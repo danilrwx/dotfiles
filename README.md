@@ -11,11 +11,7 @@
 
 ## Setup
 
-```sh
-# or https://github.com/asdf-vm/asdf
-curl -sL https://deb.nodesource.com/setup_15.x | bash -
-
-git clone git@github.com:mokevnin/dotfiles.git ~/dotfiles 
+git clone git@github.com:antoshindanil/dotfiles.git ~/dotfiles 
 cd dotfiles
 
 # ubuntu
@@ -87,3 +83,7 @@ make ubuntu-update
 * `<leader> f` – format in visual mode (prettier)
 * `<leader> fr` – search & replace
 * `<leader> rn` – replace word under cursor in current file
+
+### Original setup
+
+https://github.com/mokevnin/dotfiles
