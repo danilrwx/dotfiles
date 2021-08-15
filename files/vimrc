@@ -66,6 +66,9 @@ Plug 'xolox/vim-easytags'
 " Подсветка парных тегов
 Plug 'Valloric/MatchTagAlways'
 
+" Подсветка лишних пробелов
+Plug 'ntpeters/vim-better-whitespace'
+
 let g:coc_global_extensions = [
       \ 'coc-angular',
       \ 'coc-markdownlint',
