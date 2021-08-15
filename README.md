@@ -84,5 +84,6 @@ make ubuntu-update
 * `<leader> fr` – search & replace
 * `<leader> rn` – replace word under cursor in current file
 
+### Original setup
 
-forked from https://github.com/mokevnin/dotfiles
+https://github.com/mokevnin/dotfiles
