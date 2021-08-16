@@ -64,6 +64,16 @@ nnoremap <silent> <Leader>- :res -2<CR>
 nnoremap <silent> <Leader>0 :vertical res +2<CR>
 nnoremap <silent> <Leader>9 :vertical res -2<CR>
 
+nnoremap <silent> <leader>sc :noh<cr>
+
+noremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
+
+noremap <silent> <leader>sh :terminal<CR>
+
+noremap <Leader>h :<C-u>split<CR>
+noremap <Leader>v :<C-u>vsplit<CR>
+
 noremap <Leader>s :update<CR>
 
 map <leader>vl :vsp $MYVIMRC<CR>
