@@ -3,8 +3,8 @@ filetype plugin on
 
 set langmap=ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz
 
-colorscheme tender
-let g:airline_theme='tender'
+colorscheme onedark
+let g:airline_theme='onedark'
 
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 
@@ -39,6 +39,7 @@ set signcolumn=yes
 set scrolloff=3
 set undodir=/tmp/.vim/backups
 set undofile
+set cursorline
 
 nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
 nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
@@ -57,6 +58,11 @@ nmap "p "*p
 nmap "P "*P
 
 nnoremap gV `[v`]
+
+nnoremap <silent> <Leader>= :res +2<CR>
+nnoremap <silent> <Leader>- :res -2<CR>
+nnoremap <silent> <Leader>0 :vertical res +2<CR>
+nnoremap <silent> <Leader>9 :vertical res -2<CR>
 
 noremap <Leader>s :update<CR>
 

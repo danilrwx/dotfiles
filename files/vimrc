@@ -9,7 +9,7 @@ endif
 call plug#begin('~/.vim/plugged')
 
 "Тема
-Plug 'jacoborus/tender.vim'
+Plug 'joshdick/onedark.vim'
 
 " Нижняя панель
 Plug 'vim-airline/vim-airline'
