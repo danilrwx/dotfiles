@@ -9,9 +9,9 @@
  nnoremap <leader>di :call AddToWatch()<CR>
  nnoremap <leader>dx :call vimspector#Reset()<CR>
  nnoremap <leader>dX :call vimspector#ClearBreakpoints()<CR>
- nnoremap <S-k> :call vimspector#StepOut()<CR>
- nnoremap <S-l> :call vimspector#StepInto()<CR>
- nnoremap <S-j> :call vimspector#StepOver()<CR>
+ " nnoremap <S-k> :call vimspector#StepOut()<CR>
+ " nnoremap <S-l> :call vimspector#StepInto()<CR>
+ " nnoremap <S-j> :call vimspector#StepOver()<CR>
  nnoremap <leader>d_ :call vimspector#Restart()<CR>
  nnoremap <leader>dn :call vimspector#Continue()<CR>
  nnoremap <leader>drc :call vimspector#RunToCursor()<CR>

@@ -9,4 +9,8 @@ command! -bang -nargs=* GGrep
 
 nnoremap <silent><nowait> <leader>b :Buffers<CR>
 nnoremap <silent><nowait> <leader>p :GFiles --cached --others --exclude-standard<CR>
-nnoremap <silent><nowait> <leader>g :GGrep<CR>
+nnoremap <silent><nowait> <leader>gt :GGrep<CR>
+nnoremap <silent><nowait> <leader>gc :Commits<CR>
+
+let g:fzf_layout = { 'window': { 'width': 1, 'height': 1 } }
+

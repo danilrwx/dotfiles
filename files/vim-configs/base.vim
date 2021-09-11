@@ -3,8 +3,9 @@ filetype plugin on
 
 set langmap=ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz
 
-colorscheme onedark
-let g:airline_theme='onedark'
+colorscheme base16-default-dark
+let g:airline_theme = 'base16_default_dark'
+let g:blamer_enabled = 1
 
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 
@@ -35,7 +36,7 @@ set smartindent
 set softtabstop=2
 set tabstop=2
 set shiftwidth=2
-set signcolumn=yes
+set signcolumn=no
 set scrolloff=3
 set undodir=/tmp/.vim/backups
 set undofile
@@ -59,22 +60,23 @@ nmap "P "*P
 
 nnoremap gV `[v`]
 
-nnoremap <silent> <Leader>= :res +2<CR>
-nnoremap <silent> <Leader>- :res -2<CR>
-nnoremap <silent> <Leader>0 :vertical res +2<CR>
-nnoremap <silent> <Leader>9 :vertical res -2<CR>
+nnoremap <silent> <leader>= :res +5<CR>
+nnoremap <silent> <leader>- :res -5<CR>
+nnoremap <silent> <leader>0 :vertical res +5<CR>
+nnoremap <silent> <leader>9 :vertical res -5<CR>
 
 nnoremap <silent> <leader>sc :noh<cr>
 
+" Двигать линии с шифтом
 noremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
 
 noremap <silent> <leader>sh :terminal<CR>
 
-noremap <Leader>h :<C-u>split<CR>
-noremap <Leader>v :<C-u>vsplit<CR>
+noremap <leader>h :<C-u>split<CR>
+noremap <leader>v :<C-u>vsplit<CR>
 
-noremap <Leader>s :update<CR>
+nmap <leader>w :update<CR>
 
 map <leader>vl :vsp $MYVIMRC<CR>
 map <leader>vr :source $MYVIMRC<CR>
@@ -82,8 +84,21 @@ map <leader>vr :source $MYVIMRC<CR>
 vmap gcc <plug>NERDCommenterToggle
 nmap gcc <plug>NERDCommenterToggle
 
-let g:NERDDefaultAlign = 'left'
-let g:NERDSpaceDelims = 1
+" Открываем ranger
+nmap <silent> <leader><leader> :RnvimrToggle<CR>
+let g:rnvimr_presets = [{'width': 0.950, 'height': 0.950}]
+
+" Открываем LazyGit
+nnoremap <silent> <leader>gg :LazyGit<CR>
+
+" Закрываем окрытый буфер
+nmap <silent> <leader>q :bd<CR>
+nmap <silent> <tab> :bn<CR>
+
+nmap <silent> <leader>cr :SnipRun<CR>
+
+" Плавный скролл
+lua require('neoscroll').setup()
 
 " https://github.com/tpope/vim-endwise/issues/11
 execute "inoremap {<CR> {<CR>}<ESC>O"
