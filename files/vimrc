@@ -10,6 +10,7 @@ call plug#begin('~/.vim/plugged')
 
 " Тема
 Plug 'RRethy/nvim-base16'
+Plug 'rktjmp/lush.nvim'
 
 " Нижняя панель
 " Plug 'vim-airline/vim-airline'
