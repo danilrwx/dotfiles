@@ -13,8 +13,7 @@ nvim-install:
 	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
 
 arch-prepare:
-	paru -S neovim git silversearcher-ag fd fzf bat htop ncdu tldr httpie ctags lazygit
-
+	paru -S neovim git silversearcher-ag fd fzf bat htop ncdu tldr httpie ctags lazygit ripgrep
 
 deps: deps-gem deps-npm deps-pip
 
