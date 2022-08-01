@@ -13,9 +13,8 @@ vim.opt.scrolloff = 3
 vim.opt.undodir = '/tmp/.vim/backups'
 vim.opt.undofile = true
 vim.opt.cursorline = true
-
+vim.opt.langmap = "ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz"
 vim.g.mapleader = " "
-vim.g.langmap = "ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz"
 
 -- Ranger
 vim.g.rnvimr_presets = { { width = 0.950, height = 0.950 } }
