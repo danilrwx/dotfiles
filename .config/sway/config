@@ -13,7 +13,7 @@ font pango:Iosevka Regular 10
 xwayland disable
 default_border pixel 3
 smart_borders on
-gaps inner 10
+gaps inner 8
 client.focused #000000 #ffffff #ffffff
 
 exec mako
