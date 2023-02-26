@@ -43,7 +43,7 @@ input "1739:52631:DELL08E0:00_06CB:CD97_Touchpad" {
 input "type:keyboard" {
     xkb_layout us,ru
     xkb_options grp:alt_shift_toggle,caps:escape
-    xkb_numlock disabled
+    xkb_numlock enabled
 }
 
 bindsym $mod+Return exec $term
