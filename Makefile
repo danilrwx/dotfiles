@@ -9,11 +9,12 @@ config-install:
 	ln -snf $(PWD)/.config/htop ~/.config/htop
 	ln -snf $(PWD)/.config/lazygit ~/.config/lazygit
 	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/electron-flags.conf
+	ln -sf $(PWD)/.config/code-flags.conf ~/.config/code-flags.conf
 	ln -sf $(PWD)/.zprofile ~/.zprofile
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 
 arch-prepare:
-	sudo pacman --needed -S seatd htop git curl zsh firefox telegram-desktop discord tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick swaybg
+	sudo pacman --needed -S seatd htop git curl zsh firefox telegram-desktop discord tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick swaybg gnome-keyring
 deps: deps-gem deps-npm deps-go
 
 deps-go:
