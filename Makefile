@@ -13,7 +13,7 @@ config-install:
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 
 arch-prepare:
-	sudo pacman --needed -S seatd htop git curl zsh firefox telegram-desktop discord tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick swaybg gnome-keyring keychain
+	sudo pacman --needed -S seatd htop git curl zsh firefox tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick swaybg gnome-keyring keychain thermald
 deps: deps-gem deps-npm deps-go
 
 deps-go:
@@ -31,6 +31,7 @@ systemd:
 	systemctl enable seatd
 	systemctl enable tlp
 	systemctl enable acpid
+	systemctl enable thermald
 
 git:
 	git config --global core.editor "helix"
@@ -61,3 +62,6 @@ yay:
 
 printer:
 	yay -S pantum-driver gscan2pdf ghostscript
+
+flatpak-install:
+	flatpak install flathub com.github.tchx84.Flatseal org.telegram.desktop com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice de.shorsh.discord-screenaudio

@@ -102,7 +102,7 @@
         "on-click": "pavucontrol"
     },
     "cpu": {
-        "format": "{usage}% ",
+        "format": "{avg_frequency} | {usage}% ",
         "tooltip": false
     },
     "temperature": {
