@@ -12,11 +12,20 @@ config-sway:
 	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/electron-flags.conf
 	ln -sf $(PWD)/.config/code-flags.conf ~/.config/code-flags.conf
 
-arch-sway:
-	sudo pacman --needed -S seatd tlp acpid waybar lua-language-server brightnessctl udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring keychain thermald
+config-i3:
+	ln -sf $(PWD)/.zprofile ~/.zprofile
+	ln -snf $(PWD)/Backgrounds ~/Backgrounds
+	ln -snf $(PWD)/.config/i3 ~/.config/i3
+	ln -snf $(PWD)/.config/alacritty ~/.config/alacritty
 
 arch-base:
 	sudo pacman --needed -S htop git curl zsh firefox lazygit helix go rust otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
+
+arch-i3:
+	sudo pacman --needed -S udiskie udisks2 gnome-keyring keychain feh alacritty
+
+arch-sway:
+	sudo pacman --needed -S seatd tlp acpid waybar lua-language-server brightnessctl udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring keychain thermald
 
 wsl-base:
 	sudo apt install htop git curl zsh autoconf bison patch build-essential rustc libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libgmp-dev libncurses5-dev libffi-dev libgdbm6 libgdbm-dev libdb-dev uuid-dev imagemagick libmariadb-dev libpq-dev libmagickwand-dev
