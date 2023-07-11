@@ -40,16 +40,16 @@ window:
 
 font:
   normal:
-    family: iosevka
+    family: Iosevka
     style: Regular
   bold:
-    family: iosevka
+    family: Iosevka
     style: Bold
   italic:
-    family: iosevka
+    family: Iosevka
     style: Italic
   bold_italic:
-    family: iosevka
+    family: Iosevka
     style: Bold Italic
   size: 12.0
   #builtin_box_drawing: true
