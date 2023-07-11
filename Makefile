@@ -5,28 +5,19 @@ config-base:
 	ln -snf $(PWD)/.config/lazygit ~/.config/lazygit
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 
-config-sway:
-	ln -sf $(PWD)/.zprofile ~/.zprofile
-	ln -snf $(PWD)/Backgrounds ~/Backgrounds
-	ln -snf $(PWD)/.config/waybar ~/.config/waybar
-	ln -snf $(PWD)/.config/sway ~/.config/sway
-	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/electron-flags.conf
-	ln -sf $(PWD)/.config/code-flags.conf ~/.config/code-flags.conf
-
 config-i3:
 	ln -sf $(PWD)/.zprofile ~/.zprofile
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 	ln -snf $(PWD)/.config/i3 ~/.config/i3
+	ln -snf $(PWD)/.config/picom ~/.config/picom
+	ln -snf $(PWD)/.config/polybar ~/.config/polybar
 	ln -snf $(PWD)/.config/alacritty ~/.config/alacritty
 
 arch-base:
 	sudo pacman --needed -S htop git curl zsh firefox lazygit helix go rust otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
 
 arch-i3:
-	sudo pacman --needed -S udiskie udisks2 gnome-keyring keychain feh alacritty
-
-arch-sway:
-	sudo pacman --needed -S waybar udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring keychain
+	sudo pacman --needed -S udiskie udisks2 gnome-keyring keychain feh alacritty rofi picom 
 
 arch-laptop:
 	sudo pacman --needed -S tlp acpid brightnessctl thermald
@@ -47,8 +38,6 @@ deps-npm:
 	npm install -g typescript typescript-language-server vscode-langservers-extracted
 
 systemd:
-	sudo usermod -a -G seat $(USER)
-	systemctl enable seatd
 	systemctl enable tlp
 	systemctl enable acpid
 	systemctl enable thermald

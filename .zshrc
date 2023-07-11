@@ -97,7 +97,8 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-#alias hx="helix"
+alias hx="helix"
+alias e="emacs -nw"
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
