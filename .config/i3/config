@@ -4,11 +4,11 @@ set $down j
 set $up k
 set $right l
 set $term alacritty
-set $menu rofi -show drun
+set $menu rofi -show drun -config ~/.config/rofi/menu.rasi -show-icons
 
 font pango:Iosevka Regular 10
 
-default_border pixel 3
+default_border pixel 2
 smart_borders on
 gaps inner 8
 client.focused #000000 #ffffff #ffffff
@@ -26,6 +26,7 @@ bindsym $mod+d exec $menu
 
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+Return exec $term -e "ranger"
+bindsym $mod+Shift+s exec --no-startup-id maim --format=png --select | xclip -selection clipboard -t image/png
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 bindsym $mod+$left focus left

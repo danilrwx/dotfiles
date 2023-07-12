@@ -56,81 +56,31 @@ font:
 
 #draw_bold_text_with_bright_colors: false
 
-#colors:
-  #primary:
-  #  background: '#1d1f21'
-  #  foreground: '#c5c8c6'
-    #dim_foreground: '#828482'
-    #bright_foreground: '#eaeaea'
+colors:
+  primary:
+    background: "#2d3147" # base
+    foreground: "#CAD3f5" # text
 
-  #cursor:
-  #  text: CellBackground
-  #  cursor: CellForeground
-
-  #vi_mode_cursor:
-  #  text: CellBackground
-  #  cursor: CellForeground
-
-  #search:
-    #matches:
-    #  foreground: '#000000'
-    #  background: '#ffffff'
-    #focused_match:
-    #  foreground: '#ffffff'
-    #  background: '#000000'
-
-  #hints:
-    #start:
-    #  foreground: '#1d1f21'
-    #  background: '#e9ff5e'
-    #end:
-    #  foreground: '#e9ff5e'
-    #  background: '#1d1f21'
-
-  #line_indicator:
-  #  foreground: None
-  #  background: None
-
-  #footer_bar:
-  #  background: '#c5c8c6'
-  #  foreground: '#1d1f21'
-
-  #selection:
-  #  text: CellBackground
-  #  background: CellForeground
-
-  #normal:
-  #  black:   '#1d1f21'
-  #  red:     '#cc6666'
-  #  green:   '#b5bd68'
-  #  yellow:  '#f0c674'
-  #  blue:    '#81a2be'
-  #  magenta: '#b294bb'
-  #  cyan:    '#8abeb7'
-  #  white:   '#c5c8c6'
-
-  #bright:
-  #  black:   '#666666'
-  #  red:     '#d54e53'
-  #  green:   '#b9ca4a'
-  #  yellow:  '#e7c547'
-  #  blue:    '#7aa6da'
-  #  magenta: '#c397d8'
-  #  cyan:    '#70c0b1'
-  #  white:   '#eaeaea'
-
-  #dim:
-  #  black:   '#131415'
-  #  red:     '#864343'
-  #  green:   '#777c44'
-  #  yellow:  '#9e824c'
-  #  blue:    '#556a7d'
-  #  magenta: '#75617b'
-  #  cyan:    '#5b7d78'
-  #  white:   '#828482'
-
+  normal:
+    black: "#51576D" # surface1
+    red: "#E78284" # red
+    green: "#A6D189" # green
+    yellow: "#E5C890" # yellow
+    blue: "#8CAAEE" # blue
+    magenta: "#F4B8E4" # pink
+    cyan: "#81C8BE" # teal
+    white: "#B5BFE2" # subtext1
+  bright:
+    black: "#626880" # surface2
+    red: "#E78284" # red
+    green: "#A6D189" # green
+    yellow: "#E5C890" # yellow
+    blue: "#8CAAEE" # blue
+    magenta: "#F4B8E4" # pink
+    cyan: "#81C8BE" # teal
+    white: "#A5ADCE" # subtext0
   #indexed_colors: []
-  #transparent_background_colors: false
+  transparent_background_colors: true
 
 #bell:
   #animation: EaseOutExpo
