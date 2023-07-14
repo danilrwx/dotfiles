@@ -97,19 +97,15 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias hx="helix"
-alias e="emacs -nw"
-alias vim="nvim"
+alias vi="vim"
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
 export RUBYOPT="-W0"
 export TERM=xterm-256color
-export PATH="$PATH:$HOME/.local/bin"
-export PATH=$PATH:/snap/bin/
-
-export RUBYOPT="-W0"
-export TERM=xterm-256color
+export TERMINAL=alacritty
+export PATH=$PATH:$HOME/.local/bin/
 
 eval `keychain --agents ssh --eval --quiet ~/.ssh/id_ed25519`
+eval neofetch
