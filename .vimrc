@@ -1,23 +1,27 @@
 set nocompatible
-set lazyredraw
-set ttyfast
+
 set number
 set relativenumber
+set signcolumn=number
+
 set hlsearch
 set ignorecase
-set nojoinspaces
+
 set smarttab
 set smartindent
 set softtabstop=2
 set tabstop=2
 set shiftwidth=2
-set signcolumn=number
-set scrolloff=3
+
 set undodir=/tmp/.vim/backups
 set undofile
-set path+=**
-set wildmenu
+
 set langmap=ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz
+
+set path=.,,**
+set wildmenu
+set wildignore=*/dist*/*,*/target/*,*/builds/*,*/node_modules/*
+
 syntax on
 filetype plugin on
 
@@ -25,46 +29,69 @@ if has('mouse')
   set mouse=a
 endif
 
-if has("clipboard")
-  set clipboard=unnamed " copy to the system clipboard
-
-  if has("unnamedplus") " X11 support
-    set clipboard+=unnamedplus
-  endif
-endif
-
 if empty(glob('~/.vim/autoload/plug.vim'))
-  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
-    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+	silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+	\ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+	autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
 call plug#begin('~/.vim/plugged')
 
-Plug 'tpope/vim-endwise'
-Plug 'tpope/vim-commentary'
 Plug 'sheerun/vim-polyglot'
+
 Plug 'dense-analysis/ale'
+
+Plug 'tpope/vim-endwise'
+
+Plug 'tpope/vim-commentary'
+
 Plug 'jsit/disco.vim'
+
+Plug 'jasonccox/vim-wayland-clipboard'
+
+Plug 'mbbill/undotree'
+
+Plug 'markonm/traces.vim'
 
 call plug#end()
 
 colorscheme disco
-
 let mapleader = "\<Space>"
 
-nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
-nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
-nnoremap <expr> л (v:count == 0 ? 'gk' : 'k')
-nnoremap <expr> о (v:count == 0 ? 'gj' : 'j')
-
-vmap "y "*y
-nmap "y "*y
-nmap "Y "*Y
-nmap "p "*p
-nmap "P "*P
-
-nnoremap gV `[v`]
-
 nnoremap <Leader>gg :!lazygit<CR>
+nnoremap <Leader>pp :Ex<CR>
+nnoremap <Leader><Leader> :find 
+nnoremap <Tab> :buffers<CR>:buffer<Space>
 
+nnoremap <Leader>q :bd<CR>
+nnoremap <Leader>u :UndotreeToggle<CR>
+
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
+
+nnoremap J mzJ`z
+nnoremap <C-d> <C-d>zz
+nnoremap <C-u> <C-u>zz
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+xnoremap <Leader>p "_dP
+
+vnoremap <Leader>d "_d
+nnoremap <Leader>d "_d
+
+nnoremap <Leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>
+
+nnoremap <esc> :noh<return><esc>
+
+nnoremap <Leader>gd :ALEGoToDefinition<CR>
+nnoremap <Leader>K :ALEHover<CR>
+nnoremap <Leader>ff :ALEFix<CR>
+nnoremap <Leader>vrr :ALEFindReferences<CR>
+nnoremap <Leader>vrn :ALERename<CR>
+nnoremap <Leader>vca :ALECodeAction<CR>
+nnoremap <Leader>vws :ALESymbolSearch
+set omnifunc=ale#completion#OmniFunc
+let g:ale_fix_on_save = 1
+let g:ale_completion_enabled = 1
+let g:ale_fixers = { 'go': ['gofmt', 'goimports'], 'ruby': ['trim_whitespace'] }

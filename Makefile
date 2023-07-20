@@ -1,4 +1,16 @@
 all: config-base
+
+PACKER_PATH=~/.local/share/nvim/site/pack/packer/start
+
+nvim-install:
+	rm -rf nvim/plugin || exit 0
+	rm -rf ~/.local/share/nvim || exit 0
+	rm -rf ~/.config/nvim || exit 0
+	rm -rf $(PACKER_PATH) || exit 0
+	git clone --depth 1 https://github.com/wbthomason/packer.nvim $(PACKER_PATH)/packer.nvim
+	ln -snf $(PWD)/.config/nvim ~/.config/nvim
+	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+
 config-base:
 	ln -snf $(PWD)/.config/htop ~/.config/htop
 	ln -sf $(PWD)/.bashrc ~/.bashrc
@@ -17,17 +29,21 @@ config-wayland:
 	ln -snf $(PWD)/.config/sway ~/.config/sway
 	ln -snf $(PWD)/.config/foot ~/.config/foot
 	ln -snf $(PWD)/.config/wofi ~/.config/wofi
+	ln -snf $(PWD)/.config/i3blocks ~/.config/i3blocks
 	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/electron-flags.conf
 	ln -sf $(PWD)/.config/code-flags.conf ~/.config/code-flags.conf
 
 arch-base:
-	sudo pacman --needed -S htop git curl lazygit go man base-devel zip unzip ranger jq keychain 
+	sudo pacman --needed -S htop git curl lazygit go man base-devel zip unzip ranger jq keychain ripgrep
 
 arch-xorg:
 	sudo pacman --needed -S udiskie udisks2 firefox gnome-keyring otf-font-awesome ttc-iosevka kitty maim xclip xdotool ttf-nerd-fonts-symbols ttf-jetbrains-mono ttf-jetbrains-mono-nerd
 
 arch-wayland:
-		sudo pacman --needed -S udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring  sway slurp grim wl-clipboard
+		sudo pacman --needed -S udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring  sway slurp grim wl-clipboard i3blocks
+
+arch-libs:
+		sudo pacman --needed -S libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
 
 arch-laptop:
 	sudo pacman --needed -S tlp acpid brightnessctl thermald
@@ -44,7 +60,7 @@ git:
 	git config --global core.editor "vim"
 	git config --global user.name "Danil Antoshin"
 	git config --global user.email antoshindanil@ya.ru
-	git config --global pull.rebase false
+	git config --global pull.rebase true
 
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
