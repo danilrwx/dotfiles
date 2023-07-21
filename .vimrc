@@ -29,6 +29,14 @@ if has('mouse')
   set mouse=a
 endif
 
+if has("clipboard")
+  set clipboard=unnamed " copy to the system clipboard
+
+  if has("unnamedplus") " X11 support
+    set clipboard+=unnamedplus
+  endif
+endif
+
 if empty(glob('~/.vim/autoload/plug.vim'))
 	silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
 	\ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim

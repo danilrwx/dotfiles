@@ -18,9 +18,10 @@ config-base:
 
 config-xorg:
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
-	ln -snf $(PWD)/.config/awesome ~/.config/awesome
+	ln -snf $(PWD)/.config/i3 ~/.config/i3
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
 	ln -snf $(PWD)/.config/kitty ~/.config/kitty
+	ln -snf $(PWD)/.config/picom ~/.config/picom
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
 
 config-wayland:
@@ -37,13 +38,13 @@ arch-base:
 	sudo pacman --needed -S htop git curl lazygit go man base-devel zip unzip ranger jq keychain ripgrep
 
 arch-xorg:
-	sudo pacman --needed -S udiskie udisks2 firefox gnome-keyring otf-font-awesome ttc-iosevka kitty maim xclip xdotool ttf-nerd-fonts-symbols ttf-jetbrains-mono ttf-jetbrains-mono-nerd
+	sudo pacman --needed -S udiskie udisks2 firefox gnome-keyring otf-font-awesome ttc-iosevka kitty maim xclip xdotool ttf-nerd-fonts-symbols ttf-jetbrains-mono ttf-jetbrains-mono-nerd i3blocks rofi dunst feh autorandr 
 
 arch-wayland:
-		sudo pacman --needed -S udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring  sway slurp grim wl-clipboard i3blocks
+	sudo pacman --needed -S udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring  sway slurp grim wl-clipboard i3blocks
 
 arch-libs:
-		sudo pacman --needed -S libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
+	sudo pacman --needed -S libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
 
 arch-laptop:
 	sudo pacman --needed -S tlp acpid brightnessctl thermald

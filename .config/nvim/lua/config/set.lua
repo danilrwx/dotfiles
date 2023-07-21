@@ -19,7 +19,12 @@ vim.opt.wildmenu = true
 
 vim.opt.langmap = "ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz"
 
+vim.opt.path= ".,,**"
+vim.opt.wildmenu = true
+vim.opt.wildignore= "*/dist*/*,*/target/*,*/builds/*,*/node_modules/*"
+
 vim.g.mapleader = ' '
+
 vim.opt.termguicolors = true
 vim.cmd("colorscheme gruvbox")
 vim.api.nvim_set_hl(0, "Normal", { bg = "none" })

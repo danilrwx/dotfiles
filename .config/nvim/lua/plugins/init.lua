@@ -9,6 +9,8 @@ return require("packer").startup(function(Plug)
 
   Plug "mbbill/undotree"
 
+  Plug "tpope/vim-fugitive"
+
   Plug { "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" }
 
   Plug  {
