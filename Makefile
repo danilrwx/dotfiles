@@ -7,7 +7,6 @@ all:
 	make runit
 	make pipewire
 	make virt 
-	make docker
 	make firewall
 	make flatpak
 	make flatpak-install
@@ -29,15 +28,14 @@ base-config:
 	ln -snf $(PWD)/.config/i3blocks ~/.config/i3blocks
 
 base-packages:
-	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep acpi bashmount neofetch neovim i3blocks font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp intel-video-accel flatpak connman lazygit dex mosh xdg-user-dirs xdg-user-dirs-gtk xdg-utils easyeffects libavcodec ffmpeg mesa-dri 
+	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep acpi bashmount neofetch neovim i3blocks font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp intel-video-accel flatpak iwd lazygit dex mosh xdg-user-dirs xdg-user-dirs-gtk xdg-utils easyeffects libavcodec ffmpeg mesa-dri podman
 
 console-font:
 	echo 'FONT="cyr-sun16"' | sudo tee -a /etc/rc.conf
 
 disable-wpa:
 	sudo rm /var/service/wpa_supplicant
-	sudo rm /var/service/dhcpcd
-	sudo ln -sf /etc/sv/connmand /var/service/
+	sudo ln -sf /etc/sv/iwd /var/service/
 
 i3-packages:
 	sudo xbps-install -Syu rxvt-unicode maim xclip xdotool rofi dunst feh i3 xss-lock xorg xkblayout-state
@@ -99,4 +97,4 @@ flatpak:
 	flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak-install:
-	flatpak install -y flathub com.github.tchx84.Flatseal org.telegram.desktop com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice org.mozilla.firefox com.discordapp.Discord
+	flatpak install -y flathub com.github.tchx84.Flatseal org.telegram.desktop com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice org.mozilla.firefox com.discordapp.Discord org.qbittorrent.qBittorrent
