@@ -30,10 +30,8 @@ smart_borders on
 gaps inner 0
 
 exec mako
-exec udiskie
 exec foot --server
-exec easyeffects --gapplication-service
-exec dex --autostart --environment i3
+exec dex --autostart --environment sway
 exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
 exec hash dbus-update-activation-environment 2>/dev/null && dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
 
