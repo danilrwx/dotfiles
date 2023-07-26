@@ -3,8 +3,8 @@ set $left h
 set $down j
 set $up k
 set $right l
-set $term urxvt
-set $menu rofi -show drun
+set $term st
+set $menu rofi -show 
 
 # transparent
 #set $bg #282828B4
@@ -20,26 +20,26 @@ set $aqua #689d68
 set $gray #a89984
 set $darkgray #1d2021
 
-font pango:Iosevka Regular 12
+font pango:Iosevka Regular 10
 
 default_border pixel 1
 smart_borders on
 gaps inner 0
 
 exec_always "setxkbmap -model pc105 -layout us,ru -option grp:alt_shift_toggle"
-# exec --no-startup-id udiskie &
-# exec --no-startup-id picom &
-# exec --no-startup-id easyeffects --gapplication-service &
+
 exec --no-startup-id dex --autostart --environment i3
 exec --no-startup-id feh --bg-scale ~/Backgrounds/1.png &
 exec --no-startup-id dunst -conf ~/.config/dunst/dunstrc &
 
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
-
 bindsym $mod+Return exec $term
 bindsym $mod+Shift+q kill
 bindsym $mod+Shift+s exec --no-startup-id maim --format=png --select | xclip -selection clipboard -t image/png
-bindsym $mod+d exec $menu
+bindsym $mod+d exec $menu drun
+bindsym $mod+Shift+d exec $menu run
+
+bindsym Control+Mod1+a exec ~/dotfiles/scripts/sys-notify
+bindsym Control+Mod1+s exec ~/dotfiles/scripts/base-notify
 
 floating_modifier $mod
 
@@ -134,22 +134,4 @@ client.focused          $bg       $bg       $white    $white     $white
 client.focused_inactive $bg       $bg       $gray     $bg        $bg
 client.unfocused        $bg       $bg       $gray     $bg        $bg
 client.urgent           $red      $bg       $red      $red       $red
-
-bar {
-    position top
-
-    i3bar_command i3bar -t
-
-    status_command i3blocks
-
-    colors {
-        background $bg
-        statusline $white
-        # class              border  backgr. text
-        focused_workspace    $bg     $bg     $white
-        inactive_workspace   $bg     $bg     $gray
-        active_workspace     $bg     $bg     $gray
-        urgent_workspace     $bg     $bg     $red
-    }
-}
 
