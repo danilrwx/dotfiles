@@ -1,6 +1,7 @@
 all: 
 	make console-font
 	make base
+	make desktop-packages
 	make wm
 	make runit
 	make pipewire
@@ -8,7 +9,7 @@ all:
 	make firewall
 	make git
 	make git-change-remote
-	make disable-wpa
+	make suckless
 
 nvim-install:
 	rm -rf nvim/plugin || exit 0
@@ -26,24 +27,29 @@ base-config:
 	ln -sf $(PWD)/.bashrc ~/.bashrc
 	ln -sf $(PWD)/.vimrc ~/.vimrc
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
-	ln -snf $(PWD)/.config/i3blocks ~/.config/i3blocks
 
 base-packages:
-	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep neofetch neovim lazygit mosh podman rsync
+	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep neofetch vim lazygit mosh podman rsync
 
 laptop-packages:
 	sudo xbps-install -Syu acpi tlp intel-video-accel brightnessctl
 
 desktop-packages:
-	sudo xbps-install -Syu font-iosevka bashmount elogind dex flatpak xdg-user-dirs xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 
+	sudo xbps-install -Syu font-iosevka bashmount elogind dex flatpak xdg-user-dirs xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 firefox chromium
 
 dev-packages:
 	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl postgresql-libs postgresql-libs-devel
 
 wm: wm-packages wm-config
 
+suckless: suckless-packages suckless-install
+
 suckless-packages:
 	sudo xbps-install -Syu libX11-devel libXft-devel
+
+suckless-install:
+	cd ~/dotfiles/suckless/st
+	sudo make install
 
 wm-packages:
 	sudo xbps-install -Syu bspwm sxhkd dmenu maim xclip xdotool dunst xorg
