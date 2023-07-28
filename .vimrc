@@ -57,6 +57,8 @@ Plug 'mbbill/undotree'
 
 Plug 'markonm/traces.vim'
 
+Plug 'fatih/vim-go'
+
 call plug#end()
 
 colorscheme disco
