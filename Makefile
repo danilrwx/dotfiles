@@ -2,7 +2,6 @@ all:
 	mkdir -p ~/.config
 	make console-font
 	make base
-	make seatd
 	make wm
 	make desktop-packages
 	make git
@@ -29,12 +28,6 @@ base-config:
 base-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep neofetch vim lazygit mosh podman rsync bash-completion
 
-seatd:
-	sudo pacman -S --needed seatd
-	sudo usermod -aG seat $(USER)
-	sudo systemctl enable seatd
-	sudo systemctl start seatd
-
 laptop: laptop-packages laptop-enable
 
 laptop-packages:
@@ -46,7 +39,7 @@ laptop-enable:
 	sudo systemctl enable throttled
 
 desktop-packages:
-	sudo pacman -S --needed ttc-iosevka dex xdg-user-dirs xdg-user-dirs-gtk xdg-utils ffmpeg udisks2 firefox chromium libnotify
+	sudo pacman -S --needed ttc-iosevka dex xdg-user-dirs xdg-user-dirs-gtk xdg-utils ffmpeg udisks2 firefox chromium libnotify polkit xf86-video-intel
 
 dev-packages:
 	sudo pacman -S --needed libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagic
@@ -54,13 +47,15 @@ dev-packages:
 wm: wm-packages wm-config
 
 wm-packages:
-	sudo pacman -S --needed sway swaybg mako foot wofi slurp grim wl-clipboard
+	sudo pacman -S --needed bspwm sxhkd dmenu maim xclip xdotool dunst xorg xorg-xinit feh picom
 
 wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
-	ln -snf $(PWD)/.config/sway ~/.config/sway
-	ln -snf $(PWD)/.config/foot ~/.config/foot
-	ln -snf $(PWD)/.config/wofi ~/.config/wofi
+	ln -sf $(PWD)/.xinitrc ~/.xinitrc
+	ln -snf $(PWD)/.config/bspwm ~/.config/bspwm
+	ln -snf $(PWD)/.config/sxhkd ~/.config/sxhkd
+	ln -snf $(PWD)/.config/picom ~/.config/picom
+	ln -snf $(PWD)/.config/dunst ~/.config/dunst
 
 pipewire:
 	sudo pacman -S --needed pipewire pipewire-alsa pipewire-pulse wireplumber pavucontrol
@@ -69,8 +64,13 @@ firewall:
 	sudo pacman -S --needed ufw
 
 virt:
-	sudo pacman -S --needed virt-manager libvirt qemu
-	sudo usermod -aG libvirt $(USER)
+	sudo pacman -S --needed virt-manager qemu-desktop dnsmasq iptables
+	sudo usermod -aG libvirt danil
+	echo "unix_sock_group = 'libvirt'" | sudo tee -a /etc/libvirt/libvirtd.conf
+	echo "unix_sock_rw_perms = '0770'" | sudo tee -a /etc/libvirt/libvirtd.conf
+	echo 'user = "$(USER)"' | sudo tee -a /etc/libvirt/qemu.conf
+	echo 'group = "$(USER)"' | sudo tee -a /etc/libvirt/qemu.conf
+	sudo systemctl enable libvirtd
 
 git:
 	git config --global core.editor "vim"
