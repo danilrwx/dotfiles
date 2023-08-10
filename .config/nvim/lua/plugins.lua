@@ -38,9 +38,7 @@ return require('packer').startup(function(use)
     }
   }
 
-  use 'sindrets/diffview.nvim'
-
-  use 'NeogitOrg/neogit'
+  use 'kdheepak/lazygit.nvim'
 
   use {
     'VonHeikemen/lsp-zero.nvim',
