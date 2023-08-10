@@ -13,10 +13,10 @@ fi
 
 if which dbus-launch >/dev/null 2>&1 && test -z "$DBUS_SESSION_BUS_ADDRESS"; then
 	eval `dbus-launch --sh-syntax --exit-with-session`
-fi 
+fi
 
 # Autostart section
 setxkbmap -model pc105 -layout us,ru -option grp:alt_shift_toggle
 
-exec bspwm
+exec i3
 

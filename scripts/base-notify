@@ -1,7 +1,0 @@
-#!/bin/sh
-
-notify-send -t 8000 "$(date)
-
-$(acpi -b)"
-
-
