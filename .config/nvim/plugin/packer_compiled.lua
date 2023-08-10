@@ -104,15 +104,25 @@ _G.packer_plugins = {
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/cmp_luasnip",
     url = "https://github.com/saadparwaiz1/cmp_luasnip"
   },
+  ["diffview.nvim"] = {
+    loaded = true,
+    path = "/home/danil/.local/share/nvim/site/pack/packer/start/diffview.nvim",
+    url = "https://github.com/sindrets/diffview.nvim"
+  },
   ["friendly-snippets"] = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/friendly-snippets",
     url = "https://github.com/rafamadriz/friendly-snippets"
   },
-  ["gitui.nvim"] = {
+  ["github-nvim-theme"] = {
     loaded = true,
-    path = "/home/danil/.local/share/nvim/site/pack/packer/start/gitui.nvim",
-    url = "https://github.com/aspeddro/gitui.nvim"
+    path = "/home/danil/.local/share/nvim/site/pack/packer/start/github-nvim-theme",
+    url = "https://github.com/projekt0n/github-nvim-theme"
+  },
+  harpoon = {
+    loaded = true,
+    path = "/home/danil/.local/share/nvim/site/pack/packer/start/harpoon",
+    url = "https://github.com/ThePrimeagen/harpoon"
   },
   ["lsp-zero.nvim"] = {
     loaded = true,
@@ -134,6 +144,11 @@ _G.packer_plugins = {
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/mini.nvim",
     url = "https://github.com/echasnovski/mini.nvim"
   },
+  neogit = {
+    loaded = true,
+    path = "/home/danil/.local/share/nvim/site/pack/packer/start/neogit",
+    url = "https://github.com/NeogitOrg/neogit"
+  },
   ["nvim-cmp"] = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-cmp",
@@ -143,11 +158,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-lspconfig",
     url = "https://github.com/neovim/nvim-lspconfig"
-  },
-  ["nvim-pqf"] = {
-    loaded = true,
-    path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-pqf",
-    url = "https://github.com/yorickpeterse/nvim-pqf"
   },
   ["nvim-treesitter"] = {
     loaded = true,
@@ -169,15 +179,20 @@ _G.packer_plugins = {
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/plenary.nvim",
     url = "https://github.com/nvim-lua/plenary.nvim"
   },
+  ["telescope-project.nvim"] = {
+    loaded = true,
+    path = "/home/danil/.local/share/nvim/site/pack/packer/start/telescope-project.nvim",
+    url = "https://github.com/nvim-telescope/telescope-project.nvim"
+  },
+  ["telescope-undo.nvim"] = {
+    loaded = true,
+    path = "/home/danil/.local/share/nvim/site/pack/packer/start/telescope-undo.nvim",
+    url = "https://github.com/debugloop/telescope-undo.nvim"
+  },
   ["telescope.nvim"] = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/telescope.nvim",
     url = "https://github.com/nvim-telescope/telescope.nvim"
-  },
-  undotree = {
-    loaded = true,
-    path = "/home/danil/.local/share/nvim/site/pack/packer/start/undotree",
-    url = "https://github.com/mbbill/undotree"
   },
   ["vim-slim"] = {
     loaded = true,
