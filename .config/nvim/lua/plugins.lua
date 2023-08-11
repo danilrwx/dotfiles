@@ -33,15 +33,15 @@ return require('packer').startup(function(use)
     requires = {
       { 'nvim-lua/plenary.nvim' },
       { 'nvim-telescope/telescope-project.nvim' },
-      { 'debugloop/telescope-undo.nvim' },
       { 'ThePrimeagen/harpoon' }
     }
   }
 
-  use 'nvim-tree/nvim-web-devicons'
-  use 'folke/trouble.nvim'
+  use 'mbbill/undotree'
 
-  use 'lewis6991/gitsigns.nvim'
+  use 'nvim-tree/nvim-web-devicons'
+
+  use 'folke/trouble.nvim'
 
   use 'kdheepak/lazygit.nvim'
 
