@@ -18,7 +18,10 @@ return require('packer').startup(function(use)
 
   use 'echasnovski/mini.nvim'
 
-  use 'projekt0n/github-nvim-theme'
+  use {
+    "jesseleite/nvim-noirbuddy",
+    requires = { "tjdevries/colorbuddy.nvim", branch = "dev" }
+  }
 
   use {
     'nvim-treesitter/nvim-treesitter',

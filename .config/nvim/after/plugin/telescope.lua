@@ -26,7 +26,6 @@ require 'telescope'.setup {
   },
 }
 
-require('telescope').load_extension('harpoon')
 require('telescope').load_extension('project')
 
 vim.keymap.set('n', '<C-p>', builtin.find_files, {})
@@ -43,5 +42,4 @@ vim.keymap.set('n', '<Leader>pws', builtin.lsp_workspace_symbols, {})
 vim.keymap.set('n', '<Leader>pgs', builtin.git_status, {})
 vim.keymap.set('n', '<Leader>pgl', builtin.git_commits, {})
 vim.keymap.set('n', '<Leader>pb', builtin.buffers, {})
-vim.keymap.set('n', '<C-e>', ext.harpoon.marks, {})
 vim.keymap.set('n', '<Leader>pp', ext.project.project, {})
