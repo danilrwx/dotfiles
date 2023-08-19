@@ -38,6 +38,10 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
 	Plug 'sheerun/vim-polyglot'
 
+	Plug 'tpope/vim-sensible'
+
+	Plug 'tpope/vim-unimpaired'
+
 	Plug 'tpope/vim-endwise'
 
 	Plug 'tpope/vim-commentary'
@@ -45,6 +49,10 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 	Plug 'mbbill/undotree'
 
 	Plug 'markonm/traces.vim'
+
+	Plug 'jiangmiao/auto-pairs'
+
+	Plug 'fatih/vim-go'
 
 	Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 	Plug 'junegunn/fzf.vim'
@@ -82,32 +90,31 @@ nnoremap N Nzzzv
 xnoremap <Leader>p "_dP
 nnoremap <Leader>d "_d
 
-nnoremap <Leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>
+nnoremap <Leader>s :s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>
+nnoremap <Leader>S :%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>
 
 nnoremap <C-L> <Cmd>nohlsearch<Bar>diffupdate<CR><C-L>
 
 highlight ExtraWhitespace ctermbg=red guibg=red
 match ExtraWhitespace /\s\+$/
-nnoremap <Leader>ds :%s/\s\+$//gi
+nnoremap <Leader>ds :%s/\s\+$//gi<CR>
 
 command! -nargs=+ Grep execute 'silent grep! <args>' | copen
 
-nnoremap [q :cprev<CR>
-nnoremap ]q :cnext<CR>
-nnoremap <Leader>co :copen<CR>
-nnoremap <Leader>cc :cclose<CR>
-
-function! QuickfixMapping()
-  nnoremap <buffer> K :cprev<CR>zz<C-w>w
-  nnoremap <buffer> J :cnext<CR>zz<C-w>w
-  nnoremap <buffer> <leader>u :set modifiable<CR>
-  nnoremap <buffer> <leader>w :cgetbuffer<CR>:cclose<CR>:copen<CR>
-  nnoremap <buffer> <leader>r :cdo s/// \| update<C-Left><C-Left><Left><Left><Left>
-endfunction
-
-augroup quickfix_group
-	autocmd!
-	autocmd filetype qf call QuickfixMapping()
-	autocmd filetype qf setlocal errorformat+=%f\|%l\ col\ %c\|%m
-augroup END
-
+let g:go_fmt_fail_silently = 0
+let g:go_fmt_command = 'goimports'
+let g:go_fmt_autosave = 1
+let g:go_gopls_enabled = 1
+let g:go_highlight_types = 1
+let g:go_highlight_fields = 1
+let g:go_highlight_functions = 1
+let g:go_highlight_function_calls = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_extra_types = 1
+let g:go_highlight_variable_declarations = 1
+let g:go_highlight_variable_assignments = 1
+let g:go_highlight_build_constraints = 1
+let g:go_highlight_diagnostic_errors = 1
+let g:go_highlight_diagnostic_warnings = 1
+let g:go_auto_sameids = 0
+set updatetime=100
