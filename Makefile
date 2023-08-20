@@ -23,15 +23,20 @@ base-config:
 	ln -sf $(PWD)/.bashrc ~/.bashrc
 
 base-packages:
-	sudo apt install htop git tmux curl man zip unzip jq keychain ripgrep neofetch neovim mosh rsync bash-completion
+	sudo dnf install htop git tmux curl man zip unzip jq keychain ripgrep neofetch neovim mosh rsync bash-completion
+
+fedora-sway:
+	ln -snf $(PWD)/.config/foot ~/.config/
+	ln -snf $(PWD)/.config/waybar ~/.config/
+	ln -snf $(PWD)/.config/sway ~/.config/
 
 dev-packages:
-	sudo apt install autoconf patch build-essential rustc libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libgmp-dev libncurses5-dev libffi-dev libgdbm6 libgdbm-dev libdb-dev uuid-dev imagemagick libmariadb-dev libpq-dev libmagickwand-dev
+	sudo dnf install gcc rust patch make bzip2 openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
 
 git: git-config git-change-remote
 
 git-config:
-	git config --global core.editor "vim"
+	git config --global core.editor "nvim"
 	git config --global user.name "Danil Antoshin"
 	git config --global user.email antoshindanil@ya.ru
 	git config --global pull.rebase true
