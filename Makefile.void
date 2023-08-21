@@ -44,14 +44,6 @@ dev-packages:
 
 wm: wm-packages wm-config
 
-suckless: suckless-packages suckless-install
-
-suckless-packages:
-	sudo xbps-install -Syu libX11-devel libXft-devel
-
-suckless-install:
-	cd ~/dotfiles/suckless/st && sudo make install
-
 wm-packages:
 	sudo xbps-install -Syu bspwm sxhkd dmenu maim xclip xdotool dunst xorg hsetroot xcompmgr
 
