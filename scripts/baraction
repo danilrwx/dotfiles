@@ -82,7 +82,7 @@ bat0() {
   if [[ -d /sys/class/power_supply/BAT0/ ]]; then
     bat0=`cat /sys/class/power_supply/BAT0/capacity`
     icon0="$(bat_icon 0)"
-    res+="$icon0 $bat0"
+    res+="$icon0 $bat0%"
   fi
 
   echo -e "$res"
@@ -94,7 +94,7 @@ bat1() {
   if [[ -d /sys/class/power_supply/BAT1/ ]]; then
     bat1=`cat /sys/class/power_supply/BAT1/capacity`
     icon1="$(bat_icon 1)"
-    res+="$icon1 $bat1"
+    res+="$icon1 $bat1%"
   fi
 
   echo -e "$res"
