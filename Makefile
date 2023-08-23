@@ -54,14 +54,15 @@ dev-packages:
 wm: wm-packages wm-config
 
 wm-packages:
-	sudo xbps-install -Syu i3 dmenu maim xclip xdotool dunst xorg \
-		hsetroot xcompmgr wezterm xss-lock
+	sudo xbps-install -Syu i3 dmenu clipmenu passmenu maim xclip xdotool dunst xorg \
+		hsetroot xcompmgr xfce4-terminal xss-lock xkblayout-state
 
 wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
 	ln -snf $(PWD)/.config/i3 ~/.config/
 	ln -snf $(PWD)/.config/dunst ~/.config/
+	ln -snf $(PWD)/.config/xfce4 ~/.config/
 
 runit:
 	sudo ln -sf /etc/sv/elogind /var/service/

@@ -7,10 +7,10 @@ set $right l
 
 set $bg       #ffffff
 set $fg       #000000
-set $red      #cc241d
+set $red      #ff0000
 set $darkgray #707070
 
-set $menu dmenu_run -b -fn 'IosevkaTerm Nerd Font-13' -sb '#000000' -sf '#ffffff' -nb '#ffffff' -nf '#000000' "$@"
+set $dmenu_style -b -fn 'IosevkaTerm Nerd Font-14' -sb '#000000' -sf '#ffffff' -nb '#ffffff' -nf '#000000' "$@"
 set $term i3-sensible-terminal
 
 font pango:IosevkaTerm Nerd Font 12
@@ -21,20 +21,25 @@ exec --no-startup-id wm-autostart-blocking
 
 default_border pixel 3
 smart_borders  on
-gaps           inner 0
+gaps           inner 8
 
 bindsym XF86AudioRaiseVolume      exec --no-startup-id pactl set-sink-volume   @DEFAULT_SINK@   +10%
 bindsym XF86AudioLowerVolume      exec --no-startup-id pactl set-sink-volume   @DEFAULT_SINK@   -10%
 bindsym XF86AudioMute             exec --no-startup-id pactl set-sink-mute     @DEFAULT_SINK@   toggle
 
-bindsym $mod+XF86AudioRaiseVolume exec --no-startup-id pactl set-source-volume @DEFAULT_SINK@   +10%
-bindsym $mod+XF86AudioLowerVolume exec --no-startup-id pactl set-source-volume @DEFAULT_SINK@   -10%
+bindsym $mod+XF86AudioRaiseVolume exec --no-startup-id pactl set-source-volume @DEFAULT_SOURCE@   +10%
+bindsym $mod+XF86AudioLowerVolume exec --no-startup-id pactl set-source-volume @DEFAULT_SOURCE@   -10%
 bindsym XF86AudioMicMute          exec --no-startup-id pactl set-source-mute   @DEFAULT_SOURCE@ toggle
 
-bindsym XF86MonBrightnessDown     exec brightnessctl   set   10%-
-bindsym XF86MonBrightnessUp       exec brightnessctl   set   10%+
+bindsym XF86MonBrightnessDown     exec --no-startup-id brightnessctl   set   10%-
+bindsym XF86MonBrightnessUp       exec --no-startup-id brightnessctl   set   10%+
 
-bindsym $mod+Shift+s   exec screenshot-select
+
+bindsym $mod+Shift+s exec --no-startup-id screenshot-select
+bindsym $mod+d       exec --no-startup-id dmenu_run $dmenu_style
+bindsym $mod+Shift+u exec --no-startup-id clipmenu  $dmenu_style
+bindsym $mod+Shift+p exec --no-startup-id passmenu  $dmenu_style
+
 bindsym Control+Mod1+s exec sys-notify
 bindsym Control+Mod1+c exec cal-notify
 bindsym Control+Mod1+v exec $term -e toggle-vpn
@@ -44,8 +49,6 @@ floating_modifier $mod
 bindsym $mod+Return exec $term
 
 bindsym $mod+Shift+q kill
-
-bindsym $mod+d exec --no-startup-id $menu
 
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
@@ -109,10 +112,10 @@ bindsym $mod+Shift+r restart
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 mode "resize" {
-  bindsym $left resize shrink width 10 px or 10 ppt
-  bindsym $down resize grow height 10 px or 10 ppt
-  bindsym $up resize shrink height 10 px or 10 ppt
-  bindsym $right resize grow width 10 px or 10 ppt
+  bindsym $left  resize shrink width  5 px or 5 ppt
+  bindsym $down  resize grow   height 5 px or 5 ppt
+  bindsym $up    resize shrink height 5 px or 5 ppt
+  bindsym $right resize grow   width  5 px or 5 ppt
 
   bindsym Return mode "default"
   bindsym Escape mode "default"
@@ -121,7 +124,7 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
-client.focused                 $bg        $bg       $fg         $fg       $fg
+client.focused                 $bg        $bg       $fg            $red         $red
 client.focused_inactive        $bg        $bg       $darkgray      $bg          $bg
 client.unfocused               $bg        $bg       $darkgray      $bg          $bg
 client.urgent                  $red       $bg       $red           $red         $red
@@ -129,7 +132,7 @@ client.urgent                  $red       $bg       $red           $red         
 bar {
   status_command baraction
   colors {
-    background $bg
+     background $bg
      statusline $fg
      #class               border  backgr. text
      focused_workspace    $bg     $bg     $fg
