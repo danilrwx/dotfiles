@@ -25,7 +25,8 @@ set wildignore=*/dist*/*,*/target/*,*/builds/*,*/node_modules/*
 
 set clipboard=unnamed,unnamedplus
 
-set laststatus=1
+set colorcolumn=80
+set laststatus=0
 set showcmd
 
 set mouse=a
@@ -38,7 +39,7 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
 	Plug 'sheerun/vim-polyglot'
 
-	Plug 'tpope/vim-sensible'
+	" Plug 'tpope/vim-sensible'
 
 	Plug 'tpope/vim-unimpaired'
 
@@ -64,10 +65,10 @@ let mapleader = "\<Space>"
 
 nnoremap <Leader>gg :!lazygit<CR>
 
-nnoremap <Leader>pp :Ex<CR>
+nnoremap <Tab> :Ex<CR>
 
-nnoremap <Tab> :Buffers<CR>
 nnoremap <C-p> :GFiles<CR>
+nnoremap <Leader>pb :Buffers<CR>
 nnoremap <Leader>gl :GFiles?<CR>
 nnoremap <Leader>pf :Files<CR>
 nnoremap <Leader>ps :RG<CR>

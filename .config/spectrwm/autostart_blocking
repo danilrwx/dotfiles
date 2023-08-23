@@ -1,0 +1,6 @@
+#!/bin/bash
+
+dunst -conf ~/.config/dunst/dunstrc &
+xsetroot -cursor_name left_ptr &
+xcompmgr &
+dex --autostart --environment spectrwm &

@@ -7,11 +7,12 @@
 
 PS1='[\u@\h \W]\$ '
 
-alias cat='bat --theme ansi'
-alias ls='exa'
+alias cat='bat  --theme "Solarized (light)"'
+alias ls='exa --sort=size'
 alias l='ls -lah'
 alias c='clear'
 alias grep='grep --color=auto'
+alias vim='nvim'
 
 alias be='bundle exec'
 alias rs='rails s'
@@ -30,8 +31,8 @@ export TERM='xterm-256color'
 export EDITOR='nvim'
 export VISUAL='nvim'
 export PATH=$PATH:$HOME/.local/bin/
-export PATH=$PATH:/var/lib/flatpak/exports/bin/
 export PATH=$PATH:$HOME/dotfiles/scripts/
+export PATH=$PATH:/var/lib/flatpak/exports/bin
 
 eval `keychain --agents ssh --eval --quiet ~/.ssh/id_ed25519`
 
