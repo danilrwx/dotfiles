@@ -1,0 +1,9 @@
+[[languages]]
+name = "go"
+auto-format = true
+formatter = { command = "goimports" }
+
+[[language]]
+name = "rust"
+[language-server.rust-analyzer.config.check]
+command = "clippy"
