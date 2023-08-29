@@ -2,7 +2,7 @@ all:
 	mkdir -p ~/.config
 	make console-font
 	make base
-	make wm
+	make i3
 	make laptop
 	make runit
 	make pipewire
@@ -54,13 +54,22 @@ dev-packages:
 	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl \
 		postgresql-libs postgresql-libs-devel
 
-wm: wm-packages wm-config
+sway: sway-packages sway-config
 
-wm-packages:
+sway-packages:
+	sudo xbps-install -Su sway foot mako dmenu-wayland swaybg slurp grim wl-clipboard
+sway-config:
+	ln -sf $(PWD)/.bash_profile.wayland ~/.bash_profile
+	ln -snf $(PWD)/.config/foot ~/.config/foot
+	ln -snf $(PWD)/.config/sway ~/.config/sway
+
+i3: i3-packages i3-config
+
+i3-packages:
 	sudo xbps-install -Syu i3 dmenu clipmenu passmenu maim xclip xdotool dunst xorg \
 		hsetroot xcompmgr xfce4-terminal xss-lock xkblayout-state
 
-wm-config:
+i3-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
 	ln -snf $(PWD)/.config/i3 ~/.config/
