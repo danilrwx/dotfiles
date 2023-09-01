@@ -22,7 +22,7 @@ base-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip \
 		jq keychain ripgrep neofetch mosh podman rsync \
 		bash-completion fzf wget rustup \
-		lf lazygit fd exa bat bc
+		lf lazygit helix fd exa bat
 
 i3: i3-packages i3-config
 
@@ -58,13 +58,16 @@ laptop-gpu:
 	sudo pacman -S --needed xf86-video-intel
 	sudo ln -sf $(PWD)/20-intel.conf /etc/X11/xorg.conf.d/
 
-desktop-packages:
-	sudo pacman -S --needed dex xdg-user-dirs \
-		xdg-user-dirs-gtk xdg-utils ffmpeg udisks2 \
-		mpd mpv yt-dlp libnotify
-
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
+
+flatpak: flatpak-add flatpak-install
+
+flatpak-add:
+	sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+flatpak-install:
+	flatpak install -y flathub org.telegram.desktop io.dbeaver.DBeaverCommunity
 
 asdf: asdf-install
 
@@ -92,19 +95,18 @@ lsp-install:
 	cargo install taplo-cli --locked --features lsp
 
 helix-install:
+	mkdir -p ~/src
+	git clone https://github.com/helix-editor/helix ~/src/
+	cd ~/src/helix && RUSTFLAGS="-C target-feature=-crt-static" cargo install --path helix-term --locked
 	hx --grammar fetch
 	hx --grammar build
-
-sad-install:
-	cargo install --locked --all-features --git https://github.com/ms-jpq/sad --branch senpai
 
 go-tools-install:
 	go install github.com/jesseduffield/lazygit@latest
 	env CGO_ENABLED=0 go install -ldflags="-s -w" github.com/gokcehan/lf@latest
 
-
 yay:
 	sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && sudo makepkg -si
 
 yay-install:
-	yay xkblayout-state-git helix-git sad
+	yay xkblayout-state-git sad
