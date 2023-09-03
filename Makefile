@@ -3,7 +3,6 @@ all:
 	make console-font
 	make base
 	make i3
-	make laptop
 	make desktop
 	make git
 	make git-change-remote
@@ -71,10 +70,11 @@ desktop-packages:
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
 
-asdf: asdf-install
+asdf: asdf-install asdf-setup
 
 asdf-install:
 	git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.12.0
+	source ~/.bashrc
 
 asdf-setup:
 	asdf plugin-add golang
@@ -96,10 +96,6 @@ lsp-install:
 	rustup component add rust-analyzer
 	cargo install taplo-cli --locked --features lsp
 
-helix-install:
-	hx --grammar fetch
-	hx --grammar build
-
 sad-install:
 	cargo install --locked --all-features --git https://github.com/ms-jpq/sad --branch senpai
 
@@ -107,9 +103,8 @@ go-tools-install:
 	go install github.com/jesseduffield/lazygit@latest
 	env CGO_ENABLED=0 go install -ldflags="-s -w" github.com/gokcehan/lf@latest
 
-
 yay:
-	sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+	git clone https://aur.archlinux.org/yay.git ~/yay && cd ~/yay && makepkg -si && rm -rf ~/yay
 
 yay-install:
 	yay -S xkblayout-state-git helix-git sad bashmount
