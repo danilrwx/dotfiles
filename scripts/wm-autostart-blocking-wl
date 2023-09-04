@@ -1,0 +1,5 @@
+#!/bin/bash
+
+dunst &
+foot --server &
+dex --autostart --environment sway &

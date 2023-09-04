@@ -21,9 +21,8 @@ base-config:
 
 base-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip \
-		jq keychain ripgrep neofetch mosh podman rsync \
-		bash-completion fzf wget rustup \
-		lf lazygit fd exa bat bc
+		keychain neofetch podman rsync bash-completion fzf wget rustup \
+		lf lazygit
 
 i3: i3-packages i3-config
 
@@ -38,6 +37,19 @@ i3-config:
 	ln -snf $(PWD)/.config/dunst ~/.config/
 	ln -snf $(PWD)/.config/xfce4 ~/.config/
 
+sway: sway-packages sway-config
+
+sway-packages:
+	sudo pacman -S --needed sway foot swaybg swayidle swaylock slurp grim \
+		wl-clipboard dunst xdg-desktop-portal-wlr xorg-xwayland
+
+sway-config:
+	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/
+	ln -sf $(PWD)/.bash_profile.wayland ~/.bash_profile
+	ln -snf $(PWD)/.config/sway  ~/.config/
+	ln -snf $(PWD)/.config/foot  ~/.config/
+	ln -snf $(PWD)/.config/dunst ~/.config/
+
 git:
 	git config --global core.editor "hx"
 	git config --global user.name "Danil Antoshin"
@@ -45,10 +57,10 @@ git:
 	git config --global pull.rebase true
 
 
-laptop: laptop-packages laptop-enable laptop-gpu desktop-packages
+laptop: laptop-packages laptop-enable laptop-gpu
 
 laptop-packages:
-	sudo pacman -S --needed acpi acpid tlp brightnessctl throttled
+	sudo pacman -S --needed acpi acpid tlp brightnessctl throttled bc
 
 laptop-enable:
 	sudo systemctl enable acpid
@@ -64,8 +76,7 @@ desktop: desktop-packages
 desktop-packages:
 	sudo pacman -S --needed dex xdg-user-dirs \
 		xdg-user-dirs-gtk xdg-utils ffmpeg udisks2 \
-		mpd mpv yt-dlp libnotify firefox discord \
-		telegram-desktop
+		mpd mpv libnotify firefox telegram-desktop
 
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
