@@ -10,7 +10,7 @@ set $fg       #000000
 set $red      #ff0000
 set $darkgray #707070
 
-set $term footclient
+set $term foot
 
 font pango:IosevkaTerm Nerd Font 12
 
@@ -49,12 +49,8 @@ bindsym $mod+XF86AudioRaiseVolume exec --no-startup-id pactl set-source-volume @
 bindsym $mod+XF86AudioLowerVolume exec --no-startup-id pactl set-source-volume @DEFAULT_SOURCE@   -10%
 bindsym XF86AudioMicMute          exec --no-startup-id pactl set-source-mute   @DEFAULT_SOURCE@ toggle
 
-bindsym XF86MonBrightnessDown     exec --no-startup-id brightnessctl   set   10%-
-bindsym XF86MonBrightnessUp       exec --no-startup-id brightnessctl   set   10%+
-
-
 bindsym $mod+Shift+s exec --no-startup-id screenshot-select-wl
-bindsym $mod+d       exec --no-startup-id wofi --show drun
+bindsym $mod+d       exec --no-startup-id rofi -show drun
 
 bindsym Control+Mod1+s exec sys-notify
 bindsym Control+Mod1+c exec cal-notify
@@ -157,3 +153,5 @@ bar {
      urgent_workspace     $bg     $bg     $red
   }
 }
+
+include '$(/usr/libexec/sway/layered-include "/usr/share/sway/config.d/*.conf" "/etc/sway/config.d/*.conf" "${XDG_CONFIG_HOME:-$HOME/.config}/sway/config.d/*.conf")'
