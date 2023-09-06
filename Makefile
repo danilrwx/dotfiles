@@ -5,9 +5,6 @@ all:
 	make git
 	make git-change-remote
 
-console-font:
-	echo 'FONT="cyr-sun16"' | sudo tee -a /etc/vconsole.conf
-
 base: base-config
 
 base-config:
@@ -20,11 +17,24 @@ sway: sway-config
 
 sway-config:
 	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/
-	ln -sf $(PWD)/.bash_profile.wayland ~/.bash_profile
 	ln -snf $(PWD)/.config/sway  ~/.config/
 	ln -snf $(PWD)/.config/foot  ~/.config/
 	ln -snf $(PWD)/.config/dunst ~/.config/
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
+
+flatpak: flatpak-add flatpak-install
+
+flatpak-add:
+	sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+flatpak-install:
+	flatpak install -y flathub org.telegram.desktop io.dbeaver.DBeaverCommunity
+
+arch-packages:
+	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip \
+		jq keychain ripgrep neofetch rsync bash-completion fzf wget rustup \
+		lf lazygit fd sad git-delta
+	sudo pacman -S --needed libffi libyaml openssl zlib imagemagick postgresql-libs mariadb-libs
 
 git:
 	git config --global core.editor "hx"
@@ -51,3 +61,11 @@ asdf-inst:
 	asdf install ruby 3.0.1
 	asdf install ruby 3.1.2
 
+lsp-install:
+	npm i -g "awk-language-server@>=0.5.2" bash-language-server vscode-langservers-extracted typescript typescript-language-server sql-language-server yaml-language-server@next
+	go install golang.org/x/tools/gopls@latest
+	go install github.com/go-delve/delve/cmd/dlv@latest
+	go install golang.org/x/tools/cmd/goimports@latest
+	gem install --user-install solargraph
+	rustup component add rust-analyzer
+	cargo install taplo-cli --locked --features lsp

@@ -22,6 +22,7 @@ alias rdr='rails db:rollback'
 alias rdrp='rails db:rollback:primary'
 
 alias lg='lazygit'
+[[ -e /usr/bin/helix ]] && alias hx='helix'
 
 . $HOME/dotfiles/.bash_path
 

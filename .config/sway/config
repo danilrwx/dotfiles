@@ -58,7 +58,8 @@ bindsym Control+Mod1+v exec $term -e toggle-vpn
 
 floating_modifier $mod
 
-bindsym $mod+Return exec $term
+bindsym $mod+Return       exec $term bash -c "distrobox enter dev -- bash"
+bindsym $mod+Shift+Return exec $term
 
 bindsym $mod+Shift+q kill
 
