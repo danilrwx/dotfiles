@@ -28,12 +28,15 @@ flatpak-add:
 	sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak-install:
-	flatpak install -y flathub org.telegram.desktop io.dbeaver.DBeaverCommunity
+	flatpak install flathub net.waterfox.waterfox xyz.armcord.ArmCord com.github.tchx84.Flatseal org.telegram.desktop org.onlyoffice.desktopeditors com.github.Eloston.UngoogledChromium io.dbeaver.DBeaverCommunity
+
+distrobox:
+	distrobox create -i archlinux dev
 
 arch-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip \
 		jq keychain ripgrep neofetch rsync bash-completion fzf wget rustup \
-		lf lazygit fd sad git-delta
+		lf lazygit fd sad git-delta helix go nodejs npm yarn
 	sudo pacman -S --needed libffi libyaml openssl zlib imagemagick postgresql-libs mariadb-libs
 
 git:
@@ -51,18 +54,14 @@ asdf-install:
 	git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.12.0
 
 asdf-setup:
-	asdf plugin-add golang
 	asdf plugin-add ruby
-	asdf plugin-add nodejs
 
 asdf-inst:
-	asdf install nodejs 16.20.2
-	asdf install golang 1.21.0
 	asdf install ruby 3.0.1
 	asdf install ruby 3.1.2
 
 lsp-install:
-	npm i -g "awk-language-server@>=0.5.2" bash-language-server vscode-langservers-extracted typescript typescript-language-server sql-language-server yaml-language-server@next
+	sudo npm i -g "awk-language-server@>=0.5.2" bash-language-server vscode-langservers-extracted typescript typescript-language-server sql-language-server yaml-language-server@next
 	go install golang.org/x/tools/gopls@latest
 	go install github.com/go-delve/delve/cmd/dlv@latest
 	go install golang.org/x/tools/cmd/goimports@latest
