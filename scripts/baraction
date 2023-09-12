@@ -5,6 +5,7 @@ vol() {
   vol=`pactl get-sink-volume @DEFAULT_SINK@ | awk '{ print $5 }'`
 
   muted=`pactl get-sink-mute @DEFAULT_SINK@ | awk '{ print $2 }'`
+  [[ $muted = "да" ]] && icon="󰝟"
   [[ $muted = "yes" ]] && icon="󰝟"
 
   echo -e " $icon $vol"
@@ -15,6 +16,7 @@ mic() {
   vol=`pactl get-source-volume @DEFAULT_SOURCE@ | awk '{ print $5 }'`
 
   muted=`pactl get-source-mute @DEFAULT_SOURCE@ | awk '{ print $2 }'`
+  [[ $muted = "да" ]] && icon="󰍭"
   [[ $muted = "yes" ]] && icon="󰍭"
 
   echo -e " $icon $vol"
@@ -136,7 +138,8 @@ vpn() {
 
 keyboard() {
   icon="󰌌"
-  text=`xkblayout-state print "%s" | awk '{print toupper($0)}'`
+  # text=`xkblayout-state print "%s" | awk '{print toupper($0)}'`
+  text=`swaymsg -t get_inputs | jq 'map(select(has("xkb_active_layout_name")))[0].xkb_active_layout_name' | sed 's/"//g' | awk '{print toupper(substr($0, 0, 2))}'`
 
   echo -e " $icon $text"
 }

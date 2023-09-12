@@ -33,11 +33,18 @@ flatpak-install:
 distrobox:
 	distrobox create -i archlinux dev
 
+distrobox-ln:
+	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/foot
+	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/flatpak 
+	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/podman
+	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/rpm-ostree
+
+
 arch-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip \
 		jq keychain ripgrep neofetch rsync bash-completion fzf wget rustup \
 		lf lazygit fd sad git-delta helix go nodejs npm yarn
-	sudo pacman -S --needed libffi libyaml openssl zlib imagemagick postgresql-libs mariadb-libs
+	sudo pacman -S --needed libffi libyaml openssl zlib imagemagick postgresql-libs mariadb-libs shared-mime-info
 
 git:
 	git config --global core.editor "hx"
@@ -55,13 +62,15 @@ asdf-install:
 
 asdf-setup:
 	asdf plugin-add ruby
+	asdf plugin-add nodejs
 
 asdf-inst:
+	asdf install nodejs 16.20.2
 	asdf install ruby 3.0.1
 	asdf install ruby 3.1.2
 
 lsp-install:
-	sudo npm i -g "awk-language-server@>=0.5.2" bash-language-server vscode-langservers-extracted typescript typescript-language-server sql-language-server yaml-language-server@next
+	npm i -g "awk-language-server@>=0.5.2" bash-language-server vscode-langservers-extracted typescript typescript-language-server sql-language-server yaml-language-server@next
 	go install golang.org/x/tools/gopls@latest
 	go install github.com/go-delve/delve/cmd/dlv@latest
 	go install golang.org/x/tools/cmd/goimports@latest
