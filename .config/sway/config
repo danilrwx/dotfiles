@@ -43,6 +43,7 @@ input "type:keyboard" {
     xkb_layout us,ru
     xkb_options grp:alt_shift_toggle,ctrl:nocaps
     xkb_numlock enabled
+	# xkb_layout universal
 }
 
 bindsym XF86AudioRaiseVolume      exec --no-startup-id pactl set-sink-volume   @DEFAULT_SINK@   +10%
@@ -66,7 +67,7 @@ floating_modifier $mod
 bindsym $mod+Return       exec $term bash -c "distrobox enter dev -- bash"
 bindsym $mod+Shift+Return exec $term
 
-bindsym $mod+Shift+x kill
+bindsym $mod+Shift+q kill
 
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
@@ -80,8 +81,8 @@ bindsym $mod+Shift+$right move right
 
 bindsym $mod+f fullscreen toggle
 bindsym $mod+s layout stacking
-bindsym $mod+n layout toggle split
-bindsym $mod+a layout tabbed
+bindsym $mod+w layout toggle split
+bindsym $mod+e layout tabbed
 
 bindsym $mod+Shift+space floating toggle
 
@@ -93,20 +94,20 @@ set $ws3 "3"
 set $ws4 "4"
 set $ws5 "5"
 
-bindsym $mod+q workspace number $ws1
-bindsym $mod+w workspace number $ws2
-bindsym $mod+e workspace number $ws3
-bindsym $mod+r workspace number $ws4
-bindsym $mod+t workspace number $ws5
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+bindsym $mod+5 workspace number $ws5
 
-bindsym $mod+Shift+q move container to workspace number $ws1
-bindsym $mod+Shift+w move container to workspace number $ws2
-bindsym $mod+Shift+e move container to workspace number $ws3
-bindsym $mod+Shift+r move container to workspace number $ws4
-bindsym $mod+Shift+t move container to workspace number $ws5
+bindsym $mod+Shift+1 move container to workspace number $ws1
+bindsym $mod+Shift+2 move container to workspace number $ws2
+bindsym $mod+Shift+3 move container to workspace number $ws3
+bindsym $mod+Shift+4 move container to workspace number $ws4
+bindsym $mod+Shift+5 move container to workspace number $ws5
 
 bindsym $mod+Shift+c reload
-bindsym $mod+Shift+n restart
+bindsym $mod+Shift+r restart
 bindsym $mod+Shift+period exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 
 mode "resize" {

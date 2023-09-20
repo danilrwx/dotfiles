@@ -144,7 +144,7 @@ keyboard() {
   echo -e " $icon $text"
 }
 
-SLEEP_SEC=1
+SLEEP_SEC=0.1
 while true; do
   echo "$(vpn)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)  "
   sleep $SLEEP_SEC
