@@ -22,6 +22,13 @@ sway-config:
 	ln -snf $(PWD)/.config/dunst ~/.config/
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 
+nvim-install:
+	rm -rf nvim/plugin || exit 0
+	rm -rf ~/.local/share/nvim || exit 0
+	rm -rf ~/.config/nvim || exit 0
+	ln -snf $(PWD)/.config/nvim ~/.config/nvim
+	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+
 flatpak: flatpak-add flatpak-install
 
 flatpak-add:

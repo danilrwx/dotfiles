@@ -12,3 +12,8 @@ command = "clippy"
 name = "ruby"
 [language-server.solargraph]
 config = { diagnostics = true, formatting = true }
+
+# [[language]]
+# name = "ruby"
+# config = { solargraph = { diagnostics = true, formatting = true } }
+# formatter = { command = "rubocop", args = ["--stdin", "foo.rb", "-a", "--stderr", "--fail-level", "fatal"] }

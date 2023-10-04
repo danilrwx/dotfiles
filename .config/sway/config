@@ -43,7 +43,6 @@ input "type:keyboard" {
     xkb_layout us,ru
     xkb_options grp:alt_shift_toggle,ctrl:nocaps
     xkb_numlock enabled
-	# xkb_layout universal
 }
 
 bindsym XF86AudioRaiseVolume      exec --no-startup-id pactl set-sink-volume   @DEFAULT_SINK@   +10%
