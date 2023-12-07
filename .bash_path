@@ -1,6 +1,7 @@
 export GOPATH=$HOME/go
 export RUBYOPT="-W0"
-export TERM='xterm-256color'
+#export TERM='xterm-256color'
+export COLORTERM=truecolor
 export EDITOR='hx'
 export VISUAL='hx'
 export PATH=$PATH:$GOPATH/bin/
