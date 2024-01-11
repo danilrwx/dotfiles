@@ -14,13 +14,14 @@ local packer_bootstrap = ensure_packer()
 return require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
 
+  use 'projekt0n/github-nvim-theme'
+
+
+  use 'nvim-tree/nvim-web-devicons'
+
   use 'slim-template/vim-slim'
 
   use 'echasnovski/mini.nvim'
-
-  use 'mbbill/undotree'
-
-  use 'projekt0n/github-nvim-theme'
 
   use {
     'nvim-treesitter/nvim-treesitter',
@@ -39,7 +40,11 @@ return require('packer').startup(function(use)
     }
   }
 
-  use 'kdheepak/lazygit.nvim'
+  use 'mbbill/undotree'
+
+  use { 'kevinhwang91/nvim-bqf', ft = 'qf' }
+
+  use 'cshuaimin/ssr.nvim'
 
   use {
     'VonHeikemen/lsp-zero.nvim',

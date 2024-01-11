@@ -1,4 +1,4 @@
-vim.keymap.set("n", "<Leader>q", ":bd<CR>")
+vim.keymap.set("n", "<A-q>", ":bd<CR>")
 
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 

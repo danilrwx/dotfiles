@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Select Original pane 
+ORIGINAL_PANE=$(tmux select-pane -U)
+
+# Capture the output of the original pane
+PANE_OUTPUT=$(tmux capture-pane -p -t $ORIGINAL_PANE)
+
+# Back to the bottom pane 
+tmux select-pane -D
+
+# Extract file and line information
+RES=$(echo "$PANE_OUTPUT" | rg -e "(?:Нормальный|Вставка|Визуальный)\s+(\S*)\s[^│]* (\d+):*.*" -o --replace '$1 $2')
+FILE=$(echo $RES | choose 0)
+LINE=$(echo $RES | choose 1)
+
+# Run git blame and fzf commands
+git blame -L $LINE,+100 $FILE --color-by-age --color-lines | delta

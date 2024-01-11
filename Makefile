@@ -10,23 +10,23 @@ base: base-config
 base-config:
 	ln -sf $(PWD)/.bashrc ~/.bashrc
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
-	ln -snf $(PWD)/.config/helix ~/.config/
-	ln -snf $(PWD)/.config/htop ~/.config/
+	ln -snf $(PWD)/config/helix ~/.config/
+	ln -snf $(PWD)/config/htop ~/.config/
 
 sway: sway-config
 
 sway-config:
-	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/
-	ln -snf $(PWD)/.config/sway  ~/.config/
-	ln -snf $(PWD)/.config/foot  ~/.config/
-	ln -snf $(PWD)/.config/dunst ~/.config/
+	ln -sf $(PWD)/config/electron-flags.conf ~/.config/
+	ln -snf $(PWD)/config/sway  ~/.config/
+	ln -snf $(PWD)/config/foot  ~/.config/
+	ln -snf $(PWD)/config/dunst ~/.config/
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 
 nvim-install:
 	rm -rf nvim/plugin || exit 0
 	rm -rf ~/.local/share/nvim || exit 0
 	rm -rf ~/.config/nvim || exit 0
-	ln -snf $(PWD)/.config/nvim ~/.config/nvim
+	ln -snf $(PWD)/config/nvim ~/.config/nvim
 	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
 
 flatpak: flatpak-add flatpak-install
@@ -42,7 +42,7 @@ distrobox:
 
 distrobox-ln:
 	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/foot
-	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/flatpak 
+	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/flatpak
 	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/podman
 	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/rpm-ostree
 
@@ -50,7 +50,7 @@ distrobox-ln:
 arch-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip \
 		jq keychain ripgrep neofetch rsync bash-completion fzf wget rustup \
-		lf lazygit fd sad git-delta helix go nodejs npm yarn httpie
+		lf lazygit fd sad git-delta helix go nodejs npm yarn httpie choose
 	sudo pacman -S --needed libffi libyaml openssl zlib imagemagick postgresql-libs mariadb-libs shared-mime-info
 
 git:
