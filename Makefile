@@ -9,6 +9,7 @@ base: base-config
 
 base-config:
 	ln -sf $(PWD)/.bashrc ~/.bashrc
+	ln -sf $(PWD)/.gitconfig ~/.gitconfig
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -snf $(PWD)/config/helix ~/.config/
 	ln -snf $(PWD)/config/htop ~/.config/
@@ -50,7 +51,7 @@ distrobox-ln:
 arch-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip \
 		jq keychain ripgrep neofetch rsync bash-completion fzf wget rustup \
-		lf lazygit fd sad git-delta helix go nodejs npm yarn httpie choose
+		lf lazygit fd sad git-delta helix go nodejs npm yarn httpie choose bat
 	sudo pacman -S --needed libffi libyaml openssl zlib imagemagick postgresql-libs mariadb-libs shared-mime-info
 
 git:

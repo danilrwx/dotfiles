@@ -15,4 +15,4 @@ FILE=$(echo $RES | choose 0)
 LINE=$(echo $RES | choose 1)
 
 # Run git blame and fzf commands
-git log --follow -p -- $FILE | delta
+git log --follow -p -- $FILE

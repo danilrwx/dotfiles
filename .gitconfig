@@ -1,0 +1,24 @@
+[core]
+	editor = hx
+	pager = delta
+
+[user]
+	name = Danil Antoshin
+	email = antoshindanil@ya.ru
+
+[pull]
+	rebase = true
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	light = true
+	hyperlinks = true
+
+[merge]
+	conflictstyle = diff3
+
+[diff]
+	colorMoved = default

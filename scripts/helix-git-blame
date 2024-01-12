@@ -14,5 +14,15 @@ RES=$(echo "$PANE_OUTPUT" | rg -e "(?:Нормальный|Вставка|Виз
 FILE=$(echo $RES | choose 0)
 LINE=$(echo $RES | choose 1)
 
-# Run git blame and fzf commands
-git blame -L $LINE,+100 $FILE --color-by-age --color-lines | delta
+COMMIT=$(git blame -L $LINE,+100 $FILE | fzf --preview-window=hidden --border --delimiter ':' --height '100%' | choose 0)
+
+
+GIT_URL=$(git config --get remote.origin.url)
+if [[ ! $GIT_URL == *"https://"* ]]; then
+  GIT_URL=$(git config --get remote.origin.url | sed -e 's/:/\//g'| sed -e 's/ssh\/\/\///g'| sed -e 's/git@/https:\/\//g' | sed -e 's/.git//g')
+fi
+
+LINK="$GIT_URL/commit/$COMMIT"
+
+[[ -e /mnt/c/Windows/system32/clip.exe ]] && [[ ! -z $COMMIT ]] && echo $LINK | clip.exe
+[[ ! -z $COMMIT ]] && git show $COMMIT

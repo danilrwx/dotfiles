@@ -4,6 +4,7 @@ export RUBYOPT="-W0"
 export COLORTERM=truecolor
 export EDITOR='hx'
 export VISUAL='hx'
+export DELTA_PAGER='bat --theme "GitHub"'
 export PATH=$PATH:$GOPATH/bin/
 export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/

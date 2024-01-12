@@ -28,3 +28,5 @@ alias lg='lazygit'
 
 [[ -e /usr/share/fzf/key-bindings.bash ]] && . /usr/share/fzf/key-bindings.bash
 [[ -e /usr/share/fzf/completion.bash ]] &&   . /usr/share/fzf/completion.bash
+
+source ~/.local/share/bash-completion/completions/git-forgit.bash
