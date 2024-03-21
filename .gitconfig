@@ -1,5 +1,5 @@
 [core]
-	editor = hx
+	editor = code
 	pager = delta
 
 [user]
