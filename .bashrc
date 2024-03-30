@@ -29,3 +29,5 @@ alias lg='lazygit'
 [[ -e /usr/share/fzf/key-bindings.bash ]] && . /usr/share/fzf/key-bindings.bash
 [[ -e /usr/share/fzf/completion.bash ]] &&   . /usr/share/fzf/completion.bash
 
+
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
