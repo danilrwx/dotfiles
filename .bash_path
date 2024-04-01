@@ -3,13 +3,12 @@ export RUBYOPT="-W0"
 export COLORTERM=truecolor
 export EDITOR='nvim'
 export VISUAL='nvim'
-export DELTA_PAGER='bat --theme "GitHub"'
+# export DELTA_PAGER='bat --theme "GitHub"'
 export PATH=$PATH:$GOPATH/bin/
 export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/
 export PATH=$PATH:$HOME/dotfiles/scripts/
 export PATH=$PATH:/var/lib/flatpak/exports/bin
-export HELIX_RUNTIME=$HOME/src/helix/runtime
 
 PROMPT_COMMAND='PS1_CMD1=$(git branch 2>/dev/null | grep '"'"'*'"'"' | colrm 1 2)'; PS1='\[\e[92m\]\t\[\e[0m\] \[\e[96m\]\h\[\e[0m\]@\[\e[95m\]\u\[\e[0m\] \[\e[94m\]\w\[\e[0m\] \[\e[91m\]${PS1_CMD1}\[\e[0m\] '
 

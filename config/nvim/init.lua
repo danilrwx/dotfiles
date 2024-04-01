@@ -23,28 +23,17 @@ now(function()
 end)
 
 now(function()
-  require('mini.basics').setup({
-    options = { basic = true, extra_ui = true, },
-    mappings = { basic = true, windows = true, move_with_alt = true, },
-  })
-end)
-
-now(function()
   add('nvim-tree/nvim-web-devicons')
   require('nvim-web-devicons').setup()
 end)
 
 now(function() require('mini.notify').setup() end)
 
-now(function() require('mini.tabline').setup() end)
-
 now(function() require('mini.statusline').setup() end)
 
 -- LATER STAGE
 
 later(function() require('mini.ai').setup() end)
-
-later(function() require('mini.align').setup() end)
 
 later(function() require('mini.bracketed').setup() end)
 
@@ -54,8 +43,6 @@ later(function() require('mini.jump').setup() end)
 
 later(function() require('mini.move').setup() end)
 
-later(function() require('mini.diff').setup() end)
-
 later(function() require('mini.pairs').setup() end)
 
 later(function() require('mini.surround').setup() end)
@@ -63,29 +50,9 @@ later(function() require('mini.surround').setup() end)
 later(function() require('mini.splitjoin').setup() end)
 
 later(function()
-  require('mini.files').setup()
-  local MiniFiles = require('mini.files')
-  vim.keymap.set('n', '<Tab>', function() if not MiniFiles.close() then MiniFiles.open() end end, {})
-end)
-
-later(function()
   require('mini.trailspace').setup()
   local MiniTrailspace = require('mini.trailspace')
   vim.keymap.set('n', '<Leader>ds', function() MiniTrailspace.trim() end, {})
-end)
-
-later(function()
-  local hipatterns = require('mini.hipatterns')
-
-  hipatterns.setup({
-    highlighters = {
-      fixme     = { pattern = '%f[%w]()FIXME()%f[%W]', group = 'MiniHipatternsFixme' },
-      hack      = { pattern = '%f[%w]()HACK()%f[%W]', group = 'MiniHipatternsHack' },
-      todo      = { pattern = '%f[%w]()TODO()%f[%W]', group = 'MiniHipatternsTodo' },
-      note      = { pattern = '%f[%w]()NOTE()%f[%W]', group = 'MiniHipatternsNote' },
-      hex_color = hipatterns.gen_highlighter.hex_color(),
-    },
-  })
 end)
 
 later(function()
@@ -250,6 +217,12 @@ later(function()
 end)
 
 later(function()
+  add({ source = 'prichrd/netrw.nvim' })
+
+  require('netrw').setup()
+end)
+
+later(function()
   add({ source = 'gregorias/coerce.nvim' })
 
   require('coerce').setup()
@@ -289,6 +262,7 @@ vim.keymap.set('n', '<Esc>', ':noh<Return><Esc>')
 
 vim.keymap.set('n', '<C-g>', ':!topen-git<Return><Esc>')
 
+vim.keymap.set('n', '<Tab>', ':Lexplore 30<Return>')
 
 -- SETTINGS
 vim.opt.number = true
@@ -300,3 +274,4 @@ vim.opt.softtabstop = 2
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.colorcolumn = { 120 }
+
