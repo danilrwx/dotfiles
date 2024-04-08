@@ -1,9 +1,8 @@
 all:
 	mkdir -p ~/.config
 	make base
-	make sway
+	make packages
 	make git
-	make git-change-remote
 
 base: base-config
 
@@ -13,6 +12,10 @@ base-config:
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -snf $(PWD)/config/kak ~/.config/
 	ln -snf $(PWD)/config/htop ~/.config/
+	ln -snf $(PWD)/config/helix ~/.config/
+
+git-change-remote:
+	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
 
 nvim-install:
 	rm -rf nvim/plugin || exit 0
@@ -20,26 +23,11 @@ nvim-install:
 	rm -rf ~/.config/nvim || exit 0
 	ln -snf $(PWD)/config/nvim ~/.config/nvim
 
-flatpak: flatpak-add flatpak-install
-
-flatpak-add:
-	sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-
-flatpak-install:
-	flatpak install flathub org.telegram.desktop io.dbeaver.DBeaverCommunity
-
-distrobox:
-	distrobox create -i archlinux dev
-
-distrobox-ln:
-	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/flatpak
-	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/podman
-	sudo ln -fs /usr/bin/distrobox-host-exec /usr/local/bin/rpm-ostree
-
 packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip \
 		jq keychain ripgrep neofetch rsync bash-completion fzf wget \
 		lf lazygit fd sad git-delta go nodejs npm yarn httpie bat
+
 ruby-packages:
 	sudo pacman -S --needed base-devel rust libffi libyaml openssl zlib
 
@@ -48,15 +36,6 @@ dev-packages:
 
 yay:
 	git clone https://aur.archlinux.org/yay.git ~/yay && cd ~/yay && makepkg -si && rm -rf ~/yay
-
-git:
-	git config --global core.editor "hx"
-	git config --global user.name "Danil Antoshin"
-	git config --global user.email antoshindanil@ya.ru
-	git config --global pull.rebase true
-
-git-change-remote:
-	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
 
 asdf: asdf-install asdf-setup
 

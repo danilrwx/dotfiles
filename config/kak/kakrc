@@ -9,6 +9,7 @@ add-highlighter global/ wrap -word -indent
 
 set-option global grepcmd 'rg --column --smart-case --sort path'
 
+
 define-command -hidden open_buffer_picker %{
   prompt buffer: -menu -buffer-completion %{
     buffer %val{text}
@@ -56,4 +57,3 @@ map -docstring "open LazyGit"   global user g ":tmux-terminal-window lazygit<ret
 map -docstring "open file picker"   global user f ":open_file_picker<ret>"
 map -docstring "open rg picker"     global user r ":open_rg_picker<ret>"
 map -docstring "open buffer picker" global user b ":open_buffer_picker<ret>"
-

@@ -1,3 +1,0 @@
-#!/bin/bash
-
-foot bash -c "distrobox enter dev -- bash -c $1"

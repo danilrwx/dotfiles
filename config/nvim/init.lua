@@ -18,6 +18,7 @@ local langmap_keys = {
   'фФ;aA', 'ыЫ;sS', 'вВ;dD', 'аА;fF', 'пП;gG', 'рР;hH', 'оО;jJ', 'лЛ;kK', 'дД;lL', [[жЖ;\;:]], [[эЭ;'\"]],
   'яЯ;zZ', 'чЧ;xX', 'сС;cC', 'мМ;vV', 'иИ;bB', 'тТ;nN', 'ьЬ;mM', [[бБ;\,<]], 'юЮ;.>',
 }
+
 vim.o.langmap = table.concat(langmap_keys, ',')
 
 vim.g.mapleader = " "
@@ -40,4 +41,3 @@ require("lazy").setup("plugins")
 vim.keymap.set('n', '<Esc>', ':noh<Return><Esc>')
 vim.keymap.set('n', '<C-g>', ':!topen-git<Return><Esc>')
 vim.keymap.set('n', '<A-q>', ':bd<CR>')
-

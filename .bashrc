@@ -1,4 +1,5 @@
 #
+
 # ~/.bashrc
 #
 
@@ -20,7 +21,6 @@ alias rdr='bin/rails db:rollback'
 alias rdrp='bin/rails db:rollback:primary'
 
 alias lg='lazygit'
-[[ -e /usr/bin/helix ]] && alias hx='helix'
 
 . $HOME/dotfiles/.bash_path
 
