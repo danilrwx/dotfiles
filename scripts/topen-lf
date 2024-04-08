@@ -1,7 +1,12 @@
 #!/bin/bash
 
-if [ -n "$TMUX" ]; then
-	tmux neww bash -c "lf"
-else
-	foot lf
-fi
+ORIGINAL_PANE=$(tmux select-pane -U)
+PANE_OUTPUT=$(tmux capture-pane -p)
+
+tmux select-pane -D
+
+RES=$(echo "$PANE_OUTPUT" | rg -e "(?:Нормальный|Вставка|Визуальный)\s+(\S*)\s[^│]* (\d+):*.*" -o --replace '$1 $2')
+FILE=$(echo $RES | awk '{ print $1 }')
+LINE=$(echo $RES | awk '{ print $2 }')
+
+tmux neww bash -c "lf $($FILE)"

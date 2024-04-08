@@ -13,7 +13,20 @@ name = "ruby"
 [language-server.solargraph]
 config = { diagnostics = true, formatting = true }
 
-# [[language]]
-# name = "ruby"
-# config = { solargraph = { diagnostics = true, formatting = true } }
-# formatter = { command = "rubocop", args = ["--stdin", "foo.rb", "-a", "--stderr", "--fail-level", "fatal"] }
+[[grammar]]
+name = "slim"
+source = { git = "https://github.com/kolen/tree-sitter-slim", rev = "4b8b4cf76a28ebdb45a48861d695f58459712ba2" }
+
+[[language]]
+name = "slim"
+scope = "source.slim"
+file-types = ["slim"]
+grammar = "slim"
+comment-tokens = ["#"]
+
+[[language]]
+name = "thor"
+scope = "source.thor"
+file-types = ["thor"]
+grammar = "ruby"
+comment-tokens = ["#"]

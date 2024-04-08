@@ -2,17 +2,18 @@ export GOPATH=$HOME/go
 export RUBYOPT="-W0"
 #export TERM='xterm-256color'
 export COLORTERM=truecolor
-export EDITOR='hx'
-export VISUAL='hx'
-export DELTA_PAGER='bat --theme "GitHub"'
+export EDITOR='kak'
+export VISUAL='kak'
+export DELTA_PAGER='bat'
+# --theme "GitHub"'
 export PATH=$PATH:$GOPATH/bin/
 export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/
 export PATH=$PATH:$HOME/dotfiles/scripts/
 export PATH=$PATH:/var/lib/flatpak/exports/bin
-export HELIX_RUNTIME=$HOME/src/helix/runtime
+export HELIX_RUNTIME=$HOME/.config/helix/runtime
 
-export PS1="\[\e[01;33m\]\u\[\e[0m\]\[\e[00;37m\]@\[\e[0m\]\[\e[01;36m\]\h\[\e[0m\]\[\e[00;37m\] \t \[\e[0m\]\[\e[01;35m\]\w\[\e[0m\]\[\e[01;37m\] > \[\e[0m\]"
+PROMPT_COMMAND='PS1_CMD1=$(git branch 2>/dev/null | grep '"'"'*'"'"' | colrm 1 2)'; PS1='\[\e[92m\]\t\[\e[0m\] \[\e[96m\]\h\[\e[0m\]@\[\e[95m\]\u\[\e[0m\] \[\e[94m\]\w\[\e[0m\] \[\e[91m\]${PS1_CMD1}\[\e[0m\] '
 
 [[ -e /usr/bin/keychain ]] && eval `keychain --agents ssh --eval --quiet ~/.ssh/id_ed25519`
 

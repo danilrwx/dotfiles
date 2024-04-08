@@ -1,0 +1,59 @@
+set-option global tabstop 2
+set-option global indentwidth 2
+set-option global scrolloff 10,30
+
+add-highlighter global/ number-lines -hlcursor -separator ' '
+add-highlighter global/ show-matching
+add-highlighter global/ regex \h+$ 0:Error
+add-highlighter global/ wrap -word -indent
+
+set-option global grepcmd 'rg --column --smart-case --sort path'
+
+define-command -hidden open_buffer_picker %{
+  prompt buffer: -menu -buffer-completion %{
+    buffer %val{text}
+  }
+}
+
+define-command -hidden open_file_picker %{
+  prompt file: -menu -shell-script-candidates 'fd --type=file' %{
+    edit -existing %val{text}
+  }
+}
+
+define-command -hidden open_rg_picker %{
+  prompt search: %{
+    prompt refine: -menu -shell-script-candidates "rg -in '%val{text}'" %{
+      eval "edit -existing  %sh{(cut -d ' ' -f 1 | tr ':' ' ' ) <<< $kak_text}"
+    }
+  }
+}
+
+# map global normal p "<a-!>wl-paste --no-newline<ret>"
+# hook global RegisterModified '"' %{ nop %sh{
+#   printf %s "$kak_main_reg_dquote" | wl-copy > /dev/null 2>&1 &
+# }}
+
+map -docstring "copy line to system clipboard" global user y "<a-|>wl-copy -o<ret>"
+map -docstring "paste from system clipboard"   global user p "<a-!>wl-paste<ret>"
+
+map global normal <esc> ";,"
+
+map -docstring "comment line" global user c ":comment-line<ret>"
+
+map -docstring "close current buffer" global user q ": db<ret>"
+map -docstring "goto previous buffer" global user , ": bp<ret>"
+map -docstring "goto next buffer"     global user . ": bn<ret>"
+map -docstring "save current buffer"  global user s ": w<ret>"
+
+map -docstring "open file picker"  global user s ": w<ret>"
+
+map -docstring "insert newline above" global user [ "O<esc>j"
+map -docstring "insert newline below" global user ] "o<esc>k"
+
+map -docstring "open LazyGit"   global user g ":tmux-terminal-window lazygit<ret>"
+
+map -docstring "open file picker"   global user f ":open_file_picker<ret>"
+map -docstring "open rg picker"     global user r ":open_rg_picker<ret>"
+map -docstring "open buffer picker" global user b ":open_buffer_picker<ret>"
+
