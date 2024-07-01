@@ -9,6 +9,7 @@ base:
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 	ln -sf $(PWD)/.gitconfig ~/.gitconfig
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
+	ln -sf $(PWD)/.vimrc ~/.vimrc
 	ln -snf $(PWD)/config/nvim ~/.config/
 	ln -snf $(PWD)/config/helix ~/.config/
 	ln -snf $(PWD)/config/htop ~/.config/
