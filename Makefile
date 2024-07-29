@@ -13,11 +13,11 @@ base:
 	ln -snf $(PWD)/config/nvim ~/.config/
 	ln -snf $(PWD)/config/helix ~/.config/
 	ln -snf $(PWD)/config/htop ~/.config/
-	ln -snf $(PWD)/config/kitty ~/.config/
-	ln -snf $(PWD)/config/alacritty ~/.config/
+	ln -snf $(PWD)/config/k9s ~/.config/
+	ln -snf $(PWD)/config/skins ~/.config/
 
 git:
-	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
+	git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
 brew:
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -27,7 +27,7 @@ packages: base-packages ruby-packages dev-packages
 base-packages:
 	brew install htop tmux zip unzip jq ripgrep rsync fzf wget asdf \
 		lf lazygit fd sad git-delta httpie bat zsh-completion pkg-config \
-		neovim helix iproute2mac keychain
+		neovim helix iproute2mac keychain sops helm age regctl k9s fluxcd/tap/flux
 
 ruby-packages:
 	brew install openssl@3 readline libyaml gmp

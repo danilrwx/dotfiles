@@ -10,16 +10,11 @@ return {
     local builtin = require("telescope.builtin")
     local ext = require("telescope").extensions
 
-    local open_with_trouble = require("trouble.sources.telescope").open
     local project_actions = require("telescope._extensions.project.actions")
     require "telescope".setup {
       defaults = {
         layout_config = {
           horizontal = { width = 0.95 }
-        },
-        mappings = {
-          i = { ["<c-t>"] = open_with_trouble },
-          n = { ["<c-t>"] = open_with_trouble },
         },
       },
       pickers = {
@@ -52,8 +47,8 @@ return {
     vim.keymap.set("n", "<Leader>/", builtin.live_grep, { desc = 'Grep files' })
     vim.keymap.set("x", "<Leader>/", builtin.grep_string, { desc = 'Grep visual string' })
     vim.keymap.set("n", "<Leader>b", builtin.buffers, { desc = 'Find buffers' })
-    vim.keymap.set("n", "<Leader>q", builtin.quickfix, { desc = 'Find quickfix' })
-    vim.keymap.set("n", "<Leader>p", ext.project.project, { desc = 'Change project' })
+    vim.keymap.set("n", "<Leader>r", builtin.registers, { desc = 'Find registers' })
+    vim.keymap.set("n", "<Leader>\\", ext.project.project, { desc = 'Change project' })
     vim.keymap.set("n", "<Leader>rm", ext.rails.models, { desc = 'Find Rails models' })
     vim.keymap.set("n", "<Leader>rc", ext.rails.controllers, { desc = 'Find Rails controlles' })
     vim.keymap.set("n", "<Leader>rv", ext.rails.views, { desc = 'Find Rails views' })

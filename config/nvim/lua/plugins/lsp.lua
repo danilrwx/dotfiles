@@ -83,8 +83,22 @@ return {
             local lua_opts = lsp_zero.nvim_lua_ls()
             require("lspconfig").lua_ls.setup(lua_opts)
           end,
+          require("lspconfig")["yamlls"].setup({
+            settings = { yaml = { schemas = { kubernetes = "globPattern" } } },
+          })
         }
       })
     end
+  },
+  {
+    "someone-stole-my-name/yaml-companion.nvim",
+    dependencies = {
+      { "neovim/nvim-lspconfig" },
+      { "nvim-lua/plenary.nvim" },
+      { "nvim-telescope/telescope.nvim" },
+    },
+    config = function()
+      require("telescope").load_extension("yaml_schema")
+    end,
   }
 }
