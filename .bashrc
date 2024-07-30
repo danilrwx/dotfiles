@@ -8,6 +8,7 @@
 
 alias ls='ls --color=auto'
 alias l='ls -lah'
+alias lg='lazygit'
 alias c='clear'
 alias grep='grep --color=auto'
 alias untar='tar -zxvf '
@@ -22,4 +23,4 @@ alias rdrp='bin/rails db:rollback:primary'
 
 . $HOME/dotfiles/.bash_path
 
-. "$HOME/.cargo/env"
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"

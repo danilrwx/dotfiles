@@ -7,3 +7,4 @@ TAGS
 
 fixtures/_build
 config/helix/runtime
+config/k9s/clusters

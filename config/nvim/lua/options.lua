@@ -7,8 +7,9 @@ local langmap_keys     = {
 
 vim.o.langmap          = table.concat(langmap_keys, ',')
 vim.g.mapleader        = " "
-vim.g.undofile         = true
-vim.g.maplocalleader   = "\\"
+vim.opt.undodir        = os.getenv("HOME") .. "/.vim/undodir"
+vim.opt.undofile       = true
+vim.g.maplocalLeader   = "\\"
 vim.opt.number         = true
 vim.opt.relativenumber = true
 vim.opt.expandtab      = true
@@ -18,5 +19,4 @@ vim.opt.softtabstop    = 2
 vim.opt.tabstop        = 2
 vim.opt.shiftwidth     = 2
 vim.opt.colorcolumn    = { 120 }
-vim.opt.cmdheight      = 0
-
+vim.opt.signcolumn     = "number"
