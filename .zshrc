@@ -25,6 +25,8 @@ alias rdr='bin/rails db:rollback'
 alias rdrp='bin/rails db:rollback:primary'
 
 alias lg='lazygit'
+alias vim='nvim'
+alias vi='nvim'
 
 export GOPATH=$HOME/go
 export RUBYOPT="-W0"
@@ -37,9 +39,10 @@ export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/
 export PATH=$PATH:$HOME/dotfiles/scripts/
 export K9S_CONFIG_DIR=$HOME/.config/k9s
-export PUB_KEY=$(cat $HOME/.config/sops/age/keys.txt | grep "public" | awk '{print $4}')
-export SOPS_AGE_KEY_FILE=$HOME/.config/sops/age/keys.txt
 export FZF_DEFAULT_OPTS="--height 60% --layout=reverse --border --preview 'bat -n --color=always --theme ansi {}'"
+
+[[ -e $HOME/.config/sops ]] && export PUB_KEY=$(cat $HOME/.config/sops/age/keys.txt | grep "public" | awk '{print $4}')
+[[ -e $HOME/.config/sops ]] &&export SOPS_AGE_KEY_FILE=$HOME/.config/sops/age/keys.txt
 
 [[ -e /usr/bin/keychain ]] && eval `keychain --agents ssh --eval --quiet ~/.ssh/id_ed25519`
 
