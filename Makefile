@@ -34,7 +34,7 @@ packages: base-packages ruby-packages dev-packages
 base-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip \
 		jq keychain ripgrep neofetch rsync bash-completion fzf wget \
-		lf lazygit fd sad git-delta go nodejs npm yarn httpie bat docker \
+		lf lazygit fd sad git-delta go nodejs npm yarn httpie bat docker zsh \
 	  openssh helm sops age kubectl k9s fluxcd inetutils man-pages man-pages-ru
 
 ruby-packages:
