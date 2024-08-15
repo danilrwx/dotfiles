@@ -2,7 +2,6 @@ all:
 	mkdir -p ~/.config
 	make base
 	make git
-	make nvim
 	make packages
 	make locale
 	make docker
@@ -10,21 +9,15 @@ all:
 	make yay
 
 base:
-	ln -sf $(PWD)/.bashrc ~/.bashrc
+	ln -sf $(PWD)/.zshrc ~/.zshrc
 	ln -sf $(PWD)/.gitconfig ~/.gitconfig
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
-	ln -snf $(PWD)/config/helix ~/.config/
 	ln -snf $(PWD)/config/htop ~/.config/
-	ln -snf $(PWD)/config/kak ~/.config/
+	ln -snf $(PWD)/config/nvim ~/.config/
+	ln -snf $(PWD)/config/k9s ~/.config/
 
 git:
-	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
-
-nvim:
-	rm -rf nvim/plugin || exit 0
-	rm -rf ~/.local/share/nvim || exit 0
-	rm -rf ~/.config/nvim || exit 0
-	ln -snf $(PWD)/config/nvim ~/.config/nvim
+	git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
 locale:
 	echo 'ru_RU.UTF-8 UTF-8' | sudo tee -a /etc/locale.gen
@@ -42,21 +35,13 @@ base-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip \
 		jq keychain ripgrep neofetch rsync bash-completion fzf wget \
 		lf lazygit fd sad git-delta go nodejs npm yarn httpie bat docker \
-	  openssh
+	  openssh helm sops age kubectl k9s fluxcd
 
 ruby-packages:
 	sudo pacman -S --needed base-devel rust libffi libyaml openssl zlib
 
 dev-packages:
 	sudo pacman -S --needed imagemagick postgresql-libs mariadb-libs shared-mime-info libwebp
-
-lsp-packages:
-	sudo pacman -S --needed yaml-language-server bash-language-server typescript-language-server \
-		gopls marksman ansible-language-server taplo-cli vscode-json-languageserver \
-		vscode-html-languageserver vscode-css-languageserver vue-language-server
-	npm i -g "awk-language-server@>=0.5.2" sql-language-server
-	go install github.com/go-delve/delve/cmd/dlv@latest
-	go install golang.org/x/tools/cmd/goimports@latest
 
 yay:
 	git clone https://aur.archlinux.org/yay.git ~/yay && cd ~/yay && makepkg -si && rm -rf ~/yay

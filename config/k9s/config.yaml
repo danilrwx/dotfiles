@@ -1,0 +1,7 @@
+k9s:
+  liveViewAutoRefresh: true
+  refreshRate: 2
+  maxConnRetry: 5
+  readOnly: false
+  ui:
+    skin: light
