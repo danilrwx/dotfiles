@@ -12,6 +12,7 @@ eval "$(fzf --zsh)"
 # VARIABLES
 alias ls='ls --color=auto'
 alias l='ls -lah'
+alias so='source ~/.zshrc'
 alias c='clear'
 alias grep='grep --color=auto'
 alias untar='tar -zxvf '
