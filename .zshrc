@@ -34,7 +34,7 @@ export RUBYOPT="-W0"
 export COLORTERM=truecolor
 export EDITOR='nvim'
 export VISUAL='nvim'
-export DELTA_PAGER='bat --theme="GitHub"'
+# export DELTA_PAGER='bat'
 export PATH=$PATH:$GOPATH/bin/
 export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/
