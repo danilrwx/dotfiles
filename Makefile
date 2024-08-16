@@ -14,6 +14,7 @@ base:
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -snf $(PWD)/config/htop ~/.config/
 	ln -snf $(PWD)/config/nvim ~/.config/
+	ln -snf $(PWD)/config/nvim /mnc/c/Users/danil/AppData/Local/
 	ln -snf $(PWD)/config/k9s ~/.config/
 
 git:

@@ -14,9 +14,8 @@
 
 [delta]
 	navigate = true
-	light = false
+	light = true
 	hyperlinks = true
-	syntax-theme = ansi
 
 [merge]
 	conflictstyle = diff3
