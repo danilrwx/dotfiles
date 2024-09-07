@@ -14,7 +14,6 @@ base:
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -snf $(PWD)/config/htop ~/.config/
 	ln -snf $(PWD)/config/nvim ~/.config/
-	ln -snf $(PWD)/config/nvim /mnc/c/Users/danil/AppData/Local/
 	ln -snf $(PWD)/config/k9s ~/.config/
 
 git:
@@ -45,7 +44,7 @@ dev-packages:
 	sudo pacman -S --needed imagemagick postgresql-libs mariadb-libs shared-mime-info libwebp
 
 yay:
-	git clone https://aur.archlinux.org/yay.git ~/yay && cd ~/yay && makepkg -si && rm -rf ~/yay
+	git clone https://aur.archlinux.org/yay.git ~/yay && cd ~/yay && makepkg -si && sudo rm -rf ~/yay
 
 asdf:
 	git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.12.0
