@@ -1,7 +1,0 @@
-#!/bin/bash
-
-if [[ $XDG_SESSION_TYPE == 'wayland' ]]; then
-	footclient $1
-else
-	xfce4-terminal -e $1
-fi

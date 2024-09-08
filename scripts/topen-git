@@ -1,7 +1,0 @@
-#!/bin/bash
-
-if [ -n "$TMUX" ]; then
-	tmux neww bash -c "lazygit"
-else
-  terminal-run lazygit
-fi

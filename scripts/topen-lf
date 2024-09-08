@@ -1,7 +1,0 @@
-#!/bin/bash
-
-if [ -n "$TMUX" ]; then
-	tmux neww bash -c "lf"
-else
-	terminal-run lf
-fi
