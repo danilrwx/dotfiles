@@ -17,7 +17,7 @@ base:
 git:
 	git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
-packages: copr-packages base-packages ruby-packages dev-packages brew-install brew-packages
+packages: copr-packages system-packages base-packages ruby-packages dev-packages brew-install brew-packages
 
 copr-packages:
 	sudo dnf copr enable yohane-shiro/nekoray
