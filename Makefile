@@ -2,7 +2,6 @@ all:
 	mkdir -p ~/.config
 	make base
 	make git
-	make packages
 	make asdf
 
 base:
@@ -14,33 +13,32 @@ base:
 	ln -snf $(PWD)/config/nvim ~/.config/
 	ln -snf $(PWD)/config/k9s ~/.config/
 
+locale:
+	echo 'ru_RU.UTF-8 UTF-8' | sudo tee -a /etc/locale.gen
+	echo 'LANG=ru_RU.UTF-8' | sudo tee -a /etc/locale.conf
+	sudo locale-gen
+
 git:
 	git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
-packages: copr-packages system-packages base-packages ruby-packages dev-packages brew-install brew-packages
-
-copr-packages:
+fedora-packages:
 	sudo dnf copr enable yohane-shiro/nekoray
-
-system-packages:
 	sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$$(rpm -E %fedora).noarch.rpm
 	sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$$(rpm -E %fedora).noarch.rpm
 	sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
 	sudo dnf install -y lame\* --exclude=lame-devel
 	sudo dnf group upgrade -y --with-optional Multimedia
 	sudo dnf install -y telegram-desktop discord wireguard-tools nvtop nekoray
-
-base-packages:
-	sudo dnf install -y  htop git tmux curl man zip unzip jq keychain \
-		ripgrep neofetch rsync bash-completion fzf wget fd-find go httpie \
-		bat openssl kubernetes-client podman zsh
-
-ruby-packages:
-	sudo dnf install -y autoconf gcc rust patch make bzip2 openssl-devel libyaml-devel \
-	libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
-
-dev-packages:
+	sudo dnf install -y  htop git tmux curl man zip unzip jq keychain ripgrep neofetch rsync bash-completion fzf wget fd-find go httpie bat openssl kubernetes-client podman zsh
+	sudo dnf install -y autoconf gcc rust patch make bzip2 openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
 	sudo dnf install -y ImageMagick-devel postgresql-devel mariadb-devel shared-mime-info libwebp
+
+arch-packages:
+	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip jq keychain ripgrep neofetch rsync bash-completion fzf wget lf lazygit fd sad git-delta go nodejs npm yarn httpie bat docker zsh openssh helm sops age kubectl k9s fluxcd inetutils man-pages man-pages-ru
+	sudo pacman -S --needed base-devel rust libffi libyaml openssl zlib
+	sudo pacman -S --needed imagemagick postgresql-libs mariadb-libs shared-mime-info libwebp
+	git clone https://aur.archlinux.org/yay.git ~/yay && cd ~/yay && makepkg -si && sudo rm -rf ~/yay
+
 
 brew-install:
 	/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
