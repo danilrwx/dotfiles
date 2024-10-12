@@ -6,11 +6,12 @@ return {
     config = function()
       require("mini.bracketed").setup()
       require("mini.diff").setup()
-      require("mini.notify").setup()
-      require("mini.statusline").setup()
+      require("mini.extra").setup()
+      require('mini.icons').setup()
+      require("mini.move").setup()
+      require("mini.pairs").setup()
       require("mini.surround").setup()
       require("mini.trailspace").setup()
-      require('mini.icons').setup()
 
       local MiniAi = require('mini.ai')
       MiniAi.setup({
@@ -23,10 +24,24 @@ return {
         }
       })
 
-      local MiniFiles = require("mini.files")
-      MiniFiles.setup()
-      vim.keymap.set("n", "<Leader><Leader>",
-        function() if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0), true) end end, {})
+      -- local MiniFiles = require("mini.files")
+      -- MiniFiles.setup()
+      -- vim.keymap.set("n", "<C-n>",
+      --   function() if not MiniFiles.close() then MiniFiles.open(vim.api.nvim_buf_get_name(0), true) end end, {})
+
+      local MiniHipatterns = require('mini.hipatterns')
+      local MiniExtra = require('mini.extra')
+      local hi_words = MiniExtra.gen_highlighter.words
+      MiniHipatterns.setup({
+        highlighters = {
+          fixme = hi_words({ 'FIXME', 'Fixme', 'fixme' }, 'MiniHipatternsFixme'),
+          hack = hi_words({ 'HACK', 'Hack', 'hack' }, 'MiniHipatternsHack'),
+          todo = hi_words({ 'TODO', 'Todo', 'todo' }, 'MiniHipatternsTodo'),
+          note = hi_words({ 'NOTE', 'Note', 'note' }, 'MiniHipatternsNote'),
+
+          hex_color = MiniHipatterns.gen_highlighter.hex_color(),
+        },
+      })
     end
   }
 }
