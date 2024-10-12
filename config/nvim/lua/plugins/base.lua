@@ -49,7 +49,10 @@ return {
   },
   {
     "nvim-treesitter/nvim-treesitter",
-    dependencies = { "RRethy/nvim-treesitter-endwise" },
+    dependencies = {
+      "RRethy/nvim-treesitter-endwise",
+      "Wansmer/treesj",
+    },
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter.configs").setup({
@@ -61,13 +64,27 @@ return {
         incremental_selection = {
           enable = true,
           keymaps = {
-            init_selection = "<C-Space>",
-            node_incremental = "<C-Space>",
-            node_decremental = "<C-s>",
+            init_selection = '<C-Space>',
+            node_incremental = '<C-Space>',
+            node_decremental = '<C-s>',
           },
         },
       })
+
+      require("treesj").setup()
+      vim.keymap.set("n", "<Leader>m", require("treesj").toggle, { desc = "toggle split treesitter object" })
     end
+  },
+  {
+    "chrisgrieser/nvim-various-textobjs",
+    lazy = false,
+    opts = { useDefaultKeymaps = true },
+  },
+  {
+    "folke/todo-comments.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = {
+    }
   },
   { "slim-template/vim-slim", },
 }
