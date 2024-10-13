@@ -1,0 +1,10 @@
+#!/bin/bash
+
+status=`ip link | grep vpn | wc -l`
+
+if [[ $status -gt 0 ]]; then
+  wg-quick down vpn
+else
+  wg-quick up vpn
+fi
+
