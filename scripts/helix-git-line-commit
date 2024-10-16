@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Select Original pane 
+ORIGINAL_PANE=$(tmux select-pane -U)
+
+# Capture the output of the original pane
+PANE_OUTPUT=$(tmux capture-pane -p) # -t $ORIGINAL_PANE)
+
+# Back to the bottom pane 
+tmux select-pane -D
+
+# Extract file and line information
+RES=$(echo "$PANE_OUTPUT" | rg -e "(?:Нормальный|Вставка|Визуальный)\s+(\S*)\s[^│]* (\d+):*.*" -o --replace '$1 $2')
+FILE=$(echo $RES | awk '{ print $1 }')
+LINE=$(echo $RES | awk '{ print $2 }')
+
+COMMIT=$(git blame -L $LINE,+1 $FILE | awk '{ print $1 }')
+
+GIT_URL=$(git config --get remote.origin.url)
+if [[ ! $GIT_URL == *"https://"* ]]; then
+  GIT_URL=$(git config --get remote.origin.url | sed -e 's/:/\//g'| sed -e 's/ssh\/\/\///g'| sed -e 's/git@/https:\/\//g' | sed -e 's/.git//g')
+fi
+
+LINK="$GIT_URL/commit/$COMMIT"
+
+[[ -e /mnt/c/Windows/system32/clip.exe ]] && [[ ! -z $COMMIT ]] && echo $LINK | clip.exe
+[[ ! -z $COMMIT ]] && git show $COMMIT
