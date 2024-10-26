@@ -5,44 +5,23 @@ set $down  j
 set $up    k
 set $right l
 
-set $bg       #000000
-set $fg       #ffffff
+set $bg       #ffffff
+set $fg       #000000
 set $red      #ff0000
 set $darkgray #707070
 
-set $term foot
+set $dmenu_style -b -fn 'Iosevka Nerd Font-15' -sb '#000000' -sf '#ffffff' -nb '#ffffff' -nf '#000000' "$@"
+set $term xfce4-terminal
 
-set $rofi_cmd rofi -terminal '$term'
-set $menu $rofi_cmd -show combi -combi-modes drun
+font pango:Iosevka Nerd Font 12
 
-font pango:Iosevka Nerd Font 10
+exec --no-startup-id wm-autostart
+exec --no-startup-id wm-autostart-blocking
+exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 
-output * mode 3840x2160@120.000Hz bg ~/Backgrounds/2.jpg fill scale 2 subpixel rgb
-
-# xwayland       enabled
-default_border pixel 1
+default_border pixel 3
 smart_borders  on
-gaps           inner 0
-
-exec --no-startup-id wm-autostart-blocking-wl
-exec hash dbus-update-activation-environment 2>/dev/null && dbus-update-activation-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
-# exec swayidle -w \
-#           timeout 300 'swaylock -f -c 000000' \
-#           timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-#           before-sleep 'swaylock -f -c 000000'
-
-input "type:touchpad" {
-   dwt enabled
-   tap enabled
-   natural_scroll enabled
-   middle_emulation enabled
-}
-
-input "type:keyboard" {
-    xkb_layout us,ru
-    xkb_options grp:alt_shift_toggle,ctrl:nocaps
-    xkb_numlock enabled
-}
+gaps           inner 8
 
 bindsym XF86AudioRaiseVolume      exec --no-startup-id pactl set-sink-volume   @DEFAULT_SINK@   +10%
 bindsym XF86AudioLowerVolume      exec --no-startup-id pactl set-sink-volume   @DEFAULT_SINK@   -10%
@@ -50,15 +29,20 @@ bindsym XF86AudioMute             exec --no-startup-id pactl set-sink-mute     @
 
 bindsym $mod+XF86AudioRaiseVolume exec --no-startup-id pactl set-source-volume @DEFAULT_SOURCE@   +10%
 bindsym $mod+XF86AudioLowerVolume exec --no-startup-id pactl set-source-volume @DEFAULT_SOURCE@   -10%
-bindsym XF86AudioMicMute          exec --no-startup-id pactl set-source-mute   @DEFAULT_SOURCE@ toggle
 bindsym $mod+Shift+m              exec --no-startup-id pactl set-source-mute   @DEFAULT_SOURCE@ toggle
 
-bindsym $mod+Shift+s exec --no-startup-id grimshot copy area
-bindsym $mod+d       exec --no-startup-id $menu
+bindsym XF86MonBrightnessDown     exec --no-startup-id brightnessctl   set   10%-
+bindsym XF86MonBrightnessUp       exec --no-startup-id brightnessctl   set   10%+
 
-bindsym Control+Mod1+s exec ~/dotfiles/scripts/sys-notify
-bindsym Control+Mod1+c exec ~/dotfiles/scripts/cal-notify
-bindsym Control+Mod1+v exec $term -e ~/dotfiles/scripts/toggle-vpn
+
+bindsym $mod+Shift+s exec --no-startup-id screenshot-select
+bindsym $mod+d       exec --no-startup-id dmenu_run $dmenu_style
+bindsym $mod+Shift+u exec --no-startup-id clipmenu  $dmenu_style
+bindsym $mod+Shift+p exec --no-startup-id passmenu  $dmenu_style
+
+bindsym Control+Mod1+s exec sys-notify
+bindsym Control+Mod1+c exec cal-notify
+bindsym Control+Mod1+v exec $term -e toggle-vpn
 
 floating_modifier $mod
 
@@ -76,14 +60,19 @@ bindsym $mod+Shift+$down move down
 bindsym $mod+Shift+$up move up
 bindsym $mod+Shift+$right move right
 
+bindsym $mod+v split v
+
 bindsym $mod+f fullscreen toggle
+
 bindsym $mod+s layout stacking
-bindsym $mod+w layout toggle split
-bindsym $mod+e layout tabbed
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
 
 bindsym $mod+Shift+space floating toggle
 
 bindsym $mod+space focus mode_toggle
+
+bindsym $mod+a focus parent
 
 set $ws1 "1"
 set $ws2 "2"
@@ -94,6 +83,7 @@ set $ws6 "6"
 set $ws7 "7"
 set $ws8 "8"
 set $ws9 "9"
+set $ws10 "10"
 
 bindsym $mod+1 workspace number $ws1
 bindsym $mod+2 workspace number $ws2
@@ -104,6 +94,7 @@ bindsym $mod+6 workspace number $ws6
 bindsym $mod+7 workspace number $ws7
 bindsym $mod+8 workspace number $ws8
 bindsym $mod+9 workspace number $ws9
+bindsym $mod+0 workspace number $ws10
 
 bindsym $mod+Shift+1 move container to workspace number $ws1
 bindsym $mod+Shift+2 move container to workspace number $ws2
@@ -114,10 +105,11 @@ bindsym $mod+Shift+6 move container to workspace number $ws6
 bindsym $mod+Shift+7 move container to workspace number $ws7
 bindsym $mod+Shift+8 move container to workspace number $ws8
 bindsym $mod+Shift+9 move container to workspace number $ws9
+bindsym $mod+Shift+0 move container to workspace number $ws10
 
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
-bindsym $mod+Shift+period exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 mode "resize" {
   bindsym $left  resize shrink width  5 px or 5 ppt
@@ -130,7 +122,7 @@ mode "resize" {
   bindsym $mod+r mode "default"
 }
 
-bindsym $mod+y mode "resize"
+bindsym $mod+r mode "resize"
 
 client.focused                 $bg        $bg       $fg            $red         $red
 client.focused_inactive        $bg        $bg       $darkgray      $bg          $bg
@@ -138,7 +130,7 @@ client.unfocused               $bg        $bg       $darkgray      $bg          
 client.urgent                  $red       $bg       $red           $red         $red
 
 bar {
-  status_command ~/dotfiles/scripts/baraction
+  status_command baraction
   colors {
      background $bg
      statusline $fg
@@ -149,5 +141,3 @@ bar {
      urgent_workspace     $bg     $bg     $red
   }
 }
-
-include '$(/usr/libexec/sway/layered-include "/usr/share/sway/config.d/*.conf" "/etc/sway/config.d/*.conf" "${XDG_CONFIG_HOME:-$HOME/.config}/sway/config.d/*.conf")'
