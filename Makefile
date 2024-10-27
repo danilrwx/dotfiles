@@ -26,7 +26,7 @@ i3-config:
 	ln -sf $(PWD)/.Xresources ~/.Xresources
 	ln -snf $(PWD)/config/i3 ~/.config/
 	ln -snf $(PWD)/config/dunst ~/.config/
-	ln -snf $(PWD)/config/xfce4 ~/.config/
+	ln -snf $(PWD)/config/kitty ~/.config/
 
 git:
 	git remote set-url origin git@github.com:danilrwx/dotfiles.git
