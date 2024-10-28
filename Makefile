@@ -13,12 +13,6 @@ base:
 	ln -snf $(PWD)/config/helix ~/.config/
 	ln -snf $(PWD)/config/k9s ~/.config/
 
-sway-config:
-	ln -sf $(PWD)/Backgrounds ~/Backgrounds
-	ln -snf $(PWD)/config/sway ~/.config/
-	ln -snf $(PWD)/config/dunst ~/.config/
-	ln -snf $(PWD)/config/foot ~/.config/
-
 i3-config:
 	ln -sf $(PWD)/Backgrounds ~/Backgrounds
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
@@ -31,7 +25,7 @@ i3-config:
 git:
 	git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
-ubuntu-packages:
+base-packages:
 	sudo apt install -y build-essential curl bash-completion xorg i3 xcompmgr hsetroot \
 	kitty brightnessctl dunst acpi maim xclip xsel pipewire pipewire-pulse pavucontrol
 
@@ -41,6 +35,9 @@ brew-install:
 brew-packages:
 	brew install brew-cask-completion sops regclient k9s lazygit fzf httpie asdf ripgrep neofetch \
 	 jq keychain wget fd openssl readline libyaml gmp autoconf tmux  neovim
+
+brew-mac:
+	brew install --cask chromium
 
 docker:
 	sudo systemctl start docker.socket
