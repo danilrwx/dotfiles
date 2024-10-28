@@ -40,8 +40,6 @@ vim.keymap.set("n", "<C-n>", function()
   end
 end, { silent = true })
 
-vim.keymap.set("n", "<Leader>u", vim.cmd.UndotreeToggle, { desc = "Open UndoTree" })
-
 local builtin = require("telescope.builtin")
 vim.keymap.set("n", "<Leader>f", builtin.find_files, { desc = "Find files" })
 vim.keymap.set("n", "<Leader>/", builtin.live_grep, { desc = "Grep files" })
