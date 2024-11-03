@@ -1,17 +1,7 @@
 return {
   {
     "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "torte",
-    },
-  },
-  {
-    "catppuccin/nvim",
-    enabled = false,
-  },
-  {
-    "folke/tokyonight.nvim",
-    enabled = false,
+    opts = {},
   },
   {
     "folke/flash.nvim",
@@ -19,10 +9,6 @@ return {
   },
   {
     "folke/persistence.nvim",
-    enabled = false,
-  },
-  {
-    "stevearc/dressing.nvim",
     enabled = false,
   },
   {
@@ -165,4 +151,5 @@ return {
   { import = "lazyvim.plugins.extras.lang.ruby" },
   { import = "lazyvim.plugins.extras.lang.sql" },
   { import = "lazyvim.plugins.extras.lang.yaml" },
+  { import = "lazyvim.plugins.extras.lang.helm" },
 }

@@ -3,8 +3,8 @@
 	pager = delta
 
 [user]
-	name = Danil Antoshin
-	email = antoshindanil@ya.ru
+	name = Daniil Antoshin
+	email = daniil.antoshin@flant.com
 
 [pull]
 	rebase = true

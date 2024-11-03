@@ -15,8 +15,8 @@ alias untar='tar -zxvf '
 alias wget='wget -c '
 
 alias lg='lazygit'
-# alias vim='nvim'
-# alias vi='nvim'
+alias vim='nvim'
+alias vi='nvim'
 
 export GOPATH=$HOME/go
 export RUBYOPT="-W0"
