@@ -47,4 +47,3 @@ vim.o.cursorline = false
 vim.opt.wrap = false
 
 vim.o.colorcolumn = "120"
-vim.g.lazyvim_picker = "fzf"
