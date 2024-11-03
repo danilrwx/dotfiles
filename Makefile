@@ -39,6 +39,7 @@ brew-packages:
 
 brew-mac:
 	brew install chromium --no-quarantine
+	brew install go-task/tap/go-task
 
 docker:
 	sudo systemctl start docker.socket
