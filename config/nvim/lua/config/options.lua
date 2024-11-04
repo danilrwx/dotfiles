@@ -35,15 +35,12 @@ local langmap_keys = {
   "юЮ;.>",
 }
 
-vim.o.langmap = table.concat(langmap_keys, ",")
+vim.opt.langmap = table.concat(langmap_keys, ",")
+vim.opt.spelllang = "ru_ru,en_us"
 vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
 vim.opt.undofile = true
-vim.o.laststatus = 1
-vim.o.cmdheight = 1
-vim.o.list = false
-vim.o.showmode = true
-vim.o.cursorline = false
-
-vim.opt.wrap = false
-
-vim.o.colorcolumn = "120"
+vim.opt.laststatus = 1
+vim.opt.cmdheight = 1
+vim.opt.list = false
+vim.opt.showmode = true
+vim.opt.cursorline = false

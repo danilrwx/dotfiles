@@ -11,3 +11,10 @@ Funcs.toggle_quickfix = function()
   local command = #quickfix_wins == 0 and "copen" or "cclose"
   vim.cmd(command)
 end
+
+-- vim.api.nvim_create_autocmd({ "FileType" }, {
+--   pattern = { "*" },
+--   callback = function()
+--     vim.o.wrap = false
+--   end,
+-- })
