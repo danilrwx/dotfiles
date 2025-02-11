@@ -10,12 +10,6 @@
 [pull]
   rebase = true
 
-; [interactive]
-  ; diffFilter = delta --color-only
-
-[commit]
-  gpgsign = true
-
 [alias]
   commit = commit --signoff
 
