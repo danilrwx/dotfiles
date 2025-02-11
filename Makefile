@@ -1,9 +1,9 @@
 all:
-	mkdir -p ~/.config
 	make base
 	make git
 
 base:
+	mkdir -p ~/.config
 	ln -sf $(PWD)/.bashrc ~/.bashrc
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 	ln -sf $(PWD)/.gitconfig ~/.gitconfig
@@ -39,15 +39,17 @@ font:
 	fc-cache -f
 
 base-packages:
-	sudo apt install -y build-essential curl bash-completion xorg xcompmgr hsetroot \
-	brightnessctl dunst acpi maim xclip xsel pipewire pipewire-pulse pavucontrol
+	sudo apt install build-essential libx11-dev libxft-dev libxinerama-dev \
+		libnotify-bin notify-osd psmisc && \
+	sudo apt install -y curl bash-completion xorg xcompmgr hsetroot \
+		brightnessctl dunst acpi maim xclip xsel pipewire pipewire-pulse pavucontrol unzip
 
 brew-install:
 	/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 brew-packages:
 	brew install brew-cask-completion sops regclient k9s lazygit fzf httpie asdf ripgrep \
-	neofetch jq keychain wget fd openssl readline libyaml gmp autoconf tmux  neovim python3 \
+	neofetch jq keychain wget fd openssl readline libyaml gmp autoconf tmux neovim \
 	yq fx yh highlight moar difftastic
 
 brew-mac:
