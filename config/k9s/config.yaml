@@ -6,4 +6,6 @@ k9s:
   ui:
     enableMouse: true
     logoless: true
+    # headless: true
     skin: light
+    reactive: true

@@ -9,3 +9,14 @@ fixtures/_build
 config/helix/runtime
 config/vim/undodir
 config/k9s/clusters
+
+.gitignore
+*.orig
+*.rej
+*.o
+dwm/dwm
+dwm/config.h
+st/st
+st/config.h
+dmenu/dmenu
+dmenu/config.h
