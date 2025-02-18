@@ -93,7 +93,9 @@ set wildmenu
 set mouse=a
 
 " set background=l
-colorscheme lunaperche
+" colorscheme lunaperche
+highlight SignColumn ctermbg=NONE
+highlight ColorColumn ctermbg=238
 
 set omnifunc=syntaxcomplete#Complete
 imap <tab><tab> <c-x><c-o>
@@ -149,7 +151,8 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
     Plug 'tpope/vim-fugitive'
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
     Plug 'junegunn/fzf.vim'
-    Plug 'augmentcode/augment.vim'
+    " Plug 'augmentcode/augment.vim'
+    Plug 'madox2/vim-ai'
   call plug#end()
 
   let g:ale_set_signs = 1
@@ -203,8 +206,8 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
       call go#cmd#Build(0)
     endif
   endfunction
-  autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
 
+  autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
   autocmd FileType go nmap <Leader>n iif err != nil {<ESC>==
 
   nnoremap <Leader>gg :!lazygit<CR><CR>
