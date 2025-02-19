@@ -17,8 +17,8 @@ alias lg='lazygit'
 
 export RUBYOPT="-W0"
 export COLORTERM=truecolor
-export EDITOR='nvim'
-export VISUAL='nvim'
+export EDITOR='vim'
+export VISUAL='vim'
 export DFT_BACKGROUND=light
 
 export PATH=$PATH:$GOPATH/bin/
