@@ -1,11 +1,12 @@
 [core]
   editor = vim
-  pager = delta
   attributesfile = /Users/danil/.gitattributes
+	excludesfile = /Users/danil/.gitignore_global
 
 [user]
   name = Daniil Antoshin
   email = daniil.antoshin@flant.com
+	signingkey = 84C4921C9429DA03
 
 [commit]
 	gpgsign = true
@@ -15,6 +16,5 @@
 
 [alias]
   commit = commit --signoff
-
 [tag]
 	gpgSign = true
