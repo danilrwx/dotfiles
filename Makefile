@@ -33,7 +33,7 @@ fedora-packages:
 	sudo dnf copr enable pgdev/ghostty -y
 	sudo dnf copr enable atim/lazygit -y
 	sudo dnf install ghostty lazygit
-	sudo dnf install google-chrome-stable vim-enhanced unzip htop sensors zsh fzf jq \
+	sudo dnf install google-chrome-stable neovim unzip htop sensors zsh fzf jq \
 		keychain wget tmux yq kubernetes-client difft wl-clipboard
 
 brew-install:
