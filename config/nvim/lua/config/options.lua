@@ -41,8 +41,13 @@ vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
 vim.opt.undofile = true
 vim.opt.list = false
 vim.opt.showmode = true
-vim.opt.cursorline = false
+vim.opt.cursorline = true
 vim.opt.laststatus = 1
 vim.opt.cmdheight = 1
--- vim.opt.clipboard = ""
 vim.g.snacks_animate = false
+
+vim.filetype.add({
+  filename = {
+    ["werf.inc.yaml"] = "helm",
+  },
+})
