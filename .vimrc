@@ -137,46 +137,52 @@ autocmd BufWritePre * call TrimWhitespace()
 
 if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.local/share/vim/plugins')
-    Plug 'sheerun/vim-polyglot'
     Plug 'jasonccox/vim-wayland-clipboard'
     Plug 'tpope/vim-fugitive'
     Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
-    Plug 'dense-analysis/ale'
-    Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-    Plug 'junegunn/fzf.vim'
-    Plug 'augmentcode/augment.vim'
-    Plug 'madox2/vim-ai'
+    Plug 'girishji/scope.vim'
+    Plug 'ubaldot/vim-highlight-yanked'
+    Plug 'yegappan/lsp'
   call plug#end()
 
-  let g:fzf_vim_preview_window = ['right,50%', 'ctrl-/']
-  let g:fzf_layout = { 'down': '~90%' }
-  let g:fzf_colors =
-\ { 'fg':      ['fg', 'Normal'],
-  \ 'bg':      ['bg', 'Normal'],
-  \ 'hl':      ['fg', 'Comment'],
-  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-  \ 'hl+':     ['fg', 'Statement'],
-  \ 'info':    ['fg', 'PreProc'],
-  \ 'border':  ['fg', 'Ignore'],
-  \ 'prompt':  ['fg', 'Conditional'],
-  \ 'pointer': ['fg', 'Exception'],
-  \ 'marker':  ['fg', 'Keyword'],
-  \ 'spinner': ['fg', 'Label'],
-  \ 'header':  ['fg', 'Comment'] }
+  let lspOpts = #{
+        \  autoHighlightDiags: v:true,
+        \  useQuickfixForLocations: v:true,
+        \ }
 
-  " inoremap <expr> <c-x><c-f> fzf#vim#complete#path('fd')
-  inoremap <expr> <c-x><c-f> fzf#vim#complete#path('rg --files')
+  autocmd User LspSetup call LspOptionsSet(lspOpts)
 
+  " Go language server
+  " let lspServers = [#{
+  "       \    name: 'golang',
+  "       \    filetype: ['go', 'gomod'],
+  "       \    path: '/Users/danil/.asdf/shims/gopls',
+  "       \    args: ['serve'],
+  "       \    syncInit: v:true,
+  "       \    workspaceConfig: #{
+  "       \      gopls: #{
+  "       \        hints: #{
+  "       \          assignVariableTypes: v:true,
+  "       \          compositeLiteralFields: v:true,
+  "       \          compositeLiteralTypes: v:true,
+  "       \          constantValues: v:true,
+  "       \          functionTypeParameters: v:true,
+  "       \          parameterNames: v:true,
+  "       \          rangeVariableTypes: v:true
+  "       \        }
+  "       \      }
+  "       \    }
+  "       \ }]
+  " autocmd User LspSetup call LspAddServer(lspServers)
 
-  let g:ale_set_signs = 1
-  let g:ale_linters = {'go': ['golangci-lint', 'gofmt','gobuild']}
-  let g:ale_linter_aliases = {'bash': 'sh'}
-  let g:ale_fixers = {
-        \'sh': ['shfmt'],
-        \'bash': ['shfmt'],
-        \}
-  let g:ale_fix_on_save = 1
+  " let g:ale_set_signs = 1
+  " let g:ale_linters = {'go': ['golangci-lint', 'gofmt','gobuild']}
+  " let g:ale_linter_aliases = {'bash': 'sh'}
+  " let g:ale_fixers = {
+  "       \'sh': ['shfmt'],
+  "       \'bash': ['shfmt'],
+  "       \}
+  " let g:ale_fix_on_save = 0
 
   " golang
   let g:go_fmt_fail_silently = 0
@@ -185,20 +191,20 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   let g:go_fmt_autosave = 1
   let g:go_gopls_enabled = 1
 
-  " let g:go_highlight_types = 1
-  " let g:go_highlight_fields = 1
-  " let g:go_highlight_functions = 1
-  " let g:go_highlight_function_calls = 1
-  " let g:go_highlight_operators = 1
-  " let g:go_highlight_extra_types = 1
-  " let g:go_highlight_variable_declarations = 1
-  " let g:go_highlight_variable_assignments = 1
-  " let g:go_highlight_build_constraints = 1
-  " let g:go_highlight_diagnostic_errors = 1
-  " let g:go_highlight_diagnostic_warnings = 1
+  let g:go_highlight_types = 1
+  let g:go_highlight_fields = 1
+  let g:go_highlight_functions = 1
+  let g:go_highlight_function_calls = 1
+  let g:go_highlight_operators = 1
+  let g:go_highlight_extra_types = 1
+  let g:go_highlight_variable_declarations = 1
+  let g:go_highlight_variable_assignments = 1
+  let g:go_highlight_build_constraints = 1
+  let g:go_highlight_diagnostic_errors = 1
+  let g:go_highlight_diagnostic_warnings = 1
 
   let g:go_code_completion_enabled = 1
-  "let g:go_auto_type_info = 1 " forces 'Press ENTER' too much
+  let g:go_auto_type_info = 1 " forces 'Press ENTER' too much
   let g:go_auto_sameids = 0
   let g:go_gopls_analyses = { 'composites' : v:false }
   let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
@@ -224,21 +230,20 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
   autocmd FileType go nmap <Leader>n iif err != nil {<ESC>==
 
-  nnoremap <Leader>gg :!lazygit<CR><CR>
-  nnoremap <Leader>gs :tab Git<CR>
-  nnoremap <Leader>gl :tab Git log --follow -p %<CR>
-  nnoremap <Leader>gL :tab Git log<CR>
-  nnoremap <Leader>gK :tab Git log -p<CR>
-  nnoremap <Leader>gb :tab Git blame<CR>
-  nnoremap <Leader>gd :tab Git diff %<CR>
-  nnoremap <Leader>gD :tab Git diff <CR>
-  nnoremap <Leader>gP :Git push<CR>
-  nnoremap <Leader>gp :Git pull --rebase<CR>
+  nnoremap <leader>fb :FuzzyBuffers<CR>
+  nnoremap <leader>ff :Scope File<CR>
+  nnoremap <leader>fg :Scope Grep<CR>
 
-  nnoremap <Leader>fg :GFiles<CR>
-  nnoremap <Leader>ff :Files<CR>
-  nnoremap <Leader>ft :Tags<CR>
-  nnoremap <Leader>/ :Rg<CR>
+  nnoremap <leader>gg :!lazygit<CR><CR>
+  nnoremap <leader>gs :tab Git<CR>
+  nnoremap <leader>gl :tab Git log --follow -p %<CR>
+  nnoremap <leader>gL :tab Git log<CR>
+  nnoremap <leader>gK :tab Git log -p<CR>
+  nnoremap <leader>gb :tab Git blame<CR>
+  nnoremap <leader>gd :tab Git diff %<CR>
+  nnoremap <leader>gD :tab Git diff <CR>
+  nnoremap <leader>gP :Git push<CR>
+  nnoremap <leader>gp :Git pull --rebase<CR>
 else
   autocmd vimleavepre *.go !gofmt -w % " backup if fatih fails
 endif
