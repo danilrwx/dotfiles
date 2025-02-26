@@ -8,6 +8,7 @@ vim.keymap.del("n", "<leader>gg")
 vim.keymap.del("n", "<leader>gG")
 vim.keymap.del("n", "<leader>gf")
 vim.keymap.del("n", "<leader>gB")
+vim.keymap.del("n", "<leader><leader>")
 
 vim.keymap.set("n", "<leader>gg", "<cmd>!topen-git<Return><Esc>", { desc = "Open LazyGit" })
 

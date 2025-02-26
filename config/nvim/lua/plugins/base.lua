@@ -1,7 +1,7 @@
 return {
   {
     "LazyVim/LazyVim",
-    opts = { colorscheme = "github_dark_default" },
+    opts = { colorscheme = "moonfly" },
   },
 
   {
@@ -20,18 +20,12 @@ return {
   },
 
   {
-    "projekt0n/github-nvim-theme",
-    name = "github-theme",
+    "bluz71/vim-moonfly-colors",
+    name = "moonfly",
     lazy = false,
     priority = 1000,
     config = function()
-      require("github-theme").setup({
-        options = {
-          transparent = true,
-        },
-      })
-
-      vim.cmd("colorscheme github_dark_default")
+      vim.g.moonflyTransparent = true
     end,
   },
 
@@ -108,26 +102,60 @@ return {
       },
     },
   },
-
   {
-    "GeorgesAlkhouri/nvim-aider",
-    cmd = {
-      "AiderTerminalToggle",
-      "AiderHealth",
-    },
-    keys = {
-      { "<leader>a/", "<cmd>AiderTerminalToggle<cr>", desc = "Open Aider" },
-      { "<leader>as", "<cmd>AiderTerminalSend<cr>", desc = "Send to Aider", mode = { "n", "v" } },
-      { "<leader>ac", "<cmd>AiderQuickSendCommand<cr>", desc = "Send Command To Aider" },
-      { "<leader>ab", "<cmd>AiderQuickSendBuffer<cr>", desc = "Send Buffer To Aider" },
-      { "<leader>a+", "<cmd>AiderQuickAddFile<cr>", desc = "Add File to Aider" },
-      { "<leader>a-", "<cmd>AiderQuickDropFile<cr>", desc = "Drop File from Aider" },
-      { "<leader>ar", "<cmd>AiderQuickReadOnlyFile<cr>", desc = "Add File as Read-Only" },
-      -- Example nvim-tree.lua integration if needed
-      { "<leader>a+", "<cmd>AiderTreeAddFile<cr>", desc = "Add File from Tree to Aider", ft = "NvimTree" },
-      { "<leader>a-", "<cmd>AiderTreeDropFile<cr>", desc = "Drop File from Tree from Aider", ft = "NvimTree" },
-    },
-    dependencies = { "folke/snacks.nvim" },
+    "olimorris/codecompanion.nvim",
     config = true,
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    opts = {
+      strategies = {
+        chat = {
+          adapter = "openai",
+        },
+        inline = {
+          adapter = "openai",
+        },
+      },
+    },
   },
+  -- {
+  --   "yetone/avante.nvim",
+  --   event = "VeryLazy",
+  --   lazy = false,
+  --   version = false,
+  --   opts = {
+  --     provider = "openai",
+  --     openai = {
+  --       endpoint = "https://api.openai.com/v1",
+  --       model = "gpt-4o",
+  --       timeout = 30000,
+  --       temperature = 0,
+  --       max_tokens = 4096,
+  --       -- reasoning_effort = "high" -- only supported for reasoning models (o1, etc.)
+  --     },
+  --   },
+  --   build = "make",
+  --   dependencies = {
+  --     "nvim-treesitter/nvim-treesitter",
+  --     "stevearc/dressing.nvim",
+  --     "nvim-lua/plenary.nvim",
+  --     "MunifTanjim/nui.nvim",
+  --     "echasnovski/mini.pick", -- for file_selector provider mini.pick
+  --     -- "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
+  --     -- "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
+  --     -- "ibhagwan/fzf-lua", -- for file_selector provider fzf
+  --     -- "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+  --     -- "zbirenbaum/copilot.lua", -- for providers='copilot'
+  --     {
+  --       -- Make sure to set this up properly if you have lazy=true
+  --       "MeanderingProgrammer/render-markdown.nvim",
+  --       opts = {
+  --         file_types = { "markdown", "Avante" },
+  --       },
+  --       ft = { "markdown", "Avante" },
+  --     },
+  --   },
+  -- },
 }
