@@ -4,12 +4,12 @@ vim.keymap.set("n", "<A-q>", "<cmd>bd<CR>", { desc = "Close buffer by A-q" })
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Center view after paging" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Center view after paging" })
 --
-vim.keymap.del("n", "<leader>gg")
-vim.keymap.del("n", "<leader>gG")
-vim.keymap.del("n", "<leader>gf")
-vim.keymap.del("n", "<leader>gB")
+-- vim.keymap.del("n", "<leader>gG")
+-- vim.keymap.del("n", "<leader>gf")
+-- vim.keymap.del("n", "<leader>gB")
 vim.keymap.del("n", "<leader><leader>")
 
+vim.keymap.del("n", "<leader>gg")
 vim.keymap.set("n", "<leader>gg", "<cmd>!topen-git<Return><Esc>", { desc = "Open LazyGit" })
 
 vim.keymap.set("n", "<leader>g=", "<cmd>tab Git<CR>", { desc = "Fugitive" })
@@ -26,8 +26,9 @@ vim.keymap.set("n", "<leader>gD", "<cmd>Gvdiffsplit HEAD<CR>", { desc = "Git dif
 
 vim.keymap.set("n", "<Leader>su", vim.cmd.UndotreeToggle, { desc = "Open UndoTree" })
 
+vim.keymap.del("n", "<leader>e")
 local MiniFiles = require("mini.files")
-vim.keymap.set("n", "<C-f>", function()
+vim.keymap.set("n", "<leader>e", function()
   if not MiniFiles.close() then
     MiniFiles.open(vim.api.nvim_buf_get_name(0), true)
   end

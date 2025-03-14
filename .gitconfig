@@ -16,5 +16,6 @@
 
 [alias]
   commit = commit --signoff
+
 [tag]
 	gpgSign = true
