@@ -137,6 +137,7 @@ autocmd BufWritePre * call TrimWhitespace()
 
 if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.local/share/vim/plugins')
+    Plug 'catppuccin/vim', { 'as': 'catppuccin' }
     Plug 'jasonccox/vim-wayland-clipboard'
     Plug 'tpope/vim-fugitive'
     Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
@@ -153,82 +154,27 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   autocmd User LspSetup call LspOptionsSet(lspOpts)
 
   " Go language server
-  " let lspServers = [#{
-  "       \    name: 'golang',
-  "       \    filetype: ['go', 'gomod'],
-  "       \    path: '/Users/danil/.asdf/shims/gopls',
-  "       \    args: ['serve'],
-  "       \    syncInit: v:true,
-  "       \    workspaceConfig: #{
-  "       \      gopls: #{
-  "       \        hints: #{
-  "       \          assignVariableTypes: v:true,
-  "       \          compositeLiteralFields: v:true,
-  "       \          compositeLiteralTypes: v:true,
-  "       \          constantValues: v:true,
-  "       \          functionTypeParameters: v:true,
-  "       \          parameterNames: v:true,
-  "       \          rangeVariableTypes: v:true
-  "       \        }
-  "       \      }
-  "       \    }
-  "       \ }]
-  " autocmd User LspSetup call LspAddServer(lspServers)
-
-  " let g:ale_set_signs = 1
-  " let g:ale_linters = {'go': ['golangci-lint', 'gofmt','gobuild']}
-  " let g:ale_linter_aliases = {'bash': 'sh'}
-  " let g:ale_fixers = {
-  "       \'sh': ['shfmt'],
-  "       \'bash': ['shfmt'],
-  "       \}
-  " let g:ale_fix_on_save = 0
-
-  " golang
-  let g:go_fmt_fail_silently = 0
-  let g:go_fmt_command = 'goimports'
-  let g:go_list_type = "quickfix"
-  let g:go_fmt_autosave = 1
-  let g:go_gopls_enabled = 1
-
-  let g:go_highlight_types = 1
-  let g:go_highlight_fields = 1
-  let g:go_highlight_functions = 1
-  let g:go_highlight_function_calls = 1
-  let g:go_highlight_operators = 1
-  let g:go_highlight_extra_types = 1
-  let g:go_highlight_variable_declarations = 1
-  let g:go_highlight_variable_assignments = 1
-  let g:go_highlight_build_constraints = 1
-  let g:go_highlight_diagnostic_errors = 1
-  let g:go_highlight_diagnostic_warnings = 1
-
-  let g:go_code_completion_enabled = 1
-  let g:go_auto_type_info = 1 " forces 'Press ENTER' too much
-  let g:go_auto_sameids = 0
-  let g:go_gopls_analyses = { 'composites' : v:false }
-  let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
-  let g:go_metalinter_autosave = 1
-  let g:go_metalinter_autosave_enabled = ['vet', 'golint', 'golangci-lint']
-  let g:go_metalinter_deadline = "5s"
-  set updatetime=100
-
-  autocmd FileType go nmap <leader>t  <Plug>(go-test)
-  autocmd FileType go nmap <leader>b  <Plug>(go-build)
-  autocmd FileType go nmap gr :GoReferrers<CR>
-  autocmd FileType go nmap gI :GoImplements<CR>
-
-  function! s:build_go_files()
-    let l:file = expand('%')
-    if l:file =~# '^\f\+_test\.go$'
-      call go#test#Test(0, 1)
-    elseif l:file =~# '^\f\+\.go$'
-      call go#cmd#Build(0)
-    endif
-  endfunction
-
-  autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
-  autocmd FileType go nmap <Leader>n iif err != nil {<ESC>==
+  let lspServers = [#{
+        \    name: 'golang',
+        \    filetype: ['go', 'gomod'],
+        \    path: '/Users/danil/go/bin/gopls',
+        \    args: ['serve'],
+        \    syncInit: v:true,
+        \    workspaceConfig: #{
+        \      gopls: #{
+        \        hints: #{
+        \          assignVariableTypes: v:true,
+        \          compositeLiteralFields: v:true,
+        \          compositeLiteralTypes: v:true,
+        \          constantValues: v:true,
+        \          functionTypeParameters: v:true,
+        \          parameterNames: v:true,
+        \          rangeVariableTypes: v:true
+        \        }
+        \      }
+        \    }
+        \ }]
+  autocmd User LspSetup call LspAddServer(lspServers)
 
   nnoremap <leader>fb :FuzzyBuffers<CR>
   nnoremap <leader>ff :Scope File<CR>

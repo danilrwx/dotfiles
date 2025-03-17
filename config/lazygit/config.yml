@@ -16,6 +16,7 @@ git:
   commit:
     signOff: true
   paging:
+    pager: delta --dark --paging=never
     externalDiffCommand: difft --color=always --display=inline --syntax-highlight=on --tab-width=2
   autoFetch: false
   autoRefresh: false
