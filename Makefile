@@ -10,15 +10,9 @@ base:
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -sf $(PWD)/.vimrc ~/.vimrc
 	ln -snf $(PWD)/config/htop ~/.config/
-	ln -snf $(PWD)/config/nvim ~/.config/
-	ln -snf $(PWD)/config/bat ~/.config/
-	ln -snf $(PWD)/config/lsd ~/.config/
-	ln -snf $(PWD)/config/delta ~/.config/
-	ln -snf $(PWD)/config/helix ~/.config/
 	ln -snf $(PWD)/config/vim ~/.config/vim
 	ln -snf $(PWD)/config/lazygit ~/.config/
 	ln -snf $(PWD)/config/ghostty ~/.config/
-	ln -snf $(PWD)/config/k9s ~/.config/
 
 sway:
 	ln -snf $(PWD)/config/sway ~/.config/
@@ -36,7 +30,7 @@ font:
 	fc-cache -f
 
 ubuntu-packages:
-	sudo apt install -y curl bash-completion  unzip
+	sudo apt install -y curl bash-completion unzip
 
 fedora-copr:
 	sudo dnf copr enable atim/lazygit -y
@@ -46,22 +40,17 @@ fedora-copr:
 	sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
 
 fedora-packages:
-	sudo dnf install lazygit
-	sudo dnf install -y google-chrome-stable neovim sensors jq yq difft wl-clipboard docker htop tmux curl man zip unzip jq keychain ripgrep rsync fzf wget fd-find openssl kubernetes-client zsh
-	sudo dnf install -y autoconf gcc rust patch make bzip2 openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
-	sudo dnf install -y ImageMagick-devel postgresql-devel mariadb-devel shared-mime-info libwebp
+	sudo dnf install -y google-chrome-stable sensors jq difft wl-clipboard docker htop tmux curl man zip unzip keychain openssl kubernetes-client
 
 brew-install:
 	/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 brew-packages:
-	brew install brew-cask-completion kubectl k9s lazygit fzf ripgrep jq keychain wget fd openssl tmux neovim \
-	yq fx yh highlight lsd difftastic
+	brew install kubectl lazygit jq keychain openssl tmux difftastic
 
 brew-mac:
 	brew install chromium --no-quarantine
 	brew install go-task/tap/go-task
-	brew install metalbear-co/mirrord/mirrord
 	brew install homeport/tap/dyff
 
 go-packages:
