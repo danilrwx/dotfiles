@@ -18,7 +18,6 @@ alias rc='rails c'
 alias rdm='rails db:migrate'
 alias rdr='rails db:rollback'
 alias rdrp='rails db:rollback:primary'
-alias te='toolbox enter'
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin/

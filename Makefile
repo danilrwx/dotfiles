@@ -23,15 +23,15 @@ base-config:
 	ln -sf $(PWD)/.bashrc ~/.bashrc
 
 base-packages:
-	sudo dnf install htop git tmux curl man zip unzip jq keychain ripgrep neofetch neovim mosh rsync bash-completion
-
-fedora-sway:
-	ln -snf $(PWD)/.config/foot ~/.config/
-	ln -snf $(PWD)/.config/waybar ~/.config/
-	ln -snf $(PWD)/.config/sway ~/.config/
+	doas apt install htop git tmux curl man zip unzip jq keychain ripgrep neofetch mosh rsync bash-completion
 
 dev-packages:
-	sudo dnf install gcc rust patch make bzip2 openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
+	doas  apt install autoconf patch build-essential rustc libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libgmp-dev libncurses5-dev libffi-dev libgdbm6 libgdbm-dev libdb-dev uuid-dev imagemagick libmariadb-dev libpq-dev libmagickwand-dev
+
+debian:
+	ln -snf $(PWD)/Backgrounds ~/Backgrounds
+	# doas ln -sf $(PWD)/20-intel.conf /etc/X11/xorg.conf.d/
+	doas apt install maim xclip i3 rofi dunst xcompmgr udisks2 sxiv qterminal firefox-esr acpi libnotify-bin
 
 git: git-config git-change-remote
 
@@ -48,3 +48,17 @@ asdf: asdf-install
 
 asdf-install:
 	git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.12.0
+
+asdf-setup:
+	asdf plugin-add golang
+	asdf plugin-add neovim
+	asdf plugin-add ruby
+	asdf plugin-add nodejs
+
+flatpak: flatpak-add flatpak-install
+
+flatpak-add:
+	sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+flatpak-install:
+	flatpak install flathub com.discordapp.Discord com.valvesoftware.Steam org.telegram.desktop com.github.Eloston.UngoogledChromium
