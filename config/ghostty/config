@@ -1,0 +1,16 @@
+macos-option-as-alt = true
+
+keybind = alt+left=unbind
+keybind = alt+right=unbind
+
+font-family = Iosevka NFM Medium
+font-family-italic  = Iosevka NFM Medium Italic
+font-family-bold = Iosevka NFM SemiBold
+font-family-bold-italic  = Iosevka NFM Medium Italic
+
+font-size = 18
+# theme = dark:Raycast_Dark,light:Raycast_Light
+# theme = dark:Afterglow,light:Alabster
+theme = dark:Builtin Tango Dark,light:Builtin Tango Light
+
+

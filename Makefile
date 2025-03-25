@@ -14,7 +14,10 @@ base:
 	ln -snf $(PWD)/config/vim ~/.vim
 	ln -snf $(PWD)/config/helix ~/.config/
 	ln -snf $(PWD)/config/lazygit ~/.config/
+	ln -snf $(PWD)/config/ghostty ~/.config/
 	ln -snf $(PWD)/config/k9s ~/.config/
+	ln -snf $(PWD)/config/dunst ~/.config/
+	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 
 dwm-install:
 	cd $(PWD)/dwm && sudo make clean install
@@ -22,11 +25,9 @@ dwm-install:
 	cd $(PWD)/st && sudo make clean install
 
 dwm-config:
-	ln -sf $(PWD)/Backgrounds ~/Backgrounds
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
 	ln -sf $(PWD)/.profile ~/.profile
 	ln -sf $(PWD)/.Xresources ~/.Xresources
-	ln -snf $(PWD)/config/dunst ~/.config/
 
 git:
 	git remote set-url origin git@github.com:danilrwx/dotfiles.git
