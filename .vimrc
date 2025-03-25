@@ -1,4 +1,4 @@
-if has("eval")                               " vim-tiny lacks 'eval'
+if has("eval")             " vim-tiny lacks 'eval'
   let skip_defaults_vim = 1
 endif
 
@@ -56,6 +56,14 @@ if &shell =~# 'fish$'
   set shell=/bin/bash
 endif
 
+" Made grep great again
+if executable('ugrep')
+  set grepprg=ugrep\ -RInk\ --tabs=1\ --ignore-files\ --exclude='zz_generated*'\ --exclude-dir='generated'
+  set grepformat=%f:%l:%c:%m,%f+%l+%c+%m,%-G%f\\\|%l\\\|%c\\\|%m
+else
+  set grepprg=grep\ --exclude='*zz_generated*'\ --exclude-dir='generated'
+endif
+
 " Put all temporary files under the same directory.
 " https://github.com/mhinz/vim-galore#temporary-files
 set backup
@@ -71,8 +79,9 @@ set viminfo='100,n$HOME/.vim/files/info/viminfo
 " mark trailing spaces as errors
 match errorMsg '\s\+$'
 
-if v:version >= 1200
+if v:version >= 900
   set termguicolors
+  set background=dark
   colorscheme retrobox
 else
   set notermguicolors
@@ -81,7 +90,10 @@ else
   highlight CursorLineNr cterm=none ctermbg=250
 endif
 
-set omnifunc=syntaxcomplete#Complete
+if has("gui_macvim")
+    set guifont=Iosevka\ Nerd\ Font:h22
+	  let macvim_hig_shift_movement = 1
+endif
 
 let mapleader=" "
 
@@ -120,14 +132,19 @@ function! FzyCommand(choice_command, vim_command)
   endif
 endfunction
 
-nnoremap <leader>f :call FzyCommand("find . -type f", ":e")<cr>
-nnoremap <leader>g :call FzyCommand("git ls-files", ":e")<cr>
+if executable('ugrep')
+  nnoremap <leader>f :call FzyCommand("ugrep '' . -Rl -I --ignore-files --exclude='zz_generated*' --exclude-dir='generated'", ":e")<cr>
+else
+  nnoremap <leader>f :call FzyCommand("find . -type f", ":e")<cr>
+endif
+
+nnoremap <leader>sf :call FzyCommand("find . -type f", ":e")<cr>
+nnoremap <leader>sg :call FzyCommand("git ls-files", ":e")<cr>
 
 if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.local/share/vim/plugins')
     Plug 'tpope/vim-commentary'
     Plug 'tpope/vim-fugitive'
-    Plug 'tpope/vim-obsession'
 
     Plug 'airblade/vim-gitgutter'
 
@@ -138,68 +155,68 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
     Plug 'sebdah/vim-delve'
 
     Plug 'vim-test/vim-test'
-    Plug 'yegappan/lsp'
+
+    Plug 'prabirshrestha/vim-lsp'
+    Plug 'mattn/vim-lsp-settings'
+
+    Plug 'prabirshrestha/asyncomplete.vim'
+    Plug 'prabirshrestha/asyncomplete-lsp.vim'
   call plug#end()
 
-  let lspOpts = #{
-        \  autoHighlightDiags: v:true,
-        \  useQuickfixForLocations: v:true,
-        \  semanticHighlight: v:true,
-        \  showInlayHints: v:false,
-        \ }
+  let g:lsp_settings = {
+        \  'golangci-lint-langserver': {
+        \    'initialization_options': {'command': ['golangci-lint', 'run', '--out-format', 'json', '--issues-exit-code=1']}
+        \   }
+        \}
 
-  autocmd User LspSetup call LspOptionsSet(lspOpts)
+  let g:lsp_settings_filetype_go = ['golangci-lint-langserver', 'gopls']
 
-  " Go language server
-  let lspServers = [#{
-        \    name: 'clangd',
-        \    filetype: ['c', 'cpp'],
-        \    path: '/usr/bin/clangd',
-        \    args: ['--background-index']
-        \  },
-        \ #{
-        \    name: 'golang',
-        \    filetype: ['go', 'gomod'],
-        \    path: '/Users/danil/go/bin/gopls',
-        \    args: ['serve'],
-        \    syncInit: v:true,
-        \    workspaceConfig: #{
-        \      gopls: #{
-        \        hints: #{
-        \          assignVariableTypes: v:true,
-        \          compositeLiteralFields: v:true,
-        \          compositeLiteralTypes: v:true,
-        \          constantValues: v:true,
-        \          functionTypeParameters: v:true,
-        \          parameterNames: v:true,
-        \          rangeVariableTypes: v:true,
-        \          semanticTokens: v:false
-        \        }
-        \      }
-        \    }
-        \ }]
-  autocmd User LspSetup call LspAddServer(lspServers)
+  let g:lsp_semantic_enabled = 1
 
-  nnoremap gr :LspPeekReferences<cr>
-  nnoremap gd :LspGotoDefinition<cr>
-  nnoremap gD :LspGotoDeclaration<cr>
-  nnoremap gI :LspPeekImpl<cr>
-  nnoremap <leader>k  :LspHover<cr>
+  let g:lsp_diagnostics_float_cursor = 1
+  let g:lsp_diagnostics_virtual_text_enabled = 0
+  let g:lsp_diagnostics_virtual_text_align = 'right'
 
-  nnoremap <leader>cs :LspDocumentSymbol<cr>
-  nnoremap <leader>cS :LspSymbolSearch<cr>
+  let g:lsp_document_code_action_signs_enabled = 0
 
-  nnoremap <leader>co :LspOutgoingCalls<cr>
-  nnoremap <leader>ci :LspIncomingCalls<cr>
+  if v:version > 900
+    let g:lsp_use_native_client = 1
+    let g:lsp_format_sync_timeout = 1000
+  endif
 
-  nnoremap <leader>ca :LspCodeAction<cr>
-  nnoremap <leader>cc :LspCodeLens<cr>
-  nnoremap <leader>cr :LspRename<cr>
-  nnoremap <leader>cf :LspFormat<cr>
+  augroup lsp_install
+    au!
+    autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+  augroup END
 
-  nnoremap <c-w>d :LspDiag current<cr>
-  nnoremap [d :LspDiag prev<cr>
-  nnoremap ]d :LspDiag next<cr>
+  function! s:on_lsp_buffer_enabled() abort
+    setlocal omnifunc=lsp#complete
+    if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
+
+    nnoremap <buffer> gd <plug>(lsp-definition)
+    nnoremap <buffer> gs <plug>(lsp-document-symbol-search)
+    nnoremap <buffer> gS <plug>(lsp-workspace-symbol-search)
+    nnoremap <buffer> gr <plug>(lsp-references)
+    nnoremap <buffer> gI <plug>(lsp-implementation)
+    nnoremap <buffer> gD <plug>(lsp-type-definition)
+
+    nnoremap <buffer> [d <plug>(lsp-previous-diagnostic)
+    nnoremap <buffer> ]d <plug>(lsp-next-diagnostic)
+
+    nnoremap <buffer> K <plug>(lsp-hover)
+
+    nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
+    nnoremap <buffer> <expr><c-b> lsp#scroll(-4)
+
+    inoremap <buffer> <expr><c-f> lsp#scroll(+4)
+    inoremap <buffer> <expr><c-d> lsp#scroll(-4)
+
+    nnoremap <buffer> <leader>cr <plug>(lsp-rename)
+    nnoremap <buffer> <leader>cc <plug>(lsp-code-lens)
+    nnoremap <buffer> <leader>ca <plug>(lsp-code-action)
+
+    autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
+  endfunction
 
   nnoremap <silent> <leader>tr :TestNearest<cr>
   nnoremap <silent> <leader>tt :TestFile<cr>
@@ -207,17 +224,17 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   nnoremap <silent> <leader>tl :TestLast<cr>
   nnoremap <silent> <leader>tv :TestVisit<cr>
 
-  nnoremap <leader>gl :tab Git log --follow -p %<cr>
-  nnoremap <leader>gL :tab Git log<cr>
-  nnoremap <leader>gb :tab Git blame<cr>
-  nnoremap <leader>gd :tab Git diff %<cr>
-  nnoremap <leader>gD :tab Git diff <cr>
-  nnoremap <leader>gP :Git push<cr>
-  nnoremap <leader>gp :Git pull --rebase<cr>
+  nnoremap <silent> <leader>gl :tab Git log --follow -p %<cr>
+  nnoremap <silent> <leader>gL :tab Git log<cr>
+  nnoremap <silent> <leader>gb :tab Git blame<cr>
+  nnoremap <silent> <leader>gd :tab Git diff %<cr>
+  nnoremap <silent> <leader>gD :tab Git diff <cr>
+  nnoremap <silent> <leader>gP :Git push<cr>
+  nnoremap <silent> <leader>gp :Git pull --rebase<cr>
 
-  nnoremap <leader>u :UndotreeToggle<cr>
+  nnoremap <silent> <leader>u :UndotreeToggle<cr>
 
-  nnoremap ghs <Plug>(GitGutterStageHunk)
-  nnoremap ghu <Plug>(GitGutterUndoHunk)
-  nnoremap ghp <Plug>(GitGutterPreviewHunk)
+  nnoremap ghs <plug>(GitGutterStageHunk)
+  nnoremap ghu <plug>(GitGutterUndoHunk)
+  nnoremap ghp <plug>(GitGutterPreviewHunk)
 endif
