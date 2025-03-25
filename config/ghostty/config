@@ -12,5 +12,6 @@ maximize = true
 
 font-size = 20
 theme = dark:GruvboxDarkHard,light:GruvboxLightHard
+background = #1C1C1C
 
 
