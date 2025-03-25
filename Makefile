@@ -14,7 +14,7 @@ config-install:
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 
 arch-prepare:
-	sudo pacman --needed -S seatd htop git curl zsh firefox telegram-desktop discord tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick swaybg gnome-keyring
+	sudo pacman --needed -S seatd htop git curl zsh firefox telegram-desktop discord tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick swaybg gnome-keyring keychain
 deps: deps-gem deps-npm deps-go
 
 deps-go:
