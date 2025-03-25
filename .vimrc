@@ -2,43 +2,29 @@ if has("eval")                               " vim-tiny lacks 'eval'
   let skip_defaults_vim = 1
 endif
 
+let mapleader=" "
+
 set nocompatible
-
-set autoindent " (alpine)
-
-set expandtab " (alpine)
-
-set tabstop=2 " (alpine)
-
+set autoindent
+set expandtab
 set noignorecase
-
 set autowrite
-
 set number
-
 set ruler
-
 set showmode
-
 set noerrorbells
 set visualbell
 set vb t_vb=
-
-let mapleader=" "
-
 set softtabstop=2
-
 set shiftwidth=2
-
+set tabstop=2
 set smartindent
-
 set smarttab
+set nowrap
 
 if v:version >= 800
   set nofixendofline
-
   set listchars=space:*,trail:*,nbsp:*,extends:>,precedes:<,tab:\|>
-
   set foldmethod=manual
   set nofoldenable
 endif
