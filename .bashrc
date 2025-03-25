@@ -7,7 +7,7 @@
 
 PS1='[\u@\h \W]\$ '
 
-alias cat='bat'
+alias cat='bat --theme ansi'
 alias ls='exa'
 alias l='ls -lah'
 alias c='clear'
@@ -19,6 +19,8 @@ alias rc='rails c'
 alias rdm='rails db:migrate'
 alias rdr='rails db:rollback'
 alias rdrp='rails db:rollback:primary'
+
+alias lg='lazygit'
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin/

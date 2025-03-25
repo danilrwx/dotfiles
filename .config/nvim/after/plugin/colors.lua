@@ -1,4 +1,4 @@
-vim.opt.termguicolors = true
-vim.opt.background = 'dark'
-vim.g.adwaita_darker = true
+vim.opt.termguicolors     = true
+vim.g.adwaita_transparent = true
+vim.g.adwaita_darker      = false
 vim.cmd("colorscheme adwaita")
