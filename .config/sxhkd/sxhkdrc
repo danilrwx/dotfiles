@@ -16,6 +16,9 @@ ctrl + alt + a
 ctrl + alt + s
   base-notify
 
+ctrl + alt + c
+  cal-notify
+
 XF86AudioRaiseVolume
   pactl set-sink-volume @DEFAULT_SINK@ +10%
 XF86AudioLowerVolume
