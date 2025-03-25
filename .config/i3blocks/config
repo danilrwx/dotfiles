@@ -1,0 +1,19 @@
+separator_block_width=15
+markup=none
+
+[weather]
+command=curl -Ss 'https://wttr.in?0&T&Q' | cut -c 16- | head -2 | xargs echo
+interval=3600
+
+[battery]
+command=acpi -b | awk -F'[,:,]' '{print $2, $3}'
+interval=5
+
+[kbd_layout]
+command=swaymsg -t get_inputs | jq 'map(select(has("xkb_active_layout_name")))[0].xkb_active_layout_name'
+interval=1
+
+[time]
+command=date '+%Y-%m-%d %H:%M:%S'
+interval=1
+

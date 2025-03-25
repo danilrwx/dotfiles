@@ -6,7 +6,10 @@ set $right l
 set $term footclient
 set $menu wofi --show drun
 
-set $bg #282828
+# transparent
+set $bg #282828B4
+#set $bg #282828
+
 set $white #fbf1c7
 set $red #cc241d
 set $green #98971a
@@ -17,7 +20,7 @@ set $aqua #689d68
 set $gray #a89984
 set $darkgray #1d2021
 
-output * bg ~/Backgrounds/1.png fill
+output * bg ~/Backgrounds/2.jpg fill
 
 font pango:Iosevka Regular 12
 
@@ -29,7 +32,7 @@ gaps inner 0
 exec mako
 exec udiskie
 exec foot --server
-exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
 exec hash dbus-update-activation-environment 2>/dev/null && dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
 
 exec swayidle -w \
@@ -152,7 +155,7 @@ client.urgent           $red      $bg       $red      $red       $red
 bar {
     position top
 
-    status_command while date +'%Y-%m-%d %I:%M:%S %p'; do sleep 1; done
+    status_command i3blocks
 
     colors {
         background $bg
