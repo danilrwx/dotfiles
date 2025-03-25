@@ -29,7 +29,7 @@ base-config:
 base-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep neofetch vim lazygit mosh podman rsync bash-completion
 
-laptop: laptop-packages laptop-enable
+laptop: laptop-packages laptop-enable laptop-gpu
 
 laptop-packages:
 	sudo pacman -S --needed acpi acpid tlp brightnessctl throttled
@@ -39,8 +39,12 @@ laptop-enable:
 	sudo systemctl enable tlp
 	sudo systemctl enable throttled
 
+laptop-gpu:
+	sudo pacman -S --needed xf86-video-intel
+	sudo ln -sf $(PWD)/20-intel.conf /etc/X11/xorg.conf.d/
+
 desktop-packages:
-	sudo pacman -S --needed ttc-iosevka dex xdg-user-dirs xdg-user-dirs-gtk xdg-utils ffmpeg udisks2 firefox chromium libnotify polkit xf86-video-intel
+	sudo pacman -S --needed ttc-iosevka dex xdg-user-dirs xdg-user-dirs-gtk xdg-utils ffmpeg udisks2 firefox chromium libnotify polkit
 
 dev-packages:
 	sudo pacman -S --needed libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagic
@@ -48,7 +52,7 @@ dev-packages:
 wm: wm-packages wm-config
 
 wm-packages:
-	sudo pacman -S --needed bspwm sxhkd dmenu maim xclip xdotool dunst xorg xorg-xinit feh picom
+	sudo pacman -S --needed bspwm sxhkd dmenu maim xclip xdotool dunst xorg xorg-xinit hsetroot xcompmgr
 	cd ~/dotfiles/suckless/st && sudo make install
 
 wm-config:
@@ -56,7 +60,6 @@ wm-config:
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
 	ln -snf $(PWD)/.config/bspwm ~/.config/bspwm
 	ln -snf $(PWD)/.config/sxhkd ~/.config/sxhkd
-	ln -snf $(PWD)/.config/picom ~/.config/picom
 	ln -snf $(PWD)/.config/dunst ~/.config/dunst
 
 pipewire:

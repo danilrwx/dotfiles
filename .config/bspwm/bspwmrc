@@ -2,10 +2,9 @@
 
 pgrep -x sxhkd > /dev/null || sxhkd &
 
-feh --bg-scale ~/Backgrounds/2.jpg &
+hsetroot -cover ~/Backgrounds/2.jpg
 dex --autostart --environment bspwm &
 dunst -conf ~/.config/dunst/dunstrc &
-xsetroot -solid "#282828" &
 xsetroot -cursor_name left_ptr &
 xcompmgr &
 
