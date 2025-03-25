@@ -13,6 +13,8 @@ vim.opt.scrolloff = 3
 vim.opt.undodir = '/tmp/.vim/backups'
 vim.opt.undofile = true
 vim.opt.cursorline = true
+vim.opt.termguicolors = true
+vim.opt.clipboard = 'unnamedplus'
 vim.opt.langmap = "ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz"
 vim.g.mapleader = " "
 
