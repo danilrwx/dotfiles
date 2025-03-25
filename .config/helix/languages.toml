@@ -7,3 +7,8 @@ formatter = { command = "goimports" }
 name = "rust"
 [language-server.rust-analyzer.config.check]
 command = "clippy"
+
+[[language]]
+name = "ruby"
+[language-server.solargraph]
+config = { diagnostics = true, formatting = true }
