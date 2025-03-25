@@ -28,7 +28,7 @@ i3: i3-packages i3-config
 
 i3-packages:
 	sudo pacman -S --needed i3 dmenu clipmenu passmenu maim xclip xdotool dunst \
-		hsetroot xcompmgr xfce4-terminal
+		hsetroot xcompmgr xfce4-terminal ttf-iosevkaterm-nerd ttf-iosevka-nerd
 
 i3-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
