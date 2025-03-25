@@ -7,6 +7,7 @@ all:
 
 base:
 	ln -sf $(PWD)/.zshrc ~/.zshrc
+	ln -sf $(PWD)/.profile ~/.profile
 	ln -sf $(PWD)/.gitconfig ~/.gitconfig
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -snf $(PWD)/config/htop ~/.config/
