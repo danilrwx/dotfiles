@@ -1,15 +1,11 @@
 all: 
-	make base-packages
-	make base-config
 	make console-font
-	make i3-packages
-	make i3-config
+	make base
+	make i3
 	make runit
 	make pipewire
 	make virt 
 	make firewall
-	make flatpak
-	make flatpak-install
 	make git
 	make git-change-remote
 	make disable-wpa
@@ -21,6 +17,11 @@ nvim-install:
 	ln -snf $(PWD)/.config/nvim ~/.config/nvim
 	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync' 
 
+console-font:
+	echo 'FONT="cyr-sun16"' | sudo tee -a /etc/rc.conf
+
+base: base-config base-packages
+
 base-config:
 	ln -sf $(PWD)/.bashrc ~/.bashrc
 	ln -sf $(PWD)/.vimrc ~/.vimrc
@@ -28,23 +29,32 @@ base-config:
 	ln -snf $(PWD)/.config/i3blocks ~/.config/i3blocks
 
 base-packages:
-	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep acpi bashmount neofetch neovim i3blocks font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp intel-video-accel flatpak iwd lazygit dex mosh xdg-user-dirs xdg-user-dirs-gtk xdg-utils easyeffects libavcodec ffmpeg mesa-dri podman
+	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep neofetch neovim lazygit mosh podman rsync
 
-console-font:
-	echo 'FONT="cyr-sun16"' | sudo tee -a /etc/rc.conf
+laptop-packages:
+	sudo xbps-install -Syu acpi tlp intel-video-accel brightnessctl
 
-disable-wpa:
-	sudo rm /var/service/wpa_supplicant
-	sudo ln -sf /etc/sv/iwd /var/service/
+desktop-packages:
+	sudo xbps-install -Syu font-iosevka bashmount pipewire wireplumber pavucontrol elogind dex flatpak xdg-user-dirs xdg-user-dirs-gtk xdg-utils easyeffects libavcodec ffmpeg mesa-dri udisks2 
+
+dev-packages:
+	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl 
+
+i3: i3-packages i3-config
+
+suckless-packages:
+	sudo xbps-install -Syu libX11-devel libXft-devel
 
 i3-packages:
-	sudo xbps-install -Syu rxvt-unicode maim xclip xdotool rofi dunst feh i3 xss-lock xorg xkblayout-state
+	sudo xbps-install -Syu rxvt-unicode maim xclip xdotool rofi dunst feh i3 xorg
 
 i3-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
 	ln -sf $(PWD)/.Xresources ~/.Xresources
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
 	ln -snf $(PWD)/.config/i3 ~/.config/i3
+
+sway: sway-packages sway-config
 
 sway-packages:
 	sudo xbps-install -Syu sway foot mako wofi swaybg slurp grim wl-clipboard xdg-desktop-portal-wlr xdg-desktop-portal-gtk xdg-desktop-portal 
@@ -93,8 +103,10 @@ git:
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
 
-flatpak:
-	flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak: flatpak-add flatpak-install
+
+flatpak-add:
+	sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak-install:
-	flatpak install -y flathub com.github.tchx84.Flatseal org.telegram.desktop com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice org.mozilla.firefox com.discordapp.Discord org.qbittorrent.qBittorrent
+	flatpak install -y flathub com.github.tchx84.Flatseal com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord io.github.spacingbat3.webcord
