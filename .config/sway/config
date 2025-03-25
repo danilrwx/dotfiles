@@ -6,14 +6,15 @@ set $right l
 set $term footclient
 set $menu wofi --show drun
 
-#output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+output * bg ~/Backgrounds/1.jpg fill
 
 font pango:Iosevka Regular 10
 
+xwayland disable
+default_border pixel 3
+smart_borders on
 gaps inner 10
-smart_gaps on
-smart_borders no_gaps
-hide_edge_borders smart_no_gaps
+client.focused #000000 #ffffff #ffffff
 
 exec mako
 exec udiskie
@@ -139,7 +140,6 @@ mode "resize" {
 bindsym $mod+r mode "resize"
 
 bar {
-    position top
     swaybar_command waybar
 }
 
