@@ -79,11 +79,6 @@ _G.packer_plugins = {
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/LuaSnip",
     url = "https://github.com/L3MON4D3/LuaSnip"
   },
-  ["candle-grey"] = {
-    loaded = true,
-    path = "/home/danil/.local/share/nvim/site/pack/packer/start/candle-grey",
-    url = "https://github.com/aditya-azad/candle-grey"
-  },
   ["cmp-buffer"] = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/cmp-buffer",
@@ -108,11 +103,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/cmp_luasnip",
     url = "https://github.com/saadparwaiz1/cmp_luasnip"
-  },
-  ["colorbuddy.nvim"] = {
-    loaded = true,
-    path = "/home/danil/.local/share/nvim/site/pack/packer/start/colorbuddy.nvim",
-    url = "https://github.com/tjdevries/colorbuddy.nvim"
   },
   ["friendly-snippets"] = {
     loaded = true,
@@ -149,11 +139,6 @@ _G.packer_plugins = {
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/mini.nvim",
     url = "https://github.com/echasnovski/mini.nvim"
   },
-  ["monochrome.nvim"] = {
-    loaded = true,
-    path = "/home/danil/.local/share/nvim/site/pack/packer/start/monochrome.nvim",
-    url = "https://github.com/kdheepak/monochrome.nvim"
-  },
   ["nvim-cmp"] = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-cmp",
@@ -163,11 +148,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-lspconfig",
     url = "https://github.com/neovim/nvim-lspconfig"
-  },
-  ["nvim-noirbuddy"] = {
-    loaded = true,
-    path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-noirbuddy",
-    url = "https://github.com/jesseleite/nvim-noirbuddy"
   },
   ["nvim-treesitter"] = {
     loaded = true,
@@ -208,11 +188,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/undotree",
     url = "https://github.com/mbbill/undotree"
-  },
-  ["vim-colors-paramount"] = {
-    loaded = true,
-    path = "/home/danil/.local/share/nvim/site/pack/packer/start/vim-colors-paramount",
-    url = "https://github.com/owickstrom/vim-colors-paramount"
   },
   ["vim-slim"] = {
     loaded = true,
