@@ -16,7 +16,7 @@ base:
 git:
 	git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
-packages: base-packages ruby-packages dev-packages
+packages: copr-packages base-packages ruby-packages dev-packages
 
 copr-packages:
 	sudo dnf copr enable yohane-shiro/nekoray
@@ -24,7 +24,7 @@ copr-packages:
 base-packages:
 	sudo dnf install -y  htop git tmux curl man zip unzip jq keychain \
 		ripgrep neofetch rsync bash-completion fzf wget fd-find go httpie \
-		bat openssl kubernetes-client
+		bat openssl kubernetes-client podman nekoray
 
 ruby-packages:
 	sudo dnf install -y autoconf gcc rust patch make bzip2 openssl-devel libyaml-devel \
