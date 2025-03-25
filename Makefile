@@ -14,20 +14,21 @@ all:
 	make git
 	make git-change-remote
 
-PACKER_PATH=~/.local/share/nvim/site/pack/packer/start
-	
 nvim-install:
 	rm -rf nvim/plugin || exit 0
 	rm -rf ~/.local/share/nvim || exit 0
 	rm -rf ~/.config/nvim || exit 0
-	rm -rf $(PACKER_PATH) || exit 0
-	ln -snf $(PWD)/.config/nvim ~/.config/nvim nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync' base-config: ln -sf $(PWD)/.bashrc ~/.bashrc
+	ln -snf $(PWD)/.config/nvim ~/.config/nvim
+	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync' 
+
+base-config:
+	ln -sf $(PWD)/.bashrc ~/.bashrc
 	ln -sf $(PWD)/.vimrc ~/.vimrc
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 	ln -snf $(PWD)/.config/i3blocks ~/.config/i3blocks
 
 base-packages:
-	sudo xbps-install -Su base-devel htop git curl man zip unzip ranger jq keychain ripgrep acpi bashmount neofetch neovim i3blocks font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp intel-video-accel flatpak connman lazygit dex xdg-user-dirs xdg-utils xdg-desktop-portal-wlr
+	sudo xbps-install -Su base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep acpi bashmount neofetch neovim i3blocks font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp intel-video-accel flatpak connman lazygit dex xdg-user-dirs xdg-utils xdg-desktop-portal-wlr
 
 console-font:
 	echo 'FONT="cyr-sun16"' >> /etc/rc.conf
