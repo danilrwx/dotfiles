@@ -65,6 +65,8 @@ export GPG_TTY=$(tty)
 source <(fzf --zsh)
 source <(kubectl completion zsh)
 
+. /opt/homebrew/opt/asdf/libexec/asdf.sh
+
 go_bin_path="$(asdf which go 2>/dev/null)"
 if [[ -n "${go_bin_path}" ]]; then
   abs_go_bin_path="$(readlink -f "${go_bin_path}")"
@@ -78,3 +80,4 @@ if [[ -n "${go_bin_path}" ]]; then
   export GOBIN
   GOBIN="$(dirname "${GOROOT}")/packages/bin"
 fi
+

@@ -11,10 +11,11 @@ return {
   { import = "lazyvim.plugins.extras.lang.json" },
   { import = "lazyvim.plugins.extras.lang.python" },
   { import = "lazyvim.plugins.extras.lang.ruby" },
-  { import = "lazyvim.plugins.extras.lang.sql" },
   { import = "lazyvim.plugins.extras.lang.yaml" },
   { import = "lazyvim.plugins.extras.lsp.none-ls" },
   { import = "lazyvim.plugins.extras.test.core" },
+  { import = "lazyvim.plugins.extras.ui.treesitter-context" },
+
   {
     "LazyVim/LazyVim",
     opts = {
@@ -65,24 +66,9 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-      require("github-theme").setup({ options = { transparent = false } })
+      require("github-theme").setup({ options = { transparent = true } })
     end,
   },
-  {
-    "f-person/auto-dark-mode.nvim",
-    opts = {
-      update_interval = 1000,
-      set_dark_mode = function()
-        vim.opt.background = "dark"
-        vim.cmd("colorscheme github_dark_default")
-      end,
-      set_light_mode = function()
-        vim.opt.background = "light"
-        vim.cmd("colorscheme github_light")
-      end,
-    },
-  },
-
   {
     "chrisgrieser/nvim-various-textobjs",
     lazy = false,
@@ -101,36 +87,6 @@ return {
     opts = {
       windows = { width_preview = 60 },
       options = { use_as_default_explorer = true },
-    },
-  },
-
-  {
-    "nvim-telescope/telescope.nvim",
-    keys = {
-      { "<leader>gc", false },
-      { "<leader>gs", false },
-      { "<leader><leader>", false },
-    },
-    opts = {
-      defaults = {
-        mappings = {
-          i = {
-            ["<C-j>"] = require("telescope.actions.layout").toggle_preview,
-          },
-        },
-        preview = {
-          -- hide_on_startup = true, -- hide previewer when picker starts
-        },
-        layout_config = {
-          horizontal = {
-            -- width = 0.95,
-            -- height = 0.9,
-            width = { padding = 0 },
-            height = { padding = 0 },
-            preview_width = 0.5,
-          },
-        },
-      },
     },
   },
 
