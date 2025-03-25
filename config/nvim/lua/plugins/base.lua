@@ -1,7 +1,7 @@
 return {
   {
     "LazyVim/LazyVim",
-    opts = { colorscheme = "moonfly" },
+    opts = { colorscheme = "github_dark_default" },
   },
 
   {
@@ -20,10 +20,19 @@ return {
   },
 
   {
-    "bluz71/vim-moonfly-colors",
-    name = "moonfly",
+    "projekt0n/github-nvim-theme",
+    name = "github-theme",
     lazy = false,
     priority = 1000,
+    config = function()
+      require("github-theme").setup({
+        options = {
+          transparent = true,
+        },
+      })
+
+      vim.cmd("colorscheme github_dark_default")
+    end,
   },
 
   {

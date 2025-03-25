@@ -16,6 +16,11 @@ base:
 	ln -snf $(PWD)/config/ghostty ~/.config/
 	ln -snf $(PWD)/config/k9s ~/.config/
 
+sway:
+	ln -snf $(PWD)/config/sway ~/.config/
+	ln -snf $(PWD)/config/foot ~/.config/
+	ln -snf $(PWD)/config/waybar ~/.config/
+
 git:
 	git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
@@ -30,9 +35,11 @@ ubuntu-packages:
 	sudo apt install -y curl bash-completion  unzip
 
 fedora-packages:
-	sudo dnf copr enable pgdev/ghostty -y
+	# sudo dnf copr enable pgdev/ghostty -y
+	# sudo dnf install ghostty
 	sudo dnf copr enable atim/lazygit -y
-	sudo dnf install ghostty lazygit
+	sudo dnf install lazygit
+	sudo dnf install -y autoconf gcc rust patch make bzip2 openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
 	sudo dnf install google-chrome-stable neovim unzip htop sensors zsh fzf jq \
 		keychain wget tmux yq kubernetes-client difft wl-clipboard
 
