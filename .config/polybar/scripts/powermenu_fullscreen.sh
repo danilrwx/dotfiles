@@ -1,8 +1,7 @@
 #! /bin/sh
 
 rofi_cmd() {
-	rofi -dmenu \
-		-theme ~/.config/rofi/powermenu_fullscreen.rasi
+	rofi -dmenu -theme ~/.config/rofi/powermenu_fullscreen.rasi
 }
 
 chosen=$(printf "⏻\n󰜉\n󰗼" | rofi_cmd)
