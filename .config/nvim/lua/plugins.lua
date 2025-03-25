@@ -38,6 +38,9 @@ return require('packer').startup(function(use)
     }
   }
 
+  use 'nvim-tree/nvim-web-devicons'
+  use 'folke/trouble.nvim'
+  use 'lewis6991/gitsigns.nvim'
   use 'kdheepak/lazygit.nvim'
 
   use {
