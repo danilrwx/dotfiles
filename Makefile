@@ -48,20 +48,15 @@ laptop-packages:
 desktop-packages:
 	sudo xbps-install -Syu bashmount elogind dex xdg-user-dirs \
 		xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 \
-		flatpak wireguard nerd-fonts mpd ImageMagick
+		flatpak wireguard nerd-fonts mpd ImageMagick mpv yt-dlp
+
+desktop-config:
+	ln -snf $(PWD)/.config/ytfzf ~/.config/ytfzf
 
 dev-packages:
-	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl \
-		postgresql-libs postgresql-libs-devel
-
-sway: sway-packages sway-config
-
-sway-packages:
-	sudo xbps-install -Su sway foot mako dmenu-wayland swaybg slurp grim wl-clipboard
-sway-config:
-	ln -sf $(PWD)/.bash_profile.wayland ~/.bash_profile
-	ln -snf $(PWD)/.config/foot ~/.config/foot
-	ln -snf $(PWD)/.config/sway ~/.config/sway
+	sudo xbps-install -Syu libffi-devel libyaml-devel zlib-devel openssl \
+		postgresql-libs postgresql-libs-devel libmariadbclient libmariadbclient-devel \
+		libmagick libmagick-devel sqlite sqlite-devel
 
 i3: i3-packages i3-config
 
