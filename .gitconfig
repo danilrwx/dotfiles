@@ -1,28 +1,65 @@
 [core]
-	editor = nvim
-	pager = delta
+  editor = nvim
+  pager = delta
+  attributesfile = /Users/danil/.gitattributes
 
 [user]
-	name = Daniil Antoshin
-	email = daniil.antoshin@flant.com
+  name = Daniil Antoshin
+  email = daniil.antoshin@flant.com
 
 [pull]
-	rebase = true
+  rebase = true
 
-[interactive]
-	diffFilter = delta --color-only
+; [interactive]
+  ; diffFilter = delta --color-only
+
+[commit]
+  gpgsign = true
+
+[alias]
+  commit = commit --signoff
 
 [delta]
-	navigate = true
+  features = decorations
 	light = true
+	tabs = 2
+	line-numbers = true
+	navigate = true
 	hyperlinks = true
 
-[merge]
-	conflictstyle = diff3
+[difftool "difftastic"]
+  cmd = difft "$MERGED" "$LOCAL" "abcdef1" "100644" "$REMOTE" "abcdef2" "100644"
+
+[difftool]
+  prompt = false
+
+[pager]
+  difftool = true
 
 [diff]
-	colorMoved = default
-[alias]
-      commit = commit --signoff
+  external = difft
+  tool = difftastic
+
 [diff "dyff"]
-	command = "dyff_between() { dyff --color on between --omit-header \"$2\" \"$5\"; }; dyff_between"
+	command = "dyff_between() { dyff --color on between \"$2\" \"$5\"; }; dyff_between"
+
+[diff]
+  tool = nvimdiff
+  guitool = nvimdiff
+[difftool]
+  prompt = false
+  guiDefault = false
+[merge]
+  tool = nvimdiff
+  guitool = nvimdiff
+[mergetool]
+  prompt = false
+  guiDefault = false
+  keepBackup = false
+
+# NOTE: must set "vimdiff" here and NOT "nvimdiff" for custom layout to work
+# But just for this [mergetool "vimdiff"] section.
+# The other [merge] and [mergetool] sections above MUST be set to "nvimdiff"
+[mergetool "vimdiff"]
+  layout = (LOCAL,BASE,REMOTE) / MERGED + (LOCAL,MERGED,REMOTE) + LOCAL,REMOTE + (LOCAL,MERGED) / (REMOTE,MERGED) + (BASE,LOCAL) / (BASE,REMOTE)
+

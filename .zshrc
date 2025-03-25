@@ -2,7 +2,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="robbyrussell"
 
-plugins=(git rails asdf sudo kubectl)
+plugins=(git rails asdf sudo fzf)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -23,10 +23,13 @@ export COLORTERM=truecolor
 export EDITOR='nvim'
 export VISUAL='nvim'
 # export DELTA_PAGER='bat'
+export PAGER='moar'
+export DFT_BACKGROUND=light
 export PATH=$PATH:$GOPATH/bin/
 export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/
 export PATH=$PATH:$HOME/dotfiles/scripts/
+export XDG_CONFIG_HOME="$HOME/.config"
 export K9S_CONFIG_DIR=$HOME/.config/k9s
 export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
 
@@ -60,6 +63,7 @@ export GPG_TTY=$(tty)
 [[ -e ~/private.zsh ]] && source ~/private.zsh
 
 source <(fzf --zsh)
+source <(kubectl completion zsh)
 
 go_bin_path="$(asdf which go 2>/dev/null)"
 if [[ -n "${go_bin_path}" ]]; then

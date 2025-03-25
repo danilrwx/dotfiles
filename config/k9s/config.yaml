@@ -3,5 +3,7 @@ k9s:
   refreshRate: 2
   maxConnRetry: 5
   readOnly: false
-  # ui:
-  # skin: light
+  ui:
+    enableMouse: true
+    logoless: true
+    skin: light
