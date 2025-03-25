@@ -2,7 +2,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="robbyrussell"
 
-plugins=(git rails asdf sudo fzf)
+plugins=(git rails sudo fzf)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -62,18 +62,8 @@ export FZF_ALT_C_OPTS="
 source <(fzf --zsh)
 source <(kubectl completion zsh)
 
-go_bin_path="$(asdf which go 2>/dev/null)"
-if [[ -n "${go_bin_path}" ]]; then
-  abs_go_bin_path="$(readlink -f "${go_bin_path}")"
-
-  export GOROOT
-  GOROOT="$(dirname "$(dirname "${abs_go_bin_path}")")"
-
-  export GOPATH
-  GOPATH="$(dirname "${GOROOT}")/packages"
-
-  export GOBIN
-  GOBIN="$(dirname "${GOROOT}")/packages/bin"
-fi
+export GOPATH=$HOME/go
+export GOBIN=$GOPATH/bin
+export PATH=$PATH:$GOBIN
 
 [[ -e ~/private.zsh ]] && source ~/private.zsh
