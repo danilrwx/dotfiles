@@ -6,6 +6,7 @@ base:
 	mkdir -p ~/.config
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 	ln -sf $(PWD)/.gitconfig ~/.gitconfig
+	ln -sf $(PWD)/.gitignore_global ~/.gitignore_global
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -sf $(PWD)/.vimrc ~/.vimrc
 	ln -snf $(PWD)/config/htop ~/.config/

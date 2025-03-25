@@ -3,21 +3,13 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      -- colorscheme = "github_light",
+      colorscheme = "default",
     },
   },
 
   {
     "nvim-lualine/lualine.nvim",
-    opts = {
-      sections = {
-        lualine_a = { "mode" },
-        lualine_b = {},
-        lualine_y = {},
-        lualine_z = { "branch" },
-        lualine_c = { { "filename", path = 1 } },
-      },
-    },
+    enabled = false,
   },
 
   {
@@ -37,6 +29,14 @@ return {
         virt_text_pos = "right_align",
       },
     },
+  },
+
+  {
+    "RRethy/base16-nvim",
+  },
+
+  {
+    "noahfrederick/vim-noctu",
   },
 
   -- {

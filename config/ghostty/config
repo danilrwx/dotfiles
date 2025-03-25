@@ -11,10 +11,6 @@ font-family-bold-italic  = Iosevka NFM Medium Italic
 maximize = true
 
 font-size = 16
-# theme = dark:Raycast_Dark,light:Raycast_Light
-theme = dark:Adventure,light:Raycast_Light
-# theme = dark:3024 Night,light:Raycast_Light
-# theme = dark:Afterglow,light:Alabster
-# theme = dark:synthwave,light:Builtin Tango Light
+theme = dark:deep,light:Builtin Tango Light
 
 

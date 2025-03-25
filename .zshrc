@@ -14,6 +14,8 @@ alias grep='grep --color=auto'
 alias untar='tar -zxvf '
 alias wget='wget -c '
 alias lg='lazygit'
+alias bat='highlight -O ansi --force'
+
 
 export RUBYOPT="-W0"
 export COLORTERM=truecolor
@@ -31,10 +33,14 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export K9S_CONFIG_DIR=$HOME/.config/k9s
 export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
 
+export BAT_THEME="base16-256"
 export FZF_DEFAULT_OPTS="
   --tmux --height 60%
   --layout=reverse --border
-  --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+  --bind 'ctrl-/:change-preview-window(down|hidden|)'
+  --color fg:188,bg:233,hl:103,fg+:222,bg+:234,hl+:104
+  --color info:183,prompt:110,spinner:107,pointer:167,marker:215
+  "
 export FZF_CTRL_R_OPTS="
   --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
   --header 'Press CTRL-Y to copy command into clipboard'"

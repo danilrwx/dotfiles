@@ -7,5 +7,5 @@ k9s:
     enableMouse: true
     logoless: true
     # headless: true
-    # skin: light
+    # skin: term
     reactive: true

@@ -29,10 +29,6 @@ if v:version >= 800
   set nofoldenable
 endif
 
-" enough for line numbers + gutter within 80 standard
-set textwidth=72
-set colorcolumn=73
-
 set relativenumber
 
 set spc=
@@ -83,8 +79,6 @@ set cinoptions+=:0
 
 set laststatus=0
 
-set signcolumn=yes
-
 set wildmenu
 
 set mouse=a
@@ -96,16 +90,18 @@ set notermguicolors
 highlight SignColumn ctermbg=NONE
 highlight ColorColumn ctermbg=238
 highlight Visual ctermfg=none ctermbg=238
+highlight CursorLine cterm=none ctermbg=238
+highlight CursorLineNr cterm=none ctermbg=NONE
 
 set omnifunc=syntaxcomplete#Complete
 imap <tab><tab> <c-x><c-o>
-
-map Y y$
 
 nnoremap <C-d> <C-d>zz<CR>
 nnoremap <C-u> <C-u>zz<CR>
 
 nnoremap <C-s> :w<CR>
+
+execute "set <A-q>=\eq"
 nnoremap <A-q> :bd<CR>
 
 nnoremap <S-l> :bn<CR>
@@ -115,11 +111,6 @@ nnoremap <C-j> :cnext<CR>
 nnoremap <C-k> :cprev<CR>
 
 nnoremap <C-l> :nohl<CR>
-
-nnoremap <Leader>tl :tabnext<CR>
-nnoremap <Leader>th :tabprev<CR>
-nnoremap <Leader>tn :tabnew<CR>
-nnoremap <Leader>tc :tabclose<CR>
 
 nnoremap <Leader>e :%s/<C-r><C-w>/<C-r><C-w>
 nnoremap <Leader>E :%s/<C-r><C-w>/
@@ -146,15 +137,37 @@ autocmd BufWritePre * call TrimWhitespace()
 
 if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.local/share/vim/plugins')
+    Plug 'sheerun/vim-polyglot'
     Plug 'jasonccox/vim-wayland-clipboard'
+    Plug 'tpope/vim-fugitive'
     Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
     Plug 'dense-analysis/ale'
-    Plug 'tpope/vim-fugitive'
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
     Plug 'junegunn/fzf.vim'
     Plug 'augmentcode/augment.vim'
     Plug 'madox2/vim-ai'
   call plug#end()
+
+  let g:fzf_vim_preview_window = ['right,50%', 'ctrl-/']
+  let g:fzf_layout = { 'down': '~90%' }
+  let g:fzf_colors =
+\ { 'fg':      ['fg', 'Normal'],
+  \ 'bg':      ['bg', 'Normal'],
+  \ 'hl':      ['fg', 'Comment'],
+  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+  \ 'hl+':     ['fg', 'Statement'],
+  \ 'info':    ['fg', 'PreProc'],
+  \ 'border':  ['fg', 'Ignore'],
+  \ 'prompt':  ['fg', 'Conditional'],
+  \ 'pointer': ['fg', 'Exception'],
+  \ 'marker':  ['fg', 'Keyword'],
+  \ 'spinner': ['fg', 'Label'],
+  \ 'header':  ['fg', 'Comment'] }
+
+  " inoremap <expr> <c-x><c-f> fzf#vim#complete#path('fd')
+  inoremap <expr> <c-x><c-f> fzf#vim#complete#path('rg --files')
+
 
   let g:ale_set_signs = 1
   let g:ale_linters = {'go': ['golangci-lint', 'gofmt','gobuild']}
@@ -172,17 +185,17 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   let g:go_fmt_autosave = 1
   let g:go_gopls_enabled = 1
 
-  let g:go_highlight_types = 1
-  let g:go_highlight_fields = 1
-  let g:go_highlight_functions = 1
-  let g:go_highlight_function_calls = 1
-  let g:go_highlight_operators = 1
-  let g:go_highlight_extra_types = 1
-  let g:go_highlight_variable_declarations = 1
-  let g:go_highlight_variable_assignments = 1
-  let g:go_highlight_build_constraints = 1
-  let g:go_highlight_diagnostic_errors = 1
-  let g:go_highlight_diagnostic_warnings = 1
+  " let g:go_highlight_types = 1
+  " let g:go_highlight_fields = 1
+  " let g:go_highlight_functions = 1
+  " let g:go_highlight_function_calls = 1
+  " let g:go_highlight_operators = 1
+  " let g:go_highlight_extra_types = 1
+  " let g:go_highlight_variable_declarations = 1
+  " let g:go_highlight_variable_assignments = 1
+  " let g:go_highlight_build_constraints = 1
+  " let g:go_highlight_diagnostic_errors = 1
+  " let g:go_highlight_diagnostic_warnings = 1
 
   let g:go_code_completion_enabled = 1
   "let g:go_auto_type_info = 1 " forces 'Press ENTER' too much
@@ -196,6 +209,8 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
   autocmd FileType go nmap <leader>t  <Plug>(go-test)
   autocmd FileType go nmap <leader>b  <Plug>(go-build)
+  autocmd FileType go nmap gr :GoReferrers<CR>
+  autocmd FileType go nmap gI :GoImplements<CR>
 
   function! s:build_go_files()
     let l:file = expand('%')
@@ -220,7 +235,9 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   nnoremap <Leader>gP :Git push<CR>
   nnoremap <Leader>gp :Git pull --rebase<CR>
 
-  nnoremap <Leader>f :GFiles<CR>
+  nnoremap <Leader>fg :GFiles<CR>
+  nnoremap <Leader>ff :Files<CR>
+  nnoremap <Leader>ft :Tags<CR>
   nnoremap <Leader>/ :Rg<CR>
 else
   autocmd vimleavepre *.go !gofmt -w % " backup if fatih fails
