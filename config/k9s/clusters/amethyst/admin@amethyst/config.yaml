@@ -1,0 +1,14 @@
+k9s:
+  cluster: amethyst
+  namespace:
+    active: all
+    lockFavorites: false
+    favorites:
+    - cloudnative-pg
+    - all
+    - questions
+  view:
+    active: ingress
+  featureGates:
+    nodeShell: false
+  portForwardAddress: localhost
