@@ -4,7 +4,6 @@ all:
 
 base:
 	mkdir -p ~/.config
-	ln -sf $(PWD)/.bashrc ~/.bashrc
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 	ln -sf $(PWD)/.gitconfig ~/.gitconfig
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
@@ -12,22 +11,9 @@ base:
 	ln -snf $(PWD)/config/htop ~/.config/
 	ln -snf $(PWD)/config/nvim ~/.config/
 	ln -snf $(PWD)/config/vim ~/.vim
-	ln -snf $(PWD)/config/helix ~/.config/
 	ln -snf $(PWD)/config/lazygit ~/.config/
 	ln -snf $(PWD)/config/ghostty ~/.config/
 	ln -snf $(PWD)/config/k9s ~/.config/
-	ln -snf $(PWD)/config/dunst ~/.config/
-	ln -snf $(PWD)/Backgrounds ~/Backgrounds
-
-dwm-install:
-	cd $(PWD)/dwm && sudo make clean install
-	cd $(PWD)/dmenu && sudo make clean install
-	cd $(PWD)/st && sudo make clean install
-
-dwm-config:
-	ln -sf $(PWD)/.xinitrc ~/.xinitrc
-	ln -sf $(PWD)/.profile ~/.profile
-	ln -sf $(PWD)/.Xresources ~/.Xresources
 
 git:
 	git remote set-url origin git@github.com:danilrwx/dotfiles.git
@@ -39,11 +25,15 @@ font:
 	rm $(PWD)/Iosevka.zip
 	fc-cache -f
 
-base-packages:
-	sudo apt install build-essential libx11-dev libxft-dev libxinerama-dev \
-		libnotify-bin notify-osd psmisc && \
-	sudo apt install -y curl bash-completion xorg xcompmgr hsetroot \
-		brightnessctl dunst acpi maim xclip xsel pipewire pipewire-pulse pavucontrol unzip
+ubuntu-packages:
+	sudo apt install -y curl bash-completion  unzip
+
+fedora-packages:
+	sudo dnf copr enable pgdev/ghostty -y
+	sudo dnf copr enable atim/lazygit -y
+	sudo dnf install ghostty lazygit
+	sudo dnf install google-chrome-stable vim-enhanced unzip htop sensors zsh fzf jq \
+		keychain wget tmux yq kubernetes-client difft wl-clipboard
 
 brew-install:
 	/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"

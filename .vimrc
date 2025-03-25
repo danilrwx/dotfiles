@@ -29,9 +29,6 @@ if v:version >= 800
   set nofoldenable
 endif
 
-" mark trailing spaces as errors
-match IncSearch '\s\+$'
-
 " enough for line numbers + gutter within 80 standard
 set textwidth=72
 set colorcolumn=73
@@ -92,10 +89,13 @@ set wildmenu
 
 set mouse=a
 
-" set background=l
-" colorscheme lunaperche
+" mark trailing spaces as errors
+match errorMsg '\s\+$'
+
+set notermguicolors
 highlight SignColumn ctermbg=NONE
 highlight ColorColumn ctermbg=238
+highlight Visual ctermfg=none ctermbg=238
 
 set omnifunc=syntaxcomplete#Complete
 imap <tab><tab> <c-x><c-o>
@@ -146,20 +146,19 @@ autocmd BufWritePre * call TrimWhitespace()
 
 if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.local/share/vim/plugins')
+    Plug 'jasonccox/vim-wayland-clipboard'
     Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
     Plug 'dense-analysis/ale'
     Plug 'tpope/vim-fugitive'
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
     Plug 'junegunn/fzf.vim'
-    " Plug 'augmentcode/augment.vim'
+    Plug 'augmentcode/augment.vim'
     Plug 'madox2/vim-ai'
   call plug#end()
 
   let g:ale_set_signs = 1
-
   let g:ale_linters = {'go': ['golangci-lint', 'gofmt','gobuild']}
   let g:ale_linter_aliases = {'bash': 'sh'}
-
   let g:ale_fixers = {
         \'sh': ['shfmt'],
         \'bash': ['shfmt'],
