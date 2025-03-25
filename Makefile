@@ -1,12 +1,10 @@
 all: config-base
 config-base:
-	ln -snf $(PWD)/.config/helix ~/.config/helix
 	ln -snf $(PWD)/.config/htop ~/.config/htop
-	ln -snf $(PWD)/.config/lazygit ~/.config/lazygit
 	ln -sf $(PWD)/.zshrc ~/.zshrc
+	ln -sf $(PWD)/.vimrc ~/.vimrc
 
 config-i3:
-	ln -sf $(PWD)/.zprofile ~/.zprofile
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 	ln -snf $(PWD)/.config/i3 ~/.config/i3
 	ln -snf $(PWD)/.config/picom ~/.config/picom
@@ -16,10 +14,10 @@ config-i3:
 	ln -snf $(PWD)/.config/ranger ~/.config/ranger
 
 arch-base:
-	sudo pacman --needed -S htop git curl zsh firefox lazygit helix go rust otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick zip unzip ranger
+	sudo pacman --needed -S htop git curl zsh lazygit go rust  man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick zip unzip ranger jq
 
 arch-i3:
-	sudo pacman --needed -S udiskie udisks2 gnome-keyring keychain feh alacritty rofi picom polybar maim xclip xdotool jq ttf-nerd-fonts-symbols ttf-jetbrains-mono ttf-jetbrains-mono-nerd
+	sudo pacman --needed -S udiskie udisks2 firefox gnome-keyring otf-font-awesome ttc-iosevka keychain feh alacritty rofi picom polybar maim xclip xdotool ttf-nerd-fonts-symbols ttf-jetbrains-mono ttf-jetbrains-mono-nerd
 
 arch-laptop:
 	sudo pacman --needed -S tlp acpid brightnessctl thermald
@@ -45,10 +43,10 @@ systemd:
 	systemctl enable thermald
 
 git:
-	git config --global core.editor "helix"
+	git config --global core.editor "vim"
 	git config --global user.name "Danil Antoshin"
 	git config --global user.email antoshindanil@ya.ru
-	git config --global pull.rebase true
+	git config --global pull.rebase false
 
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
