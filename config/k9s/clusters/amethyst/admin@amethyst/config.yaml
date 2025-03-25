@@ -8,7 +8,7 @@ k9s:
     - cloudnative-pg
     - questions
   view:
-    active: context
+    active: helmrelease
   featureGates:
     nodeShell: false
   portForwardAddress: localhost

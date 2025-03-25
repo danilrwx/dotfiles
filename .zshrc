@@ -49,4 +49,4 @@ export FZF_DEFAULT_OPTS="--height 60% --layout=reverse --border --preview 'bat -
 
 [[ -e /usr/bin/kubectl ]] && source <(kubectl completion zsh)
 
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+[[ -e /home/linuxbrew/.linuxbrew/bin/brew ]] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
