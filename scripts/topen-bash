@@ -3,5 +3,5 @@
 if [ -n "$TMUX" ]; then
 	tmux neww bash
 else
-	xfce4-terminal -e bash
+	terminal-run bash
 fi

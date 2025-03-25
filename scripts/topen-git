@@ -3,5 +3,5 @@
 if [ -n "$TMUX" ]; then
 	tmux neww bash -c "lazygit"
 else
-	xfce4-terminal -e lazygit
+  terminal-run lazygit
 fi
