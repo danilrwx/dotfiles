@@ -104,12 +104,6 @@ return {
     },
   },
 
-  -- {
-  --   "stevearc/oil.nvim",
-  --   opts = {},
-  --   dependencies = { { "echasnovski/mini.icons", opts = {} } },
-  -- },
-
   {
     "nvim-telescope/telescope.nvim",
     keys = {
@@ -167,7 +161,7 @@ return {
       },
       definition = { enabled = true },
       implementation = { enabled = true },
-      -- vt_position = "end_of_line",
+      vt_position = "end_of_line",
     },
   },
 
