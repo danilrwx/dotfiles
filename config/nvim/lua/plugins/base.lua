@@ -1,98 +1,76 @@
 return {
-
   {
     "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "default",
-    },
+    opts = { colorscheme = "moonfly" },
   },
 
   {
-    "nvim-lualine/lualine.nvim",
+    "vim-lualine/lualine.nvim",
     enabled = false,
+  },
+
+  {
+    "echasnovski/mini.pairs",
+    enabled = false,
+  },
+
+  {
+    "folke/noice.nvim",
+    enabled = false,
+  },
+
+  {
+    "bluz71/vim-moonfly-colors",
+    name = "moonfly",
+    lazy = false,
+    priority = 1000,
   },
 
   {
     "tpope/vim-fugitive",
     lazy = false,
-    dependencies = { "shumphrey/fugitive-gitlab.vim", "tpope/vim-rhubarb" },
-  },
-
-  {
-    "lewis6991/gitsigns.nvim",
-    event = "LazyFile",
-    opts = {
-      signcolumn = true,
-      current_line_blame = true,
-      current_line_blame_opts = {
-        delay = 300,
-        virt_text_pos = "right_align",
-      },
-    },
-  },
-
-  {
-    "RRethy/base16-nvim",
-  },
-
-  {
-    "noahfrederick/vim-noctu",
-  },
-
-  -- {
-  --   "akinsho/git-conflict.nvim",
-  --   version = "*",
-  --   config = true,
-  -- },
-  --
-  -- {
-  --   "projekt0n/github-nvim-theme",
-  --   lazy = false,
-  --   priority = 1000,
-  --   config = function()
-  --     require("github-theme").setup({ options = { transparent = true } })
-  --   end,
-  -- },
-
-  {
-    "chrisgrieser/nvim-various-textobjs",
-    lazy = false,
-    opts = { useDefaults = true },
   },
 
   {
     "Wansmer/treesj",
     keys = { "<space>m", { "<space>j", false }, { "<space>s", false } },
-    dependencies = { "nvim-treesitter/nvim-treesitter" }, -- if you install parsers with `nvim-treesitter`
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
     opts = {},
   },
 
   {
     "echasnovski/mini.files",
     opts = {
-      windows = { width_preview = 60 },
-      options = { use_as_default_explorer = true },
+      windows = {
+        width_focus = 50,
+        width_nofocus = 35,
+        preview = false,
+      },
+      options = {
+        use_as_default_explorer = true,
+      },
     },
   },
 
   {
     "neovim/nvim-lspconfig",
     opts = {
-      document_highlight = {
-        enabled = false,
-      },
-      codelens = {
-        enabled = true,
-      },
-      inlay_hints = {
-        enabled = false,
-      },
+      document_highlight = { enabled = false },
+      codelens = { enabled = true },
+      inlay_hints = { enabled = false },
+    },
+  },
+
+  {
+    "folke/snacks.nvim",
+    opts = {
+      dashboard = { enabled = false },
     },
   },
 
   {
     "Wansmer/symbol-usage.nvim",
-    event = "LspAttach", -- need run before LspAttach if you use nvim 0.9. On 0.10 use 'LspAttach'
+    event = "LspAttach",
     opts = {
       kinds = {
         vim.lsp.protocol.SymbolKind.Function,
@@ -105,12 +83,6 @@ return {
       vt_position = "end_of_line",
     },
   },
-  --
-  -- {
-  --   "SCJangra/table-nvim",
-  --   ft = "markdown",
-  --   opts = {},
-  -- },
 
   { "mbbill/undotree" },
 
@@ -146,12 +118,7 @@ return {
       { "<leader>a+", "<cmd>AiderTreeAddFile<cr>", desc = "Add File from Tree to Aider", ft = "NvimTree" },
       { "<leader>a-", "<cmd>AiderTreeDropFile<cr>", desc = "Drop File from Tree from Aider", ft = "NvimTree" },
     },
-    dependencies = {
-      "folke/snacks.nvim",
-      --- The below dependencies are optional
-      "catppuccin/nvim",
-      "nvim-tree/nvim-tree.lua",
-    },
+    dependencies = { "folke/snacks.nvim" },
     config = true,
   },
 }
