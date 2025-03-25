@@ -12,6 +12,8 @@ config-i3:
 	ln -snf $(PWD)/.config/picom ~/.config/picom
 	ln -snf $(PWD)/.config/polybar ~/.config/polybar
 	ln -snf $(PWD)/.config/alacritty ~/.config/alacritty
+	ln -snf $(PWD)/.config/rofi ~/.config/rofi
+	ln -snf $(PWD)/.config/ranger ~/.config/ranger
 
 arch-base:
 	sudo pacman --needed -S htop git curl zsh firefox lazygit helix go rust otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
