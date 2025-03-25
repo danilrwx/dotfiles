@@ -16,30 +16,31 @@ return require('packer').startup(function(use)
 
   use 'slim-template/vim-slim'
 
-  use 'mbbill/undotree'
-
   use 'echasnovski/mini.nvim'
 
   use 'projekt0n/github-nvim-theme'
 
-  use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
-
-  use 'RRethy/nvim-treesitter-endwise'
-
   use {
-    'nvim-telescope/telescope.nvim', tag = '0.1.2',
-    -- or                            , branch = '0.1.x',
-    requires = { { 'nvim-lua/plenary.nvim' } }
-  }
-
-  use {
-    "NeogitOrg/neogit",
-    requires = {
-      "nvim-lua/plenary.nvim",         -- required
-      "nvim-telescope/telescope.nvim", -- optional
-      "sindrets/diffview.nvim",        -- optional
+    'nvim-treesitter/nvim-treesitter',
+    run = ':TSUpdate',
+    require = {
+      { 'RRethy/nvim-treesitter-endwise' }
     }
   }
+
+  use {
+    'nvim-telescope/telescope.nvim',
+    requires = {
+      { 'nvim-lua/plenary.nvim' },
+      { 'nvim-telescope/telescope-project.nvim' },
+      { 'debugloop/telescope-undo.nvim' },
+      { 'ThePrimeagen/harpoon' }
+    }
+  }
+
+  use 'sindrets/diffview.nvim'
+
+  use 'NeogitOrg/neogit'
 
   use {
     'VonHeikemen/lsp-zero.nvim',
