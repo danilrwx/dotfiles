@@ -77,47 +77,45 @@ filetype plugin on
 
 set cinoptions+=:0
 
-set laststatus=0
+set laststatus=1
 
 set wildmenu
 
 set mouse=a
 
+set path=.,,**
+
+set updatetime=100
+
 " mark trailing spaces as errors
 match errorMsg '\s\+$'
 
+" auto set background on mac
+let output =  system("defaults read -g AppleInterfaceStyle")
+if v:shell_error != 0
+    set background=light
+else
+    set background=dark
+endif
+
 set notermguicolors
 highlight SignColumn ctermbg=NONE
-highlight ColorColumn ctermbg=238
-highlight Visual ctermfg=none ctermbg=238
-highlight CursorLine cterm=none ctermbg=238
-highlight CursorLineNr cterm=none ctermbg=NONE
+" highlight ColorColumn ctermbg=238
+highlight CursorLine cterm=none ctermbg=250
+highlight CursorLineNr cterm=none ctermbg=250
 
 set omnifunc=syntaxcomplete#Complete
 imap <tab><tab> <c-x><c-o>
 
-nnoremap <C-d> <C-d>zz<CR>
-nnoremap <C-u> <C-u>zz<CR>
+nnoremap <S-l> :bn<cr>
+nnoremap <S-h> :bp<cr>
 
-nnoremap <C-s> :w<CR>
+nnoremap <C-j> :cnext<cr>
+nnoremap <C-k> :cprev<cr>
 
-execute "set <A-q>=\eq"
-nnoremap <A-q> :bd<CR>
+nnoremap <C-l> :nohl<cr>
 
-nnoremap <S-l> :bn<CR>
-nnoremap <S-h> :bp<CR>
-
-nnoremap <C-j> :cnext<CR>
-nnoremap <C-k> :cprev<CR>
-
-nnoremap <C-l> :nohl<CR>
-
-nnoremap <Leader>e :%s/<C-r><C-w>/<C-r><C-w>
-nnoremap <Leader>E :%s/<C-r><C-w>/
-
-nnoremap <Leader>l :ls<CR>:b<space>
-
-map <leader>s :e %%
+nnoremap <Leader>l :ls<cr>:b<space>
 
 function! ToggleQuickFix()
     if empty(filter(getwininfo(), 'v:val.quickfix'))
@@ -126,7 +124,7 @@ function! ToggleQuickFix()
         cclose
     endif
 endfunction
-nnoremap <silent> <C-q> :call ToggleQuickFix()<cr>
+nnoremap <silent> <leader>q :call ToggleQuickFix()<cr>
 
 function! TrimWhitespace()
     let l:save = winsaveview()
@@ -137,12 +135,21 @@ autocmd BufWritePre * call TrimWhitespace()
 
 if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.local/share/vim/plugins')
-    Plug 'catppuccin/vim', { 'as': 'catppuccin' }
-    Plug 'jasonccox/vim-wayland-clipboard'
+    Plug 'tpope/vim-commentary'
     Plug 'tpope/vim-fugitive'
-    Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+    Plug 'tpope/vim-obsession'
+
+    Plug 'airblade/vim-gitgutter'
+
+    Plug 'preservim/vimux'
+
     Plug 'girishji/scope.vim'
-    Plug 'ubaldot/vim-highlight-yanked'
+
+    Plug 'charlespascoe/vim-go-syntax'
+    Plug 'kyoh86/vim-go-coverage'
+    Plug 'sebdah/vim-delve'
+
+    Plug 'vim-test/vim-test'
     Plug 'yegappan/lsp'
   call plug#end()
 
@@ -155,6 +162,12 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
   " Go language server
   let lspServers = [#{
+        \    name: 'clangd',
+        \    filetype: ['c', 'cpp'],
+        \    path: '/usr/bin/clangd',
+        \    args: ['--background-index']
+        \  },
+        \ #{
         \    name: 'golang',
         \    filetype: ['go', 'gomod'],
         \    path: '/Users/danil/go/bin/gopls',
@@ -176,20 +189,48 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
         \ }]
   autocmd User LspSetup call LspAddServer(lspServers)
 
-  nnoremap <leader>fb :FuzzyBuffers<CR>
-  nnoremap <leader>ff :Scope File<CR>
-  nnoremap <leader>fg :Scope Grep<CR>
+  nnoremap gr :LspPeekReferences<cr>
+  nnoremap gd :LspGotoDefinition<cr>
+  nnoremap gD :LspGotoDeclaration<cr>
+  nnoremap gI :LspPeekImpl<cr>
+  nnoremap <leader>k  :LspHover<cr>
 
-  nnoremap <leader>gg :!lazygit<CR><CR>
-  nnoremap <leader>gs :tab Git<CR>
-  nnoremap <leader>gl :tab Git log --follow -p %<CR>
-  nnoremap <leader>gL :tab Git log<CR>
-  nnoremap <leader>gK :tab Git log -p<CR>
-  nnoremap <leader>gb :tab Git blame<CR>
-  nnoremap <leader>gd :tab Git diff %<CR>
-  nnoremap <leader>gD :tab Git diff <CR>
-  nnoremap <leader>gP :Git push<CR>
-  nnoremap <leader>gp :Git pull --rebase<CR>
-else
-  autocmd vimleavepre *.go !gofmt -w % " backup if fatih fails
+  nnoremap <leader>cs :LspDocumentSymbol<cr>
+  nnoremap <leader>cS :LspSymbolSearch<cr>
+
+  nnoremap <leader>co :LspOutgoingCalls<cr>
+  nnoremap <leader>ci :LspIncomingCalls<cr>
+
+  nnoremap <leader>ca :LspCodeAction<cr>
+  nnoremap <leader>cc :LspCodeLens<cr>
+  nnoremap <leader>cr :LspRename<cr>
+  nnoremap <leader>cf :LspFormat<cr>
+
+  nnoremap <c-w>d :LspDiag current<cr>
+  nnoremap [d :LspDiag prev<cr>
+  nnoremap ]d :LspDiag next<cr>
+
+  nnoremap <silent> <leader>tr :TestNearest<cr>
+  nnoremap <silent> <leader>tt :TestFile<cr>
+  nnoremap <silent> <leader>ta :TestSuite<cr>
+  nnoremap <silent> <leader>tl :TestLast<cr>
+  nnoremap <silent> <leader>tv :TestVisit<cr>
+
+  nnoremap <leader>f <cmd>Scope File<cr>
+  nnoremap <leader>/ <cmd>Scope Grep<cr>
+
+  nnoremap <leader>gg :!lazygit<cr><cr>
+  nnoremap <leader>gs :tab Git<cr>
+  nnoremap <leader>gl :tab Git log --follow -p %<cr>
+  nnoremap <leader>gL :tab Git log<cr>
+  nnoremap <leader>gK :tab Git log -p<cr>
+  nnoremap <leader>gb :tab Git blame<cr>
+  nnoremap <leader>gd :tab Git diff %<cr>
+  nnoremap <leader>gD :tab Git diff <cr>
+  nnoremap <leader>gP :Git push<cr>
+  nnoremap <leader>gp :Git pull --rebase<cr>
+
+  nnoremap ghs <Plug>(GitGutterStageHunk)
+  nnoremap ghu <Plug>(GitGutterUndoHunk)
+  nnoremap ghp <Plug>(GitGutterPreviewHunk)
 endif
