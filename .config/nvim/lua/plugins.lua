@@ -14,8 +14,6 @@ local packer_bootstrap = ensure_packer()
 return require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
 
-  use 'Mofiqul/adwaita.nvim'
-
   use 'slim-template/vim-slim'
 
   use 'echasnovski/mini.nvim'

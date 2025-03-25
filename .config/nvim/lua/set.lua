@@ -17,11 +17,14 @@ vim.opt.undodir = '/tmp/.nvim/backups'
 vim.opt.undofile = true
 vim.opt.wildmenu = true
 
-vim.opt.langmap = "ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz"
+vim.opt.langmap =
+"ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz"
 
-vim.opt.path= ".,,**"
+vim.opt.path = ".,,**"
 vim.opt.wildmenu = true
-vim.opt.wildignore= "*/dist*/*,*/target/*,*/builds/*,*/node_modules/*"
+vim.opt.wildignore = "*/dist*/*,*/target/*,*/builds/*,*/node_modules/*"
+
+vim.opt.laststatus = 0
+vim.opt.colorcolumn = { 80 }
 
 vim.g.mapleader = ' '
-

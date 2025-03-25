@@ -29,10 +29,13 @@ base: base-config base-packages
 
 base-config:
 	ln -sf $(PWD)/.bashrc ~/.bashrc
+	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 
 base-packages:
-	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip lf jq keychain ripgrep neofetch neovim lazygit mosh podman rsync bash-completion exa bat
+	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip lf \
+		jq keychain ripgrep neofetch neovim lazygit mosh podman rsync \
+		bash-completion exa bat
 
 laptop: laptop-packages desktop-packages
 
@@ -40,28 +43,31 @@ laptop-packages:
 	sudo xbps-install -Syu acpi tlp intel-video-accel brightnessctl
 
 desktop-packages:
-	sudo xbps-install -Syu font-iosevka bashmount elogind dex xdg-user-dirs xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 firefox flatpak
+	sudo xbps-install -Syu bashmount elogind dex xdg-user-dirs \
+		xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 \
+		flatpak wireguard nerd-fonts mpd
 
 dev-packages:
-	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl postgresql-libs postgresql-libs-devel
+	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl \
+		postgresql-libs postgresql-libs-devel ImageMagick
 
 wm: wm-packages wm-config
 
 wm-packages:
-	sudo xbps-install -Syu bspwm sxhkd dmenu maim xclip xdotool dunst xorg hsetroot xcompmgr xfce4-terminal
+	sudo xbps-install -Syu spectrwm dmenu maim xclip xdotool dunst xorg \
+		hsetroot xcompmgr alacritty slock
 
 wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
-	ln -snf $(PWD)/.config/bspwm ~/.config/
-	ln -snf $(PWD)/.config/sxhkd ~/.config/
+	ln -snf $(PWD)/.config/spectrwm ~/.config/
 	ln -snf $(PWD)/.config/dunst ~/.config/
-	ln -snf $(PWD)/.config/lemonbar ~/.config/
 
 runit:
 	sudo ln -sf /etc/sv/elogind /var/service/
 	sudo ln -sf /etc/sv/dbus /var/service/
 	sudo ln -sf /etc/sv/tlp /var/service/
+	sudo ln -sf /etc/sv/mpd /var/service/
 
 pipewire:
 	sudo xbps-install -Syu pipewire wireplumber pavucontrol
@@ -97,7 +103,8 @@ flatpak-add:
 	sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak-install:
-	flatpak install -y flathub org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord io.github.spacingbat3.webcord
+	flatpak install -y flathub org.telegram.desktop io.dbeaver.DBeaverCommunity \
+		org.libreoffice.LibreOffice com.discordapp.Discord
 
 asdf: asdf-install
 
