@@ -18,5 +18,4 @@ fi
 # Autostart section
 setxkbmap -model pc105 -layout us,ru -option grp:alt_shift_toggle
 
-exec i3
-
+exec bspwm
