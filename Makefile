@@ -8,11 +8,12 @@ all:
 	make pipewire
 	make virt 
 	make docker
-	make ufw
+	make firewall
 	make flatpak
 	make flatpak-install
 	make git
 	make git-change-remote
+	make disable-wpa
 
 nvim-install:
 	rm -rf nvim/plugin || exit 0
@@ -28,13 +29,17 @@ base-config:
 	ln -snf $(PWD)/.config/i3blocks ~/.config/i3blocks
 
 base-packages:
-	sudo xbps-install -Su base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep acpi bashmount neofetch neovim i3blocks font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp intel-video-accel flatpak connman lazygit dex xdg-user-dirs xdg-utils xdg-desktop-portal-wlr
+	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep acpi bashmount neofetch neovim i3blocks font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp intel-video-accel flatpak connman lazygit dex xdg-user-dirs xdg-utils xdg-desktop-portal-wlr
 
 console-font:
-	echo 'FONT="cyr-sun16"' >> /etc/rc.conf
+	echo 'FONT="cyr-sun16"' | sudo tee -a /etc/rc.conf
+
+disable-wpa:
+	sudo rm /var/service/wpa_supplicant
+	sudo rm /var/service/dhcpcd
 
 sway-packages:
-	sudo xbps-install -Su sway foot mako wofi swaybg slurp grim wl-clipboard mesa-dri
+	sudo xbps-install -Syu sway foot mako wofi swaybg slurp grim wl-clipboard mesa-dri
 
 sway-config:
 	ln -sf $(PWD)/.bash_profile.wayland ~/.bash_profile
@@ -55,18 +60,18 @@ pipewire:
 	sudo ln -sf /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
 
 docker:
-	sudo xbps-install -Su docker
-	sudo usermod -aG docker $USER
+	sudo xbps-install -Syu docker
+	sudo usermod -aG docker $(USER)
 	sudo ln -sf /etc/sv/containerd /var/service
 	sudo ln -sf /etc/sv/docker /var/service
 
 firewall:
-	sudo xbps-install -Su ufw
+	sudo xbps-install -Syu ufw
 	sudo ln -sf /etc/sv/ufw /var/service
 
 virt:
-	sudo xbps-install -Su virt-manager libvirt qemu
-	sudo usermod -aG libvirt $USER
+	sudo xbps-install -Syu virt-manager libvirt qemu
+	sudo usermod -aG libvirt $(USER)
 	modprobe kvm-intel
 	sudo ln -sf /etc/sv/libvirtd /var/service
 	sudo ln -sf /etc/sv/virtlockd /var/service
@@ -85,4 +90,4 @@ flatpak:
 	flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak-install:
-	flatpak install flathub com.github.tchx84.Flatseal org.telegram.desktop com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord org.mozilla.firefox
+	flatpak install -y flathub com.github.tchx84.Flatseal org.telegram.desktop com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice org.mozilla.firefox io.github.spacingbat3.webcord com.github.wwmm.easyeffects
