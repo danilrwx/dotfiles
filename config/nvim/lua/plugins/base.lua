@@ -2,7 +2,7 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "torte",
+      colorscheme = "tokyonight",
     },
   },
   {
@@ -11,7 +11,13 @@ return {
   },
   {
     "folke/tokyonight.nvim",
-    enabled = false,
+    opts = {
+      transparent = true,
+      styles = {
+        sidebars = "transparent",
+        floats = "transparent",
+      },
+    },
   },
   {
     "folke/noice.nvim",
@@ -89,9 +95,12 @@ return {
   {
     "ray-x/lsp_signature.nvim",
     event = "VeryLazy",
-    config = function(_, opts)
-      require("lsp_signature").setup(opts)
-    end,
+    opts = {
+      hint_enable = false,
+      handler_opts = {
+        border = "rounded", -- double, rounded, single, shadow, none, or a table of borders
+      },
+    },
   },
 
   {
@@ -107,6 +116,23 @@ return {
     config = function()
       vim.g.fugitive_gitlab_domains = { "https://rscz.ru" }
     end,
+  },
+
+  {
+    "ray-x/go.nvim",
+    dependencies = { -- optional packages
+      "ray-x/guihua.lua",
+      "neovim/nvim-lspconfig",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    opts = {
+      lsp_inlay_hints = {
+        enable = false,
+      },
+    },
+    event = { "CmdlineEnter" },
+    ft = { "go", "gomod" },
+    build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
   },
 
   { import = "lazyvim.plugins.extras.editor.fzf" },
