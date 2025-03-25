@@ -11,11 +11,23 @@ config-xorg:
 	ln -snf $(PWD)/.config/kitty ~/.config/kitty
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
 
+config-wayland:
+	ln -snf $(PWD)/Backgrounds ~/Backgrounds
+	ln -sf $(PWD)/.bash_profile.wayland ~/.bash_profile
+	ln -snf $(PWD)/.config/sway ~/.config/sway
+	ln -snf $(PWD)/.config/foot ~/.config/foot
+	ln -snf $(PWD)/.config/wofi ~/.config/wofi
+	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/electron-flags.conf
+	ln -sf $(PWD)/.config/code-flags.conf ~/.config/code-flags.conf
+
 arch-base:
-	sudo pacman --needed -S htop git curl lazygit go man base-devel zip unzip ranger jq
+	sudo pacman --needed -S htop git curl lazygit go man base-devel zip unzip ranger jq keychain 
 
 arch-xorg:
-	sudo pacman --needed -S udiskie udisks2 firefox gnome-keyring otf-font-awesome ttc-iosevka keychain alacritty maim xclip xdotool ttf-nerd-fonts-symbols ttf-jetbrains-mono ttf-jetbrains-mono-nerd
+	sudo pacman --needed -S udiskie udisks2 firefox gnome-keyring otf-font-awesome ttc-iosevka kitty maim xclip xdotool ttf-nerd-fonts-symbols ttf-jetbrains-mono ttf-jetbrains-mono-nerd
+
+arch-wayland:
+		sudo pacman --needed -S udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring  sway slurp grim wl-clipboard
 
 arch-laptop:
 	sudo pacman --needed -S tlp acpid brightnessctl thermald

@@ -1,5 +1,5 @@
 set nocompatible
-"" set lazyredraw
+set lazyredraw
 set ttyfast
 set number
 set relativenumber
@@ -11,7 +11,7 @@ set smartindent
 set softtabstop=2
 set tabstop=2
 set shiftwidth=2
-set signcolumn=yes
+set signcolumn=number
 set scrolloff=3
 set undodir=/tmp/.vim/backups
 set undofile
@@ -50,7 +50,6 @@ Plug 'jsit/disco.vim'
 call plug#end()
 
 colorscheme disco
-hi SignColumn ctermbg=NONE ctermbg=NONE
 
 let mapleader = "\<Space>"
 
@@ -58,11 +57,6 @@ nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
 nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
 nnoremap <expr> л (v:count == 0 ? 'gk' : 'k')
 nnoremap <expr> о (v:count == 0 ? 'gj' : 'j')
-
-map <C-k> <C-w><Up>
-map <C-j> <C-w><Down>
-map <C-l> <C-w><Right>
-map <C-h> <C-w><Left>
 
 vmap "y "*y
 nmap "y "*y

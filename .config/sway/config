@@ -3,44 +3,62 @@ set $left h
 set $down j
 set $up k
 set $right l
-set $term alacritty
-set $menu rofi -show drun -config ~/.config/rofi/menu.rasi -show-icons
+set $term footclient
+set $menu wofi --show drun
 
-font pango:Iosevka Regular 10
+set $bg #282828
+set $white #fbf1c7
+set $red #cc241d
+set $green #98971a
+set $yellow #d79921
+set $blue #458588
+set $purple #b16286
+set $aqua #689d68
+set $gray #a89984
+set $darkgray #1d2021
 
-default_border pixel 2
+output * bg ~/Backgrounds/1.png fill
+
+font pango:Iosevka Regular 12
+
+xwayland enable
+default_border pixel 1
 smart_borders on
-#gaps inner 8
+gaps inner 0
 
-client.focused			#cad3f5 #cad3f5 #cad3f5 #cad3f5
-client.focused_inactive	#24273a #24273a #24273a #24273a
-client.unfocused		#24273a #24273a #24273a #24273a
-client.urgent			#E78284 #E78284 #E78284 #E78284
-client.placeholder		#24273a #24273a #24273a #24273a
+exec mako
+exec udiskie
+exec foot --server
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec hash dbus-update-activation-environment 2>/dev/null && dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
 
-exec_always "setxkbmap -model pc105 -layout us,ru -option grp:alt_space_toggle"
-exec_always --no-startup-id $HOME/.config/polybar/launch.sh &
-exec --no-startup-id udiskie &
-exec --no-startup-id picom &
-exec --no-startup-id blueman-applet &
-exec --no-startup-id feh --bg-scale ~/Backgrounds/1.jpg &
-exec --no-startup-id dunst -conf ~/.config/dunst/dunstrc &
+exec swayidle -w \
+          timeout 300 'swaylock -f -c 000000' \
+          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+          before-sleep 'swaylock -f -c 000000'
 
-floating_modifier $mod
+input "1739:52631:DELL08E0:00_06CB:CD97_Touchpad" {
+   dwt enabled
+   tap enabled
+   natural_scroll enabled
+   middle_emulation enabled
+}
+
+input "type:keyboard" {
+    xkb_layout us,ru
+    xkb_options grp:alt_shift_toggle,caps:escape
+    xkb_numlock enabled
+}
 
 bindsym $mod+Return exec $term
 bindsym $mod+Shift+q kill
+bindsym $mod+Shift+s exec grim -g "$(slurp)" -t png - | wl-copy -t image/png
 bindsym $mod+d exec $menu
 
-bindsym $mod+Shift+c reload
-bindsym $mod+Shift+r restart
-bindsym $mod+Shift+s exec --no-startup-id maim --format=png --select | xclip -selection clipboard -t image/png
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+floating_modifier $mod normal
 
-bindsym $mod+Shift+Return exec $term -e "ranger"
-bindsym $mod+Shift+v exec $term -e "vim"
-bindsym $mod+Shift+w exec firefox
-bindsym $mod+Shift+BackSpace exec $term -e "htop"
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
@@ -125,3 +143,29 @@ mode "resize" {
 }
 bindsym $mod+r mode "resize"
 
+# class                 border    backgr    text      indicator  child_border
+client.focused          $bg       $bg       $white    $white     $white
+client.focused_inactive $bg       $bg       $gray     $bg        $bg
+client.unfocused        $bg       $bg       $gray     $bg        $bg
+client.urgent           $red      $bg       $red      $red       $red
+
+bar {
+    position top
+
+    status_command while date +'%Y-%m-%d %I:%M:%S %p'; do sleep 1; done
+
+    colors {
+        background $bg
+        statusline $white
+        # class              border  backgr. text
+        focused_workspace    $bg     $bg     $white
+        inactive_workspace   $bg     $bg     $gray
+        active_workspace     $bg     $bg     $gray
+        urgent_workspace     $bg     $bg     $red
+    }
+
+    # swaybar_command waybar
+}
+
+
+include /etc/sway/config.d/*
