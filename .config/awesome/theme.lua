@@ -1,8 +1,3 @@
----------------------------
--- Default awesome theme --
----------------------------
-
-local beautiful = require("beautiful")
 local theme_assets = require("beautiful.theme_assets")
 local xresources = require("beautiful.xresources")
 local dpi = xresources.apply_dpi
@@ -14,22 +9,24 @@ local theme = {}
 
 theme.font          = "iosevka 11"
 
-theme.bg_normal     = "#222222"
-theme.bg_focus      = "#535d6c"
-theme.bg_urgent     = "#ff0000"
-theme.bg_minimize   = "#444444"
+theme.bg_normal     = "#282828"
+theme.bg_focus      = "#3c3836"
+theme.bg_urgent     = theme.bg_normal
+theme.bg_minimize   = theme.bg_focus
 theme.bg_systray    = theme.bg_normal
+theme.hotkeys_bg    = theme.bg_normal
 
-theme.fg_normal     = "#aaaaaa"
-theme.fg_focus      = "#ffffff"
-theme.fg_urgent     = "#ffffff"
-theme.fg_minimize   = "#ffffff"
+theme.fg_normal     = "#ebdbb2"
+theme.fg_focus      = theme.fg_normal
+theme.fg_urgent     = "#d3869b"
+theme.fg_minimize   = theme.fg_normal
+theme.hotkeys_fg    = theme.fg_normal
 
-theme.useless_gap   = dpi(0)
-theme.border_width  = dpi(4)
-theme.border_normal = "#000000"
-theme.border_focus  = "#535d6c"
-theme.border_marked = "#91231c"
+theme.useless_gap   = 0
+theme.border_width  = 2
+theme.border_normal = theme.bg_normal
+theme.border_focus  = "#a89984"
+theme.border_marked = "#cc241d"
 
 -- There are other variable sets
 -- overriding the default one when
