@@ -97,7 +97,7 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias hx="helix"
+#alias hx="helix"
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
@@ -105,4 +105,9 @@ export PATH=$PATH:$GOPATH/bin
 export RUBYOPT="-W0"
 export TERM=xterm-256color
 export PATH="$PATH:$HOME/.local/bin"
-export PATH="/home/danil/.asdf/installs/poetry/1.4.2/bin:$PATH"
+export PATH=$PATH:/snap/bin/
+
+export RUBYOPT="-W0"
+export TERM=xterm-256color
+
+eval `keychain --agents ssh --eval --quiet ~/.ssh/id_ed25519`
