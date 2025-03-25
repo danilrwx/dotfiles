@@ -49,6 +49,11 @@ brew-install:
 brew-packages:
 	brew install brew-cask-completion sops regclient k9s lazygit
 
+docker:
+	sudo systemctl start docker.socket
+	sudo systemctl enable docker.socket
+	sudo usermod -aG docker $(USER)
+
 asdf:
 	git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.12.0
 
