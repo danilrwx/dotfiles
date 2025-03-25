@@ -1,3 +1,5 @@
+set nocompatible
+
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -9,6 +11,8 @@ call plug#begin('~/.vim/plugged')
 Plug 'catppuccin/vim', { 'as': 'catppuccin' }
 Plug 'tpope/vim-endwise'
 Plug 'mnishz/colorscheme-preview.vim'
+Plug 'tpope/vim-commentary'
+Plug 'sheerun/vim-polyglot'
 
 call plug#end()
 
@@ -37,7 +41,7 @@ endif
 
 set lazyredraw
 set ttyfast
-set number
+set relativenumber
 set hlsearch
 set ignorecase
 set nojoinspaces
@@ -50,7 +54,7 @@ set signcolumn=yes
 set scrolloff=3
 set undodir=/tmp/.vim/backups
 set undofile
-
+set cursorline
 set path+=**
 set wildmenu
 
@@ -72,3 +76,4 @@ nmap "P "*P
 
 nnoremap gV `[v`]
 
+nnoremap <Leader>gg :!lazygit<CR>
