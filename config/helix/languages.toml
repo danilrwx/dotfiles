@@ -1,0 +1,9 @@
+[[languages]]
+name = "go"
+auto-format = true
+formatter = { command = "goimports" }
+
+[[language]]
+name = "ruby"
+[language-server.solargraph]
+config = { diagnostics = true, formatting = true }
