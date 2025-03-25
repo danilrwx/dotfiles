@@ -34,12 +34,18 @@ brew-install:
 	/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 brew-packages:
-	brew install brew-cask-completion sops regclient k9s lazygit fzf httpie asdf ripgrep neofetch \
-	 jq keychain wget fd openssl readline libyaml gmp autoconf tmux  neovim python3
+	brew install brew-cask-completion sops regclient k9s lazygit fzf httpie asdf ripgrep \ 
+	neofetch jq keychain wget fd openssl readline libyaml gmp autoconf tmux  neovim python3 \
+	yq
 
 brew-mac:
 	brew install chromium --no-quarantine
 	brew install go-task/tap/go-task
+	brew install metalbear-co/mirrord/mirrord
+	brew install homeport/tap/dyff
+
+go-packages:
+	go install github.com/kubernetes-sigs/controller-tools@latest
 
 docker:
 	sudo systemctl start docker.socket

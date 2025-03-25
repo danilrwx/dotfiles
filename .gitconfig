@@ -14,7 +14,7 @@
 
 [delta]
 	navigate = true
-	light = false
+	light = true
 	hyperlinks = true
 
 [merge]
@@ -22,3 +22,7 @@
 
 [diff]
 	colorMoved = default
+[alias]
+      commit = commit --signoff
+[diff "dyff"]
+	command = "dyff_between() { dyff --color on between --omit-header \"$2\" \"$5\"; }; dyff_between"

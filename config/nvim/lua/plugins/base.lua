@@ -5,27 +5,20 @@ return {
       colorscheme = "github_dark",
     },
   },
-  {
-    "catppuccin/nvim",
-    enabled = false,
-  },
-  {
-    "folke/tokyonight.nvim",
-    enabled = false,
-    opts = {},
-  },
-  {
-    "akinsho/bufferline.nvim",
-    enabled = false,
-  },
+
   {
     "nvim-lualine/lualine.nvim",
-    enabled = false,
+    opts = {
+      sections = {
+        lualine_a = { "mode" },
+        lualine_b = {},
+        lualine_y = {},
+        lualine_z = { "branch" },
+        lualine_c = { { "filename", path = 1 } },
+      },
+    },
   },
-  {
-    "nvimdev/dashboard-nvim",
-    enabled = false,
-  },
+
   {
     "lewis6991/gitsigns.nvim",
     event = "LazyFile",
@@ -75,16 +68,6 @@ return {
   },
 
   {
-    "iamcco/markdown-preview.nvim",
-    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-    build = "cd app && yarn install",
-    init = function()
-      vim.g.mkdp_filetypes = { "markdown" }
-    end,
-    ft = { "markdown" },
-  },
-
-  {
     "Wansmer/treesj",
     keys = { "<space>m", "<space>j", "<space>s" },
     dependencies = { "nvim-treesitter/nvim-treesitter" }, -- if you install parsers with `nvim-treesitter`
@@ -102,13 +85,71 @@ return {
 
   {
     "nvim-telescope/telescope.nvim",
-    keys = { { "<leader>gc", false }, { "<leader>gs", false } },
+    keys = {
+      { "<leader>gc", false },
+      { "<leader>gs", false },
+      { "<leader><leader>", false },
+    },
+    opts = {
+      defaults = {
+        mappings = {
+          i = {
+            ["<C-j>"] = require("telescope.actions.layout").toggle_preview,
+          },
+        },
+        preview = {
+          -- hide_on_startup = true, -- hide previewer when picker starts
+        },
+        layout_config = {
+          horizontal = {
+            -- width = 0.95,
+            -- height = 0.9,
+            width = { padding = 0 },
+            height = { padding = 0 },
+            preview_width = 0.5,
+          },
+        },
+      },
+    },
+  },
+
+  {
+    "neovim/nvim-lspconfig",
+    opts = {
+      document_highlight = {
+        enabled = false,
+      },
+      codelens = {
+        enabled = false,
+      },
+      inlay_hints = {
+        enabled = false,
+      },
+    },
+  },
+
+  {
+    "SCJangra/table-nvim",
+    ft = "markdown",
+    opts = {},
   },
 
   { "mbbill/undotree" },
   { import = "lazyvim.plugins.extras.coding.mini-surround" },
-  { import = "lazyvim.plugins.extras.coding.neogen" },
   { import = "lazyvim.plugins.extras.dap.core" },
+  {
+    "rcarriga/nvim-dap-ui",
+    dependencies = { "nvim-neotest/nvim-nio" },
+    keys = {
+      {
+        "<leader>du",
+        function()
+          require("dapui").toggle({ reset = true })
+        end,
+        desc = "Dap UI",
+      },
+    },
+  },
   { import = "lazyvim.plugins.extras.editor.refactoring" },
   { import = "lazyvim.plugins.extras.lang.docker" },
   { import = "lazyvim.plugins.extras.lang.git" },
