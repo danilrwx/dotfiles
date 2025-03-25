@@ -1,7 +1,9 @@
 vim.opt.termguicolors = true
 
--- Set colorscheme to NeoSolarized
-vim.cmd [[
-        colorscheme default
-        set background=light
-]]
+require('github-theme').setup({
+  options = {
+    transparent = true,
+  }
+})
+
+vim.cmd('colorscheme github_light')
