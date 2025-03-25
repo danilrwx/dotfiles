@@ -12,8 +12,7 @@ config-install:
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 
 arch-prepare:
-	sudo pacman --needed -S seatd htop git curl zsh firefox telegram-desktop discord tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man
-
+	sudo pacman --needed -S seatd htop git curl zsh firefox telegram-desktop discord tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
 deps: deps-gem deps-npm deps-go
 
 deps-go:
@@ -38,3 +37,21 @@ git:
 
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
+
+ohmyzsh:
+	sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+
+asdf:
+	git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.11.2
+	~/.asdf/bin/asdf plugin-add ruby
+	~/.asdf/bin/asdf plugin-add nodejs
+
+asdf-install:
+	~/.asdf/bin/asdf install ruby 3.1.2
+	~/.asdf/bin/asdf install nodejs 14.21.3
+	~/.asdf/bin/asdf global ruby 3.1.2
+	~/.asdf/bin/asdf global nodejs 14.21.3
+
+yay:
+	git clone https://aur.archlinux.org/yay.git ~/yay
+	cd ~/yay; makepkg -si
