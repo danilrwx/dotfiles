@@ -2,7 +2,9 @@ all:
 	mkdir -p ~/.config
 	make console-font
 	make base
-	make wm
+	make i3
+	make laptop
+	make desktop
 	make git
 	make git-change-remote
 
@@ -58,10 +60,13 @@ laptop-gpu:
 	sudo pacman -S --needed xf86-video-intel
 	sudo ln -sf $(PWD)/20-intel.conf /etc/X11/xorg.conf.d/
 
+desktop: desktop-packages
+
 desktop-packages:
 	sudo pacman -S --needed dex xdg-user-dirs \
 		xdg-user-dirs-gtk xdg-utils ffmpeg udisks2 \
-		mpd mpv yt-dlp libnotify
+		mpd mpv yt-dlp libnotify firefox discord \
+		telegram-desktop
 
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
@@ -104,7 +109,7 @@ go-tools-install:
 
 
 yay:
-	sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && sudo makepkg -si
+	sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
 
 yay-install:
-	yay xkblayout-state-git helix-git sad bashmount
+	yay -S xkblayout-state-git helix-git sad bashmount
