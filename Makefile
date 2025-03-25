@@ -9,9 +9,9 @@ base:
 	ln -sf $(PWD)/.gitignore_global ~/.gitignore_global
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -sf $(PWD)/.vimrc ~/.vimrc
+	ln -snf $(PWD)/config/vim ~/.vim
 	ln -snf $(PWD)/config/htop ~/.config/
-	ln -snf $(PWD)/config/vim ~/.config/vim
-	ln -snf $(PWD)/config/lazygit ~/.config/
+	# ln -snf $(PWD)/config/lazygit ~/.config/
 	ln -snf $(PWD)/config/ghostty ~/.config/
 
 sway:
