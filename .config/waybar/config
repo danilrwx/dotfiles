@@ -2,6 +2,7 @@
     "layer": "top",
     "position": "top",
     "height": 20, // Waybar height (to be removed for auto height)
+    "margin": "8 8 0 8",
     // "spacing": 4, // Gaps between modules (4px)
     "modules-left": ["sway/workspaces", "sway/mode", "sway/scratchpad", "custom/media"],
     "modules-center": ["sway/window"],
