@@ -1,0 +1,147 @@
+set $mod Mod4
+set $left h
+set $down j
+set $up k
+set $right l
+set $term footclient
+set $menu wofi --show drun
+
+# transparent
+set $bg #282828B4
+#set $bg #282828
+
+set $white #fbf1c7
+set $red #cc241d
+set $green #98971a
+set $yellow #d79921
+set $blue #458588
+set $purple #b16286
+set $aqua #689d68
+set $gray #a89984
+set $darkgray #1d2021
+
+output * bg ~/Backgrounds/2.jpg fill
+
+font pango:Iosevka Regular 12
+
+#xwayland disable
+default_border pixel 1
+smart_borders on
+gaps inner 0
+
+exec mako
+exec foot --server
+exec dex --autostart --environment sway
+exec hash dbus-update-activation-environment 2>/dev/null && dbus-update-activation-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+
+exec swayidle -w \
+          timeout 300 'swaylock -f -c 000000' \
+          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+          before-sleep 'swaylock -f -c 000000'
+
+input "1739:52631:DELL08E0:00_06CB:CD97_Touchpad" {
+   dwt enabled
+   tap enabled
+   natural_scroll enabled
+   middle_emulation enabled
+}
+
+input "type:keyboard" {
+    xkb_layout us,ru
+    xkb_options grp:alt_shift_toggle,caps:escape
+    xkb_numlock enabled
+}
+
+bindsym $mod+Return exec $term
+bindsym $mod+Shift+q kill
+bindsym $mod+Shift+s exec grim -g "$(slurp)" -t png - | wl-copy -t image/png
+bindsym $mod+d exec $menu
+
+bindsym Control+Mod1+a exec ~/dotfiles/scripts/sys-notify
+bindsym Control+Mod1+s exec ~/dotfiles/scripts/base-notify
+
+floating_modifier $mod normal
+
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+
+bindsym $mod+b splith
+bindsym $mod+v splitv
+
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+bindsym $mod+f fullscreen
+
+bindsym $mod+Shift+space floating toggle
+
+bindsym $mod+space focus mode_toggle
+
+bindsym $mod+a focus parent
+
+bindsym $mod+Shift+minus move scratchpad
+
+bindsym $mod+minus scratchpad show
+
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +10%
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -10%
+bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+bindsym XF86MonBrightnessDown exec brightnessctl set 10%-
+bindsym XF86MonBrightnessUp exec brightnessctl set 10%+
+
+mode "resize" {
+    bindsym $left resize shrink width 10px
+    bindsym $down resize grow height 10px
+    bindsym $up resize shrink height 10px
+    bindsym $right resize grow width 10px
+
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+# class                 border    backgr    text      indicator  child_border
+client.focused          $bg       $bg       $white    $white     $white
+client.focused_inactive $bg       $bg       $gray     $bg        $bg
+client.unfocused        $bg       $bg       $gray     $bg        $bg
+client.urgent           $red      $bg       $red      $red       $red
+
+include /etc/sway/config.d/*
