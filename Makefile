@@ -45,22 +45,22 @@ laptop-packages:
 desktop-packages:
 	sudo xbps-install -Syu bashmount elogind dex xdg-user-dirs \
 		xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 \
-		flatpak wireguard nerd-fonts mpd
+		flatpak wireguard nerd-fonts mpd ImageMagick
 
 dev-packages:
 	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl \
-		postgresql-libs postgresql-libs-devel ImageMagick
+		postgresql-libs postgresql-libs-devel
 
 wm: wm-packages wm-config
 
 wm-packages:
-	sudo xbps-install -Syu spectrwm dmenu maim xclip xdotool dunst xorg \
-		hsetroot xcompmgr alacritty slock
+	sudo xbps-install -Syu i3 dmenu maim xclip xdotool dunst xorg \
+		hsetroot xcompmgr wezterm xss-lock
 
 wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
-	ln -snf $(PWD)/.config/spectrwm ~/.config/
+	ln -snf $(PWD)/.config/i3 ~/.config/
 	ln -snf $(PWD)/.config/dunst ~/.config/
 
 runit:
