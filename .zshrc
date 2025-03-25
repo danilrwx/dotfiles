@@ -26,8 +26,8 @@ alias rdr='bin/rails db:rollback'
 alias rdrp='bin/rails db:rollback:primary'
 
 alias lg='lazygit'
-alias vim='nvim'
-alias vi='nvim'
+# alias vim='nvim'
+# alias vi='nvim'
 
 export GOPATH=$HOME/go
 export RUBYOPT="-W0"
