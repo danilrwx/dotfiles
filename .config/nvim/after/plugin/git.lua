@@ -1,5 +1,2 @@
-vim.keymap.set("n", "<Leader>gg", ":LazyGit<CR>")
+vim.keymap.set("n", "<Leader>gg", vim.cmd.LazyGit)
 
-require('gitsigns').setup({
-  current_line_blame = true
-})
