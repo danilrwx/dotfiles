@@ -6,8 +6,10 @@
 TAGS
 
 fixtures/_build
-config/helix/runtime
-config/vim/undodir
+config/vim/files/undo/*
+config/vim/files/swap/*
+config/vim/files/backup/*
+
 config/k9s/clusters
 
 .gitignore
