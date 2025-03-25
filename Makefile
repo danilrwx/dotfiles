@@ -38,12 +38,8 @@ i3-config:
 	ln -snf $(PWD)/.config/dunst ~/.config/
 	ln -snf $(PWD)/.config/xfce4 ~/.config/
 
-git:
-	git config --global core.editor "hx"
-	git config --global user.name "Danil Antoshin"
-	git config --global user.email antoshindanil@ya.ru
-	git config --global pull.rebase true
-
+dev-packages:
+	sudo pacman -S --needed libffi libyaml openssl zlib imagemagick postgresql-libs mariadb-libs
 
 laptop: laptop-packages laptop-enable laptop-gpu desktop-packages
 
@@ -65,7 +61,13 @@ desktop-packages:
 	sudo pacman -S --needed dex xdg-user-dirs \
 		xdg-user-dirs-gtk xdg-utils ffmpeg udisks2 \
 		mpd mpv yt-dlp libnotify firefox discord \
-		telegram-desktop
+		telegram-desktop pavucontrol
+
+git:
+	git config --global core.editor "hx"
+	git config --global user.name "Danil Antoshin"
+	git config --global user.email antoshindanil@ya.ru
+	git config --global pull.rebase true
 
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
