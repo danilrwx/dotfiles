@@ -3,7 +3,7 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "github_light",
+      -- colorscheme = "github_light",
     },
   },
 
@@ -44,15 +44,15 @@ return {
   --   version = "*",
   --   config = true,
   -- },
-
-  {
-    "projekt0n/github-nvim-theme",
-    lazy = false,
-    priority = 1000,
-    config = function()
-      require("github-theme").setup({ options = { transparent = true } })
-    end,
-  },
+  --
+  -- {
+  --   "projekt0n/github-nvim-theme",
+  --   lazy = false,
+  --   priority = 1000,
+  --   config = function()
+  --     require("github-theme").setup({ options = { transparent = true } })
+  --   end,
+  -- },
 
   {
     "chrisgrieser/nvim-various-textobjs",
