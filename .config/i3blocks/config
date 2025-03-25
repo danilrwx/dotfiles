@@ -13,6 +13,10 @@ interval=5
 command=swaymsg -t get_inputs | jq 'map(select(has("xkb_active_layout_name")))[0].xkb_active_layout_name'
 interval=1
 
+[kbd_layout_i3]
+comman=xkblayout-state print %n
+interval=1
+
 [time]
 command=date '+%Y-%m-%d %H:%M:%S'
 interval=1

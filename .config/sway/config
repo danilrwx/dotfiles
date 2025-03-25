@@ -32,8 +32,7 @@ gaps inner 0
 exec mako
 exec foot --server
 exec dex --autostart --environment sway
-exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
-exec hash dbus-update-activation-environment 2>/dev/null && dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec hash dbus-update-activation-environment 2>/dev/null && dbus-update-activation-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
 
 exec swayidle -w \
           timeout 300 'swaylock -f -c 000000' \

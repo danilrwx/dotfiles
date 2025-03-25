@@ -2,8 +2,8 @@ all:
 	make base-packages
 	make base-config
 	make console-font
-	make sway-packages
-	make sway-config
+	make i3-packages
+	make i3-config
 	make runit
 	make pipewire
 	make virt 
@@ -29,7 +29,7 @@ base-config:
 	ln -snf $(PWD)/.config/i3blocks ~/.config/i3blocks
 
 base-packages:
-	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep acpi bashmount neofetch neovim i3blocks font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp intel-video-accel flatpak connman lazygit dex xdg-user-dirs xdg-utils xdg-desktop-portal-wlr
+	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep acpi bashmount neofetch neovim i3blocks font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp intel-video-accel flatpak connman lazygit dex mosh xdg-user-dirs xdg-user-dirs-gtk xdg-utils easyeffects libavcodec ffmpeg mesa-dri 
 
 console-font:
 	echo 'FONT="cyr-sun16"' | sudo tee -a /etc/rc.conf
@@ -37,9 +37,19 @@ console-font:
 disable-wpa:
 	sudo rm /var/service/wpa_supplicant
 	sudo rm /var/service/dhcpcd
+	sudo ln -sf /etc/sv/connmand /var/service/
+
+i3-packages:
+	sudo xbps-install -Syu rxvt-unicode maim xclip xdotool rofi dunst feh i3 xss-lock xorg xkblayout-state
+
+i3-config:
+	ln -sf $(PWD)/.bash_profile ~/.bash_profile
+	ln -sf $(PWD)/.Xresources ~/.Xresources
+	ln -sf $(PWD)/.xinitrc ~/.xinitrc
+	ln -snf $(PWD)/.config/i3 ~/.config/i3
 
 sway-packages:
-	sudo xbps-install -Syu sway foot mako wofi swaybg slurp grim wl-clipboard mesa-dri
+	sudo xbps-install -Syu sway foot mako wofi swaybg slurp grim wl-clipboard xdg-desktop-portal-wlr xdg-desktop-portal-gtk xdg-desktop-portal 
 
 sway-config:
 	ln -sf $(PWD)/.bash_profile.wayland ~/.bash_profile
@@ -50,7 +60,6 @@ sway-config:
 runit:
 	sudo ln -sf /etc/sv/elogind /var/service/
 	sudo ln -sf /etc/sv/dbus /var/service/
-	sudo ln -sf /etc/sv/connmand /var/service/
 	sudo ln -sf /etc/sv/tlp /var/service/
 
 pipewire:
@@ -90,4 +99,4 @@ flatpak:
 	flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak-install:
-	flatpak install -y flathub com.github.tchx84.Flatseal org.telegram.desktop com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice org.mozilla.firefox io.github.spacingbat3.webcord com.github.wwmm.easyeffects
+	flatpak install -y flathub com.github.tchx84.Flatseal org.telegram.desktop com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice org.mozilla.firefox com.discordapp.Discord

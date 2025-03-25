@@ -3,5 +3,8 @@ if which dbus-launch >/dev/null 2>&1 && test -z "$DBUS_SESSION_BUS_ADDRESS"; the
 fi 
 
 if [ -z "${WAYLAND_DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
-  exec sway
+	export SDL_VIDEODRIVER=wayland 
+	export XDG_CURRENT_DESKTOP=sway
+	export XDG_SESSION_DESKTOP=sway
+	exec dbus-run-session sway 
 fi
