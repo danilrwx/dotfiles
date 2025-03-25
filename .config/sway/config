@@ -3,12 +3,12 @@ set $left h
 set $down j
 set $up k
 set $right l
-set $term footclient
-set $menu wofi --show drun
+set $term foot
+set $menu rofi -show drun
 
 # transparent
-set $bg #282828B4
-#set $bg #282828
+# set $bg #282828B4
+set $bg #282828
 
 set $white #fbf1c7
 set $red #cc241d
@@ -20,9 +20,9 @@ set $aqua #689d68
 set $gray #a89984
 set $darkgray #1d2021
 
-output * bg ~/Backgrounds/2.jpg fill
+# output * bg ~/Backgrounds/2.jpg fill
 
-font pango:Iosevka Regular 12
+font pango:Iosevka Regular 10
 
 #xwayland disable
 default_border pixel 1
@@ -144,4 +144,9 @@ client.focused_inactive $bg       $bg       $gray     $bg        $bg
 client.unfocused        $bg       $bg       $gray     $bg        $bg
 client.urgent           $red      $bg       $red      $red       $red
 
+bar {
+    swaybar_command waybar
+}
+
 include /etc/sway/config.d/*
+include '$($LIBEXECDIR/sway/layered-include "$DATADIR/sway/config.d/*.conf" "$SYSCONFDIR/sway/config.d/*.conf" "${XDG_CONFIG_HOME:-$HOME/.config}/sway/config.d/*.conf")'

@@ -1,3 +1,3 @@
 vim.opt.termguicolors = true
-vim.g.adwaita_darker = true
-vim.cmd("colorscheme adwaita")
+vim.opt.background = 'dark'
+vim.cmd("colorscheme gruvbox")
