@@ -1,20 +1,4 @@
 return {
-  { import = "lazyvim.plugins.extras.coding.mini-surround" },
-  { import = "lazyvim.plugins.extras.coding.yanky" },
-  { import = "lazyvim.plugins.extras.dap.core" },
-  { import = "lazyvim.plugins.extras.editor.mini-files" },
-  { import = "lazyvim.plugins.extras.editor.refactoring" },
-  { import = "lazyvim.plugins.extras.lang.docker" },
-  { import = "lazyvim.plugins.extras.lang.git" },
-  { import = "lazyvim.plugins.extras.lang.go" },
-  { import = "lazyvim.plugins.extras.lang.helm" },
-  { import = "lazyvim.plugins.extras.lang.json" },
-  { import = "lazyvim.plugins.extras.lang.python" },
-  { import = "lazyvim.plugins.extras.lang.ruby" },
-  { import = "lazyvim.plugins.extras.lang.yaml" },
-  { import = "lazyvim.plugins.extras.lsp.none-ls" },
-  { import = "lazyvim.plugins.extras.test.core" },
-  { import = "lazyvim.plugins.extras.ui.treesitter-context" },
 
   {
     "LazyVim/LazyVim",
@@ -55,11 +39,11 @@ return {
     },
   },
 
-  {
-    "akinsho/git-conflict.nvim",
-    version = "*",
-    config = true,
-  },
+  -- {
+  --   "akinsho/git-conflict.nvim",
+  --   version = "*",
+  --   config = true,
+  -- },
 
   {
     "projekt0n/github-nvim-theme",
@@ -69,10 +53,11 @@ return {
       require("github-theme").setup({ options = { transparent = true } })
     end,
   },
+
   {
     "chrisgrieser/nvim-various-textobjs",
     lazy = false,
-    opts = { useDefaultKeymaps = true },
+    opts = { useDefaults = true },
   },
 
   {
@@ -120,14 +105,15 @@ return {
       vt_position = "end_of_line",
     },
   },
-
-  {
-    "SCJangra/table-nvim",
-    ft = "markdown",
-    opts = {},
-  },
+  --
+  -- {
+  --   "SCJangra/table-nvim",
+  --   ft = "markdown",
+  --   opts = {},
+  -- },
 
   { "mbbill/undotree" },
+
   {
     "rcarriga/nvim-dap-ui",
     dependencies = { "nvim-neotest/nvim-nio" },
@@ -143,26 +129,29 @@ return {
   },
 
   {
-    "nvim-contrib/nvim-ginkgo",
-    lazy = false,
-  },
-  {
-    "nvim-neotest/neotest",
-    lazy = true,
+    "GeorgesAlkhouri/nvim-aider",
+    cmd = {
+      "AiderTerminalToggle",
+      "AiderHealth",
+    },
+    keys = {
+      { "<leader>a/", "<cmd>AiderTerminalToggle<cr>", desc = "Open Aider" },
+      { "<leader>as", "<cmd>AiderTerminalSend<cr>", desc = "Send to Aider", mode = { "n", "v" } },
+      { "<leader>ac", "<cmd>AiderQuickSendCommand<cr>", desc = "Send Command To Aider" },
+      { "<leader>ab", "<cmd>AiderQuickSendBuffer<cr>", desc = "Send Buffer To Aider" },
+      { "<leader>a+", "<cmd>AiderQuickAddFile<cr>", desc = "Add File to Aider" },
+      { "<leader>a-", "<cmd>AiderQuickDropFile<cr>", desc = "Drop File from Aider" },
+      { "<leader>ar", "<cmd>AiderQuickReadOnlyFile<cr>", desc = "Add File as Read-Only" },
+      -- Example nvim-tree.lua integration if needed
+      { "<leader>a+", "<cmd>AiderTreeAddFile<cr>", desc = "Add File from Tree to Aider", ft = "NvimTree" },
+      { "<leader>a-", "<cmd>AiderTreeDropFile<cr>", desc = "Drop File from Tree from Aider", ft = "NvimTree" },
+    },
     dependencies = {
-      "fredrikaverpil/neotest-golang",
-      "nvim-contrib/nvim-ginkgo",
+      "folke/snacks.nvim",
+      --- The below dependencies are optional
+      "catppuccin/nvim",
+      "nvim-tree/nvim-tree.lua",
     },
-    opts = {
-      adapters = {
-        -- ["neotest-golang"] = {
-        --   go_test_args = { "-v", "-race", "-count=1", "-timeout=60s" },
-        --   dap_go_enabled = true,
-        --   testify_enabled = true,
-        -- },
-        ["nvim-ginkgo"] = {},
-        -- require("nvim-ginkgo"),
-      },
-    },
+    config = true,
   },
 }

@@ -13,22 +13,20 @@ alias c='clear'
 alias grep='grep --color=auto'
 alias untar='tar -zxvf '
 alias wget='wget -c '
-
 alias lg='lazygit'
-alias vim='nvim'
-alias vi='nvim'
 
 export RUBYOPT="-W0"
 export COLORTERM=truecolor
 export EDITOR='nvim'
 export VISUAL='nvim'
-# export DELTA_PAGER='bat'
-export PAGER='moar'
 export DFT_BACKGROUND=light
+
 export PATH=$PATH:$GOPATH/bin/
 export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/
 export PATH=$PATH:$HOME/dotfiles/scripts/
+export PATH=$PATH:$HOME/.bun/bin
+
 export XDG_CONFIG_HOME="$HOME/.config"
 export K9S_CONFIG_DIR=$HOME/.config/k9s
 export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
@@ -48,24 +46,15 @@ export FZF_ALT_C_OPTS="
   --walker-skip .git,node_modules,target
   --preview 'tree -C {}'"
 
-export GPG_TTY=$(tty)
-
 [[ -e $HOME/.config/sops ]] && export PUB_KEY=$(cat $HOME/.config/sops/age/keys.txt | grep "public" | awk '{print $4}')
 [[ -e $HOME/.config/sops ]] && export SOPS_AGE_KEY_FILE=$HOME/.config/sops/age/keys.txt
-
 # [[ -e /usr/bin/keychain ]] && eval `keychain --agents ssh --eval --quiet ~/.ssh/id_ed25519`
-
-[[ -e /usr/bin/kubectl ]] && source <(kubectl completion zsh)
 
 [[ -e /home/linuxbrew/.linuxbrew/bin/brew ]] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 [[ -e /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
-[[ -e ~/private.zsh ]] && source ~/private.zsh
-
 source <(fzf --zsh)
 source <(kubectl completion zsh)
-
-. /opt/homebrew/opt/asdf/libexec/asdf.sh
 
 go_bin_path="$(asdf which go 2>/dev/null)"
 if [[ -n "${go_bin_path}" ]]; then
@@ -81,3 +70,4 @@ if [[ -n "${go_bin_path}" ]]; then
   GOBIN="$(dirname "${GOROOT}")/packages/bin"
 fi
 
+[[ -e ~/private.zsh ]] && source ~/private.zsh
