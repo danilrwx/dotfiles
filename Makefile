@@ -4,9 +4,10 @@ all:
 	make git
 
 base:
-	ln -sf $(PWD)/.bashrc ~/.bashrc
+	ln -sf $(PWD)/.zshrc ~/.zshrc
 	ln -sf $(PWD)/.gitconfig ~/.gitconfig
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
+	ln -sf $(PWD)/.vimrc ~/.vimrc
 	ln -snf $(PWD)/config/htop ~/.config/
 	ln -snf $(PWD)/config/nvim ~/.config/
 	ln -snf $(PWD)/config/vim ~/.vim
@@ -34,10 +35,10 @@ brew-install:
 
 brew-packages:
 	brew install brew-cask-completion sops regclient k9s lazygit fzf httpie asdf ripgrep neofetch \
-	 jq keychain wget fd openssl readline libyaml gmp autoconf tmux  neovim
+	 jq keychain wget fd openssl readline libyaml gmp autoconf tmux  neovim python3
 
 brew-mac:
-	brew install --cask chromium
+	brew install chromium --no-quarantine
 
 docker:
 	sudo systemctl start docker.socket
