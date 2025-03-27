@@ -6,6 +6,10 @@
 TAGS
 
 fixtures/_build
+config/vim/nfiles/undo/*
+config/vim/nfiles/swap/*
+config/vim/nfiles/backup/*
+config/vim/nfiles/info/*
 config/vim/files/undo/*
 config/vim/files/swap/*
 config/vim/files/backup/*

@@ -2,14 +2,31 @@ return {
   {
     "echasnovski/mini.nvim",
     version = false,
-    dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter-textobjects",
+      'rafamadriz/friendly-snippets'
+    },
     config = function()
-      require("mini.bracketed").setup()
-      require("mini.diff").setup()
       require("mini.notify").setup()
       require("mini.surround").setup()
       require("mini.trailspace").setup()
       require('mini.icons').setup()
+      require('mini.tabline').setup()
+      require('mini.extra').setup()
+
+      require('mini.completion').setup()
+      require('mini.snippets').setup()
+
+      require('mini.git').setup()
+      -- require("mini.diff").setup({ view = { style = 'number', priority = 199 } })
+
+      require("mini.pick").setup()
+      vim.keymap.set("n", "<leader>f", "<cmd>Pick files<cr>")
+      vim.keymap.set("n", "<leader>/", "<cmd>Pick grep_live<cr>")
+      vim.keymap.set("n", "<leader>'", "<cmd>Pick resume<cr>")
+      vim.keymap.set("n", "<leader>sb", "<cmd>Pick buffers<cr>")
+      vim.keymap.set("n", "<leader>sh", "<cmd>Pick git_hunks<cr>")
+      vim.keymap.set("n", "<leader>sd", "<cmd>Pick diagnostic<cr>")
 
       local MiniAi = require('mini.ai')
       MiniAi.setup({

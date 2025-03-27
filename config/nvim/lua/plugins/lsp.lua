@@ -1,92 +1,75 @@
 return {
   {
-    "VonHeikemen/lsp-zero.nvim",
-    branch = "v3.x",
-    lazy = true,
-    config = false,
-    init = function()
-      vim.g.lsp_zero_extend_cmp = 0
-      vim.g.lsp_zero_extend_lspconfig = 0
-    end,
-  },
-  {
-    "williamboman/mason.nvim",
-    lazy = false,
-    config = true,
-  },
-  {
-    "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
-    dependencies = {
-      { "L3MON4D3/LuaSnip" },
-      { "hrsh7th/cmp-path" },
-      { "hrsh7th/cmp-buffer" },
-      { "hrsh7th/cmp-nvim-lua" },
-      { "saadparwaiz1/cmp_luasnip" },
-      { "rafamadriz/friendly-snippets" },
-    },
-    config = function()
-      local lsp_zero = require("lsp-zero")
-      lsp_zero.extend_cmp()
-
-      local cmp = require("cmp")
-      local cmp_action = lsp_zero.cmp_action()
-      local cmp_select = { behavior = cmp.SelectBehavior.Select }
-
-      require("luasnip.loaders.from_vscode").lazy_load()
-
-      cmp.setup({
-        sources = {
-          { name = "path" },
-          { name = "nvim_lsp" },
-          { name = "nvim_lua" },
-          { name = "luasnip", keyword_length = 2 },
-          { name = "buffer",  keyword_length = 3 },
-        },
-        formatting = lsp_zero.cmp_format({ details = true }),
-        mapping = cmp.mapping.preset.insert({
-          ["<C-Space>"] = cmp.mapping.complete(),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
-          ["<C-u>"] = cmp.mapping.scroll_docs(-4),
-          ["<C-d>"] = cmp.mapping.scroll_docs(4),
-          ["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
-          ["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
-          ["<C-f>"] = cmp_action.luasnip_jump_forward(),
-          ["<C-b>"] = cmp_action.luasnip_jump_backward(),
-        }),
-        snippet = {
-          expand = function(args)
-            require("luasnip").lsp_expand(args.body)
-          end,
-        },
-      })
-    end
-  },
-  {
     "neovim/nvim-lspconfig",
     cmd = { "LspInfo", "LspInstall", "LspStart" },
     event = { "BufReadPre", "BufNewFile" },
-    dependencies = { { "hrsh7th/cmp-nvim-lsp" }, { "williamboman/mason-lspconfig.nvim" } },
     config = function()
-      local lsp_zero = require("lsp-zero")
-      lsp_zero.extend_lspconfig()
+      -- require('lspconfig').gopls.setup({
+      --   root_dir = function(fname)
+      --     local util = require 'lspconfig.util'
+      --     local async = require 'lspconfig.async'
+      --     local mod_cache = nil
+      --
+      --     -- see: https://github.com/neovim/nvim-lspconfig/issues/804
+      --     if not mod_cache then
+      --       local result = async.run_command { 'go', 'env', 'GOMODCACHE' }
+      --       if result and result[1] then
+      --         mod_cache = vim.trim(result[1])
+      --       else
+      --         mod_cache = vim.fn.system 'go env GOMODCACHE'
+      --       end
+      --     end
+      --     if mod_cache and fname:sub(1, #mod_cache) == mod_cache then
+      --       local clients = util.get_lsp_clients { name = 'gopls' }
+      --       if #clients > 0 then
+      --         return clients[#clients].config.root_dir
+      --       end
+      --     end
+      --     return util.root_pattern('go.work', '.git', 'go.mod')(fname)
+      --   end,
+      -- })
 
-      lsp_zero.on_attach(function(_, bufnr)
-        lsp_zero.default_keymaps({ buffer = bufnr })
-      end)
+      require('lspconfig').golangci_lint_ls.setup({
+        filetypes = { 'go', 'gomod' },
+        init_options = { command = { "golangci-lint", "run", "--out-format", "json", "--issues-exit-code=1" } }
+      })
 
-      require("mason-lspconfig").setup({
-        ensure_installed = {},
-        handlers = {
-          lsp_zero.default_setup,
-          lua_ls = function()
-            local lua_opts = lsp_zero.nvim_lua_ls()
-            require("lspconfig").lua_ls.setup(lua_opts)
-          end,
-        }
+      require('lspconfig').lua_ls.setup({
+        on_init = function(client)
+          if client.workspace_folders then
+            local path = client.workspace_folders[1].name
+            if path ~= vim.fn.stdpath('config') and (vim.loop.fs_stat(path .. '/.luarc.json') or vim.loop.fs_stat(path .. '/.luarc.jsonc')) then
+              return
+            end
+          end
+
+          client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+            runtime = { version = 'LuaJIT' },
+            workspace = { checkThirdParty = false, library = { vim.env.VIMRUNTIME } },
+          })
+        end,
+        settings = { Lua = {} }
       })
     end
   },
+
+  -- {
+  --   "stevearc/conform.nvim",
+  --   opts = {
+  --     formatters_by_ft = {
+  --       lua = { "stylua" },
+  --       go = { "golangci-lint", "gofmt" },
+  --       ["*"] = { "codespell" },
+  --       ["_"] = { "trim_whitespace" },
+  --     },
+  --     format_on_save = {
+  --       -- I recommend these options. See :help conform.format for details.
+  --       lsp_format = "fallback",
+  --       timeout_ms = 500,
+  --     },
+  --   },
+  -- },
+
   {
     "Wansmer/symbol-usage.nvim",
     event = "LspAttach",
