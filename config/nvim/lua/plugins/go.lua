@@ -1,24 +1,24 @@
 return {
   {
-    'kyoh86/vim-go-coverage',
+    "kyoh86/vim-go-coverage",
   },
   {
-    'sebdah/vim-delve',
-    config = function()
-      vim.keymap.set('n', '<leader>db', '<cmd>DlvToggleBreakpoint<cr>')
-      vim.keymap.set('n', '<leader>dt', '<cmd>DlvTest<cr>')
-      vim.keymap.set('n', '<leader>dr', '<cmd>DlvTestCurrent<cr>')
-      vim.keymap.set('n', '<leader>dc', '<cmd>DlvConnect :2345<cr>')
-    end
+    "sebdah/vim-delve",
+    keys = {
+      { "<leader>db", "<cmd>DlvToggleBreakpoint<cr>" },
+      { "<leader>dt", "<cmd>DlvTest<cr>" },
+      { "<leader>dr", "<cmd>DlvTestCurrent<cr>" },
+      { "<leader>dc", "<cmd>DlvConnect :2345<cr>" },
+    }
   },
   {
-    'vim-test/vim-test',
-    config = function()
-      vim.keymap.set('n', '<leader>tr', '<cmd>TestNearest<cr>')
-      vim.keymap.set('n', '<leader>tt', '<cmd>TestFile<cr>')
-      vim.keymap.set('n', '<leader>ta', '<cmd>TestSuite<cr>')
-      vim.keymap.set('n', '<leader>tl', '<cmd>TestLast<cr>')
-      vim.keymap.set('n', '<leader>tv', '<cmd>TestVisit<cr>')
-    end
+    "vim-test/vim-test",
+    keys = {
+      { "<leader>tr", "<cmd>TestNearest<cr>" },
+      { "<leader>tt", "<cmd>TestFile<cr>" },
+      { "<leader>ta", "<cmd>TestSuite<cr>" },
+      { "<leader>tl", "<cmd>TestLast<cr>" },
+      { "<leader>tv", "<cmd>TestVisit<cr>" },
+    }
   },
 }

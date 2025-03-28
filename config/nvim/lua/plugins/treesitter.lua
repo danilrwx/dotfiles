@@ -11,19 +11,19 @@ return {
         incremental_selection = {
           enable = true,
           keymaps = {
-            init_selection = '<C-Space>',
-            node_incremental = '<C-Space>',
-            node_decremental = '<C-s>',
+            init_selection = "<C-Space>",
+            node_incremental = "<C-Space>",
+            node_decremental = "<C-s>",
           },
         },
       })
-    end
+    end,
   },
 
   {
     "chrisgrieser/nvim-various-textobjs",
     lazy = false,
-    opts = { keymaps = { useDefault = true }},
+    opts = { keymaps = { useDefault = true } },
   },
 
   {
