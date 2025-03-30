@@ -1,33 +1,40 @@
 return {
   {
     "mbbill/undotree",
-    config = function()
-      vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
-    end,
+    keys = { { "<leader>u", "<cmd>UndotreeToggle<cr>" } },
   },
-
   {
-    "sainnhe/gruvbox-material",
+    'rmagatti/auto-session',
     lazy = false,
-    priority = 1000,
-    config = function()
-      vim.g.gruvbox_material_background = "hard"
-      vim.g.gruvbox_material_enable_italic = true
-      vim.g.gruvbox_material_transparent_background = 1
-      vim.cmd.colorscheme("gruvbox-material")
-    end,
+    opts = {
+      suppressed_dirs = { '~/', '~/Downloads', '/' },
+    }
   },
-
   {
-    "folke/flash.nvim",
-    event = "VeryLazy",
+    'stevearc/oil.nvim',
     opts = {},
-    keys = {
-      { "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },
-      { "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter" },
-      { "r",     mode = "o",               function() require("flash").remote() end,            desc = "Remote Flash" },
-      { "R",     mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
-      { "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    keys = { { "-", "<cmd>Oil<cr>" } },
+    lazy = false,
+  },
+  {
+    'romgrk/barbar.nvim',
+    dependencies = {
+      'lewis6991/gitsigns.nvim',
+      'nvim-tree/nvim-web-devicons',
     },
+    init = function() vim.g.barbar_auto_setup = false end,
+    opts = {
+      animation = false,
+      icons = {
+        button = '',
+        modified = { button = '🔸' },
+        pinned = { button = '📌', filename = true },
+        diagnostics = {
+          [vim.diagnostic.severity.ERROR] = { enabled = true, icon = '🔥' },
+        }
+      },
+    },
+    version = '^1.0.0',
   },
 }

@@ -1,38 +1,41 @@
 return {
   {
-    "neovim/nvim-lspconfig",
+    'neovim/nvim-lspconfig',
     cmd = { "LspInfo", "LspInstall", "LspStart" },
     event = { "BufReadPre", "BufNewFile" },
-    config = function()
-      require("lspconfig").gopls.setup({})
-
-      require("lspconfig").golangci_lint_ls.setup({
-        filetypes = { "go", "gomod" },
-        init_options = { command = { "golangci-lint", "run", "--out-format", "json", "--issues-exit-code=1" } },
-      })
-
-      require("lspconfig").lua_ls.setup({
-        on_init = function(client)
-          if client.workspace_folders then
-            local path = client.workspace_folders[1].name
-            if
-                path ~= vim.fn.stdpath("config")
-                and (vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc"))
-            then
-              return
+    dependencies = { 'saghen/blink.cmp' },
+    opts = {
+      servers = {
+        lua_ls = {
+          on_init = function(client)
+            if client.workspace_folders then
+              local path = client.workspace_folders[1].name
+              if
+                  path ~= vim.fn.stdpath("config")
+                  and (vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc"))
+              then
+                return
+              end
             end
-          end
 
-          client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
-            runtime = { version = "LuaJIT" },
-            workspace = { checkThirdParty = false, library = { vim.env.VIMRUNTIME } },
-          })
-        end,
-        settings = { Lua = {} },
-      })
-    end,
+            client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+              runtime = { version = "LuaJIT" },
+              workspace = { checkThirdParty = false, library = { vim.env.VIMRUNTIME } },
+            })
+          end,
+          settings = { Lua = {} },
+        },
+        gopls = {},
+      }
+    },
+    config = function(_, opts)
+      local lspconfig = require('lspconfig')
+      for server, config in pairs(opts.servers) do
+        config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
+        lspconfig[server].setup(config)
+      end
+    end
   },
-
   {
     "nvimtools/none-ls.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
@@ -41,7 +44,7 @@ return {
       nls.setup({
         debug = true,
         sources = {
-          -- nls.builtins.diagnostics.golangci_lint,
+          nls.builtins.diagnostics.golangci_lint,
           nls.builtins.code_actions.gomodifytags,
           nls.builtins.code_actions.impl,
           nls.builtins.formatting.gofumpt,
