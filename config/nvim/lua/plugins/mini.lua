@@ -35,6 +35,18 @@ return {
           l = MiniAi.gen_spec.treesitter({ a = "@loop.outer", i = "@loop.inner" }),
         },
       })
+
+      local MiniFiles = require("mini.files")
+      MiniFiles.setup({
+        windows = { width_focus = 50, width_nofocus = 35, preview = false },
+        options = { use_as_default_explorer = true },
+      })
+
+      vim.keymap.set("n", "<leader>e", function()
+        if not MiniFiles.close() then
+          MiniFiles.open(vim.api.nvim_buf_get_name(0), true)
+        end
+      end, {})
     end,
   },
 }
