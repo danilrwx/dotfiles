@@ -13,8 +13,8 @@ alias grep='grep --color=auto'
 alias untar='tar -zxvf '
 alias wget='wget -c '
 alias lg='lazygit'
-# alias vi='nvim'
-# alias vim='nvim'
+alias vi='nvim'
+alias vim='nvim'
 
 export LANG=ru_RU.UTF-8
 export EDITOR='vim'
