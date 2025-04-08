@@ -10,6 +10,7 @@ base:
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -sf $(PWD)/.vimrc ~/.vimrc
 	ln -snf $(PWD)/config/vim ~/.vim
+	ln -snf $(PWD)/config/k9s ~/.config/
 	ln -snf $(PWD)/config/nvim ~/.config/
 	ln -snf $(PWD)/config/htop ~/.config/
 	ln -snf $(PWD)/config/lazygit ~/.config/

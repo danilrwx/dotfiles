@@ -166,8 +166,6 @@ endif
 
 if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.local/share/vim/plugins')
-    Plug 'ap/vim-buftabline'
-
     Plug 'tpope/vim-fugitive'
 
     Plug 'airblade/vim-gitgutter'
@@ -202,13 +200,13 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   let g:gitgutter_sign_priority = 0
   let g:gitgutter_preview_win_floating = 1
 
-  let g:gitgutter_sign_added = '🮊'
-  let g:gitgutter_sign_modified = '🮊'
-  let g:gitgutter_sign_removed = '▁'
+  let g:gitgutter_sign_added              = '🮊'
+  let g:gitgutter_sign_modified           = '🮊'
+  let g:gitgutter_sign_modified_removed   = "🭪"
+  let g:gitgutter_sign_removed            = '▁'
   let g:gitgutter_sign_removed_first_line = '▔'
-  let g:gitgutter_sign_modified_removed = "🭪"
 
-  inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
+  inoremap <expr> <cr> pumvisible() ? asyncomplete#close_popup() : "\<cr>"
 
   let g:lsp_settings = {
         \  'golangci-lint-langserver': {
