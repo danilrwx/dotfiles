@@ -26,6 +26,11 @@ return {
           settings = { Lua = {} },
         },
         gopls = {},
+        golangci_lint_ls = {
+          filetypes = { "go", "gomod" },
+          init_options = { command = { "golangci-lint", "run", "--out-format", "json", "--issues-exit-code=1" } },
+        },
+        helm_ls = {},
       }
     },
     config = function(_, opts)
@@ -36,6 +41,7 @@ return {
       end
     end
   },
+
   {
     "nvimtools/none-ls.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
@@ -44,12 +50,10 @@ return {
       nls.setup({
         debug = true,
         sources = {
-          nls.builtins.diagnostics.golangci_lint,
           nls.builtins.code_actions.gomodifytags,
           nls.builtins.code_actions.impl,
           nls.builtins.formatting.gofumpt,
           nls.builtins.formatting.goimports,
-          nls.builtins.code_actions.refactoring
         },
       })
     end,
