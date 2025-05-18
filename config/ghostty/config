@@ -10,7 +10,7 @@ font-family-bold-italic  = Iosevka NFM Medium Italic
 
 maximize = true
 
-font-size = 21
+font-size = 16
 # theme = dark:GruvboxDark,light:Raycast_Light
 theme = dark:Dark Pastel,light:Raycast_Light
 # background = #1C1C1C

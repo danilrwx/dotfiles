@@ -6,7 +6,7 @@ return {
       require("nvim-treesitter.configs").setup({
         ensure_installed = { "lua", "vimdoc" },
         auto_install = true,
-        highlight = { enable = false },
+        highlight = { enable = true },
         folds = { enable = true },
         indent = { enable = true },
         incremental_selection = {
@@ -17,10 +17,10 @@ return {
     end,
   },
 
-  {
-    "Wansmer/treesj",
-    keys = { "<space>m", { "<space>j", false }, { "<space>s", false } },
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-    opts = {},
-  },
+  -- {
+  --   "Wansmer/treesj",
+  --   keys = { "<space>m", { "<space>j", false }, { "<space>s", false } },
+  --   dependencies = { "nvim-treesitter/nvim-treesitter" },
+  --   opts = {},
+  -- },
 }

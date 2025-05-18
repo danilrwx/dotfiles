@@ -6,7 +6,7 @@
 [user]
   name = Daniil Antoshin
   email = daniil.antoshin@flant.com
-  signingkey = 84C4921C9429DA03
+  signingkey = FD3CC5C71FFD6458
 
 [commit]
   gpgsign = true
@@ -26,3 +26,5 @@
 	tool = vimdiff
 [difftool]
 	prompt = false
+[rerere]
+	enabled = true

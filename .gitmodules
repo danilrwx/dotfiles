@@ -22,3 +22,15 @@
 [submodule "config/vim/pack/plugins/start/augment.vim"]
 	path = config/vim/pack/plugins/start/augment.vim
 	url = https://github.com/augmentcode/augment.vim
+[submodule "config/vim/pack/plugins/start/undotree"]
+	path = config/vim/pack/plugins/start/undotree
+	url = https://github.com/mbbill/undotree
+[submodule "config/vim/pack/plugins/start/vim-go-syntax"]
+	path = config/vim/pack/plugins/start/vim-go-syntax
+	url = https://github.com/charlespascoe/vim-go-syntax
+[submodule "config/vim/pack/plugins/start/vimspector"]
+	path = config/vim/pack/plugins/start/vimspector
+	url = https://github.com/puremourning/vimspector
+[submodule "config/vim/pack/plugins/start/asyncrun.vim"]
+	path = config/vim/pack/plugins/start/asyncrun.vim
+	url = https://github.com/skywind3000/asyncrun.vim
