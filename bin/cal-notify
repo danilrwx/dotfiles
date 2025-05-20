@@ -1,0 +1,11 @@
+#!/bin/sh
+
+CAL=`cal`
+DATE=`date`
+
+notify-send -t 8000 "$CAL
+
+$DATE"
+
+
+

@@ -6,7 +6,7 @@
 [user]
   name = Daniil Antoshin
   email = daniil.antoshin@flant.com
-  signingkey = FD3CC5C71FFD6458
+  signingkey = 31FB21FCE9E18AEB
 
 [commit]
   gpgsign = true
