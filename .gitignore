@@ -6,14 +6,14 @@
 TAGS
 
 fixtures/_build
-config/vim/nfiles/undo/*
-config/vim/nfiles/swap/*
-config/vim/nfiles/backup/*
-config/vim/nfiles/info/*
+
 config/vim/files/undo/*
 config/vim/files/swap/*
 config/vim/files/backup/*
 config/vim/files/info/*
+!config/vim/files/undo/.keep
+!config/vim/files/swap/.keep
+!config/vim/files/backup/.keep
 config/vim/.netrwhist
 
 config/k9s/clusters
