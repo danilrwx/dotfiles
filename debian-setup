@@ -98,7 +98,7 @@ sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
 
 # Install dev packages
-sudo apt install -y nodejs golang gopls lazygit kubectl
+sudo apt install -y nodejs golang gopls delve lazygit kubectl
 
 # Install go packages
 go install github.com/derailed/k9s@latest
