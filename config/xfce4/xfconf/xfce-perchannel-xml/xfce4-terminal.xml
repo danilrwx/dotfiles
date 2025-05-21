@@ -9,4 +9,5 @@
   <property name="misc-show-unsafe-paste-dialog" type="bool" value="false"/>
   <property name="background-mode" type="string" value="TERMINAL_BACKGROUND_TRANSPARENT"/>
   <property name="background-darkness" type="double" value="0.84999999999999998"/>
+  <property name="misc-copy-on-select" type="bool" value="false"/>
 </channel>
