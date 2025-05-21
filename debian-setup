@@ -23,6 +23,7 @@ ln -snf ~/dotfiles/config/lazygit ~/.config/
 
 ln -snf ~/dotfiles/config/i3 ~/.config/
 ln -snf ~/dotfiles/config/dunst ~/.config/
+ln -snf ~/dotfiles/config/xfce4 ~/.config/
 
 # Update system
 sudo apt update -y
@@ -32,7 +33,7 @@ sudo apt upgrade -y
 sudo apt install -y xorg xinit wireplumber pipewire pipewire-pulse pavucontrol pulseaudio-utils
 
 # Install some software for i3
-sudo apt install -y xcompmgr hsetroot	brightnessctl acpi maim xclip xsel
+sudo apt install -y xcompmgr hsetroot	brightnessctl acpi maim xclip xsel lxappearance gtk-chtheme
 
 # Install base software
 sudo apt install -y curl zip unzip gpg keychain ssh-askpass-gnome
@@ -88,3 +89,6 @@ if ! groups | grep -q '\bdocker\b'; then
 	sudo usermod -aG docker $USER
 fi
 
+
+# Install dev packages
+sudo apt install -y golang gopls lazygit kubectl kubectx

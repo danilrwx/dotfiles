@@ -84,6 +84,7 @@ match errorMsg '\s\+$'
 set background=dark
 colorscheme lunaperche
 highlight SignColumn ctermbg=none
+highlight Normal ctermbg=none
 
 if has("gui_macvim")
     set guifont=Iosevka\ Nerd\ Font:h22
