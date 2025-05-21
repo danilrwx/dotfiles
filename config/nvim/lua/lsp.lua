@@ -5,12 +5,6 @@ vim.api.nvim_create_autocmd({ "LspAttach" }, {
     local client = vim.lsp.get_client_by_id(event.data.client_id)
     if client == nil then return end
 
-    if client:supports_method('textDocument/completion') then
-      local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
-      client.server_capabilities.completionProvider.triggerCharacters = chars
-      vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = true })
-    end
-
     if not client:supports_method('textDocument/willSaveWaitUntil')
         and client:supports_method('textDocument/formatting') then
       vim.api.nvim_create_autocmd('BufWritePre', {
@@ -34,8 +28,6 @@ vim.api.nvim_create_autocmd({ "LspAttach" }, {
   end,
 })
 
-vim.o.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
-
 DIAGNOSTIC_ICONS = {
   [vim.diagnostic.severity.ERROR] = "🔥",
   [vim.diagnostic.severity.WARN] = "💫",
@@ -53,10 +45,3 @@ vim.diagnostic.config({
   -- }
 })
 
--- vim.lsp.config("*", {
---   -- capabilities = {},
---   root_markers = { ".git" },
--- })
---
--- vim.lsp.enable("gopls")
--- vim.lsp.enable("lua_ls")
