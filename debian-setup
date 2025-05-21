@@ -98,10 +98,16 @@ sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
 
 # Install dev packages
-sudo apt install -y nodejs golang gopls delve lazygit kubectl
+sudo apt install -y nodejs golang gopls delve lazygit kubectl jq
 
 # Install go packages
 go install github.com/derailed/k9s@latest
+go install github.com/go-task/task/v3/cmd/task@latest
+go install github.com/nametake/golangci-lint-langserver@latest
+
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
+go install github.com/matryer/moq@v0.4.0
 
 # Install kubectl krew
 if [ ! -d ~/.krew ]; then
@@ -114,4 +120,18 @@ if [ ! -d ~/.krew ]; then
 	./"${KREW}" install krew
 fi
 
+# Instal kubectl plugins
 kubectl krew install ctx ns
+
+# Install difftastic
+if [ ! -f ~/.local/bin/difftastic ]; then
+	curl -fsSL https://github.com/Wilfred/difftastic/releases/download/0.63.0/difft-x86_64-unknown-linux-gnu.tar.gz | tar xzv -C ~/.local/bin
+fi
+
+# Install lua-language-server
+if [ ! -d ~/.local/share/lua-language-server ]; then
+	mkdir -p ~/.local/share/lua-language-server
+  curl -fsSL https://github.com/LuaLS/lua-language-server/releases/download/3.14.0/lua-language-server-3.14.0-linux-x64.tar.gz | tar xzv -C ~/.local/share/lua-language-server
+  ln -s ~/.local/share/lua-language-server/bin/lua-language-server ~/.local/bin/lua-language-server
+fi
+
