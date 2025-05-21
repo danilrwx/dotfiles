@@ -14,7 +14,7 @@ alias untar='tar -zxvf '
 alias wget='wget -c '
 alias lg='lazygit'
 
-export LANG=ru_RU.UTF-8
+# export LANG=ru_RU.UTF-8
 export EDITOR='vim'
 export VISUAL='vim'
 
