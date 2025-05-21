@@ -13,6 +13,7 @@ ln -sf ~/dotfiles/.gitignore_global ~/
 ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
 ln -snf ~/dotfiles/.vimrc ~/
 
+ln -snf ~/dotfiles/config/alacritty/ ~/.config/
 ln -snf ~/dotfiles/config/k9s ~/.config/
 ln -snf ~/dotfiles/config/htop ~/.config/
 ln -snf ~/dotfiles/config/lazygit ~/.config/
@@ -31,7 +32,7 @@ sudo apt install -y xorg xinit wireplumber pipewire pipewire-pulse pavucontrol p
 
 # Install some software for i3
 sudo apt install -y xcompmgr hsetroot	brightnessctl acpi maim xclip xsel lxappearance gtk-chtheme \
- libnotify-bin ncal fonts-noto-color-emoji
+ libnotify-bin ncal fonts-noto-color-emoji alacritty
 
 # Install base software
 sudo apt install -y curl zip unzip gpg keychain ssh-askpass-gnome zsh fzf neovim
@@ -104,6 +105,7 @@ sudo apt install -y nodejs golang gopls delve lazygit kubectl jq
 go install github.com/derailed/k9s@latest
 go install github.com/go-task/task/v3/cmd/task@latest
 go install github.com/nametake/golangci-lint-langserver@latest
+go install github.com/homeport/dyff/cmd/dyff@latest
 
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
@@ -124,7 +126,7 @@ fi
 kubectl krew install ctx ns
 
 # Install difftastic
-if [ ! -f ~/.local/bin/difftastic ]; then
+if [ ! -f ~/.local/bin/difft ]; then
 	curl -fsSL https://github.com/Wilfred/difftastic/releases/download/0.63.0/difft-x86_64-unknown-linux-gnu.tar.gz | tar xzv -C ~/.local/bin
 fi
 
