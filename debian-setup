@@ -99,7 +99,7 @@ sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub
 flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
 
 # Install dev packages
-sudo apt install -y nodejs golang gopls delve lazygit kubectl jq
+sudo apt install -y nodejs golang gopls delve lazygit kubectl jq uuid-runtime
 
 # Install go packages
 go install github.com/derailed/k9s@latest
@@ -137,3 +137,9 @@ if [ ! -d ~/.local/share/lua-language-server ]; then
   ln -s ~/.local/share/lua-language-server/bin/lua-language-server ~/.local/bin/lua-language-server
 fi
 
+
+# Install helm-ls
+if [ ! -f ~/.local/bin/helm-ls ]; then
+	curl -L https://github.com/mrjosh/helm-ls/releases/download/master/helm_ls_linux_amd64 --output ~/.local/bin/helm_ls
+  chmod +x ~/.local/bin/helm_ls
+fi
