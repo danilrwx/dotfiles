@@ -5,8 +5,8 @@ vim.api.nvim_create_autocmd({ "LspAttach" }, {
     local client = vim.lsp.get_client_by_id(event.data.client_id)
     if client == nil then return end
 
-    if not client:supports_method('textDocument/willSaveWaitUntil')
-        and client:supports_method('textDocument/formatting') then
+    if not client.supports_method('textDocument/willSaveWaitUntil')
+        and client.supports_method('textDocument/formatting') then
       vim.api.nvim_create_autocmd('BufWritePre', {
         group = vim.api.nvim_create_augroup('my.lsp', { clear = false }),
         buffer = event.buf,
@@ -22,8 +22,32 @@ vim.api.nvim_create_autocmd({ "LspAttach" }, {
       vim.keymap.set("n", "grc", "<cmd>lua vim.lsp.codelens.run()<cr>", opts)
     end
 
-    if client:supports_method("textDocument/formatting") then
-      vim.keymap.set({ "n", "x" }, "grf", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", opts)
+    if client.server_capabilities.codeActionProvider then
+      vim.keymap.set("n", "gra", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
+    end
+
+    if client.server_capabilities.renameProvider then
+      vim.keymap.set("n", "grn", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
+    end
+
+    if client.server_capabilities.documentFormattingProvider then
+      vim.keymap.set("n", "grf", "<cmd>lua vim.lsp.buf.format()<cr>", opts)
+    end
+
+    if client.server_capabilities.implementationProvider then
+      vim.keymap.set("n", "gri", "<cmd>lua require('fzf-lua').lsp_implementations()<cr>", opts)
+    end
+
+    if client.server_capabilities.referencesProvider then
+      vim.keymap.set("n", "grr", "<cmd>lua require('fzf-lua').lsp_references()<cr>", opts)
+    end
+
+    if client.server_capabilities.workspaceSymbolProvider then
+      vim.keymap.set("n", "<leader>S", "<cmd>lua require('fzf-lua').lsp_live_workspace_symbols()<cr>", opts)
+    end
+
+    if client.server_capabilities.documentSymbolProvider then
+      vim.keymap.set("n", "<leader>s", "<cmd>lua require('fzf-lua').lsp_document_symbols()<cr>", opts)
     end
   end,
 })
