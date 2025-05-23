@@ -105,8 +105,11 @@ sudo apt install -y nodejs golang gopls delve lazygit kubectl jq uuid-runtime
 # Install go packages
 go install github.com/derailed/k9s@latest
 go install github.com/go-task/task/v3/cmd/task@latest
-go install github.com/nametake/golangci-lint-langserver@latest
 go install github.com/homeport/dyff/cmd/dyff@latest
+
+go install github.com/nametake/golangci-lint-langserver@latest
+go install mvdan.cc/gofumpt@latest
+go install golang.org/x/tools/cmd/goimports@latest
 
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
@@ -137,7 +140,6 @@ if [ ! -d ~/.local/share/lua-language-server ]; then
   curl -fsSL https://github.com/LuaLS/lua-language-server/releases/download/3.14.0/lua-language-server-3.14.0-linux-x64.tar.gz | tar xzv -C ~/.local/share/lua-language-server
   ln -s ~/.local/share/lua-language-server/bin/lua-language-server ~/.local/bin/lua-language-server
 fi
-
 
 # Install helm-ls
 if [ ! -f ~/.local/bin/helm-ls ]; then
