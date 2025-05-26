@@ -35,20 +35,23 @@ vim.api.nvim_create_autocmd({ "LspAttach" }, {
     end
 
     if client.server_capabilities.implementationProvider then
-      vim.keymap.set("n", "gri", "<cmd>lua require('fzf-lua').lsp_implementations()<cr>", opts)
+      vim.keymap.set("n", "grI", "<cmd>lua require('fzf-lua').lsp_implementations()<cr>", opts)
+      vim.keymap.set("n", "gri", "<cmd>lua vim.lsp.buf.implementation()<cr>", opts)
     end
 
     if client.server_capabilities.referencesProvider then
-      vim.keymap.set("n", "grr", "<cmd>lua require('fzf-lua').lsp_references()<cr>", opts)
+      vim.keymap.set("n", "grr", "<cmd>lua vim.lsp.buf.references()<cr>", opts)
+      vim.keymap.set("n", "grR", "<cmd>lua require('fzf-lua').lsp_references()<cr>", opts)
     end
 
     if client.server_capabilities.workspaceSymbolProvider then
-      vim.keymap.set("n", "<leader>S", "<cmd>lua require('fzf-lua').lsp_live_workspace_symbols()<cr>", opts)
+      vim.keymap.set("n", "<leader>S", "<cmd>lua require('fzf-lua').lsp_workspace_symbols()<cr>", opts)
     end
 
     if client.server_capabilities.documentSymbolProvider then
       vim.keymap.set("n", "<leader>s", "<cmd>lua require('fzf-lua').lsp_document_symbols()<cr>", opts)
     end
+
   end,
 })
 
