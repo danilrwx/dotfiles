@@ -1,4 +1,4 @@
-vim.opt.undodir = os.getenv("HOME") .. "/.vim/nfiles/undo"
+-- vim.opt.undodir = os.getenv("HOME") .. "/.vim/nfiles/undo"
 vim.opt.undofile = true
 
 vim.opt.number = false
