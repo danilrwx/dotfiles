@@ -14,6 +14,7 @@ return {
       },
     },
     keys = {
+      { "<leader>b",  "<cmd>lua require('fzf-lua').buffers()<cr>" },
       { "<leader>f",  "<cmd>lua require('fzf-lua').files()<cr>" },
       { "<leader>/",  "<cmd>lua require('fzf-lua').live_grep()<cr>" },
       { "<leader>'",  "<cmd>lua require('fzf-lua').resume()<cr>" },

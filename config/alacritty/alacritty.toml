@@ -1,5 +1,5 @@
 [window]
-opacity = 0.9
+# opacity = 0.9
 padding.x = 0
 padding.y = 0
 decorations = "Full"
@@ -23,7 +23,8 @@ size = 14.5
 
 [colors.primary]
 # hard contrast background = = '#1d2021'
-background = '#1c1c1c'
+# background = '#1c1c1c'
+background = '#000000'
 # soft contrast background = = '#32302f'
 foreground = '#ebdbb2'
 
