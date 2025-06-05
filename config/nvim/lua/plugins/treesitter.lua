@@ -17,10 +17,10 @@ return {
     end,
   },
 
-  -- {
-  --   "Wansmer/treesj",
-  --   keys = { "<space>m", { "<space>j", false }, { "<space>s", false } },
-  --   dependencies = { "nvim-treesitter/nvim-treesitter" },
-  --   opts = {},
-  -- },
+  {
+    "Wansmer/treesj",
+    keys = { "<space>m", { "<space>j", false }, { "<space>s", false } },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = {},
+  },
 }

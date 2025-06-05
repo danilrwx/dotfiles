@@ -14,5 +14,5 @@ font-size = 19
 theme = dark:GruvboxDark,light:Raycast_Light
 # theme = dark:Dark Pastel,light:Raycast_Light
 # background = #1C1C1C
-background = #000000
+# background = #000000
 
