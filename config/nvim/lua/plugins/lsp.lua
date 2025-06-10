@@ -30,6 +30,7 @@ return {
           init_options = { command = { "golangci-lint", "run", "--out-format", "json", "--issues-exit-code=1" } },
         },
         helm_ls = {},
+        clangd = {},
       }
     },
     config = function(_, opts)

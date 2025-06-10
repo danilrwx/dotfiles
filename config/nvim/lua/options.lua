@@ -23,7 +23,7 @@ end
 
 vim.opt.signcolumn = "auto"
 
-vim.cmd.colorscheme("github_light")
+vim.cmd.colorscheme("github_dark")
 
 vim.cmd.packadd("cfilter")
 

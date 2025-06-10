@@ -17,7 +17,15 @@ return {
     keys = { { "-", "<cmd>Oil<cr>" } },
     lazy = false,
   },
-  { 'projekt0n/github-nvim-theme', name = 'github-theme' },
+  {
+    'projekt0n/github-nvim-theme',
+    name = 'github-theme',
+    opts = {
+      options = {
+        transparent = true,
+      }
+    },
+  },
   {
     'romgrk/barbar.nvim',
     lazy = false,
