@@ -87,7 +87,7 @@ highlight SignColumn ctermbg=none
 highlight Normal ctermbg=none
 
 if has("gui_macvim")
-    set guifont=Iosevka\ Nerd\ Font:h22
+    set guifont=Iosevka\ Nerd\ Font:h16
 	  let macvim_hig_shift_movement = 1
 endif
 
