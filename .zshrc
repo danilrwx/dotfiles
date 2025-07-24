@@ -15,9 +15,11 @@ alias wget='wget -c '
 alias lg='lazygit'
 alias k="kubectl"
 alias kaf="kubectl apply -f"
-alias vi="nvim"
-alias vim="nvim"
+# alias vi="nvim"
+# alias vim="nvim"
 
+export EDITOR='vim'
+export VISUAL='vim'
 
 export PATH=$PATH:$GOPATH/bin/
 export PATH=$PATH:$HOME/.cargo/bin/
