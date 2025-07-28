@@ -51,4 +51,8 @@ return {
     },
     version = '^1.0.0',
   },
+  {
+    'laktak/tome',
+    lazy = false,
+  },
 }
