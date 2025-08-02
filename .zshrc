@@ -19,8 +19,6 @@ alias wget='wget -c '
 alias lg='lazygit'
 alias k="kubectl"
 alias kaf="kubectl apply -f"
-alias vi="nvim"
-alias vim="nvim"
 
 export EDITOR='nvim'
 export VISUAL='nvim'
@@ -46,9 +44,6 @@ export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -na
 source <(kubectl completion zsh)
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  export EDITOR='nvim'
-  export VISUAL='nvim'
-
   eval $( keychain --eval -q )
   keychain --inherit any -q --confirm $HOME/.ssh/id_rsa
 fi

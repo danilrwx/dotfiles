@@ -10,6 +10,6 @@ font-family-bold-italic  = Iosevka Medium Italic
 
 maximize = true
 
-font-size = 20
+font-size = 24
 theme = dark:retrobox,light:Raycast_Light
 
