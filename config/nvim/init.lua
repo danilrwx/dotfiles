@@ -215,16 +215,16 @@ local toggle_quickfix = function()
 end
 vim.keymap.set("n", "<leader>q", toggle_quickfix)
 
-vim.keymap.set("n", "<leader>m", '<cmd>lua require("treesj").toggle()<cr>')
-
 vim.keymap.set("n", "<leader>tr", "<cmd>TestNearest<cr>")
 vim.keymap.set("n", "<leader>tt", "<cmd>TestFile<cr>")
 
-vim.keymap.set("n", "<leader>b", "<cmd>lua require('fzf-lua').buffers()<cr>")
-vim.keymap.set("n", "<leader>f", "<cmd>lua require('fzf-lua').files()<cr>")
-vim.keymap.set("n", "<leader>/", "<cmd>lua require('fzf-lua').live_grep()<cr>")
-vim.keymap.set("n", "<leader>'", "<cmd>lua require('fzf-lua').resume()<cr>")
-vim.keymap.set("n", "<leader>D", "<cmd>lua require('fzf-lua').lsp_workspace_diagnostics()<cr>")
+vim.keymap.set("n", "<leader>m", require("treesj").toggle)
+
+vim.keymap.set("n", "<leader>b", require('fzf-lua').buffers)
+vim.keymap.set("n", "<leader>f", require('fzf-lua').files)
+vim.keymap.set("n", "<leader>/", require('fzf-lua').live_grep)
+vim.keymap.set("n", "<leader>'", require('fzf-lua').resume)
+vim.keymap.set("n", "<leader>D", require('fzf-lua').lsp_workspace_diagnostics)
 
 vim.keymap.set({ "n", "v" }, "<leader>d", require("debugmaster").mode.toggle, { nowait = true })
 -- vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
