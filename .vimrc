@@ -97,72 +97,6 @@ if has('patch-9.1.0375')
 	packadd! comment
 endif
 
-let g:gitgutter_sign_priority = 0
-let g:gitgutter_preview_win_floating = 1
-
-let lspOpts = #{
-			\  autoHighlightDiags: v:true,
-			\  useQuickfixForLocations: v:true,
-			\  semanticHighlight: v:false,
-			\  showInlayHints: v:false,
-			\ }
-
-autocmd User LspSetup call LspOptionsSet(lspOpts)
-
-let lspServers = [
-			\ #{
-			\    name: 'clangd',
-			\    filetype: ['c', 'cpp'],
-			\    path: '/usr/bin/clangd',
-			\    args: ['--background-index']
-			\  },
-			\ #{
-			\    name: 'golang',
-			\    filetype: ['go', 'gomod'],
-			\    path: '/Users/danil/go/bin/gopls',
-			\    args: ['serve'],
-			\    syncInit: v:false,
-			\    workspaceConfig: #{
-			\      gopls: #{
-			\        hints: #{
-			\          assignVariableTypes: v:true,
-			\          compositeLiteralFields: v:true,
-			\          compositeLiteralTypes: v:true,
-			\          constantValues: v:true,
-			\          functionTypeParameters: v:true,
-			\          parameterNames: v:true,
-			\          rangeVariableTypes: v:true,
-			\          semanticTokens: v:false
-			\        }
-			\      }
-			\    }
-			\ }
-			\]
-autocmd User LspSetup call LspAddServer(lspServers)
-
-function! s:on_lsp_buffer_enabled()
-	setlocal omnifunc=g:LspOmniFunc
-	setlocal tagfunc=lsp#lsp#TagFunc
-	setlocal formatexpr=lsp#lsp#FormatExpr()
-
-	nnoremap grr :LspShowReferences<cr>
-	nnoremap gri :LspPeekImpl<cr>
-	nnoremap K   :LspHover<cr>
-	nnoremap grs :LspDocumentSymbol<cr>
-	nnoremap grS :LspSymbolSearch<cr>
-	nnoremap gra :LspCodeAction<cr>
-	nnoremap grc :LspCodeLens<cr>
-	nnoremap grn :LspRename<cr>
-	nnoremap grf :LspFormat<cr>
-
-	nnoremap <c-w>d :LspDiag current<cr>
-	nnoremap [d :LspDiag prev<cr>
-	nnoremap ]d :LspDiag next<cr>
-
-	autocmd! BufWritePre *.go call execute('LspFormat')
-endfunction
-autocmd User LspAttached call s:on_lsp_buffer_enabled()
-
 function! ToggleQuickFix()
 	if empty(filter(getwininfo(), 'v:val.quickfix'))
 		copen
@@ -240,14 +174,3 @@ nnoremap <c-d> <c-d>zz<cr>
 nnoremap <c-u> <c-u>zz<cr>
 
 nnoremap <c-l> :nohl<cr>
-
-nnoremap <silent> <leader>tr :TestNearest<cr>
-nnoremap <silent> <leader>tt :TestFile<cr>
-
-nnoremap <silent> <leader>gl :tab Git log --follow -p %<cr>
-nnoremap <silent> <leader>gL :tab Git log<cr>
-nnoremap <silent> <leader>gb :tab Git blame<cr>
-
-nnoremap <silent> ghs <cmd>GitGutterStageHunk<cr>
-nnoremap <silent> ghu <cmd>GitGutterUndoHunk<cr>
-nnoremap <silent> ghp <cmd>GitGutterPreviewHunk<cr>
