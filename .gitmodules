@@ -1,0 +1,27 @@
+[submodule "config/vim/pack/plugins/start/lsp"]
+	path = config/vim/pack/plugins/start/lsp
+	url = https://github.com/yegappan/lsp
+[submodule "config/vim/pack/plugins/start/vim-figutive"]
+	path = config/vim/pack/plugins/start/vim-figutive
+	url = https://github.com/tpope/vim-fugitive
+[submodule "config/vim/pack/plugins/start/vim-gitgutter"]
+	path = config/vim/pack/plugins/start/vim-gitgutter
+	url = https://github.com/airblade/vim-gitgutter
+[submodule "config/vim/pack/plugins/start/traces.vim"]
+	path = config/vim/pack/plugins/start/traces.vim
+	url = https://github.com/markonm/traces.vim
+[submodule "config/vim/pack/plugins/start/vim-go-coverage"]
+	path = config/vim/pack/plugins/start/vim-go-coverage
+	url = https://github.com/kyoh86/vim-go-coverage
+[submodule "config/vim/pack/plugins/start/vim-test"]
+	path = config/vim/pack/plugins/start/vim-test
+	url = https://github.com/vim-test/vim-test
+[submodule "config/vim/pack/plugins/start/traces"]
+	path = config/vim/pack/plugins/start/traces
+	url = https://github.com/markonm/traces.vim
+[submodule "config/vim/pack/plugins/start/vim-go-syntax"]
+	path = config/vim/pack/plugins/start/vim-go-syntax
+	url = https://github.com/charlespascoe/vim-go-syntax
+[submodule "config/vim/pack/plugins/start/vim-polyglot"]
+	path = config/vim/pack/plugins/start/vim-polyglot
+	url = https://github.com/sheerun/vim-polyglot

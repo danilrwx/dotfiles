@@ -11,9 +11,11 @@ config/vim/files/undo/*
 config/vim/files/swap/*
 config/vim/files/backup/*
 config/vim/files/info/*
+config/vim/files/sessions/*
 !config/vim/files/undo/.keep
 !config/vim/files/swap/.keep
 !config/vim/files/backup/.keep
+!config/vim/files/sessions/.keep
 config/vim/.netrwhist
 
 config/k9s/clusters
