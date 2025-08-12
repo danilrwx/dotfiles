@@ -23,7 +23,6 @@ alias kaf="kubectl apply -f"
 export EDITOR='nvim'
 export VISUAL='nvim'
 
-export PATH=$PATH:$GOPATH/bin/
 export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/
 export PATH=$PATH:$HOME/dotfiles/scripts/

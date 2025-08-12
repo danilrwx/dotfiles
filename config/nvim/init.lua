@@ -187,9 +187,9 @@ vim.keymap.set("n", "<c-l>", "<cmd>noh<Return><esc>")
 vim.keymap.set("n", "<c-d>", "<c-d>zz")
 vim.keymap.set("n", "<c-u>", "<c-u>zz")
 
--- vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
--- vim.keymap.set("n", "<leader>p", "+p")
--- vim.keymap.set("n", "<leader>Y", [["+Y]])
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
+vim.keymap.set("n", "<leader>p", "+p")
+vim.keymap.set("n", "<leader>Y", [["+Y]])
 
 vim.keymap.set("n", "-", "<cmd>Oil<cr>")
 
@@ -213,6 +213,7 @@ vim.keymap.set("n", "<leader>tt", "<cmd>TestFile<cr>")
 
 vim.keymap.set("n", "<leader>b", require('fzf-lua').buffers)
 vim.keymap.set("n", "<leader>f", require('fzf-lua').files)
+vim.keymap.set("n", "<leader>'", require('fzf-lua').resume)
 
 vim.keymap.set("n", "<leader>D", vim.diagnostic.setqflist)
 
