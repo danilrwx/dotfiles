@@ -10,7 +10,7 @@ ln -sf ~/dotfiles/.gitconfig ~/
 ln -sf ~/dotfiles/.gitignore_global ~/
 ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
 ln -snf ~/dotfiles/.vimrc ~/
-ln -snf ~/dotfiles/config/vim ~/
+ln -snf ~/dotfiles/config/vim ~/.vim
 
 ln -snf ~/dotfiles/config/alacritty/ ~/.config/
 ln -snf ~/dotfiles/config/k9s ~/.config/

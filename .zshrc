@@ -16,9 +16,10 @@ alias c='clear'
 alias grep='grep --color=auto'
 alias untar='tar -zxvf '
 alias wget='wget -c '
-alias lg='lazygit'
-alias k="kubectl"
 alias kaf="kubectl apply -f"
+alias kad="kubectl delete -f"
+alias vi='nvim'
+alias vim='nvim'
 
 export EDITOR='nvim'
 export VISUAL='nvim'
