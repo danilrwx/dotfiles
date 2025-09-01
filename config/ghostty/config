@@ -14,5 +14,5 @@ font-size = 15
 # theme = dark:retrobox,light:Builtin Light
 # theme = dark:deep,light:Builtin Light
 theme = dark:GruvboxDark,light:Builtin Light
-# background = #1c1c1c
+background = #282828
 
