@@ -21,6 +21,12 @@ require("lazy").setup({
   spec = {
     { "laktak/tome" },
     { "tpope/vim-surround" },
+    {
+      "mbbill/undotree",
+      keys = {
+        { "<leader>u", "<cmd>UndotreeToggle<cr>" },
+      },
+    },
 
     {
       "kyoh86/vim-go-coverage",
@@ -212,7 +218,6 @@ require("lazy").setup({
         appearance = { nerd_font_variant = "normal" },
         completion = {
           accept = { auto_brackets = { enabled = true } },
-          -- menu = { draw = { treesitter = { "lsp" } } },
           menu = {
             draw = {
               columns = { { "kind_icon" }, { "label", gap = 1 } },
@@ -263,10 +268,10 @@ require("lazy").setup({
       end,
     },
 
-    {
-      'stevearc/conform.nvim',
-      opts = { format_on_save = { timeout_ms = 500, lsp_format = "fallback" } },
-    },
+    -- {
+    --   'stevearc/conform.nvim',
+    --   opts = { format_on_save = { timeout_ms = 500, lsp_format = "fallback" } },
+    -- },
 
     {
       "lewis6991/gitsigns.nvim",
@@ -341,11 +346,53 @@ require("lazy").setup({
 
 
 vim.o.termguicolors = true
-vim.cmd.colorscheme("gruvbox")
+vim.cmd.colorscheme("retrobox")
+
+-- vim.api.nvim_set_hl(0, "Normal", { bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "Visual", { bg = "#252525" })
+-- vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
+
+-- vim.api.nvim_set_hl(0, "Pmenu", { bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#303030" })
+--
+-- vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#83A598", bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "PmenuKindSel", { bg = "#303030" })
+--
+-- vim.api.nvim_set_hl(0, "PmenuExtra", { bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "PmenuExtraSel", { bg = "#303030" })
+--
+-- vim.api.nvim_set_hl(0, "PmenuMatch", { fg = "#B16286", bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "PmenuMatchSel", { bg = "#303030" })
+
+vim.api.nvim_set_hl(0, "Added", { fg = "#B8BB26" })
+vim.api.nvim_set_hl(0, "Changed", { fg = "#83A598" })
+vim.api.nvim_set_hl(0, "Removed", { fg = "#FB4934" })
+
+vim.api.nvim_set_hl(0, "DiffAdd", { bg = "#282808" })
+vim.api.nvim_set_hl(0, "DiffChange", { bg = "#19231f" })
+vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#420801" })
+vim.api.nvim_set_hl(0, "DiffText", { bg = "#522500" })
+
+vim.api.nvim_set_hl(0, "OilGitAdded", { fg = "#B8BB26" })
+vim.api.nvim_set_hl(0, "OilGitModified", { fg = "#83A598" })
+vim.api.nvim_set_hl(0, "OilGitRenamed", { fg = "#522500" })
+vim.api.nvim_set_hl(0, "OilGitUntracked", { fg = "#FB4934" })
+
+vim.api.nvim_set_hl(0, "Identifier", { fg = "#EBDBB2" })
+vim.api.nvim_set_hl(0, "Delimiter", { fg = "#EBDBB2" })
+vim.api.nvim_set_hl(0, "@variable", { fg = "#83A598" })
+vim.api.nvim_set_hl(0, "@variable.parameter", { fg = "#83A598" })
+
+vim.api.nvim_set_hl(0, "DiagnosticError", { fg = "#FB4934" })
+vim.api.nvim_set_hl(0, "DiagnosticWarn", { fg = "#FE8019" })
+vim.api.nvim_set_hl(0, "DiagnosticInfo", { fg = "#EBDBB2" })
+vim.api.nvim_set_hl(0, "DiagnosticHint", { fg = "#EBDBB2" })
+vim.api.nvim_set_hl(0, "DiagnosticOk", { fg = "#B8BB26" })
 
 require("fzf-lua").register_ui_select()
 
-vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+-- vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 
 vim.opt.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
 
@@ -431,16 +478,16 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local client = vim.lsp.get_client_by_id(event.data.client_id)
     if client == nil then return end
 
-    -- if not client:supports_method("textDocument/willSaveWaitUntil")
-    --     and client:supports_method("textDocument/formatting") then
-    --   vim.api.nvim_create_autocmd("BufWritePre", {
-    --     group = vim.api.nvim_create_augroup("my.lsp", { clear = false }),
-    --     buffer = event.buf,
-    --     callback = function()
-    --      vim.lsp.buf.format({ bufnr = event.buf, id = client.id, timeout_ms = 1000 })
-    --     end,
-    --   })
-    -- end
+    if not client:supports_method("textDocument/willSaveWaitUntil")
+        and client:supports_method("textDocument/formatting") then
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        group = vim.api.nvim_create_augroup("my.lsp", { clear = false }),
+        buffer = event.buf,
+        callback = function()
+          vim.lsp.buf.format({ bufnr = event.buf, id = client.id, timeout_ms = 1000 })
+        end,
+      })
+    end
 
     if client.server_capabilities.codeLensProvider then
       ---@diagnostic disable-next-line: param-type-mismatch
@@ -449,9 +496,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
       vim.keymap.set("n", "grc", "<cmd>lua vim.lsp.codelens.run()<cr>", opts)
     end
 
-    -- if client:supports_method("textDocument/formatting") then
-    --   vim.keymap.set({ "n", "x" }, "grf", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", opts)
-    -- end
+    if client:supports_method("textDocument/formatting") then
+      vim.keymap.set({ "n", "x" }, "grf", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", opts)
+    end
   end,
 })
 
@@ -465,7 +512,7 @@ local toggle_quickfix = function()
 end
 vim.keymap.set("n", "<leader>q", toggle_quickfix)
 
-vim.keymap.set("n", "<leader>gg", "<cmd>!zellij run -i -- lazygit<cr>")
+vim.keymap.set("n", "<leader>gg", "<cmd>!tmux neww lazygit<cr>")
 
 vim.keymap.set("n", "<c-[>", "<cmd>noh<Return><esc>")
 
