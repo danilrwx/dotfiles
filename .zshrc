@@ -21,6 +21,9 @@ alias kad="kubectl delete -f"
 alias vi='nvim'
 alias vim='nvim'
 
+alias kubectl="kubecolor"
+alias k="kubecolor"
+
 export EDITOR='nvim'
 export VISUAL='nvim'
 
