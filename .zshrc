@@ -21,8 +21,10 @@ alias kad="kubectl delete -f"
 alias vi='nvim'
 alias vim='nvim'
 
-alias kubectl="kubecolor"
-alias k="kubecolor"
+source <(kubectl completion zsh)
+compdef kubecolor=kubectl
+alias kubectl=kubecolor
+alias k=kubecolor
 
 export EDITOR='nvim'
 export VISUAL='nvim'
@@ -44,8 +46,6 @@ export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
 export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':')
 
 [[ -e /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-
-source <(kubectl completion zsh)
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   eval $( keychain --eval -q )

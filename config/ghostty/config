@@ -10,9 +10,6 @@ font-family-bold-italic  = Iosevka Medium Italic
 
 maximize = true
 
-font-size = 16
+font-size = 18
 
-theme = dark:retrobox,light:Builtin Light
-background = #000000
-
-
+theme = Catppuccin Mocha

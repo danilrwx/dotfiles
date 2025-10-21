@@ -29,6 +29,12 @@ require("lazy").setup({
     },
 
     {
+      "catppuccin/nvim",
+      name = "catppuccin",
+      priority = 1000,
+    },
+
+    {
       "kyoh86/vim-go-coverage",
       lazy = false,
       keys = {
@@ -45,36 +51,6 @@ require("lazy").setup({
         { "<leader>gl", "<cmd>tab Git log --follow -p %<cr>" },
         { "<leader>gL", "<cmd>tab Git log<cr>" },
         { "<leader>gb", "<cmd>tab Git blame<cr>" },
-      },
-    },
-
-    {
-      "ellisonleao/gruvbox.nvim",
-      priority = 1000,
-      opts = {
-        transparent_mode = true,
-        italic = {
-          strings = false,
-          emphasis = false,
-          comments = false,
-          operators = false,
-          folds = false,
-        },
-      }
-    },
-
-    {
-      'mrjones2014/smart-splits.nvim',
-      lazy = false,
-      keys = {
-        { "<A-h>", "<cmd>SmartResizeLeft<cr>" },
-        { "<A-j>", "<cmd>SmartResizeDown<cr>" },
-        { "<A-k>", "<cmd>SmartResizeUp<cr>" },
-        { "<A-l>", "<cmd>SmartResizeRight<cr>" },
-        { "<C-h>", "<cmd>SmartCursorMoveLeft<cr>" },
-        { "<C-j>", "<cmd>SmartCursorMoveDown<cr>" },
-        { "<C-k>", "<cmd>SmartCursorMoveUp<cr>" },
-        { "<C-l>", "<cmd>SmartCursorMoveRight<cr>" },
       },
     },
 
@@ -268,10 +244,10 @@ require("lazy").setup({
       end,
     },
 
-    -- {
-    --   'stevearc/conform.nvim',
-    --   opts = { format_on_save = { timeout_ms = 500, lsp_format = "fallback" } },
-    -- },
+    {
+      'stevearc/conform.nvim',
+      opts = { format_on_save = { timeout_ms = 500, lsp_format = "fallback" } },
+    },
 
     {
       "lewis6991/gitsigns.nvim",
@@ -303,97 +279,17 @@ require("lazy").setup({
         end
       }
     },
-
-    {
-      "coder/claudecode.nvim",
-      dependencies = { "folke/snacks.nvim" },
-      lazy = false,
-      config = true,
-      opts = {
-        terminal = {
-          provider = "external",
-          provider_opts = {
-            external_terminal_cmd = "zellij run -n claude --width 250 -x 50 -y 50 -f -- %s",
-          },
-        },
-      },
-      keys = {
-        { "<leader>a",  nil,                              desc = "AI/Claude Code" },
-        { "<leader>ac", "<cmd>ClaudeCode<cr>",            desc = "Toggle Claude" },
-        { "<leader>af", "<cmd>ClaudeCodeFocus<cr>",       desc = "Focus Claude" },
-        { "<M-,>",      "<cmd>ClaudeCodeFocus<cr>",       desc = "Claude Code",        mode = { "n", "x" } },
-
-        { "<leader>ar", "<cmd>ClaudeCode --resume<cr>",   desc = "Resume Claude" },
-        { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
-        { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
-        { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>",       desc = "Add current buffer" },
-        { "<leader>as", "<cmd>ClaudeCodeSend<cr>",        mode = "v",                  desc = "Send to Claude" },
-        {
-          "<leader>as",
-          "<cmd>ClaudeCodeTreeAdd<cr>",
-          desc = "Add file",
-          ft = { "NvimTree", "neo-tree", "oil", "minifiles" },
-        },
-        -- Diff management
-        { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
-        { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",   desc = "Deny diff" },
-      },
-    },
-
   },
   checker = { enabled = false },
 })
 
 
 vim.o.termguicolors = true
-vim.o.background = "dark"
-vim.cmd.colorscheme("retrobox")
-
-vim.api.nvim_set_hl(0, "Normal", { bg = nil })
-vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#1C1C1C" })
-vim.api.nvim_set_hl(0, "Visual", { bg = "#252525" })
-vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
-
--- vim.api.nvim_set_hl(0, "Pmenu", { bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#303030" })
---
--- vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#83A598", bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "PmenuKindSel", { bg = "#303030" })
---
--- vim.api.nvim_set_hl(0, "PmenuExtra", { bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "PmenuExtraSel", { bg = "#303030" })
---
--- vim.api.nvim_set_hl(0, "PmenuMatch", { fg = "#B16286", bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "PmenuMatchSel", { bg = "#303030" })
-
-vim.api.nvim_set_hl(0, "Added", { fg = "#B8BB26" })
-vim.api.nvim_set_hl(0, "Changed", { fg = "#83A598" })
-vim.api.nvim_set_hl(0, "Removed", { fg = "#FB4934" })
-
-vim.api.nvim_set_hl(0, "DiffAdd", { bg = "#282808" })
-vim.api.nvim_set_hl(0, "DiffChange", { bg = "#19231f" })
-vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#420801" })
-vim.api.nvim_set_hl(0, "DiffText", { bg = "#522500" })
-
-vim.api.nvim_set_hl(0, "OilGitAdded", { fg = "#B8BB26" })
-vim.api.nvim_set_hl(0, "OilGitModified", { fg = "#83A598" })
-vim.api.nvim_set_hl(0, "OilGitRenamed", { fg = "#522500" })
-vim.api.nvim_set_hl(0, "OilGitUntracked", { fg = "#FB4934" })
-
-vim.api.nvim_set_hl(0, "Identifier", { fg = "#EBDBB2" })
-vim.api.nvim_set_hl(0, "Delimiter", { fg = "#EBDBB2" })
-vim.api.nvim_set_hl(0, "@variable", { fg = "#83A598" })
-vim.api.nvim_set_hl(0, "@variable.parameter", { fg = "#83A598" })
-
-vim.api.nvim_set_hl(0, "DiagnosticError", { fg = "#FB4934" })
-vim.api.nvim_set_hl(0, "DiagnosticWarn", { fg = "#FE8019" })
-vim.api.nvim_set_hl(0, "DiagnosticInfo", { fg = "#EBDBB2" })
-vim.api.nvim_set_hl(0, "DiagnosticHint", { fg = "#EBDBB2" })
-vim.api.nvim_set_hl(0, "DiagnosticOk", { fg = "#B8BB26" })
+vim.cmd.colorscheme("catppuccin")
 
 require("fzf-lua").register_ui_select()
 
--- vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 
 vim.opt.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
 
@@ -416,7 +312,7 @@ vim.opt.foldlevelstart = 99
 
 vim.opt.signcolumn = "auto"
 vim.opt.laststatus = 1
-vim.opt.cmdheight = 1
+vim.opt.cmdheight = 0
 
 vim.opt.updatetime = 500
 
@@ -441,10 +337,14 @@ vim.filetype.add({
   }
 })
 
+vim.api.nvim_set_hl(0, "TabLine_Custom", { gui = nil })
+vim.api.nvim_set_hl(0, "TabLineFill_Custom", { gui = nil })
+
 vim.lsp.enable("gopls")
 vim.lsp.enable("golangci_lint_ls")
 vim.lsp.enable("lua_ls")
 vim.lsp.enable("helm_ls")
+vim.lsp.enable("rust_analyzer")
 
 vim.diagnostic.config({ virtual_text = { prefix = "🐗", }, signs = false })
 
@@ -453,6 +353,9 @@ vim.fn.sign_define("DapBreakpointCondition", { text = "🫸", texthl = "", lineh
 vim.fn.sign_define("DapLogPoint", { text = "📄", texthl = "", linehl = "", numhl = "" })
 vim.fn.sign_define("DapStopped", { text = "👉", texthl = "", linehl = "", numhl = "" })
 vim.fn.sign_define("DapBreakpointRejected", { text = "🚫", texthl = "", linehl = "", numhl = "" })
+
+vim.api.nvim_create_autocmd("RecordingEnter", { pattern = "*", callback = function() vim.o.cmdheight = 1 end })
+vim.api.nvim_create_autocmd("RecordingLeave", { pattern = "*", callback = function() vim.o.cmdheight = 0 end })
 
 ---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_create_autocmd("TextYankPost", {
@@ -516,6 +419,7 @@ vim.keymap.set("n", "<leader>q", toggle_quickfix)
 vim.keymap.set("n", "<leader>gg", "<cmd>!tmux neww lazygit<cr>")
 
 vim.keymap.set("n", "<c-[>", "<cmd>noh<Return><esc>")
+vim.keymap.set("n", "<c-l>", "<cmd>noh<Return><esc>")
 
 vim.keymap.set("n", "<c-d>", "<c-d>zz")
 vim.keymap.set("n", "<c-u>", "<c-u>zz")
