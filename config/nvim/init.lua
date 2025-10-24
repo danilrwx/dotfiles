@@ -21,6 +21,7 @@ require("lazy").setup({
   spec = {
     { "laktak/tome" },
     { "tpope/vim-surround" },
+
     {
       "mbbill/undotree",
       keys = {
@@ -28,10 +29,22 @@ require("lazy").setup({
       },
     },
 
+    { 'kevinhwang91/nvim-bqf' },
+
     {
-      "catppuccin/nvim",
-      name = "catppuccin",
+      'p00f/alabaster.nvim',
+      lazy = false,
       priority = 1000,
+    },
+
+    {
+      "otavioschwanck/arrow.nvim",
+      dependencies = { { "nvim-tree/nvim-web-devicons" } },
+      opts = {
+        show_icons = true,
+        leader_key = ';',
+        buffer_leader_key = 'm',
+      }
     },
 
     {
@@ -64,15 +77,33 @@ require("lazy").setup({
 
     {
       "chrisgrieser/nvim-origami",
-      opts = { foldKeymaps = { setup = false }, autoFold = { enabled = false } },
+      opts = {
+        foldKeymaps = { setup = false },
+        autoFold = { enabled = false },
+      },
     },
 
     {
       'stevearc/oil.nvim',
-      dependencies = { "nvim-tree/nvim-web-devicons" },
       opts = { view_options = { show_hidden = true } },
       keys = { { "-", "<cmd>Oil<cr>" } },
       lazy = false,
+    },
+
+    {
+      'windwp/nvim-autopairs',
+      event = "InsertEnter",
+      config = true,
+      opts = {}
+    },
+
+    {
+      'andymass/vim-matchup',
+      opts = {
+        treesitter = {
+          stopline = 500,
+        }
+      }
     },
 
     {
@@ -113,14 +144,28 @@ require("lazy").setup({
       opts = {},
     },
 
+    -- {
+    --   "sebdah/vim-delve",
+    --   keys = {
+    --     { "<leader>td", "<cmd>DlvTestCurrent<cr>" },
+    --     { "<leader>db", "<cmd>DlvToggleBreakpoint<cr>" },
+    --     { "<leader>dc", "<cmd>DlvConnect :2345<cr>" },
+    --   },
+    -- },
+
     {
-      "sebdah/vim-delve",
-      keys = {
-        { "<leader>td", "<cmd>DlvTestCurrent<cr>" },
-        { "<leader>db", "<cmd>DlvToggleBreakpoint<cr>" },
-        { "<leader>dc", "<cmd>DlvConnect :2345<cr>" },
+      "miroshQa/debugmaster.nvim",
+      dependencies = {
+        "mfussenegger/nvim-dap",
+        { 'https://github.com/leoluz/nvim-dap-go', opts = {} },
       },
+      config = function()
+        local dm = require("debugmaster")
+        vim.keymap.set({ "n", "v" }, "<leader>d", dm.mode.toggle, { nowait = true })
+        vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+      end
     },
+
 
     {
       "daliusd/ghlite.nvim",
@@ -135,30 +180,30 @@ require("lazy").setup({
       },
     },
 
-    {
-      "romgrk/barbar.nvim",
-      lazy = false,
-      dependencies = { 'lewis6991/gitsigns.nvim', 'nvim-tree/nvim-web-devicons' },
-      opts = {
-        animation = false,
-        icons = {
-          button = "",
-          modified = { button = "🔸" },
-          pinned = { button = "📌", filename = true },
-          diagnostics = { [vim.diagnostic.severity.ERROR] = { enabled = true, icon = "🔥" }, },
-        },
-      },
-      keys = {
-        { "<s-h>",   "<cmd>BufferPrevious<cr>" },
-        { "<a-s-h>", "<cmd>BufferMovePrevious<cr>" },
-
-        { "<s-l>",   "<cmd>BufferNext<cr>" },
-        { "<a-s-l>", "<cmd>BufferMoveNext<cr>" },
-
-        { "<a-q>",   "<cmd>BufferClose<cr>" },
-        { "<a-s-q>", "<cmd>BufferCloseAllButCurrent<cr>" },
-      }
-    },
+    -- {
+    --   "romgrk/barbar.nvim",
+    --   lazy = false,
+    --   dependencies = { 'lewis6991/gitsigns.nvim', 'nvim-tree/nvim-web-devicons' },
+    --   opts = {
+    --     animation = false,
+    --     icons = {
+    --       button = "",
+    --       modified = { button = "🔸" },
+    --       pinned = { button = "📌", filename = true },
+    --       diagnostics = { [vim.diagnostic.severity.ERROR] = { enabled = true, icon = "🔥" }, },
+    --     },
+    --   },
+    --   keys = {
+    --     { "<s-h>",   "<cmd>BufferPrevious<cr>" },
+    --     { "<a-s-h>", "<cmd>BufferMovePrevious<cr>" },
+    --
+    --     { "<s-l>",   "<cmd>BufferNext<cr>" },
+    --     { "<a-s-l>", "<cmd>BufferMoveNext<cr>" },
+    --
+    --     { "<a-q>",   "<cmd>BufferClose<cr>" },
+    --     { "<a-s-q>", "<cmd>BufferCloseAllButCurrent<cr>" },
+    --   }
+    -- },
 
     {
       "ibhagwan/fzf-lua",
@@ -187,7 +232,10 @@ require("lazy").setup({
 
     {
       "saghen/blink.cmp",
-      dependencies = { "xzbdmw/colorful-menu.nvim" },
+      dependencies = {
+        "xzbdmw/colorful-menu.nvim",
+        { 'yus-works/csc.nvim', opts = {} },
+      },
       opts = {
         keymap = { preset = "enter" },
         signature = { enabled = true },
@@ -285,7 +333,7 @@ require("lazy").setup({
 
 
 vim.o.termguicolors = true
-vim.cmd.colorscheme("catppuccin")
+vim.cmd.colorscheme("alabaster")
 
 require("fzf-lua").register_ui_select()
 
@@ -311,8 +359,8 @@ vim.opt.foldlevel = 99
 vim.opt.foldlevelstart = 99
 
 vim.opt.signcolumn = "auto"
-vim.opt.laststatus = 1
-vim.opt.cmdheight = 0
+vim.opt.laststatus = 0
+vim.opt.cmdheight = 1
 
 vim.opt.updatetime = 500
 
@@ -337,9 +385,6 @@ vim.filetype.add({
   }
 })
 
-vim.api.nvim_set_hl(0, "TabLine_Custom", { gui = nil })
-vim.api.nvim_set_hl(0, "TabLineFill_Custom", { gui = nil })
-
 vim.lsp.enable("gopls")
 vim.lsp.enable("golangci_lint_ls")
 vim.lsp.enable("lua_ls")
@@ -353,9 +398,6 @@ vim.fn.sign_define("DapBreakpointCondition", { text = "🫸", texthl = "", lineh
 vim.fn.sign_define("DapLogPoint", { text = "📄", texthl = "", linehl = "", numhl = "" })
 vim.fn.sign_define("DapStopped", { text = "👉", texthl = "", linehl = "", numhl = "" })
 vim.fn.sign_define("DapBreakpointRejected", { text = "🚫", texthl = "", linehl = "", numhl = "" })
-
-vim.api.nvim_create_autocmd("RecordingEnter", { pattern = "*", callback = function() vim.o.cmdheight = 1 end })
-vim.api.nvim_create_autocmd("RecordingLeave", { pattern = "*", callback = function() vim.o.cmdheight = 0 end })
 
 ---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_create_autocmd("TextYankPost", {
@@ -421,9 +463,14 @@ vim.keymap.set("n", "<leader>gg", "<cmd>!tmux neww lazygit<cr>")
 vim.keymap.set("n", "<c-[>", "<cmd>noh<Return><esc>")
 vim.keymap.set("n", "<c-l>", "<cmd>noh<Return><esc>")
 
+vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
+vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
+
 vim.keymap.set("n", "<c-d>", "<c-d>zz")
 vim.keymap.set("n", "<c-u>", "<c-u>zz")
 
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>p", "+p")
 vim.keymap.set("n", "<leader>Y", [["+Y]])
+
+-- vim.keymap.set({ "n", "v" }, "<leader>d", require("debugmaster").mode.toggle, { nowait = true })

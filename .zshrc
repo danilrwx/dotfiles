@@ -67,3 +67,5 @@ fi
 autoload -Uz compinit && compinit -i
 
 [[ -e ~/private.zsh ]] && source ~/private.zsh
+
+[[ "$PATH" == *"$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
