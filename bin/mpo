@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+if [ $# -lt 1 ]; then
+    kubectl get mpo virtualization -o jsonpath='{.spec.imageTag}'
+else
+    arg="$1"
+
+    if [[ "$arg" =~ ^[0-9]+$ ]]; then
+        tag="pr$arg"
+    else
+        tag="$arg"
+    fi
+
+    kubectl patch mpo virtualization --type merge -p "{\"spec\":{\"imageTag\":\"$tag\"}}"
+fi
+
+
+

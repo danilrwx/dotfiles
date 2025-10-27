@@ -31,7 +31,7 @@ export VISUAL='nvim'
 
 export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/
-export PATH=$PATH:$HOME/dotfiles/scripts/
+export PATH=$PATH:$HOME/dotfiles/bin/
 export PATH=$PATH:$HOME/.bun/bin
 export PATH=$PATH:$HOME/.aid/bin
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
