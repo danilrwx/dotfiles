@@ -1,15 +1,16 @@
 [core]
-  editor = vim
+  editor = nvim
   attributesfile = /Users/danil/.gitattributes
   excludesfile = /Users/danil/.gitignore_global
 
 [user]
   name = Daniil Antoshin
   email = daniil.antoshin@flant.com
-  signingkey = 31FB21FCE9E18AEB
+  signingkey = FD3CC5C71FFD6458
 
 [commit]
   gpgsign = true
+	verbose = true
 
 [pull]
   rebase = true
@@ -20,11 +21,22 @@
 [tag]
   gpgSign = true
 
-[merge]
-  conflictstyle = zdiff3
-[diff]
-	tool = vimdiff
-[difftool]
-	prompt = false
 [rerere]
 	enabled = true
+
+[format]
+	signOff = yes
+
+[diff]
+    tool = nvimdiff
+[difftool]
+    prompt = false
+[difftool "nvimdiff"]
+    cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
+
+[merge]
+	tool = nvimdiff
+[mergetool]
+    prompt = true
+[mergetool "nvimdiff"]
+    cmd = "nvim -d \"$LOCAL\" \"$REMOTE\" \"$MERGED\" -c 'wincmd w' -c 'wincmd J'"
