@@ -36,6 +36,8 @@ export PATH=$PATH:$HOME/.bun/bin
 export PATH=$PATH:$HOME/.aid/bin
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
+[[ "$PATH" == *"$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
+
 export GOPATH=$HOME/go
 export GOBIN=$GOPATH/bin
 export PATH=$PATH:$GOBIN
@@ -46,10 +48,12 @@ export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
 export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':')
 
 [[ -e /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+[[ -e /home/linuxbrew/.linuxbrew/bin/brew ]] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   eval $( keychain --eval -q )
-  keychain --inherit any -q --confirm $HOME/.ssh/id_rsa
+  keychain -q --confirm $HOME/.ssh/id_rsa
 fi
 
 h=()
@@ -66,6 +70,8 @@ fi
 
 autoload -Uz compinit && compinit -i
 
+
 [[ -e ~/private.zsh ]] && source ~/private.zsh
 
-[[ "$PATH" == *"$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
+
+! { which flint | grep -qsE "^/home/danil/.trdl/"; } && [[ -x "$HOME/bin/trdl" ]] && source $("$HOME/bin/trdl" use flint "2")

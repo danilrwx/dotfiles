@@ -144,15 +144,6 @@ require("lazy").setup({
       opts = {},
     },
 
-    -- {
-    --   "sebdah/vim-delve",
-    --   keys = {
-    --     { "<leader>td", "<cmd>DlvTestCurrent<cr>" },
-    --     { "<leader>db", "<cmd>DlvToggleBreakpoint<cr>" },
-    --     { "<leader>dc", "<cmd>DlvConnect :2345<cr>" },
-    --   },
-    -- },
-
     {
       "miroshQa/debugmaster.nvim",
       dependencies = {
@@ -180,30 +171,30 @@ require("lazy").setup({
       },
     },
 
-    -- {
-    --   "romgrk/barbar.nvim",
-    --   lazy = false,
-    --   dependencies = { 'lewis6991/gitsigns.nvim', 'nvim-tree/nvim-web-devicons' },
-    --   opts = {
-    --     animation = false,
-    --     icons = {
-    --       button = "",
-    --       modified = { button = "🔸" },
-    --       pinned = { button = "📌", filename = true },
-    --       diagnostics = { [vim.diagnostic.severity.ERROR] = { enabled = true, icon = "🔥" }, },
-    --     },
-    --   },
-    --   keys = {
-    --     { "<s-h>",   "<cmd>BufferPrevious<cr>" },
-    --     { "<a-s-h>", "<cmd>BufferMovePrevious<cr>" },
-    --
-    --     { "<s-l>",   "<cmd>BufferNext<cr>" },
-    --     { "<a-s-l>", "<cmd>BufferMoveNext<cr>" },
-    --
-    --     { "<a-q>",   "<cmd>BufferClose<cr>" },
-    --     { "<a-s-q>", "<cmd>BufferCloseAllButCurrent<cr>" },
-    --   }
-    -- },
+    {
+      "romgrk/barbar.nvim",
+      lazy = false,
+      dependencies = { 'lewis6991/gitsigns.nvim', 'nvim-tree/nvim-web-devicons' },
+      opts = {
+        animation = false,
+        icons = {
+          button = "",
+          modified = { button = "🔸" },
+          pinned = { button = "📌", filename = true },
+          diagnostics = { [vim.diagnostic.severity.ERROR] = { enabled = true, icon = "🔥" }, },
+        },
+      },
+      keys = {
+        { "<s-h>",   "<cmd>BufferPrevious<cr>" },
+        { "<a-s-h>", "<cmd>BufferMovePrevious<cr>" },
+
+        { "<s-l>",   "<cmd>BufferNext<cr>" },
+        { "<a-s-l>", "<cmd>BufferMoveNext<cr>" },
+
+        { "<a-q>",   "<cmd>BufferClose<cr>" },
+        { "<a-s-q>", "<cmd>BufferCloseAllButCurrent<cr>" },
+      }
+    },
 
     {
       "ibhagwan/fzf-lua",

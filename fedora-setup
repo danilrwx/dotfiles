@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Update repo remote url
+git remote set-url origin git@github.com:danilrwx/dotfiles.git
+
+# Make symlinks for configs
+mkdir -p ~/.config
+
+ln -sf ~/dotfiles/.gitconfig ~/
+ln -sf ~/dotfiles/.gitignore_global ~/
+ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
+
+ln -snf ~/dotfiles/config/k9s ~/.config/
+ln -snf ~/dotfiles/config/htop ~/.config/
+ln -snf ~/dotfiles/config/lazygit ~/.config/
+ln -snf ~/dotfiles/config/nvim ~/.config/
+
+ln -sf ~/dotfiles/.zprofile ~/
+
+sudo dnf install -y lame\* --exclude=lame-devel
+sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
+sudo dnf install -y wl-clipboard tmux git wget zip unzip curl zsh tigervnc openssh-askpass
+
+# Install Homebrew
+if [ ! -d /home/linuxbrew/.linuxbrew ]; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+# Install tmux plugin manager
+if [ ! -d ~/.tmux/plugins/tpm ]; then
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
+# Install ohmyzsh
+if [ ! -d ~/.oh-my-zsh ]; then
+	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+rm ~/.zshrc
+ln -sf ~/dotfiles/.zshrc ~/
+
+# Download Iosevka nerd font
+if [ ! -f ~/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
+	wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip
+	mkdir -p ~/.local/share/fonts
+	cd ~/.local/share/fonts && unzip ~/dotfiles/Iosevka.zip
+	rm ~/dotfiles/Iosevka.zip
+	fc-cache -f
+fi
+
+# Install docker
+if [ ! -f /usr/bin/docker ]; then
+  curl -fsSL get.docker.com | bash
+ 	sudo systemctl start docker.socket
+ 	sudo systemctl enable docker.socket
+fi
+
+if ! groups | grep -q '\bdocker\b'; then
+ 	sudo usermod -aG docker $USER
+fi
+
+# Install virt-manager
+if [ ! -f /usr/bin/virt-manager ]; then
+	sudo dnf install -y virt-manager
+	sudo usermod -aG libvirt $USER
+fi
+
+# Setup flatpak
+sudo dnf install -y flatpak
+sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
+
+# Install dev packages
+brew install kubectl jq k9s kubecolor htop difftastic fzf keychain go golangci-lint-langserver gofumpt \
+  goimports go-task gopls
+
+# Instal kubectl plugins
+kubectl krew install ctx ns df-pv
