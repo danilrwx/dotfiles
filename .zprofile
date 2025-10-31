@@ -1,28 +1,12 @@
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
+PATH="$HOME/bin:$PATH"
+PATH="$HOME/.local/bin:$PATH"
+PATH="$HOME/dotfiles/bin:$PATH"
+PATH="$HOME/.bun/bin:$PATH"
+PATH="$HOME/.cargo/bin:$PATH"
 
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
-
-if [ -d "$HOME/dotfiles/bin" ] ; then
-    PATH="$HOME/dotfiles/bin:$PATH"
-fi
-
-if [ -d "$HOME/.bun/bin" ] ; then
-    PATH="$HOME/.bun/bin:$PATH"
-fi
-
-if [ -d "$HOME/.cargo/bin" ] ; then
-    PATH="$HOME/.cargo/bin:$PATH"
-fi
-
-if [ -d "$HOME/go/bin" ] ; then
-  GOPATH=$HOME/go
-  GOBIN=$GOPATH/bin
-  PATH=$GOBIN:$PATH
-fi
+GOPATH=$HOME/go
+GOBIN=$GOPATH/bin
+PATH=$HOME/go/bin:$PATH
 
 if [ -e "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
