@@ -88,7 +88,7 @@ flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
 
 # Install dev packages
 brew install kubectl jq k9s kubecolor htop difftastic fzf keychain go golangci-lint-langserver gofumpt \
-  goimports go-task gopls neovim krew lazygit
+  goimports go-task gopls neovim krew lazygit gh
 
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
