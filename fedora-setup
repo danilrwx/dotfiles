@@ -5,6 +5,7 @@ git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
 # Make symlinks for configs
 mkdir -p ~/.config
+mkdir -p ~/.local/share
 
 ln -sf ~/dotfiles/.gitconfig ~/
 ln -sf ~/dotfiles/.gitignore_global ~/
@@ -15,11 +16,26 @@ ln -snf ~/dotfiles/config/htop ~/.config/
 ln -snf ~/dotfiles/config/lazygit ~/.config/
 ln -snf ~/dotfiles/config/nvim ~/.config/
 
+ln -snf ~/dotfiles/config/xfce4/ ~/.config/
+ln -snf ~/dotfiles/config/xfce4-share/ ~/.local/share/xfce4
+
+ln -snf ~/dotfiles/config/i3 ~/.config/
+ln -snf ~/dotfiles/config/dunst ~/.config/
+
 ln -sf ~/dotfiles/.zprofile ~/
+
+sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+
+sudo dnf install -y hsetroot xcompmgr xclip xsel
 
 sudo dnf install -y lame\* --exclude=lame-devel
 sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
-sudo dnf install -y wl-clipboard tmux git wget zip unzip curl zsh tigervnc openssh-askpass
+sudo dnf install -y tmux git wget zip unzip curl zsh tigervnc openssh-askpass
+
+if [ ! -d ~/Backgrounds ]; then
+  git clone https://github.com/orangci/walls-catppuccin-mocha.git ~/Backgrounds
+fi
 
 # Install Homebrew
 if [ ! -d /home/linuxbrew/.linuxbrew ]; then
@@ -72,7 +88,7 @@ flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
 
 # Install dev packages
 brew install kubectl jq k9s kubecolor htop difftastic fzf keychain go golangci-lint-langserver gofumpt \
-  goimports go-task gopls
+  goimports go-task gopls neovim krew lazygit
 
 # Instal kubectl plugins
 kubectl krew install ctx ns df-pv

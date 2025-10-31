@@ -1,9 +1,7 @@
 #!/bin/bash
 
-dex --autostart --environment i3 &
+dex-autostart --autostart --environment i3 &
 xss-lock --transfer-sleep-lock -- i3lock --nofork &
 dunst -conf ~/.config/dunst/dunstrc &
 xsetroot -cursor_name left_ptr &
 xcompmgr &
-lxpolkit &
-# clipmenud
