@@ -10,17 +10,17 @@ if [[ "$OS" != "Linux" ]]; then
 fi
 
 if [ -f /etc/os-release ]; then
-    . /etc/os-release
+  . /etc/os-release
 
-    if [ "$ID" == "ubuntu" ]; then
-      log "This is a Ubuntu system."
-    elif [ "$ID" == "debian" ]; then
-      log "This is a Debian system."
-    elif [ "$ID" == "fedora" ]; then
-      log "This is a Fedora system."
-    else
-      exit 1
-    fi
+  if [ "$ID" == "ubuntu" ]; then
+    log "This is a Ubuntu system."
+  elif [ "$ID" == "debian" ]; then
+    log "This is a Debian system."
+  elif [ "$ID" == "fedora" ]; then
+    log "This is a Fedora system."
+  else
+    exit 1
+  fi
 else
   exit 1
 fi
@@ -69,11 +69,13 @@ if [[ "$OS" == "Linux" ]]; then
   if [ ! -d /home/linuxbrew/.linuxbrew ]; then
     log "Installing linuxbrew"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   fi
 elif [[ "$OS" == "Darwin" ]]; then
   if [ ! -d /opt/homebrew ]; then
     log "Installing homebrew"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
 fi
 
@@ -122,10 +124,13 @@ fi
 if [ ! -d ~/.oh-my-zsh ]; then
   log "Installing ohmyzsh"
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-fi
 
-rm ~/.zshrc
-ln -sf ~/dotfiles/.zshrc ~/
+  rm ~/.zshrc
+  ln -sf ~/dotfiles/.zshrc ~/
+
+  source ~/.zshrc
+  source ~/.zprofile
+fi
 
 if [ ! -d ~/.tmux/plugins/tpm ]; then
   log "Installing tmux plugins"
