@@ -3,6 +3,7 @@ PATH="$HOME/.local/bin:$PATH"
 PATH="$HOME/dotfiles/bin:$PATH"
 PATH="$HOME/.bun/bin:$PATH"
 PATH="$HOME/.cargo/bin:$PATH"
+PATH="$HOME/.krew/bin:$PATH"
 
 GOPATH=$HOME/go
 GOBIN=$GOPATH/bin

@@ -7,6 +7,7 @@ set $right l
 
 set $bg       #1e1e2e
 set $bg_t     #1e1e2ee6
+# set $bg_t     #1e1e2e
 set $fg       #cdd6f4
 set $red      #f38ba8
 set $darkgray #7f849c

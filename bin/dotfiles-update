@@ -1,0 +1,124 @@
+#!/bin/env bash
+
+. ~/dotfiles/scripts/util
+
+mkdir -p ~/.config
+mkdir -p ~/.local/share
+
+ln -sf ~/dotfiles/.gitconfig ~/
+ln -sf ~/dotfiles/.gitignore_global ~/
+ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
+
+ln -snf ~/dotfiles/config/k9s ~/.config/
+ln -snf ~/dotfiles/config/htop ~/.config/
+ln -snf ~/dotfiles/config/lazygit ~/.config/
+ln -snf ~/dotfiles/config/nvim ~/.config/
+
+ln -snf ~/dotfiles/config/xfce4/ ~/.config/
+ln -snf ~/dotfiles/config/xfce4-share/ ~/.local/share/xfce4
+ln -snf ~/dotfiles/config/i3 ~/.config/
+ln -snf ~/dotfiles/config/dunst ~/.config/
+
+ln -sf ~/dotfiles/.zprofile ~/
+
+
+if [ "$ID" == "fedora" ]; then
+  log "Installing fedora packages"
+  sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+  sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+
+  sudo dnf update -y
+
+  sudo dnf install -y hsetroot xcompmgr xclip xsel lxrandr
+
+  sudo dnf install -y lame\* --exclude=lame-devel
+  sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
+  sudo dnf install -y tmux git wget zip unzip curl zsh tigervnc openssh-askpass pinentry-gnome3 virt-manager flatpak gpg
+elif [ "$ID" == "debian" ]; then
+  log "Installing debian packages"
+
+  sudo apt upgdate -y
+  sudo apt install -y tmux git wget zip unzip curl zsh tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 virt-manager flatpak gpg
+fi
+
+
+if [[ "$OS" == "Linux" ]]; then
+  if [ ! -d /home/linuxbrew/.linuxbrew ]; then
+    log "Installing linuxbrew"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+elif [[ "$OS" == "Darwin" ]]; then
+  if [ ! -d /opt/homebrew ]; then
+    log "Installing homebrew"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+fi
+
+
+log "Installing brew apps"
+brew install kubectl k9s kubecolor htop difftastic fzf keychain go golangci-lint-langserver gofumpt \
+  goimports go-task gopls neovim krew lazygit gh yq xq jq
+
+log "Installing golang apps"
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
+go install github.com/matryer/moq@latest
+
+if ! flatpak remotes --columns=name | grep -q '\bflathub\b'; then
+  log "Adding flathub remote"
+  sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+fi
+
+log "Installing flatpak apps"
+flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
+
+log "Installing kubectl plugins"
+kubectl krew install ctx ns df-pv
+
+
+if [ ! -f /usr/bin/docker ]; then
+  log "Installing docker"
+  curl -fsSL get.docker.com | bash
+
+  log "Starting docker"
+  sudo systemctl start docker.socket
+  log "Enabling docker"
+  sudo systemctl enable docker.socket
+fi
+
+if ! groups | grep -q '\bdocker\b'; then
+  log "Adding user to docker group"
+  sudo usermod -aG docker $USER
+fi
+
+if ! groups | grep -q '\blibvirt\b'; then
+  log "Adding user to libvirt group"
+  sudo usermod -aG libvirt $USER
+fi
+
+if [ ! -d ~/.oh-my-zsh ]; then
+  log "Installing ohmyzsh"
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+rm ~/.zshrc
+ln -sf ~/dotfiles/.zshrc ~/
+
+if [ ! -d ~/.tmux/plugins/tpm ]; then
+  log "Installing tmux plugins"
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
+if [ ! -f ~/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
+  log "Downloading Iosevka nerd font"
+  wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip
+  mkdir -p ~/.local/share/fonts
+  cd ~/.local/share/fonts && unzip ~/dotfiles/Iosevka.zip
+  rm ~/dotfiles/Iosevka.zip
+  fc-cache -f
+fi
+
+if [ ! -d ~/Backgrounds ]; then
+  log "Installing wallpapers"
+  git clone https://github.com/orangci/walls-catppuccin-mocha.git ~/Backgrounds
+fi

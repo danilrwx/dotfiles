@@ -11,8 +11,8 @@ gui:
 git:
   commit:
     signOff: true
-  paging:
-    externalDiffCommand: difft --color=always --display=inline --syntax-highlight=on --tab-width=2 --background=dark
+  pagers:
+    - externalDiffCommand: difft --color=always --display=inline --syntax-highlight=on --tab-width=2 --background=dark
   autoFetch: false
   autoRefresh: false
 customCommands:

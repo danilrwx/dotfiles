@@ -17,15 +17,15 @@
   <property name="color-bold-is-bright" type="bool" value="true"/>
   <property name="color-use-theme" type="bool" value="false"/>
   <property name="tab-activity-color" type="string" value="#fab387"/>
-  <property name="command-login-shell" type="bool" value="false"/>
+  <property name="command-login-shell" type="bool" value="true"/>
   <property name="scrolling-unlimited" type="bool" value="true"/>
-  <property name="misc-copy-on-select" type="bool" value="true"/>
+  <property name="misc-copy-on-select" type="bool" value="false"/>
   <property name="misc-show-unsafe-paste-dialog" type="bool" value="false"/>
   <property name="misc-menubar-default" type="bool" value="false"/>
   <property name="misc-borders-default" type="bool" value="true"/>
   <property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>
   <property name="misc-toolbar-default" type="bool" value="false"/>
   <property name="misc-confirm-close" type="bool" value="false"/>
-  <property name="background-mode" type="string" value="TERMINAL_BACKGROUND_TRANSPARENT"/>
+  <property name="background-mode" type="string" value="TERMINAL_BACKGROUND_SOLID"/>
   <property name="background-darkness" type="double" value="0.90000000000000002"/>
 </channel>
