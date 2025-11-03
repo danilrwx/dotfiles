@@ -53,7 +53,7 @@ if [ "$ID" == "fedora" ]; then
 
   sudo dnf update -y
 
-  sudo dnf install -y hsetroot xcompmgr xclip xsel lxrandr
+  sudo dnf install -y hsetroot xcompmgr xclip xsel
 
   sudo dnf install -y lame\* --exclude=lame-devel
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
@@ -128,6 +128,12 @@ fi
 if [ ! -d ~/.tmux/plugins/tpm ]; then
   log "Installing tmux plugins"
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
+if [[ "$SHELL" != "$(brew --prefix)/bin/bash" ]]; then
+  log "Setting bash as default shell"
+  echo $(brew --prefix)/bin/bash | sudo tee -a /etc/shells
+  chsh -s $(brew --prefix)/bin/bash
 fi
 
 if [ ! -f ~/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
