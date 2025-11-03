@@ -29,6 +29,7 @@ else
   start_agent;
 fi
 
+PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
 
 source <(kubectl completion bash)
 source <(fzf --bash)
