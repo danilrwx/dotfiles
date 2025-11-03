@@ -42,8 +42,10 @@ ln -snf ~/dotfiles/config/xfce4-share/ ~/.local/share/xfce4
 ln -snf ~/dotfiles/config/i3 ~/.config/
 ln -snf ~/dotfiles/config/dunst ~/.config/
 
-ln -sf ~/dotfiles/.zprofile ~/
-ln -sf ~/dotfiles/.zshrc ~/
+# ln -sf ~/dotfiles/.zprofile ~/
+# ln -sf ~/dotfiles/.zshrc ~/
+ln -sf ~/dotfiles/.bash_profile ~/
+ln -sf ~/dotfiles/.bashrc ~/
 
 
 if [ "$ID" == "fedora" ]; then
