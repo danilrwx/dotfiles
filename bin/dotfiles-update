@@ -36,8 +36,8 @@ ln -snf ~/dotfiles/config/xfce4-share/ ~/.local/share/xfce4
 ln -snf ~/dotfiles/config/i3 ~/.config/
 ln -snf ~/dotfiles/config/dunst ~/.config/
 
-ln -sf ~/dotfiles/.bash_profile ~/
-ln -sf ~/dotfiles/.bashrc ~/
+ln -sf ~/dotfiles/.zprofile ~/
+ln -sf ~/dotfiles/.zshrc ~/
 
 
 if [ "$ID" == "fedora" ]; then
@@ -79,7 +79,8 @@ log "Installing brew apps"
 brew install htop fzf keychain neovim lazygit gh yq xq jq difftastic \
   kubectl k9s kubecolor krew \
   go golangci-lint-langserver gofumpt goimports go-task gopls \
-  bash-language-server lua-language-server helm-ls
+  bash-language-server lua-language-server helm-ls \
+  zsh zinit
 
 log "Installing golang apps"
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
@@ -90,19 +91,19 @@ go install github.com/matryer/moq@latest
 log "Installing kubectl plugins"
 kubectl krew install ctx ns df-pv
 
+if [[ "$SHELL" != "$(brew --prefix)/bin/zsh" ]]; then
+  if ! grep -w $(brew --prefix)/bin/zsh /etc/shells; then
+    log "Adding brew zsh to shells"
+    echo $(brew --prefix)/bin/zsh | sudo tee -a /etc/shells
+  fi
+
+  log "Setting brew zsh as default shell"
+  chsh -s $(brew --prefix)/bin/zsh
+fi
+
 if [ ! -d ~/.tmux/plugins/tpm ]; then
   log "Installing tmux plugins"
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-fi
-
-if [[ "$SHELL" != "$(brew --prefix)/bin/bash" ]]; then
-  if ! grep -w $(brew --prefix)/bin/bash /etc/shells; then
-    log "Adding brew bash to shells"
-    echo $(brew --prefix)/bin/bash | sudo tee -a /etc/shells
-  fi
-
-  log "Setting brew bash as default shell"
-  chsh -s $(brew --prefix)/bin/bash
 fi
 
 if [[ "$OS" == "Linux" ]]; then
