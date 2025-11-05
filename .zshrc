@@ -2,7 +2,6 @@ PROMPT="[%F{11}%*%f] %F{10}%~%f %F{12}󰅂%f "
 
 if type brew &>/dev/null; then
   FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
-
   autoload -Uz compinit
   compinit
 fi
@@ -45,6 +44,7 @@ if [ -e $(brew --prefix)/opt/zinit/zinit.zsh ]; then
 fi
 
 zinit light Aloxaf/fzf-tab
+zinit light zdharma-continuum/fast-syntax-highlighting
 
 if [ -e ~/private.zsh ]; then
   source ~/private.zsh
