@@ -1,5 +1,3 @@
-PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
-
 if [ -f /etc/bashrc ]; then
   source /etc/bashrc
 fi
@@ -50,3 +48,6 @@ alias kad="kubectl delete -f"
 alias vi='nvim'
 alias vim='nvim'
 alias lg='lazygit'
+
+export PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
+
