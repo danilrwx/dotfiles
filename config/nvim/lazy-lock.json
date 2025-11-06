@@ -1,9 +1,7 @@
 {
   "arrow.nvim": { "branch": "master", "commit": "6e0f726f55f99332dd726a53effd6813786b6d49" },
   "auto-session": { "branch": "main", "commit": "4cd20bb5c0138d1ce00ab35f8d7ac0f4fb4a403a" },
-  "barbar.nvim": { "branch": "master", "commit": "fb4369940a07dda35fa4d7f54cf4a36aa00440e6" },
   "blink.cmp": { "branch": "main", "commit": "afc4f4d260af11b248a79c5c8b4f82014f7330f4" },
-  "catppuccin": { "branch": "main", "commit": "8c4125e3c746976ba025dc5d908fa22c6aa09486" },
   "colorful-menu.nvim": { "branch": "master", "commit": "d5b97d247528be308b6b69d96b5950a30e470f3d" },
   "conform.nvim": { "branch": "master", "commit": "9fd3d5e0b689ec1bf400c53cbbec72c6fdf24081" },
   "csc.nvim": { "branch": "master", "commit": "1b5b85de38c0d0db69e851e3502ccabb23e4429a" },
@@ -11,10 +9,9 @@
   "fzf-lua": { "branch": "main", "commit": "a8458b79a957a6e3e217d84106a0fd4b9470ff4c" },
   "ghlite.nvim": { "branch": "main", "commit": "416a38ba76069adad87d2b51387dff285c554356" },
   "gitsigns.nvim": { "branch": "main", "commit": "20ad4419564d6e22b189f6738116b38871082332" },
-  "lazy.nvim": { "branch": "main", "commit": "db067881fff0fd4be8c00e5bde7492e0e1c77a2f" },
+  "lazy.nvim": { "branch": "main", "commit": "85c7ff3711b730b4030d03144f6db6375044ae82" },
   "none-ls.nvim": { "branch": "main", "commit": "a96172f673f720cd4f3572e1fcd08400ed3eb25d" },
   "nvim-autopairs": { "branch": "master", "commit": "7a2c97cccd60abc559344042fefb1d5a85b3e33b" },
-  "nvim-bqf": { "branch": "main", "commit": "a77b17e39b1b707b6feee86a36c83703c1534c08" },
   "nvim-dap": { "branch": "master", "commit": "6782b097af2417a4c3e33849b0a26ae2188bd7ea" },
   "nvim-dap-go": { "branch": "main", "commit": "b4421153ead5d726603b02743ea40cf26a51ed5f" },
   "nvim-origami": { "branch": "main", "commit": "d42d11008a32f5f8c92bca6fd63f6782f197d114" },
@@ -30,7 +27,6 @@
   "undotree": { "branch": "master", "commit": "0f1c9816975b5d7f87d5003a19c53c6fd2ff6f7f" },
   "vim-fugitive": { "branch": "master", "commit": "61b51c09b7c9ce04e821f6cf76ea4f6f903e3cf4" },
   "vim-go-coverage": { "branch": "main", "commit": "e3d47b7780ca998ea34f2f9055ef15d366c56a2e" },
-  "vim-matchup": { "branch": "master", "commit": "ca538c3bb02836510526ff7d07cf7e4c8e9a3b90" },
   "vim-surround": { "branch": "master", "commit": "3d188ed2113431cf8dac77be61b842acb64433d9" },
   "vim-test": { "branch": "master", "commit": "2c264d2a5dddb3a7ec927e4359a2b619a8c13a8c" }
 }

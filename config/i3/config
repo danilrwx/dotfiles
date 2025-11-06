@@ -5,15 +5,15 @@ set $down  j
 set $up    k
 set $right l
 
-set $bg       #1e1e2e
-set $bg_t     #1e1e2ee6
+set $bg       #000000
+set $bg_t     #000000
 # set $bg_t     #1e1e2e
 set $fg       #cdd6f4
-set $red      #f38ba8
+set $red      #19cb00
 set $darkgray #7f849c
 
 set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1e1e2e' -sb '#cdd6f4' -nf '#cdd6f4' -nb '#1e1e2e' "$@"
-set $term xfce4-terminal
+set $term kitty
 
 font pango:Iosevka Nerd Font 12
 
@@ -129,7 +129,7 @@ client.unfocused               $bg        $bg       $darkgray      $bg          
 client.urgent                  $red       $bg       $red           $red         $red
 
 bar {
-  i3bar_command i3bar --transparency
+  # i3bar_command i3bar --transparency
   status_command baraction
 	position top
   colors {

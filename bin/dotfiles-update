@@ -30,14 +30,20 @@ ln -snf ~/dotfiles/config/k9s ~/.config/
 ln -snf ~/dotfiles/config/htop ~/.config/
 ln -snf ~/dotfiles/config/lazygit ~/.config/
 ln -snf ~/dotfiles/config/nvim ~/.config/
+ln -snf ~/dotfiles/config/nvim ~/.config/nvimpager
 
 ln -snf ~/dotfiles/config/xfce4/ ~/.config/
 ln -snf ~/dotfiles/config/xfce4-share/ ~/.local/share/xfce4
 ln -snf ~/dotfiles/config/i3 ~/.config/
+ln -snf ~/dotfiles/config/kitty ~/.config/
+ln -snf ~/dotfiles/config/alacritty ~/.config/
 ln -snf ~/dotfiles/config/dunst ~/.config/
 
 ln -sf ~/dotfiles/.zprofile ~/
 ln -sf ~/dotfiles/.zshrc ~/
+
+ln -sf ~/dotfiles/.bash_profile ~/
+ln -sf ~/dotfiles/.bashrc ~/
 
 
 if [ "$ID" == "fedora" ]; then
@@ -51,8 +57,8 @@ if [ "$ID" == "fedora" ]; then
 
   sudo dnf install -y lame\* --exclude=lame-devel
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
-  sudo dnf install -y tmux git wget zip unzip curl tigervnc openssh-askpass pinentry-gnome3 virt-manager flatpak gpg
-elif [ "$ID" == "debian" ]; then
+  sudo dnf install -y tmux git wget zip unzip curl tigervnc openssh-askpass pinentry-gnome3 virt-manager flatpak gpg telegram-desktop discord
+elif [ "$ID" == "debian" || "$ID" == "ubuntu" ]; then
   log "Installing debian packages"
 
   sudo apt update -y
@@ -76,7 +82,7 @@ fi
 
 
 log "Installing brew apps"
-brew install htop fzf keychain neovim lazygit gh yq xq jq difftastic \
+brew install htop fzf keychain neovim nvimpager lazygit gh yq xq jq difftastic \
   kubectl k9s kubecolor krew \
   go golangci-lint-langserver gofumpt goimports go-task gopls \
   bash-language-server lua-language-server helm-ls \
