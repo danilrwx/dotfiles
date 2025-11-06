@@ -19,6 +19,13 @@ PATH=$HOME/go/bin:$PATH
 export KREW_ROOT="$HOME/.krew"
 PATH="$KREW_ROOT/bin:$PATH"
 
+if [ -d "$(brew --prefix)/opt/glibc" ]; then
+  PATH="$(brew --prefix)/opt/glibc/sbin:$PATH"
+  PATH="$(brew --prefix)/opt/glibc/bin:$PATH"
+  LDFLAGS="-L$(brew --prefix)/opt/glibc/lib"
+  CPPFLAGS="-I$(brew --prefix)/opt/glibc/include"
+fi
+
 export EDITOR='nvim'
 export VISUAL='nvim'
 export XDG_CONFIG_HOME="$HOME/.config"
