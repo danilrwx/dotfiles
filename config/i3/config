@@ -7,12 +7,11 @@ set $right l
 
 set $bg       #000000
 set $bg_t     #000000
-# set $bg_t     #1e1e2e
-set $fg       #cdd6f4
-set $red      #19cb00
+set $fg       #ffffff
+set $accent   #19cb00
 set $darkgray #7f849c
 
-set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1e1e2e' -sb '#cdd6f4' -nf '#cdd6f4' -nb '#1e1e2e' "$@"
+set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#000000' -sb '#ffffff' -nf '#ffffff' -nb '#000000' "$@"
 set $term kitty
 
 font pango:Iosevka Nerd Font 12
@@ -123,10 +122,10 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
-client.focused                 $bg        $bg       $fg            $red         $red
+client.focused                 $bg        $bg       $fg            $accent      $accent
 client.focused_inactive        $bg        $bg       $darkgray      $bg          $bg
 client.unfocused               $bg        $bg       $darkgray      $bg          $bg
-client.urgent                  $red       $bg       $red           $red         $red
+client.urgent                  $accent    $bg       $accent        $accent      $accent
 
 bar {
   # i3bar_command i3bar --transparency
@@ -139,6 +138,6 @@ bar {
      focused_workspace    $bg_t     $bg_t     $fg
      inactive_workspace   $bg_t     $bg_t     $darkgray
      active_workspace     $bg_t     $bg_t     $darkgray
-     urgent_workspace     $bg_t     $bg_t     $red
+     urgent_workspace     $bg_t     $bg_t     $accent
   }
 }
