@@ -1,3 +1,15 @@
+if [ -e "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+
+if [ -e "/opt/homebrew/bin/brew" ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+HOMEBREW_PREFIX=$(brew --prefix)
+for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnubin; do export PATH=$d:$PATH; done
+for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnuman; do export MANPATH=$d:$MANPATH; done
+
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/dotfiles/bin:$PATH"
@@ -10,17 +22,6 @@ export PATH=$HOME/go/bin:$PATH
 
 export KREW_ROOT="$HOME/.krew"
 export PATH="$KREW_ROOT/bin:$PATH"
-
-if [ -d "$(brew --prefix)/opt/glibc" ]; then
-  export PATH="$(brew --prefix)/opt/glibc/sbin:$PATH"
-  export PATH="$(brew --prefix)/opt/glibc/bin:$PATH"
-  export LDFLAGS="-L$(brew --prefix)/opt/glibc/lib"
-  export CPPFLAGS="-I$(brew --prefix)/opt/glibc/include"
-fi
-
-if [ -f "$(brew --prefix)/opt/coreutils/libexec/gnubin" ]; then
- export PATH="/home/linuxbrew/.linuxbrew/opt/coreutils/libexec/gnubin:$PATH"
-fi
 
 export EDITOR='nvim'
 export VISUAL='nvim'
@@ -35,14 +36,6 @@ export FZF_DEFAULT_OPTS=" \
   --color=marker:#B4BEFE,fg+:#CDD6F4,prompt:#CBA6F7,hl+:#F38BA8 \
   --color=selected-bg:#45475A \
   --color=border:#6C7086,label:#CDD6F4"
-
-if [ -e "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
-
-if [ -e "/opt/homebrew/bin/brew" ]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
 
 if [ -e "$HOME/bin/trdl" ]; then
   source $("$HOME/bin/trdl" use flint "2")
