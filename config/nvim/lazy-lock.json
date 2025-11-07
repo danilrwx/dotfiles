@@ -23,12 +23,13 @@
   "supermaven-nvim": { "branch": "main", "commit": "07d20fce48a5629686aefb0a7cd4b25e33947d50" },
   "symbol-usage.nvim": { "branch": "main", "commit": "e07c07dfe7504295a369281e95a24e1afa14b243" },
   "table-nvim": { "branch": "main", "commit": "c044fd37169eb10376962b0d0cec5f94d58ca626" },
-  "tairiki.nvim": { "branch": "master", "commit": "3dcbc50e4834769f844604d1d26f378299ee9d29" },
   "tome": { "branch": "master", "commit": "4c4b31eeb8e8e12d1493a88b3870a257c7d15667" },
   "treesj": { "branch": "main", "commit": "4770492244ccecdc9b01e0e81fa8f2f6b4a23841" },
   "undotree": { "branch": "master", "commit": "0f1c9816975b5d7f87d5003a19c53c6fd2ff6f7f" },
   "vim-fugitive": { "branch": "master", "commit": "61b51c09b7c9ce04e821f6cf76ea4f6f903e3cf4" },
   "vim-go-coverage": { "branch": "main", "commit": "e3d47b7780ca998ea34f2f9055ef15d366c56a2e" },
+  "vim-go-syntax": { "branch": "main", "commit": "290fcd7df3f1d5746ab5db75240e02bc379cb524" },
+  "vim-polyglot": { "branch": "master", "commit": "f061eddb7cdcc614c8406847b2bfb53099832a4e" },
   "vim-surround": { "branch": "master", "commit": "3d188ed2113431cf8dac77be61b842acb64433d9" },
   "vim-test": { "branch": "master", "commit": "2c264d2a5dddb3a7ec927e4359a2b619a8c13a8c" }
 }
