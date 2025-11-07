@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+
+log() {
+  echo -e "\033[0;31m$1\033[0m"
+}
+
+
+# Some useful functions ─────────────────────────────────────────────────────────────────────────────────────────────────
+OS=$(uname -s)
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+
+  if [ "$ID" == "ubuntu" ]; then
+    log "This is a Ubuntu system."
+  elif [ "$ID" == "debian" ]; then
+    log "This is a Debian system."
+  elif [ "$ID" == "fedora" ]; then
+    log "This is a Fedora system."
+  else
+    exit 1
+  fi
+fi
+
+
+# Create directories and synlinks to config files ───────────────────────────────────────────────────────────────────────
+mkdir -p $HOME/.config
+mkdir -p $HOME/.local/share
+
+ln -sf $HOME/dotfiles/.gitconfig $HOME/
+ln -sf $HOME/dotfiles/.gitignore_global $HOME/
+ln -sf $HOME/dotfiles/.tmux.conf $HOME/.tmux.conf
+
+ln -snf $HOME/dotfiles/config/k9s $HOME/.config/
+ln -snf $HOME/dotfiles/config/htop $HOME/.config/
+ln -snf $HOME/dotfiles/config/lazygit $HOME/.config/
+ln -snf $HOME/dotfiles/config/nvim $HOME/.config/
+ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
+
+ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
+ln -snf $HOME/dotfiles/config/ghostty/ $HOME/.config/
+ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
+
+ln -sf $HOME/dotfiles/.bash_profile $HOME/
+ln -sf $HOME/dotfiles/.bashrc $HOME/
+
+
+# Install packages for different OSes ───────────────────────────────────────────────────────────────────────────────────
+if [ "$ID" == "fedora" ]; then
+  log "Installing fedora packages"
+  sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+  sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+
+  sudo dnf update -y
+
+  sudo dnf install -y hsetroot xcompmgr xclip xsel
+
+  sudo dnf install -y lame\* --exclude=lame-devel
+  sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
+  sudo dnf install -y tmux git wget zip unzip curl tigervnc openssh-askpass pinentry-gnome3 virt-manager flatpak gpg
+elif [ "$ID" == "debian" ]; then
+  log "Installing debian packages"
+
+  sudo apt update -y
+  sudo apt install -y tmux git wget zip unzip curl tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 virt-manager flatpak gpg
+fi
+
+
+# Install Homebrew for different OSes ───────────────────────────────────────────────────────────────────────────────────
+if [[ "$OS" == "Linux" ]]; then
+  if [ ! -d /home/linuxbrew/.linuxbrew ]; then
+    log "Installing linuxbrew"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  fi
+elif [[ "$OS" == "Darwin" ]]; then
+  if [ ! -d /opt/homebrew ]; then
+    log "Installing homebrew"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  fi
+fi
+
+
+# Install brew applications ─────────────────────────────────────────────────────────────────────────────────────────────
+log "Installing brew apps"
+brew install htop fzf keychain neovim nvimpager lazygit gh yq xq jq difftastic \
+  kubectl k9s kubecolor krew \
+  go golangci-lint-langserver gofumpt goimports go-task gopls \
+  bash-language-server lua-language-server helm-ls \
+  awk gawk grep gnu-sed coreutils binutils findutils diffutils \
+  eza fastfetch \
+  bash bash-completion@2
+
+
+# Install golang applications ───────────────────────────────────────────────────────────────────────────────────────────
+log "Installing golang apps"
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
+go install github.com/matryer/moq@latest
+
+
+# Install kubectl plugins ───────────────────────────────────────────────────────────────────────────────────────────────
+log "Installing kubectl plugins"
+kubectl krew install ctx ns df-pv
+
+
+# Set bash shell for macOS ──────────────────────────────────────────────────────────────────────────────────────────────
+if [[ "$SHELL" == "/bin/zsh" ]]; then
+  if ! grep -w $(brew --prefix)/bin/bash /etc/shells; then
+    log "Adding brew bash to shells"
+    echo $(brew --prefix)/bin/bash | sudo tee -a /etc/shells
+  fi
+
+  log "Setting brew bash as default shell"
+  chsh -s $(brew --prefix)/bin/bash
+fi
+
+
+# Unlink brew bash for linux ────────────────────────────────────────────────────────────────────────────────────────────
+if [[ "$OS" == "Linux" && "$(which bash)" == "$(brew --prefix)/bin/bash" ]]; then
+  log "Unlinking brew bash"
+  brew unlink bash
+fi
+
+
+# Save completions to files for better performance ──────────────────────────────────────────────────────────────────────
+if [ ! -d $HOME/.local/share/completions ]; then
+  log "Installing completions"
+
+  mkdir -p $HOME/.local/share/completions
+
+  fzf --bash > $HOME/.local/share/completions/fzf.bash
+  kubectl completion bash > $HOME/.local/share/completions/kubectl.bash
+  flint completion --shell=bash > $HOME/.local/share/completions/flint.bash
+fi
+
+
+# Install tmux plugin manager ───────────────────────────────────────────────────────────────────────────────────────────
+if [ ! -d $HOME/.tmux/plugins/tpm ]; then
+  log "Installing tmux plugins"
+  git clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
+fi
+
+
+# Install platpak repository and applications ───────────────────────────────────────────────────────────────────────────
+if [[ "$OS" == "Linux" ]]; then
+  # add flathub repository ──────────────────────────────────────────────────────────────────────────────────────────────
+  if ! flatpak remotes --columns=name | grep -q '\bflathub\b'; then
+    log "Adding flathub remote"
+    sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  fi
+
+  # install flapak applications ─────────────────────────────────────────────────────────────────────────────────────────
+  log "Installing flatpak apps"
+  flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
+
+  # install docker ──────────────────────────────────────────────────────────────────────────────────────────────────────
+  if [ ! -f /usr/bin/docker ]; then
+    log "Installing docker"
+    curl -fsSL get.docker.com | bash
+
+    log "Starting docker"
+    sudo systemctl start docker.socket
+    log "Enabling docker"
+    sudo systemctl enable docker.socket
+  fi
+
+  # add user to docker group ────────────────────────────────────────────────────────────────────────────────────────────
+  if ! groups | grep -q '\bdocker\b'; then
+    log "Adding user to docker group"
+    sudo usermod -aG docker $USER
+  fi
+
+  # add user to libvirt group ───────────────────────────────────────────────────────────────────────────────────────────
+  if ! groups | grep -q '\blibvirt\b'; then
+    log "Adding user to libvirt group"
+    sudo usermod -aG libvirt $USER
+  fi
+
+  # download Iosevka nerd font ──────────────────────────────────────────────────────────────────────────────────────────
+  if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
+    log "Downloading Iosevka nerd font"
+    wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip
+    mkdir -p $HOME/.local/share/fonts
+    cd $HOME/.local/share/fonts && unzip $HOME/dotfiles/Iosevka.zip
+    rm $HOME/dotfiles/Iosevka.zip
+    fc-cache -f
+  fi
+
+  # download wallpapers ─────────────────────────────────────────────────────────────────────────────────────────────────
+  if [ ! -d $HOME/Backgrounds ]; then
+    log "Installing wallpapers"
+    git clone https://github.com/orangci/walls-catppuccin-mocha.git $HOME/Backgrounds
+  fi
+fi

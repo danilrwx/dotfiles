@@ -295,7 +295,7 @@ require("lazy").setup({
 
 
 vim.o.termguicolors = true
-vim.cmd.colorscheme("catppuccin")
+vim.cmd.colorscheme("torte")
 
 require("fzf-lua").register_ui_select()
 
@@ -435,4 +435,15 @@ vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>p", "+p")
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 
--- vim.keymap.set({ "n", "v" }, "<leader>d", require("debugmaster").mode.toggle, { nowait = true })
+vim.keymap.set("n", "<leader>c", function()
+  local line = vim.api.nvim_get_current_line()
+  local total_len = 120
+
+  local filler_count = total_len - #line
+  if filler_count < 0 then filler_count = 0 end
+  local filler = string.rep("─", filler_count)
+
+  local new_line = line .. " " .. filler
+
+  vim.api.nvim_set_current_line(new_line)
+end, { desc = "Wrap line in fixed-width comment" })
