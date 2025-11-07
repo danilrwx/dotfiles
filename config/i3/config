@@ -5,11 +5,10 @@ set $down  j
 set $up    k
 set $right l
 
-# set $bg       #1e1e2ee6
 set $bg       #1e1e2e
 set $fg       #cdd6f4
 set $red      #19cb00
-set $accent   #19cb00
+set $accent   #a6e3a1
 set $darkgray #7f849c
 
 set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1e1e2e' -sb '#cdd6f4' -nf '#cdd6f4' -nb '#1e1e2e' "$@"
