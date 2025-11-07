@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ $# -lt 1 ]; then
-    kubectl get mpo virtualization -o jsonpath='{.spec.imageTag}'
+    echo $(kubectl get mpo virtualization -o jsonpath='{.spec.imageTag}')
 else
     arg="$1"
 

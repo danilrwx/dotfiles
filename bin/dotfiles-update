@@ -19,25 +19,25 @@ if [ -f /etc/os-release ]; then
   fi
 fi
 
-mkdir -p ~/.config
-mkdir -p ~/.local/share
+mkdir -p $HOME/.config
+mkdir -p $HOME/.local/share
 
-ln -sf ~/dotfiles/.gitconfig ~/
-ln -sf ~/dotfiles/.gitignore_global ~/
-ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
+ln -sf $HOME/dotfiles/.gitconfig $HOME/
+ln -sf $HOME/dotfiles/.gitignore_global $HOME/
+ln -sf $HOME/dotfiles/.tmux.conf $HOME/.tmux.conf
 
-ln -snf ~/dotfiles/config/k9s ~/.config/
-ln -snf ~/dotfiles/config/htop ~/.config/
-ln -snf ~/dotfiles/config/lazygit ~/.config/
-ln -snf ~/dotfiles/config/nvim ~/.config/
-ln -snf ~/dotfiles/config/nvim ~/.config/nvimpager
+ln -snf $HOME/dotfiles/config/k9s $HOME/.config/
+ln -snf $HOME/dotfiles/config/htop $HOME/.config/
+ln -snf $HOME/dotfiles/config/lazygit $HOME/.config/
+ln -snf $HOME/dotfiles/config/nvim $HOME/.config/
+ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
 
-ln -snf ~/dotfiles/config/i3 ~/.config/
-ln -snf ~/dotfiles/config/ghostty/ ~/.config/
-ln -snf ~/dotfiles/config/dunst ~/.config/
+ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
+ln -snf $HOME/dotfiles/config/ghostty/ $HOME/.config/
+ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
 
-ln -sf ~/dotfiles/.bash_profile ~/
-ln -sf ~/dotfiles/.bashrc ~/
+ln -sf $HOME/dotfiles/.bash_profile $HOME/
+ln -sf $HOME/dotfiles/.bashrc $HOME/
 
 
 if [ "$ID" == "fedora" ]; then
@@ -48,9 +48,6 @@ if [ "$ID" == "fedora" ]; then
   sudo dnf update -y
 
   sudo dnf install -y hsetroot xcompmgr xclip xsel
-
-  sudo dnf copr enable scottames/ghostty
-  sudo dnf install ghostty
 
   sudo dnf install -y lame\* --exclude=lame-devel
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
@@ -110,9 +107,27 @@ if [[ "$OS" == "Linux" && "$(which bash)" == "$(brew --prefix)/bin/bash" ]]; the
   brew unlink bash
 fi
 
-if [ ! -d ~/.tmux/plugins/tpm ]; then
+if [ ! -d $HOME/.local/share/completions ]; then
+  log "Installing completions"
+
+  mkdir -p $HOME/.local/share/completions
+
+  if [ ! -e $HOME/.local/share/completions/fzf.bash ]; then
+    fzf --bash > $HOME/.local/share/completions/fzf.bash
+  fi
+
+  if [ ! -e $HOME/.local/share/completions/kubectl.bash ]; then
+    kubectl completion bash > $HOME/.local/share/completions/kubectl.bash
+  fi
+
+  if [ ! -e $HOME/.local/share/completions/flint.bash ]; then
+    flint completion --shell=bash > $HOME/.local/share/completions/flint.bash
+  fi
+fi
+
+if [ ! -d $HOME/.tmux/plugins/tpm ]; then
   log "Installing tmux plugins"
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+  git clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
 fi
 
 if [[ "$OS" == "Linux" ]]; then
@@ -144,17 +159,17 @@ if [[ "$OS" == "Linux" ]]; then
     sudo usermod -aG libvirt $USER
   fi
 
-  if [ ! -f ~/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
+  if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
     log "Downloading Iosevka nerd font"
     wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip
-    mkdir -p ~/.local/share/fonts
-    cd ~/.local/share/fonts && unzip ~/dotfiles/Iosevka.zip
-    rm ~/dotfiles/Iosevka.zip
+    mkdir -p $HOME/.local/share/fonts
+    cd $HOME/.local/share/fonts && unzip $HOME/dotfiles/Iosevka.zip
+    rm $HOME/dotfiles/Iosevka.zip
     fc-cache -f
   fi
 
-  if [ ! -d ~/Backgrounds ]; then
+  if [ ! -d $HOME/Backgrounds ]; then
     log "Installing wallpapers"
-    git clone https://github.com/orangci/walls-catppuccin-mocha.git ~/Backgrounds
+    git clone https://github.com/orangci/walls-catppuccin-mocha.git $HOME/Backgrounds
   fi
 fi
