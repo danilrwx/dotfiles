@@ -26,7 +26,7 @@ endif
 
 set nocompatible
 
-filetype plugin indent on  " Load plugins according to detected filetype.
+filetype plugin on  " Load plugins according to detected filetype.
 syntax on                  " Enable syntax highlighting.
 
 set autoindent             " Indent according to previous line.
@@ -77,20 +77,20 @@ endif
 
 " Put all temporary files under the same directory.
 " https://github.com/mhinz/vim-galore#temporary-files
-set backup
-set backupdir=$HOME/.vim/files/backup/
-set backupext=-vimbackup
-set backupskip=
-set directory=$HOME/.vim/files/swap/
-set updatecount=100
-set undofile
-set undodir=$HOME/.vim/files/undo/
-set viminfo='100,n$HOME/.vim/files/info/viminfo
+ set backup
+ set backupdir=$HOME/.vim/files/backup/
+ set backupext=-vimbackup
+ set backupskip=
+ set directory=$HOME/.vim/files/swap/
+ set updatecount=100
+ set undofile
+ set undodir=$HOME/.vim/files/undo/
+ set viminfo='100,n$HOME/.vim/files/info/viminfo
 
 " mark trailing spaces as errors
 match errorMsg '\s\+$'
 
-" colorscheme koehler
+colorscheme torte
 highlight SignColumn ctermbg=none
 highlight LineNr ctermfg=243
 " highlight Pmenu ctermbg=16 ctermfg=7
@@ -125,16 +125,6 @@ if has('patch-9.0.1799')
 endif
 
 let mapleader=" "
-
-if executable('ugrep')
-  nnoremap <leader>f :call FzyCommand("ugrep '' . -Rl -I --ignore-files --exclude='zz_generated*' --exclude-dir='generated'", ":e")<cr>
-else
-  nnoremap <leader>f :call FzyCommand("find . -type f", ":e")<cr>
-endif
-
-nnoremap <leader>b :call FzyBuffer()<cr>
-nnoremap <leader>sf :call FzyCommand("find . -type f", ":e")<cr>
-nnoremap <leader>sg :call FzyCommand("git ls-files", ":e")<cr>
 
 nnoremap <silent> <leader>q :call ToggleQuickFix()<cr>
 nnoremap <c-j> :cnext<cr>
@@ -174,17 +164,12 @@ let lspOpts = #{
 
 autocmd User LspSetup call LspOptionsSet(lspOpts)
 
+
 let lspServers = [
-      \ #{
-      \    name: 'clangd',
-      \    filetype: ['c', 'cpp'],
-      \    path: '/usr/bin/clangd',
-      \    args: ['--background-index']
-      \  },
       \ #{
       \    name: 'golang',
       \    filetype: ['go', 'gomod'],
-      \    path: '/Users/danil/go/bin/gopls',
+      \    path: '/home/linuxbrew/.linuxbrew/bin/gopls',
       \    args: ['serve'],
       \    syncInit: v:false,
       \    workspaceConfig: #{
@@ -226,32 +211,6 @@ function! s:on_lsp_buffer_enabled()
   autocmd! BufWritePre *.go call execute('LspFormat')
 endfunction
 autocmd User LspAttached call s:on_lsp_buffer_enabled()
-
-function! FzyCommand(choice_command, vim_command)
-  try
-    let output = system(a:choice_command . " | fzy ")
-  catch /Vim:Interrupt/
-    " Swallow errors from ^C, allow redraw! below
-  endtry
-  redraw!
-  if v:shell_error == 0 && !empty(output)
-    exec a:vim_command . ' ' . output
-  endif
-endfunction
-
-function! FzyBuffer()
-  let bufnrs = filter(range(1, bufnr("$")), 'buflisted(v:val)')
-  let buffers = map(bufnrs, 'bufname(v:val)')
-  call FzyCommand('echo "' . join(buffers, "\n") . '"', ":b")
-endfunction
-
-function! ToggleQuickFix()
-  if empty(filter(getwininfo(), 'v:val.quickfix'))
-    copen
-  else
-    cclose
-  endif
-endfunction
 
 function! TrimWhitespace()
   let l:save = winsaveview()
