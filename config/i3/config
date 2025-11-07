@@ -12,7 +12,7 @@ set $accent   #a6e3a1
 set $darkgray #7f849c
 
 set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1e1e2e' -sb '#cdd6f4' -nf '#cdd6f4' -nb '#1e1e2e' "$@"
-set $term kitty
+set $term ghostty
 
 font pango:Iosevka Nerd Font 12
 
