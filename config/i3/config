@@ -5,12 +5,14 @@ set $down  j
 set $up    k
 set $right l
 
-set $bg       #000000
-set $fg       #ffffff
+# set $bg       #1e1e2ee6
+set $bg       #1e1e2e
+set $fg       #cdd6f4
+set $red      #19cb00
 set $accent   #19cb00
 set $darkgray #7f849c
 
-set $dmenu_style -fn 'Iosevka Nerd Font-15' -sf '#000000' -sb '#ffffff' -nf '#ffffff' -nb '#000000' "$@"
+set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1e1e2e' -sb '#cdd6f4' -nf '#cdd6f4' -nb '#1e1e2e' "$@"
 set $term kitty
 
 font pango:Iosevka Nerd Font 12
@@ -131,12 +133,12 @@ bar {
   status_command baraction
 	position top
   colors {
-     background $bg_t
+     background $bg
      statusline $fg
      #class               border  backgr. text
-     focused_workspace    $bg_t     $bg_t     $fg
-     inactive_workspace   $bg_t     $bg_t     $darkgray
-     active_workspace     $bg_t     $bg_t     $darkgray
-     urgent_workspace     $bg_t     $bg_t     $accent
+     focused_workspace    $bg     $bg     $fg
+     inactive_workspace   $bg     $bg     $darkgray
+     active_workspace     $bg     $bg     $darkgray
+     urgent_workspace     $bg     $bg     $accent
   }
 }
