@@ -1,13 +1,14 @@
-if [ -f /etc/bashrc ]; then
-  source /etc/bashrc
-fi
-
-if [ -f ~/private.bash ]; then
-  source ~/private.bash
-fi
-
 if [ -e "$(brew --prefix)/etc/profile.d/bash_completion.sh" ]; then
   source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
+fi
+
+if [ -d "$HOME/.completions" ]; then
+  for f in "$HOME/.completions/"*; do
+    if [[ $f == *.bash ]]; then
+      source "$f"
+      echo "sourced $f"
+    fi
+  done
 fi
 
 SSH_ENV="/tmp/.ssh_environment_added"
@@ -24,13 +25,6 @@ if [ -f "${SSH_ENV}" ]; then
 else
   start_agent;
 fi
-
-source <(fzf --bash)
-source <(kubectl completion bash)
-source <(flint completion --shell=bash)
-
-# source ~/fzf-tab-completion/bash/fzf-bash-completion.sh
-# bind -x '"\t": fzf_bash_completion'
 
 alias kubectl=kubecolor
 complete -o default -F __start_kubectl kubecolor
