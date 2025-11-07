@@ -23,6 +23,17 @@ require("lazy").setup({
     { "tpope/vim-surround" },
 
     {
+      "catppuccin/nvim",
+      name = "catppuccin",
+      priority = 1000,
+      lazy = false,
+      opts = {
+        transparent_background = true,
+        term_colors = true,
+      },
+    },
+
+    {
       "mbbill/undotree",
       keys = {
         { "<leader>u", "<cmd>UndotreeToggle<cr>" },
@@ -113,7 +124,7 @@ require("lazy").setup({
         require("nvim-treesitter.configs").setup({
           ensure_installed = { "lua", "vimdoc" },
           auto_install = true,
-          highlight = { enable = false },
+          highlight = { enable = true },
           folds = { enable = true },
           indent = { enable = true },
         })
@@ -282,7 +293,7 @@ require("lazy").setup({
 
 
 vim.o.termguicolors = true
-vim.cmd.colorscheme("koehler")
+vim.cmd.colorscheme("catppuccin")
 
 require("fzf-lua").register_ui_select()
 
