@@ -41,8 +41,8 @@ alias sp='source ~/.bash_profile'
 
 alias untar='tar -zxvf '
 
-alias cat='nvimpager -c'
-alias less='nvimpager -p'
+# alias cat='nvimpager -c'
+# alias less='nvimpager -p'
 
 alias kaf="kubectl apply -f"
 alias kad="kubectl delete -f"
@@ -53,4 +53,7 @@ alias kad="kubectl delete -f"
 alias lg='lazygit'
 
 export PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
-
+export EDITOR='nvim'
+export VISUAL='nvim'
+export PAGER='nvimpager'
+export FZF_DEFAULT_OPTS=""
