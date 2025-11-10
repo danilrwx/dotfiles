@@ -143,6 +143,7 @@ keyboard() {
 
 SLEEP_SEC=1
 while true; do
-  echo "$(mem)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)  "
+  echo "$(mem)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)"
+  xsetroot -name "$(mem)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)"
   sleep $SLEEP_SEC
 done

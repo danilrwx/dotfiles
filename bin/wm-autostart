@@ -1,4 +1,6 @@
 #!/bin/bash
 
 setxkbmap -model pc105 -layout us,ru -option grp:alt_shift_toggle
-hsetroot -cover $(find ~/Backgrounds -type f \( -iname "*.jpg" -o -iname "*.png" \) | shuf -n 1)
+# hsetroot -cover $(find ~/Backgrounds -type f \( -iname "*.jpg" -o -iname "*.png" \) | shuf -n 1)
+# hsetroot -solid '#1c1c1c'
+hsetroot -solid '#000000'

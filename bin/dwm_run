@@ -1,0 +1,19 @@
+#!/bin/bash
+# /usr/local/bin/dwm-log-session.sh
+LOGFILE="$HOME/.dwm.log"
+
+# Перенаправляем вывод в лог
+exec > >(tee -a "$LOGFILE") 2>&1
+
+echo "Starting X session at $(date)"
+
+wm-autostart &
+wm-autostart-blocking &
+
+# Цикл для авто-перезапуска
+while true; do
+    echo "Launching dwm..."
+    dwm
+    echo "dwm exited at $(date). Restarting..."
+done
+

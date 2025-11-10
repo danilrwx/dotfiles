@@ -12,6 +12,13 @@ set $right l
 # set $darkgray #7f849c
 # set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1e1e2e' -sb '#cdd6f4' -nf '#cdd6f4' -nb '#1e1e2e' "$@"
 
+# habamax ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# set $bg       #1c1c1c
+# set $fg       #c7c7c7
+# set $accent   #87d787
+# set $darkgray #7f849c
+# set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1c1c1c' -sb '#c7c7c7' -nf '#c7c7c7' -nb '#1c1c1c' "$@"
+
 # base ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 set $bg       #000000
 set $fg       #ffffff
@@ -19,7 +26,7 @@ set $accent   #00cd00
 set $darkgray #7f849c
 set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#000000' -sb '#ffffff' -nf '#ffffff' -nb '#000000' "$@"
 
-set $term kitty
+set $term st
 
 font pango:Iosevka Nerd Font 12
 
@@ -41,7 +48,7 @@ bindsym XF86MonBrightnessDown     exec --no-startup-id brightnessctl   set   10%
 bindsym XF86MonBrightnessUp       exec --no-startup-id brightnessctl   set   10%+
 
 bindsym $mod+Shift+s exec --no-startup-id screenshot-select
-bindsym $mod+d       exec --no-startup-id dmenu-apps $dmenu_style
+bindsym $mod+d       exec --no-startup-id dmenu_run $dmenu_style
 
 bindsym Control+Mod1+s exec sys-notify
 bindsym Control+Mod1+c exec cal-notify

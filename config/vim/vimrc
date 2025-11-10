@@ -1,74 +1,87 @@
-if has("eval")             " vim-tiny lacks 'eval'
-  let skip_defaults_vim = 1
+if (v:version < 802 || (v:version == 802 && !has('patch3434')))
+  if (v:version < 801 || (v:version == 801 && !has('patch1705')))
+    echo "No Vim9 script: Use -u & _vimrc8"
+  else
+    call popup_notification("No Vim9 script: Use -u & _vimrc8", #{time: 8000})
+  endif
+  finish
+endif
+vim9script
+
+if has("eval")
+  g:skip_defaults_vim = 1
 endif
 
 if filereadable(expand("~/.vim/autoload/plug.vim"))
-  call plug#begin('~/.local/share/vim/plugins')
-  Plug 'markonm/traces.vim'
-  Plug 'sheerun/vim-polyglot'
+	plug#begin('~/.local/share/vim/plugins')
 
-  Plug 'tpope/vim-fugitive'
-  Plug 'airblade/vim-gitgutter'
+	Plug 'markonm/traces.vim'
+	Plug 'sheerun/vim-polyglot'
 
-  Plug 'yegappan/lsp'
+	Plug 'tpope/vim-fugitive'
+	Plug 'airblade/vim-gitgutter'
 
-  Plug 'vim-test/vim-test'
-  Plug 'sebdah/vim-delve'
-  Plug 'charlespascoe/vim-go-syntax'
+	Plug 'yegappan/lsp'
 
-  Plug 'habamax/vim-dir'
+	Plug 'vim-test/vim-test'
+	Plug 'sebdah/vim-delve'
+	Plug 'charlespascoe/vim-go-syntax'
 
-  Plug 'laktak/tome'
+	Plug 'habamax/vim-dir'
 
-  Plug 'vim-fuzzbox/fuzzbox.vim'
-  call plug#end()
+	Plug 'laktak/tome'
+
+	Plug 'vim-fuzzbox/fuzzbox.vim'
+
+	plug#end()
 endif
 
 set nocompatible
 
-filetype plugin on  " Load plugins according to detected filetype.
-syntax on                  " Enable syntax highlighting.
+filetype plugin indent on # Load plugins according to detected filetype.
+syntax on                  # Enable syntax highlighting.
 
-set autoindent             " Indent according to previous line.
-set expandtab              " Use spaces instead of tabs.
-set tabstop=2              " Use 2 spaces for indenting.
-set softtabstop=2          " Tab key indents by 2 spaces.
-set shiftwidth =2          " >> indents by 2 spaces.
-set shiftround             " >> indents to next multiple of 'shiftwidth'.
-set paste                  " fix indenting when pasting.
+set autoindent             # Indent according to previous line.
+set expandtab              # Use spaces instead of tabs.
+set tabstop=2              # Use 2 spaces for indenting.
+set softtabstop=2          # Tab key indents by 2 spaces.
+set shiftwidth=2           # >> indents by 2 spaces.
+set shiftround             # >> indents to next multiple of 'shiftwidth'.
+set paste                  # fix indenting when pasting.
 
-set backspace=indent,eol,start " Make backspace work as you would expect.
-set hidden                 " Switch between buffers without having to save first.
-set laststatus=2           " Always show statusline.
-set display=lastline       " Show as much as possible of the last line.
+set backspace=indent,eol,start # Make backspace work as you would expect.
+set hidden                 # Switch between buffers without having to save first.
+set laststatus=2           # Always show statusline.
+set display=lastline       # Show as much as possible of the last line.
 
-set showcmd                " Show already typed keys when more are expected.
+set showcmd                # Show already typed keys when more are expected.
 
-set incsearch              " Highlight while searching with / or ?.
-set hlsearch               " Keep matches highlighted.
+set incsearch              # Highlight while searching with / or ?.
+set hlsearch               # Keep matches highlighted.
 
-set ttyfast                " Faster redrawing.
-set lazyredraw             " Only redraw when necessary.
+set ttyfast                # Faster redrawing.
+set lazyredraw             # Only redraw when necessary.
 
-set laststatus=1           " Set minimal bottom statusline
+set laststatus=1           # Set minimal bottom statusline
 
-set number                 " Set line numbers
-set relativenumber         " Set relative linenumbers
+set number                 # Set line numbers
+set relativenumber         # Set relative linenumbers
 
-set updatetime=100         " Fast redraw
-set signcolumn=yes         " Always render signcolumn
-set shortmess=aoOtTI       " Avoid most of the 'Hit Enter ...' messages
-set wildmenu               " Better command-line completion
-set mouse=a                " Enable mouse support
-set autochdir              " Auto change dir to current file
+set updatetime=100         # Fast redraw
+set signcolumn=yes         # Always render signcolumn
+set shortmess=aoOtTI       # Avoid most of the 'Hit Enter ...' messages
+set wildmenu               # Better command-line completion
+set mouse=a                # Enable mouse support
+set laststatus=0           # Disable status bar
+set autochdir              # Auto change dir to current file
 
-" The fish shell is not very compatible to other shells and unexpectedly
-" breaks things that use 'shell'.
+# The fish shell is not very compatible to other shells and unexpectedly
+# breaks things that use 'shell'.
 if &shell =~# 'fish$'
-  set shell=/bin/bash
+	set shell=exepath('bash')
 endif
 
-" Made grep great again
+# Made grep great again
 if executable('ugrep')
   set grepprg=ugrep\ -RInk\ --tabs=1\ --ignore-files\ --exclude='zz_generated*'\ --exclude-dir='generated'
   set grepformat=%f:%l:%c:%m,%f+%l+%c+%m,%-G%f\\\|%l\\\|%c\\\|%m
@@ -76,33 +89,25 @@ else
   set grepprg=grep\ --exclude='*zz_generated*'\ --exclude-dir='generated'
 endif
 
-" Put all temporary files under the same directory.
-" https://github.com/mhinz/vim-galore#temporary-files
- set backup
- set backupdir=$HOME/.vim/files/backup/
- set backupext=-vimbackup
- set backupskip=
- set directory=$HOME/.vim/files/swap/
- set updatecount=100
- set undofile
- set undodir=$HOME/.vim/files/undo/
- set viminfo='100,n$HOME/.vim/files/info/viminfo
+# Put all temporary files under the same directory.
+# https://github.com/mhinz/vim-galore#temporary-files
+set backup
+set backupdir=$HOME/.vim/files/backup/
+set backupext=-vimbackup
+set backupskip=
+set directory=$HOME/.vim/files/swap/
+set updatecount=100
+set undofile
+set undodir=$HOME/.vim/files/undo/
+set viminfo='100,n$HOME/.vim/files/info/viminfo
 
-" mark trailing spaces as errors
+# mark trailing spaces as errors
 match errorMsg '\s\+$'
 
 colorscheme torte
-" highlight SignColumn ctermbg=none
-" highlight LineNr ctermfg=243
-" highlight Pmenu ctermbg=16 ctermfg=7
-" highlight PmenuSel ctermbg=7 ctermfg=16
-" highlight SpellBad ctermfg=16
-" highlight SpellCap ctermfg=16
-" highlight SpellRare ctermfg=16
-" highlight SpellLocal ctermfg=16
-" highlight DiffAdd ctermfg=16
-" highlight DiffChange ctermfg=16
-" highlight DiffDelete ctermfg=16
+# highlight DiffAdd ctermfg=16
+# highlight DiffChange ctermfg=16
+# highlight DiffDelete ctermfg=16
 
 if has('patch-8.1.0311')
   packadd! cfilter
@@ -120,7 +125,7 @@ if has('patch-9.0.1799')
   packadd! editorconfig
 endif
 
-let mapleader=" "
+g:mapleader = " "
 
 nnoremap <silent> <leader>q :call ToggleQuickFix()<cr>
 nnoremap <c-j> :cnext<cr>
@@ -148,45 +153,50 @@ nnoremap <silent> ghp <cmd>GitGutterPreviewHunk<cr>
 
 nnoremap <silent> - <cmd>Dir<cr>
 
-let g:gitgutter_sign_priority = 0
-let g:gitgutter_preview_win_floating = 1
+g:gitgutter_sign_priority = 0
+g:gitgutter_preview_win_floating = 1
 
-let lspOpts = #{
-      \  autoHighlightDiags: v:true,
-      \  useQuickfixForLocations: v:true,
-      \  semanticHighlight: v:false,
-      \  showInlayHints: v:false,
-      \ }
+var lspOpts = {
+	autoHighlightDiags: true,
+	useQuickfixForLocations: true,
+	semanticHighlight: true,
+	showInlayHints: false,
+}
 
 autocmd User LspSetup call LspOptionsSet(lspOpts)
 
+var lspServers = [{
+	name: 'golang',
+	filetype: ['go', 'gomod'],
+	path: exepath('gopls'),
+	args: ['serve'],
+	syncInit: false,
+	workspaceConfig: {
+		gopls: {
+			hints: {
+				assignVariableTypes: true,
+				compositeLiteralFields: true,
+				compositeLiteralTypes: true,
+				constantValues: true,
+				functionTypeParameters: true,
+				parameterNames: true,
+				rangeVariableTypes: true,
+				semanticTokens: false
+			}
+		}
+	}
+},
+{
+  name: 'clangd',
+  filetype: ['c', 'cpp'],
+  path: exepath('clangd'),
+  args: ['--background-index']
+},
+]
 
-let lspServers = [
-      \ #{
-      \    name: 'golang',
-      \    filetype: ['go', 'gomod'],
-      \    path: exepath('gopls'),
-      \    args: ['serve'],
-      \    syncInit: v:false,
-      \    workspaceConfig: #{
-      \      gopls: #{
-      \        hints: #{
-      \          assignVariableTypes: v:true,
-      \          compositeLiteralFields: v:true,
-      \          compositeLiteralTypes: v:true,
-      \          constantValues: v:true,
-      \          functionTypeParameters: v:true,
-      \          parameterNames: v:true,
-      \          rangeVariableTypes: v:true,
-      \          semanticTokens: v:false
-      \        }
-      \      }
-      \    }
-      \ }
-      \]
 autocmd User LspSetup call LspAddServer(lspServers)
 
-function! s:on_lsp_buffer_enabled()
+def On_lsp_buffer_enabled()
   setlocal omnifunc=g:LspOmniFunc
   setlocal tagfunc=lsp#lsp#TagFunc
   setlocal formatexpr=lsp#lsp#FormatExpr()
@@ -205,33 +215,21 @@ function! s:on_lsp_buffer_enabled()
   nnoremap ]d :LspDiag next<cr>
 
   autocmd! BufWritePre *.go call execute('LspFormat')
-endfunction
-autocmd User LspAttached call s:on_lsp_buffer_enabled()
+enddef
+autocmd User LspAttached call On_lsp_buffer_enabled()
 
-function! TrimWhitespace()
-  let l:save = winsaveview()
-  keeppatterns %s/\s\+$//e
-  call winrestview(l:save)
-endfun
-autocmd BufWritePre * call TrimWhitespace()
+# def g:TrimWhitespace()
+#   var save = winsaveview()
+#   keeppatterns :%s/\s\+$//e
+#   winrestview(save)
+# enddef
+# autocmd BufWritePre * call TrimWhitespace()
 
-function! ToggleQuickFix()
+def g:ToggleQuickFix()
   if empty(filter(getwininfo(), 'v:val.quickfix'))
     copen
   else
     cclose
   endif
-endfunction
-
-set findfunc=Find
-func Find(arg, _)
-  if empty(s:filescache)
-    let s:filescache = globpath('.', '**', 1, 1)
-    call filter(s:filescache, '!isdirectory(v:val)')
-    call map(s:filescache, "fnamemodify(v:val, ':.')")
-  endif
-  return a:arg == '' ? s:filescache : matchfuzzy(s:filescache, a:arg)
-endfunc
-let s:filescache = []
-autocmd CmdlineEnter : let s:filescache = []
+enddef
 
