@@ -26,7 +26,7 @@ set $accent   #00cd00
 set $darkgray #7f849c
 set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#000000' -sb '#ffffff' -nf '#ffffff' -nb '#000000' "$@"
 
-set $term xfce4-terminal
+set $term st
 
 font pango:Iosevka Nerd Font 12
 
