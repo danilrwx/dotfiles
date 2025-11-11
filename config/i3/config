@@ -72,6 +72,8 @@ bindsym $mod+Shift+$right move right
 
 bindsym $mod+v split v
 
+bindsym $mod+b bar mode toggle
+
 bindsym $mod+f fullscreen toggle
 
 bindsym $mod+s layout stacking
@@ -151,6 +153,7 @@ bar {
   i3bar_command i3bar --transparency
   status_command baraction
   tray_padding 6
+  mode hide
 	position top
   colors {
      background $bg
