@@ -44,6 +44,7 @@ ln -snf $HOME/dotfiles/config/ghostty/ $HOME/.config/
 ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
 ln -snf $HOME/dotfiles/config/xfce4/ $HOME/.config/
 
+ln -sf $HOME/dotfiles/.Xresources $HOME/
 ln -sf $HOME/dotfiles/.bash_profile $HOME/
 ln -sf $HOME/dotfiles/.bashrc $HOME/
 
@@ -69,7 +70,7 @@ elif [ "$ID" == "ubuntu" ]; then
   sudo apt-mark hold snapd
   sudo apt autoremove -y
 
-  sudo apt install -y libx11-dev libxinerama-dev libxft2-dev
+  sudo apt install -y libx11-dev libxinerama-dev libxft2-dev hsetroot xcompmgr xclip xsel
 
   sudo apt install -y tmux git wget zip unzip curl tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 \
     virt-manager flatpak gpg
