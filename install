@@ -40,6 +40,7 @@ ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
 ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
 ln -snf $HOME/dotfiles/config/ghostty/ $HOME/.config/
 ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
+ln -snf $HOME/dotfiles/config/xfce4/ $HOME/.config/
 
 ln -sf $HOME/dotfiles/.bash_profile $HOME/
 ln -sf $HOME/dotfiles/.bashrc $HOME/
