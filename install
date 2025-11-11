@@ -21,6 +21,8 @@ if [ -f /etc/os-release ]; then
   fi
 fi
 
+# Change to ssh remote ──────────────────────────────────────────────────────────────────────────────────────────────────
+git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
 # Create directories and synlinks to config files ───────────────────────────────────────────────────────────────────────
 mkdir -p $HOME/.config
