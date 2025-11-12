@@ -40,9 +40,7 @@ ln -snf $HOME/dotfiles/config/nvim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
 
 ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
-ln -snf $HOME/dotfiles/config/ghostty/ $HOME/.config/
 ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
-ln -snf $HOME/dotfiles/config/xfce4/ $HOME/.config/
 
 ln -sf $HOME/dotfiles/.Xresources $HOME/
 ln -sf $HOME/dotfiles/.bash_profile $HOME/
@@ -57,11 +55,13 @@ if [ "$ID" == "fedora" ]; then
 
   sudo dnf update -y
 
-  sudo dnf install -y hsetroot xcompmgr xclip xsel
+  sudo dnf install -y hsetroot xcompmgr xclip xsel libX11-devel libXft-devel libXinerama-devel
+  sudo dnf group install c-development
 
   sudo dnf install -y lame\* --exclude=lame-devel
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
-  sudo dnf install -y tmux git wget zip unzip curl tigervnc openssh-askpass pinentry-gnome3 virt-manager flatpak gpg
+  sudo dnf install -y tmux git wget zip unzip curl tigervnc openssh-askpass pinentry-gnome3 virt-manager flatpak gpg \
+	make
 elif [ "$ID" == "ubuntu" ]; then
   log "Installing ubuntu packages"
 
@@ -164,7 +164,7 @@ if [[ "$OS" == "Linux" ]]; then
 
   # install flapak applications ─────────────────────────────────────────────────────────────────────────────────────────
   log "Installing flatpak apps"
-  flatpak install flathub -y org.telegram.desktop com.discordapp.Discord com.valvesoftware.Steam
+  flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
 
   # install docker ──────────────────────────────────────────────────────────────────────────────────────────────────────
   if [ ! -f /usr/bin/docker ]; then

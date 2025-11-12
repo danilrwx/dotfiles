@@ -153,7 +153,6 @@ bar {
   i3bar_command i3bar --transparency
   status_command baraction
   tray_padding 6
-  mode hide
 	position top
   colors {
      background $bg
