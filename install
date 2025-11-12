@@ -199,6 +199,13 @@ if [[ "$OS" == "Linux" ]]; then
     fc-cache -f
   fi
 
+  # download Apple Emoji font ───────────────────────────────────────────────────────────────────────────────────────────
+  if [ ! -f $HOME/.local/share/fonts/AppleColorEmoji.ttf ]; then
+    log "Downloading Apple Emoji font"
+    wget -P $HOME/.local/share/fonts https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
+    fc-cache -f
+  fi
+
   # download wallpapers ─────────────────────────────────────────────────────────────────────────────────────────────────
   if [ ! -d $HOME/Backgrounds ]; then
     log "Installing wallpapers"

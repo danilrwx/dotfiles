@@ -142,7 +142,7 @@ for_window [class="Firefox" window_role="alert"] floating enable
 for_window [class="steam"] floating enable
 for_window [class="steam" title="^Steam$"] floating disable
 for_window [class="pavucontrol"] floating enable, border normal
-for_window [class="Telegram"] floating enable, border normal
+for_window [class="Telegram"] floating enable, border disable
 
 client.focused                 $bg        $bg       $fg            $accent      $accent
 client.focused_inactive        $bg        $bg       $darkgray      $bg          $bg
@@ -152,7 +152,7 @@ client.urgent                  $accent    $bg       $accent        $accent      
 bar {
   i3bar_command i3bar --transparency
   status_command baraction
-  tray_padding 6
+  tray_padding 5
 	position top
   colors {
      background $bg
