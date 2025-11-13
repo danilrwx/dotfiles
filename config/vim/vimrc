@@ -92,22 +92,23 @@ endif
 # Put all temporary files under the same directory.
 # https://github.com/mhinz/vim-galore#temporary-files
 set backup
-set backupdir=$HOME/.vim/files/backup/
+set backupdir=$XDG_CONFIG_HOME/vim/files/backup/
 set backupext=-vimbackup
 set backupskip=
-set directory=$HOME/.vim/files/swap/
+set directory=$XDG_CONFIG_HOME/vim/files/swap/
 set updatecount=100
 set undofile
-set undodir=$HOME/.vim/files/undo/
-set viminfo='100,n$HOME/.vim/files/info/viminfo
+set undodir=$XDG_CONFIG_HOME/vim/files/undo/
 
 # mark trailing spaces as errors
 match errorMsg '\s\+$'
 
 colorscheme torte
-# highlight DiffAdd ctermfg=16
-# highlight DiffChange ctermfg=16
-# highlight DiffDelete ctermfg=16
+highlight Normal ctermbg=none
+highlight SignColumn ctermbg=none
+highlight DiffAdd ctermfg=16
+highlight DiffChange ctermfg=16
+highlight DiffDelete ctermfg=16
 
 if has('patch-8.1.0311')
   packadd! cfilter
