@@ -12,8 +12,6 @@ if [ -f /etc/os-release ]; then
 
   if [ "$ID" == "ubuntu" ]; then
     log "This is a Ubuntu system."
-  elif [ "$ID" == "debian" ]; then
-    log "This is a Debian system."
   elif [ "$ID" == "fedora" ]; then
     log "This is a Fedora system."
   else
@@ -39,7 +37,10 @@ ln -snf $HOME/dotfiles/config/vim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
 
-ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
+if [ -e /usr/bin/i3 ]; then
+  ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
+fi
+
 ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
 
 ln -sf $HOME/dotfiles/.Xresources $HOME/
@@ -55,7 +56,10 @@ if [ "$ID" == "fedora" ]; then
 
   sudo dnf update -y
 
-  sudo dnf install -y hsetroot xcompmgr xclip xsel libX11-devel libXft-devel libXinerama-devel
+  if [ -e /usr/bin/i3 ]; then
+    sudo dnf install -y hsetroot xcompmgr xclip xsel libX11-devel libXft-devel libXinerama-devel
+  fi
+
   sudo dnf group install c-development
 
   sudo dnf install -y lame\* --exclude=lame-devel
@@ -70,7 +74,9 @@ elif [ "$ID" == "ubuntu" ]; then
   sudo apt-mark hold snapd
   sudo apt autoremove -y
 
-  sudo apt install -y libx11-dev libxinerama-dev libxft2-dev hsetroot xcompmgr xclip xsel
+  if [ -e /usr/bin/i3 ]; then
+    sudo apt install -y libx11-dev libxinerama-dev libxft2-dev hsetroot xcompmgr xclip xsel
+  fi
 
   sudo apt install -y tmux git wget zip unzip curl tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 \
     virt-manager flatpak gpg
