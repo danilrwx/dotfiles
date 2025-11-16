@@ -33,28 +33,37 @@ complete -o default -F __start_kubectl kubecolor
 alias k=kubecolor
 complete -o default -F __start_kubectl k
 
-alias ls='eza'
-alias ll='eza -lah'
+
+if [ -x "$(command -v eza)" ]; then
+  alias ls='eza'
+  alias ll='eza -lah'
+fi
 
 alias so='source ~/.bashrc'
 alias sp='source ~/.bash_profile'
 
 alias untar='tar -zxvf '
 
-alias cat='nvimpager -c'
-alias less='nvimpager -p'
+if [ -x "$(command -v nvimpager)" ]; then
+  alias cat='nvimpager -c'
+  alias less='nvimpager -p'
+
+  export PAGER='nvimpager'
+fi
 
 alias kaf="kubectl apply -f"
 alias kad="kubectl delete -f"
 
-# alias vi='nvim'
-# alias vim='nvim'
+if [ -x "$(command -v nvim)" ]; then
+  alias vi='nvim'
+  alias vim='nvim'
+
+  export EDITOR='nvim'
+  export VISUAL='nvim'
+fi
 
 alias lg='lazygit'
 
 export PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
-export EDITOR='nvim'
-export VISUAL='nvim'
-export PAGER='nvimpager'
 export FZF_DEFAULT_OPTS=""
 
