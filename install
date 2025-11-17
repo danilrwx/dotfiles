@@ -37,12 +37,6 @@ ln -snf $HOME/dotfiles/config/vim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
 
-if [ -e /usr/bin/i3 ]; then
-  ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
-  ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
-  ln -sf $HOME/dotfiles/.Xresources $HOME/
-fi
-
 ln -sf $HOME/dotfiles/.profile $HOME/
 ln -sf $HOME/dotfiles/.bash_profile $HOME/
 ln -sf $HOME/dotfiles/.bashrc $HOME/
@@ -56,29 +50,19 @@ if [ "$ID" == "fedora" ]; then
 
   sudo dnf update -y
 
-  if [ -e /usr/bin/i3 ]; then
-    sudo dnf install -y hsetroot xcompmgr xclip xsel libX11-devel libXft-devel libXinerama-devel
-  fi
-
   sudo dnf group install c-development
 
   sudo dnf install -y lame\* --exclude=lame-devel
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
   sudo dnf install -y tmux git wget zip unzip curl tigervnc openssh-askpass pinentry-gnome3 virt-manager gpg \
-	make
+	make xclip xsel
 elif [ "$ID" == "ubuntu" ]; then
   log "Installing ubuntu packages"
 
   sudo apt update -y
 
-  if [ -e /usr/bin/i3 ]; then
-    sudo apt install -y libx11-dev libxinerama-dev libxft2-dev \
-      xcompmgr hsetroot	brightnessctl acpi maim xclip xsel lxappearance gtk-chtheme \
-      libnotify-bin ncal lxpolkit pavucontrol pulseaudio-utils
-  fi
-
-  sudo apt install -y build-essential tmux git wget zip unzip curl tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 \
-    virt-manager gpg
+  sudo apt install -y build-essential tmux git wget zip unzip curl ssh-askpass-gnome pinentry-gnome3 \
+    virt-manager gpg xclip xsel
 
   sudo snap install telegram-desktop discord
 fi
@@ -212,45 +196,5 @@ if [[ "$OS" == "Linux" ]]; then
     log "Downloading Apple Emoji font"
     wget -P $HOME/.local/share/fonts https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
     fc-cache -f
-  fi
-
-  # download wallpapers ─────────────────────────────────────────────────────────────────────────────────────────────────
-  # if [ ! -d $HOME/Backgrounds ]; then
-  #   log "Installing wallpapers"
-  #   git clone https://github.com/orangci/walls-catppuccin-mocha.git $HOME/Backgrounds
-  # fi
-
-  if [ ! -f /etc/X11/xorg.conf.d/00-input.conf ]; then
-    setxkbmap -model pc105 -layout us,ru -option grp:alt_shift_toggle -option caps:ctrl_modifier
-    cat << EOF | sudo tee -a /etc/X11/xorg.conf.d/00-input.conf >> /dev/null
-Section "InputClass"
-  Identifier "system-keyboard"
-  MatchIsKeyboard "on"
-  Option "XkbLayout" "us,ru"
-  Option "XkbModel" "pc105"
-  Option "XkbOptions" "grp:ctrl_space_toggle,caps:ctrl_modifier"
-EndSection
-
-Section "InputClass"
-    Identifier "touchpad"
-    Driver "libinput"
-    MatchIsTouchpad "on"
-    Option "Tapping" "on"
-    Option "CircularScrolling" "on"
-    Option "NaturalScrolling" "true"
-EndSection
-EOF
-  fi
-
-# Setup amdgpu driver
-  if [ ! -f /etc/X11/xorg.conf.d/20-amdgpu.conf ]; then
-    cat << EOF | sudo tee -a /etc/X11/xorg.conf.d/20-amdgpu.conf >> /dev/null
-Section "Device"
-  Identifier "AMD"
-  Driver "amdgpu"
-  Option "TearFree" "true"
-  Option "DRI" "3"
-EndSection
-EOF
   fi
 fi

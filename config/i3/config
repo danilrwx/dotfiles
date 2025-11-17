@@ -71,6 +71,7 @@ bindsym $mod+Shift+$up move up
 bindsym $mod+Shift+$right move right
 
 bindsym $mod+v split v
+bindsym $mod+c split h
 
 bindsym $mod+b bar mode toggle
 
