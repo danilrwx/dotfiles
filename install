@@ -61,10 +61,7 @@ elif [ "$ID" == "ubuntu" ]; then
 
   sudo apt update -y
 
-  sudo apt install -y build-essential tmux git wget zip unzip curl ssh-askpass-gnome pinentry-gnome3 \
-    virt-manager gpg xclip xsel
-
-  sudo snap install telegram-desktop discord
+  sudo apt install -y build-essential tmux git wget zip unzip curl virt-manager gpg xclip xsel flatpak
 fi
 
 
@@ -148,7 +145,7 @@ fi
 # Install platpak repository and applications ───────────────────────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
   # install flapak applications ─────────────────────────────────────────────────────────────────────────────────────────
-  if [ "$ID" == "fedora" ]; then
+  if ! command -v flatpak &> /dev/null; then
     if ! flatpak remotes --columns=name | grep -q '\bflathub\b'; then
       log "Adding flathub remote"
       sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -156,6 +153,18 @@ if [[ "$OS" == "Linux" ]]; then
 
     log "Installing flatpak apps"
     flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
+  fi
+
+  # install google chrome ───────────────────────────────────────────────────────────────────────────────────────────────
+  if ! command -v google-chrome &> /dev/null; then
+    if [ "$ID" == "ubuntu" ]; then
+      wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+      sudo dpkg -i google-chrome-stable_current_amd64.deb
+      sudo apt-get install -f -y
+      rm google-chrome-stable_current_amd64.deb
+    elif [ "$ID" == "fedora" ]; then
+      sudo dnf install -y google-chrome-stable
+    fi
   fi
 
   # install docker ──────────────────────────────────────────────────────────────────────────────────────────────────────

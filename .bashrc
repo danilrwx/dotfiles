@@ -11,7 +11,7 @@ if [ -d "$HOME/.local/share/completions" ]; then
 fi
 
 if [ -e "$HOME/.ssh/id_rsa" ]; then
-  eval $( keychain --eval -q )
+  eval $(keychain --eval -q)
   keychain --inherit any --confirm $HOME/.ssh/id_rsa -q
 fi
 
