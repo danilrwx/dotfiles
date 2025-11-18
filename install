@@ -36,6 +36,7 @@ ln -snf $HOME/dotfiles/config/lazygit $HOME/.config/
 ln -snf $HOME/dotfiles/config/vim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
+ln -snf $HOME/dotfiles/config/kitty $HOME/.config/
 
 ln -sf $HOME/dotfiles/.profile $HOME/
 ln -sf $HOME/dotfiles/.bash_profile $HOME/
@@ -145,7 +146,7 @@ fi
 # Install platpak repository and applications ───────────────────────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
   # install flapak applications ─────────────────────────────────────────────────────────────────────────────────────────
-  if ! command -v flatpak &> /dev/null; then
+  if command -v flatpak &> /dev/null; then
     if ! flatpak remotes --columns=name | grep -q '\bflathub\b'; then
       log "Adding flathub remote"
       sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
