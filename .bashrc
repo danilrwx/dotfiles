@@ -15,6 +15,10 @@ if [ -e "$HOME/.ssh/id_rsa" ]; then
   keychain --ssh-allow-forwarded --confirm $HOME/.ssh/id_rsa -q
 fi
 
+if [ -f $HOME/private-dotfiles/.bashrc ]; then
+  source $HOME/private-dotfiles/.bashrc
+fi
+
 alias kubectl=kubecolor
 complete -o default -F __start_kubectl kubecolor
 alias k=kubecolor
