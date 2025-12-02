@@ -33,6 +33,9 @@ export K9S_CONFIG_DIR=$HOME/.config/k9s
 export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':')
 export KUBECOLOR_PRESET="protanopia-dark"
 
+export HISTSIZE=-1
+export HISTFILESIZE=-1
+
 if [ -e "$HOME/bin/trdl" ]; then
   source $("$HOME/bin/trdl" use flint "2")
 fi

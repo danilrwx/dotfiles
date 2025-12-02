@@ -19,6 +19,10 @@ if [ -f $HOME/private-dotfiles/.bashrc ]; then
   source $HOME/private-dotfiles/.bashrc
 fi
 
+shopt -s histappend
+
+PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
+
 alias kubectl=kubecolor
 complete -o default -F __start_kubectl kubecolor
 alias k=kubecolor

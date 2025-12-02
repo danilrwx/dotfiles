@@ -12,7 +12,7 @@ if has("eval")
   g:skip_defaults_vim = 1
 endif
 
-if filereadable(expand("~/.vim/autoload/plug.vim"))
+if filereadable(expand("~/.config/vim/autoload/plug.vim"))
 	plug#begin('~/.local/share/vim/plugins')
 
 	Plug 'markonm/traces.vim'
