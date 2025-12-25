@@ -59,35 +59,16 @@ vim.g.maplocalleader = "\\"
 require("lazy").setup({
   spec = {
     { "laktak/tome" },
-    { "tpope/vim-surround" },
-    { "sheerun/vim-polyglot" },
-    { "charlespascoe/vim-go-syntax" },
 
     {
-      'mcncl/alabaster.nvim',
+      'projekt0n/github-nvim-theme',
+      name = 'github-theme',
       lazy = false,
       priority = 1000,
-      opts = {
-        style = "dark",
-        transparent = true,
-      },
-    },
-
-    {
-      "mbbill/undotree",
-      keys = {
-        { "<leader>u", "<cmd>UndotreeToggle<cr>" },
-      },
-    },
-
-    {
-      "otavioschwanck/arrow.nvim",
-      dependencies = { { "nvim-tree/nvim-web-devicons" } },
-      opts = {
-        show_icons = true,
-        leader_key = ';',
-        buffer_leader_key = 'm',
-      }
+      config = function()
+        require('github-theme').setup({ transparent_background = false })
+        vim.cmd('colorscheme github_light')
+      end,
     },
 
     {
@@ -146,11 +127,6 @@ require("lazy").setup({
     },
 
     {
-      "SCJangra/table-nvim",
-      opts = { next = 'right', prev = 'left' },
-    },
-
-    {
       "supermaven-inc/supermaven-nvim",
       event = "InsertEnter",
       cmd = { "SupermavenUseFree", "SupermavenUsePro" },
@@ -164,7 +140,7 @@ require("lazy").setup({
         require("nvim-treesitter.configs").setup({
           ensure_installed = { "lua", "vimdoc" },
           auto_install = true,
-          highlight = { enable = false },
+          highlight = { enable = true },
           folds = { enable = true },
           indent = { enable = true },
         })
@@ -187,20 +163,6 @@ require("lazy").setup({
       },
     },
 
-    -- {
-    --   "miroshQa/debugmaster.nvim",
-    --   dependencies = {
-    --     "mfussenegger/nvim-dap",
-    --     { 'https://github.com/leoluz/nvim-dap-go', opts = {} },
-    --   },
-    --   config = function()
-    --     local dm = require("debugmaster")
-    --     vim.keymap.set({ "n", "v" }, "<leader>d", dm.mode.toggle, { nowait = true })
-    --     vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
-    --   end
-    -- },
-
-
     {
       "daliusd/ghlite.nvim",
       lazy = false,
@@ -209,9 +171,7 @@ require("lazy").setup({
         diff_split = "tabnew",
         comment_split = "tabnew",
       },
-      keys = {
-        { "<leader>gS", "<cmd>GHLitePRSelect<cr>" },
-      },
+      keys = { { "<leader>gS", "<cmd>GHLitePRSelect<cr>" } },
     },
 
     {
@@ -223,11 +183,7 @@ require("lazy").setup({
       opts = {
         winopts = {
           fullscreen = true,
-          preview = {
-            layout = "vertical",
-            vertical = "up:55%",
-            border = "single",
-          },
+          preview = { layout = "vertical", vertical = "up:55%", border = "single" },
         },
       },
       keys = {
@@ -243,7 +199,6 @@ require("lazy").setup({
       "saghen/blink.cmp",
       dependencies = {
         "xzbdmw/colorful-menu.nvim",
-        { 'yus-works/csc.nvim', opts = {} },
       },
       opts = {
         keymap = { preset = "enter" },
@@ -284,23 +239,6 @@ require("lazy").setup({
       }
     },
 
-    -- {
-    --   "nvimtools/none-ls.nvim",
-    --   dependencies = { "nvim-lua/plenary.nvim" },
-    --   config = function()
-    --     local nls = require("null-ls")
-    --     nls.setup({
-    --       debug = true,
-    --       sources = {
-    --         nls.builtins.code_actions.gomodifytags,
-    --         nls.builtins.code_actions.impl,
-    --         nls.builtins.formatting.gofumpt,
-    --         nls.builtins.formatting.goimports,
-    --       },
-    --     })
-    --   end,
-    -- },
-
     {
       "lewis6991/gitsigns.nvim",
       opts = {
@@ -334,21 +272,6 @@ require("lazy").setup({
   },
   checker = { enabled = false },
 })
-
-vim.opt.background = "dark"
-vim.opt.termguicolors = false
-vim.cmd.colorscheme('torte')
-
-vim.api.nvim_set_hl(0, "Normal", { bg = nil })
-vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
-
-vim.api.nvim_set_hl(0, "Added", { fg = "#00cd00" })
-vim.api.nvim_set_hl(0, "Changed", { fg = "#00cdcd" })
-vim.api.nvim_set_hl(0, "Removed", { fg = "#cd0000" })
-
-vim.api.nvim_set_hl(0, "DiffAdded", { fg = "#00cd00" })
-vim.api.nvim_set_hl(0, "DiffChanged", { fg = "#00cdcd" })
-vim.api.nvim_set_hl(0, "DiffRemoved", { fg = "#cd0000" })
 
 require("fzf-lua").register_ui_select()
 
@@ -391,12 +314,7 @@ end
 
 vim.cmd.packadd("cfilter")
 
-vim.filetype.add({
-  extension = {
-    yaml = "helm",
-    tpl = "helm",
-  }
-})
+vim.filetype.add({ extension = { yaml = "helm", tpl = "helm" } })
 
 vim.lsp.enable("gopls")
 vim.lsp.enable("golangci_lint_ls")
@@ -406,12 +324,6 @@ vim.lsp.enable("clangd")
 vim.lsp.enable("rust_analyzer")
 
 vim.diagnostic.config({ virtual_text = { prefix = "🐗", }, signs = false })
-
-vim.fn.sign_define("DapBreakpoint", { text = "✊", texthl = "", linehl = "", numhl = "" })
-vim.fn.sign_define("DapBreakpointCondition", { text = "🫸", texthl = "", linehl = "", numhl = "" })
-vim.fn.sign_define("DapLogPoint", { text = "📄", texthl = "", linehl = "", numhl = "" })
-vim.fn.sign_define("DapStopped", { text = "👉", texthl = "", linehl = "", numhl = "" })
-vim.fn.sign_define("DapBreakpointRejected", { text = "🚫", texthl = "", linehl = "", numhl = "" })
 
 ---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_create_autocmd("TextYankPost", {
@@ -438,17 +350,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local client = vim.lsp.get_client_by_id(event.data.client_id)
     if client == nil then return end
 
-    -- if not client:supports_method("textDocument/willSaveWaitUntil")
-    --     and client:supports_method("textDocument/formatting") then
-    --   vim.api.nvim_create_autocmd("BufWritePre", {
-    --     group = vim.api.nvim_create_augroup("my.lsp", { clear = false }),
-    --     buffer = event.buf,
-    --     callback = function()
-    --       vim.lsp.buf.format({ bufnr = event.buf, id = client.id, timeout_ms = 1000 })
-    --     end,
-    --   })
-    -- end
-
     if client.server_capabilities.codeLensProvider then
       ---@diagnostic disable-next-line: param-type-mismatch
       vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold" },
@@ -462,23 +363,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
-local toggle_quickfix = function()
-  local quickfix_wins = vim.tbl_filter(function(win_id)
-    return vim.fn.getwininfo(win_id)[1].quickfix == 1
-  end, vim.api.nvim_tabpage_list_wins(0))
-
-  local command = #quickfix_wins == 0 and "copen" or "cclose"
-  vim.cmd(command)
-end
-vim.keymap.set("n", "<leader>q", toggle_quickfix)
-
 vim.keymap.set("n", "<leader>gg", "<cmd>!tmux neww lazygit<cr>")
 
 vim.keymap.set("n", "<c-[>", "<cmd>noh<Return><esc>")
-vim.keymap.set("n", "<c-l>", "<cmd>noh<Return><esc>")
-
-vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
-vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
 
 vim.keymap.set("n", "<c-d>", "<c-d>zz")
 vim.keymap.set("n", "<c-u>", "<c-u>zz")
@@ -488,16 +375,3 @@ vim.keymap.set("n", "<leader>p", "+p")
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 
 vim.keymap.set("n", "<leader>dd", "<cmd>let @+ = expand('%') . ':' . line('.')<CR>")
-
-vim.keymap.set("n", "<leader>C", function()
-  local line = vim.api.nvim_get_current_line()
-  local total_len = 120
-
-  local filler_count = total_len - #line
-  if filler_count < 0 then filler_count = 0 end
-  local filler = string.rep("─", filler_count)
-
-  local new_line = line .. " " .. filler
-
-  vim.api.nvim_set_current_line(new_line)
-end, { desc = "Wrap line in fixed-width comment" })

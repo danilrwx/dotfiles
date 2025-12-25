@@ -50,8 +50,8 @@ alias kaf="kubectl apply -f"
 alias kad="kubectl delete -f"
 
 if [ -x "$(command -v nvim)" ]; then
-  alias vi='nvim'
-  alias vim='nvim'
+  # alias vi='nvim'
+  # alias vim='nvim'
 
   export EDITOR='nvim'
   export VISUAL='nvim'
@@ -60,5 +60,5 @@ fi
 alias lg='lazygit'
 
 export PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
-export FZF_DEFAULT_OPTS=""
+
 
