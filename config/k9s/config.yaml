@@ -4,8 +4,9 @@ k9s:
   maxConnRetry: 5
   readOnly: false
   ui:
-    enableMouse: true
+    enableMouse: false
     logoless: true
     headless: true
-    skin: light
+    # skin: transparent
+    # skin: catppuccin-mocha-transparent
     reactive: true

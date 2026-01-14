@@ -31,9 +31,7 @@ export PATH="$KREW_ROOT/bin:$PATH"
 export XDG_CONFIG_HOME="$HOME/.config"
 export K9S_CONFIG_DIR=$HOME/.config/k9s
 export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':')
-export KUBECOLOR_PRESET="light"
-
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=bg+:#efefef,bg:#ffffff,spinner:#4d4d4c,hl:#8e908c,fg:#4d4d4c,header:#8e908c,info:#8959a8,pointer:#4d4d4c,marker:#4d4d4c,fg+:#4d4d4c,prompt:#4d4d4c,hl+:#4d4d4c"
+export KUBECOLOR_PRESET="protanopia-dark"
 
 export HISTSIZE=-1
 export HISTFILESIZE=-1
