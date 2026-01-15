@@ -1,0 +1,18 @@
+macos-option-as-alt = true
+
+keybind = alt+left=unbind
+keybind = alt+right=unbind
+
+font-family = Iosevka NFM Medium
+
+maximize = true
+
+window-padding-x = 8
+window-padding-y = 5
+
+font-size = 16
+adjust-cell-width = -05%
+adjust-cell-height = 12%
+
+theme = base
+
