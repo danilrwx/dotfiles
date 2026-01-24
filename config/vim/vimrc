@@ -16,17 +16,18 @@ if filereadable(expand("~/.config/vim/autoload/plug.vim"))
 	plug#begin('~/.local/share/vim/plugins')
 
 	Plug 'tpope/vim-surround'
+
 	Plug 'markonm/traces.vim'
-	Plug 'sheerun/vim-polyglot'
 
 	Plug 'tpope/vim-fugitive'
+
 	Plug 'airblade/vim-gitgutter'
 
 	Plug 'yegappan/lsp'
 
 	Plug 'vim-test/vim-test'
+
 	Plug 'sebdah/vim-delve'
-	Plug 'charlespascoe/vim-go-syntax'
 
 	Plug 'habamax/vim-dir'
 
@@ -103,7 +104,7 @@ set undodir=$XDG_CONFIG_HOME/vim/files/undo/
 # mark trailing spaces as errors
 match errorMsg '\s\+$'
 
-# colorscheme torte
+colorscheme torte
 highlight Normal ctermbg=none
 highlight SignColumn ctermbg=none
 # highlight DiffAdd ctermfg=16
@@ -153,6 +154,9 @@ nnoremap <silent> ghu <cmd>GitGutterUndoHunk<cr>
 nnoremap <silent> ghp <cmd>GitGutterPreviewHunk<cr>
 
 nnoremap <silent> - <cmd>Dir<cr>
+
+execute "set <A-q>=\eq"
+nnoremap <a-q> :bd<cr>
 
 g:gitgutter_sign_priority = 0
 g:gitgutter_preview_win_floating = 1
