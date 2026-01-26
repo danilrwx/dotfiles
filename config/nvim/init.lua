@@ -1,5 +1,231 @@
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+  if vim.v.shell_error ~= 0 then
+    vim.api.nvim_echo({
+      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+      { out,                            "WarningMsg" },
+      { "\nPress any key to exit..." },
+    }, true, {})
+    vim.fn.getchar()
+    os.exit(1)
+  end
+end
+vim.opt.rtp:prepend(lazypath)
+
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
+
+require("lazy").setup({
+  spec = {
+    { "laktak/tome" },
+    { "tpope/vim-surround" },
+
+    {
+      "kyoh86/vim-go-coverage",
+      lazy = false,
+      keys = {
+        { "<leader>tc", "<cmd>GoCover<cr>" },
+        { "<leader>tC", "<cmd>GoCoverClear<cr>" },
+      },
+    },
+
+    {
+      "tpope/vim-fugitive",
+      lazy = false,
+      keys = {
+        { "<leader>g=", "<cmd>tab Git<cr>" },
+        { "<leader>gl", "<cmd>tab Git log --follow -p %<cr>" },
+        { "<leader>gL", "<cmd>tab Git log<cr>" },
+        { "<leader>gb", "<cmd>tab Git blame<cr>" },
+      },
+    },
+
+    {
+      "vim-test/vim-test",
+      keys = {
+        { "<leader>tr", "<cmd>TestNearest<cr>" },
+        { "<leader>tt", "<cmd>TestFile<cr>" },
+      },
+    },
+
+    {
+      "chrisgrieser/nvim-origami",
+      opts = {
+        foldKeymaps = { setup = false },
+        autoFold = { enabled = false },
+      },
+    },
+
+    {
+      'stevearc/oil.nvim',
+      opts = { view_options = { show_hidden = true } },
+      keys = { { "-", "<cmd>Oil<cr>" } },
+      lazy = false,
+    },
+
+    {
+      "rmagatti/auto-session",
+      opts = { suppressed_dirs = { "~/", "~/Downloads", "/" } },
+    },
+
+    {
+      "supermaven-inc/supermaven-nvim",
+      event = "InsertEnter",
+      cmd = { "SupermavenUseFree", "SupermavenUsePro" },
+      opts = {},
+    },
+
+    {
+      "nvim-treesitter/nvim-treesitter",
+      build = ":TSUpdate",
+      config = function()
+        require("nvim-treesitter.configs").setup({
+          ensure_installed = { "lua", "vimdoc" },
+          auto_install = true,
+          highlight = { enable = false },
+          folds = { enable = true },
+          indent = { enable = true },
+        })
+      end,
+    },
+
+    {
+      "Wansmer/treesj",
+      keys = { "<space>m", { "<space>j", false }, { "<space>s", false } },
+      dependencies = { "nvim-treesitter/nvim-treesitter" },
+      opts = {},
+    },
+
+    -- {
+    --   "sebdah/vim-delve",
+    --   keys = {
+    --     { "<leader>td", "<cmd>DlvTestCurrent<cr>" },
+    --     { "<leader>db", "<cmd>DlvToggleBreakpoint<cr>" },
+    --     { "<leader>dc", "<cmd>DlvConnect :2345<cr>" },
+    --   },
+    -- },
+
+    {
+      "ibhagwan/fzf-lua",
+      lazy = false,
+      dependencies = {
+        "nvim-tree/nvim-web-devicons",
+      },
+      opts = {
+        winopts = {
+          fullscreen = true,
+          preview = { layout = "vertical", vertical = "up:55%", border = "single" },
+        },
+      },
+      keys = {
+        { "<leader>f", "<cmd>lua require('fzf-lua').files()<cr>" },
+        { "<leader>/", "<cmd>lua require('fzf-lua').live_grep()<cr>" },
+        { "<leader>'", "<cmd>lua require('fzf-lua').resume()<cr>" },
+        { "<leader>b", "<cmd>lua require('fzf-lua').buffers()<cr>" },
+        { "<leader>D", "<cmd>lua require('fzf-lua').lsp_workspace_diagnostics()<cr>" },
+      }
+    },
+
+    -- {
+    --   "saghen/blink.cmp",
+    --   dependencies = {
+    --     "xzbdmw/colorful-menu.nvim",
+    --   },
+    --   opts = {
+    --     keymap = { preset = "enter" },
+    --     signature = { enabled = true },
+    --     appearance = { nerd_font_variant = "normal" },
+    --     completion = {
+    --       accept = { auto_brackets = { enabled = true } },
+    --       menu = {
+    --         draw = {
+    --           columns = { { "kind_icon" }, { "label", gap = 1 } },
+    --           components = {
+    --             label = {
+    --               text = function(ctx) return require("colorful-menu").blink_components_text(ctx) end,
+    --               highlight = function(ctx) return require("colorful-menu").blink_components_highlight(ctx) end,
+    --             },
+    --           },
+    --         },
+    --       },
+    --       documentation = { auto_show = true, auto_show_delay_ms = 200 },
+    --     },
+    --     fuzzy = { prebuilt_binaries = { force_version = "v1.6.0" } },
+    --     sources = { default = { "lsp", "path", "snippets", "buffer" } },
+    --   }
+    -- },
+
+    {
+      "Wansmer/symbol-usage.nvim",
+      opts = {
+        kinds = {
+          vim.lsp.protocol.SymbolKind.Function,
+          vim.lsp.protocol.SymbolKind.Method,
+          vim.lsp.protocol.SymbolKind.Interface,
+          vim.lsp.protocol.SymbolKind.Constant,
+        },
+        definition = { enabled = true },
+        implementation = { enabled = true },
+        vt_position = "end_of_line",
+      }
+    },
+
+    {
+      "lewis6991/gitsigns.nvim",
+      opts = {
+        numhl = true,
+        signcolumn = false,
+        on_attach = function(bufnr)
+          local gitsigns = require("gitsigns")
+          local opts = { buffer = bufnr }
+
+          vim.keymap.set("n", "]c",
+            function() if vim.wo.diff then vim.cmd.normal({ "]c", bang = true }) else gitsigns.nav_hunk("next") end end,
+            opts)
+          vim.keymap.set("n", "[c",
+            function() if vim.wo.diff then vim.cmd.normal({ "[c", bang = true }) else gitsigns.nav_hunk("prev") end end,
+            opts)
+
+          vim.keymap.set("n", "ghs", gitsigns.stage_hunk, opts)
+          vim.keymap.set("n", "ghu", gitsigns.reset_hunk, opts)
+          vim.keymap.set("v", "ghs", function() gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, opts)
+          vim.keymap.set("v", "ghu", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, opts)
+          vim.keymap.set("n", "ghS", gitsigns.stage_buffer, opts)
+          vim.keymap.set("n", "ghU", gitsigns.reset_buffer, opts)
+          vim.keymap.set("n", "ghp", gitsigns.preview_hunk_inline, opts)
+          vim.keymap.set("n", "ghd", gitsigns.diffthis, opts)
+          vim.keymap.set("n", "ghD", function() gitsigns.diffthis("~") end, opts)
+
+          vim.keymap.set({ "o", "x" }, "ih", gitsigns.select_hunk, opts)
+        end
+      }
+    },
+  },
+  checker = { enabled = false },
+})
+
+vim.opt.termguicolors = true
+vim.cmd.colorscheme("torte")
+
+-- vim.api.nvim_set_hl(0, "Normal", { bg = nil })
+-- vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
+
+vim.api.nvim_set_hl(0, "Added", { fg = "#00cd00" })
+vim.api.nvim_set_hl(0, "Changed", { fg = "#00cdcd" })
+vim.api.nvim_set_hl(0, "Removed", { fg = "#cd0000" })
+
+vim.api.nvim_set_hl(0, "DiffAdded", { fg = "#00cd00" })
+vim.api.nvim_set_hl(0, "DiffChanged", { fg = "#00cdcd" })
+vim.api.nvim_set_hl(0, "DiffRemoved", { fg = "#cd0000" })
+
+require("fzf-lua").register_ui_select()
+
+vim.opt.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
+
+vim.opt.undodir = os.getenv("HOME") .. "/.local/nvim/undo"
+vim.opt.undofile = true
 
 vim.opt.number = true
 vim.opt.numberwidth = 2
@@ -27,85 +253,11 @@ else
   vim.opt.grepprg = 'grep -RIn --exclude="zz_generated*" --exclude-dir="generated"'
 end
 
-vim.o.diffopt = 'internal,filler,closeoff,inline:word,linematch:40'
-
-vim.opt.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
-
-vim.opt.undodir = os.getenv("HOME") .. "/.local/nvim/undo"
-vim.opt.undofile = true
-
-vim.pack.add({
-  { src = "https://github.com/nvim-treesitter/nvim-treesitter" },
-  { src = "https://github.com/supermaven-inc/supermaven-nvim" },
-  { src = "https://github.com/chrisgrieser/nvim-origami" },
-  { src = "https://github.com/laktak/tome" },
-
-  { src = "https://github.com/sebdah/vim-delve" },
-  { src = "https://github.com/vim-test/vim-test" },
-  { src = "https://github.com/kyoh86/vim-go-coverage" },
-
-  { src = "https://github.com/Wansmer/symbol-usage.nvim" },
-
-  { src = "https://github.com/rmagatti/auto-session" },
-
-  { src = "https://github.com/stevearc/oil.nvim" },
-
-  { src = "https://github.com/ibhagwan/fzf-lua" },
-
-  { src = "https://github.com/nvim-mini/mini.nvim" },
-
-  { src = "https://github.com/catppuccin/nvim" },
-})
-
-require('nvim-treesitter.config').setup({
-  ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "go" },
-  auto_install = true,
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-  },
-})
-
-require("oil").setup({ view_options = { show_hidden = true } })
-
-require("auto-session").setup({ suppressed_dirs = { "~/", "~/Downloads", "/" } })
-
-require("origami").setup({ foldKeymaps = { setup = false }, autoFold = { enabled = false } })
-
-require("supermaven-nvim").setup({})
-
-require("fzf-lua").setup({ winopts = { fullscreen = true, preview = { layout = "vertical", vertical = "up:55%", border = "single" } } })
-require("fzf-lua").register_ui_select()
-
-require("symbol-usage").setup({
-  kinds = {
-    vim.lsp.protocol.SymbolKind.Function,
-    vim.lsp.protocol.SymbolKind.Method,
-    vim.lsp.protocol.SymbolKind.Interface,
-    vim.lsp.protocol.SymbolKind.Constant,
-  },
-  definition = { enabled = true },
-  implementation = { enabled = true },
-  vt_position = "end_of_line",
-})
-
-require("mini.extra").setup()
-require("mini.diff").setup()
-require("mini.git").setup()
-
-require("mini.trailspace").setup()
-require("mini.icons").setup()
-
-vim.opt.termguicolors = true
-vim.cmd.colorscheme("catppuccin")
-
-vim.api.nvim_set_hl(0, "Added", { fg = "#00cd00" })
-vim.api.nvim_set_hl(0, "Changed", { fg = "#00cdcd" })
-vim.api.nvim_set_hl(0, "Removed", { fg = "#cd0000" })
-
-vim.api.nvim_set_hl(0, "DiffAdded", { fg = "#00cd00" })
-vim.api.nvim_set_hl(0, "DiffChanged", { fg = "#00cdcd" })
-vim.api.nvim_set_hl(0, "DiffRemoved", { fg = "#cd0000" })
+if vim.fn.has('nvim-0.12') == 1 then
+  vim.o.diffopt = 'internal,filler,closeoff,inline:word,linematch:40'
+elseif vim.fn.has('nvim-0.11') == 1 then
+  vim.o.diffopt = 'internal,filler,closeoff,linematch:40'
+end
 
 vim.cmd.packadd("cfilter")
 
@@ -120,6 +272,7 @@ vim.lsp.enable("rust_analyzer")
 
 vim.diagnostic.config({ virtual_text = { prefix = "🐗", }, signs = false })
 
+---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("highlight_yank", {}),
   pattern = "*",
@@ -157,15 +310,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
-local toggle_quickfix = function()
-  local quickfix_wins = vim.tbl_filter(function(win_id)
-    return vim.fn.getwininfo(win_id)[1].quickfix == 1
-  end, vim.api.nvim_tabpage_list_wins(0))
-
-  local command = #quickfix_wins == 0 and "copen" or "cclose"
-  vim.cmd(command)
-end
-
 vim.keymap.set("n", "<leader>gg", "<cmd>!tmux neww lazygit<cr>")
 
 vim.keymap.set("n", "<c-[>", "<cmd>noh<Return><esc>")
@@ -182,30 +326,12 @@ vim.keymap.set("n", "<leader>dd", "<cmd>let @+ = expand('%') . ':' . line('.')<C
 vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
 vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
 
-vim.keymap.set("n", "<leader>tc", "<cmd>GoCover<cr>")
-vim.keymap.set("n", "<leader>tC", "<cmd>GoCoverClear<cr>")
+local toggle_quickfix = function()
+  local quickfix_wins = vim.tbl_filter(function(win_id)
+    return vim.fn.getwininfo(win_id)[1].quickfix == 1
+  end, vim.api.nvim_tabpage_list_wins(0))
 
-vim.keymap.set("n", "<leader>gl", "<cmd>Git log --follow -p %<cr>")
-vim.keymap.set("n", "<leader>gL", "<cmd>Git log<cr>")
-vim.keymap.set("n", "<leader>gb", "<cmd>Git blame<cr>")
-
-vim.keymap.set("n", "<leader>tr", "<cmd>TestNearest<cr>")
-vim.keymap.set("n", "<leader>tt", "<cmd>TestFile<cr>")
-
-vim.keymap.set("n", "<leader>f", "<cmd>lua require('fzf-lua').files()<cr>")
-vim.keymap.set("n", "<leader>/", "<cmd>lua require('fzf-lua').live_grep()<cr>")
-vim.keymap.set("n", "<leader>'", "<cmd>lua require('fzf-lua').resume()<cr>")
-vim.keymap.set("n", "<leader>b", "<cmd>lua require('fzf-lua').buffers()<cr>")
-vim.keymap.set("n", "<leader>D", "<cmd>lua require('fzf-lua').lsp_workspace_diagnostics()<cr>")
-
-vim.keymap.set("n", "<leader>td", "<cmd>DlvTestCurrent<cr>")
-vim.keymap.set("n", "<leader>db", "<cmd>DlvToggleBreakpoint<cr>")
-vim.keymap.set("n", "<leader>dc", "<cmd>DlvConnect :2345<cr>")
-
-vim.keymap.set({ 'n', 'x' }, '<leader>gs', "<cmd>lua require('mini.git').show_at_cursor()<cr>")
-
-vim.keymap.set('n', 'ghp', "<cmd>lua require('mini.diff').toggle_overlay()<cr>")
-
-vim.keymap.set("n", "-", "<cmd>Oil<cr>")
-
+  local command = #quickfix_wins == 0 and "copen" or "cclose"
+  vim.cmd(command)
+end
 vim.keymap.set("n", "<leader>q", toggle_quickfix)
