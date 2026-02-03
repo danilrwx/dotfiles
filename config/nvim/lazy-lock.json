@@ -1,6 +1,6 @@
 {
+  "auto-session": { "branch": "main", "commit": "292492ab7af4bd8b9e37e28508bc8ce995722fd5" },
   "blink.cmp": { "branch": "main", "commit": "fab799d086fd63fa5b389007f63767b23885ebf8" },
-  "catppuccin": { "branch": "main", "commit": "beaf41a30c26fd7d6c386d383155cbd65dd554cd" },
   "colorful-menu.nvim": { "branch": "master", "commit": "b51a659459df8d078201aefc995db8175ed55e84" },
   "fzf-lua": { "branch": "main", "commit": "36d60dd59cd9bc0442352119fc0e45e1c9011e03" },
   "gitsigns.nvim": { "branch": "main", "commit": "abf82a65f185bd54adc0679f74b7d6e1ada690c9" },
