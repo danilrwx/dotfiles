@@ -1,199 +1,25 @@
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
-  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-  if vim.v.shell_error ~= 0 then
-    vim.api.nvim_echo({
-      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out,                            "WarningMsg" },
-      { "\nPress any key to exit..." },
-    }, true, {})
-    vim.fn.getchar()
-    os.exit(1)
-  end
-end
-vim.opt.rtp:prepend(lazypath)
+vim.pack.add({
+  { src = "https://github.com/ibhagwan/fzf-lua" },
+  { src = "https://github.com/laktak/tome" },
+  { src = "https://github.com/nvim-treesitter/nvim-treesitter" },
+  { src = "https://github.com/rmagatti/auto-session" },
+  { src = "https://github.com/supermaven-inc/supermaven-nvim" },
+  { src = "https://github.com/vim-test/vim-test" },
+  { src = "https://github.com/tpope/vim-fugitive" },
+  { src = "https://github.com/stevearc/oil.nvim" },
+})
+
+require("oil").setup({ view_options = { show_hidden = true } })
+
+require("auto-session").setup({ suppressed_dirs = { "~/", "~/Downloads", "/" } })
+
+require("fzf-lua").setup({ winopts = { fullscreen = true, preview = { layout = "vertical", vertical = "up:55%", border = "single" } } })
+require("fzf-lua").register_ui_select()
+
+require("supermaven-nvim").setup({})
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
-
-require("lazy").setup({
-  spec = {
-    {
-      "laktak/tome",
-    },
-
-    {
-      "tpope/vim-surround",
-    },
-
-    {
-      "tpope/vim-fugitive",
-      lazy = false,
-      keys = {
-        { "<leader>g=", "<cmd>tab Git<cr>" },
-        { "<leader>gl", "<cmd>tab Git log --follow -p %<cr>" },
-        { "<leader>gL", "<cmd>tab Git log<cr>" },
-        { "<leader>gb", "<cmd>tab Git blame<cr>" },
-      },
-    },
-
-    {
-      "kyoh86/vim-go-coverage",
-      lazy = false,
-      keys = {
-        { "<leader>tc", "<cmd>GoCover<cr>" },
-        { "<leader>tC", "<cmd>GoCoverClear<cr>" },
-      },
-    },
-
-    {
-      "vim-test/vim-test",
-      keys = {
-        { "<leader>tr", "<cmd>TestNearest<cr>" },
-        { "<leader>tt", "<cmd>TestFile<cr>" },
-      },
-    },
-
-    {
-      'stevearc/oil.nvim',
-      opts = { view_options = { show_hidden = true } },
-      keys = { { "-", "<cmd>Oil<cr>" } },
-      lazy = false,
-    },
-
-    {
-      "rmagatti/auto-session",
-      opts = { suppressed_dirs = { "~/", "~/Downloads", "/" } },
-    },
-
-    {
-      "supermaven-inc/supermaven-nvim",
-      event = "InsertEnter",
-      cmd = { "SupermavenUseFree", "SupermavenUsePro" },
-      opts = {},
-    },
-
-    {
-      "nvim-treesitter/nvim-treesitter",
-      dependencies = { "nvim-treesitter/nvim-treesitter" },
-      lazy = false,
-      build = ":TSUpdate",
-    },
-
-    {
-      "Wansmer/treesj",
-      keys = { "<space>m", { "<space>j", false }, { "<space>s", false } },
-      dependencies = { "nvim-treesitter/nvim-treesitter" },
-      opts = {},
-    },
-
-    {
-      "sebdah/vim-delve",
-      keys = {
-        { "<leader>td", "<cmd>DlvTestCurrent<cr>" },
-        { "<leader>db", "<cmd>DlvToggleBreakpoint<cr>" },
-        { "<leader>dc", "<cmd>DlvConnect :2345<cr>" },
-      },
-    },
-
-    {
-      "ibhagwan/fzf-lua",
-      lazy = false,
-      dependencies = {
-        "nvim-tree/nvim-web-devicons",
-      },
-      opts = {
-        winopts = {
-          fullscreen = true,
-          preview = { layout = "vertical", vertical = "up:55%", border = "single" },
-        },
-      },
-      keys = {
-        { "<leader>f", "<cmd>lua require('fzf-lua').files()<cr>" },
-        { "<leader>/", "<cmd>lua require('fzf-lua').live_grep()<cr>" },
-        { "<leader>'", "<cmd>lua require('fzf-lua').resume()<cr>" },
-        { "<leader>b", "<cmd>lua require('fzf-lua').buffers()<cr>" },
-        { "<leader>H", "<cmd>lua require('fzf-lua').git_hunks()<cr>" },
-        { "<leader>D", "<cmd>lua require('fzf-lua').lsp_workspace_diagnostics()<cr>" },
-      }
-    },
-
-    -- {
-    --   "saghen/blink.cmp",
-    --   dependencies = {
-    --     "xzbdmw/colorful-menu.nvim",
-    --   },
-    --   opts = {
-    --     keymap = { preset = "enter" },
-    --     signature = { enabled = true },
-    --     appearance = { nerd_font_variant = "normal" },
-    --     completion = {
-    --       accept = { auto_brackets = { enabled = true } },
-    --       menu = {
-    --         draw = {
-    --           columns = { { "kind_icon" }, { "label", gap = 1 } },
-    --           components = {
-    --             label = {
-    --               text = function(ctx) return require("colorful-menu").blink_components_text(ctx) end,
-    --               highlight = function(ctx) return require("colorful-menu").blink_components_highlight(ctx) end,
-    --             },
-    --           },
-    --         },
-    --       },
-    --       documentation = { auto_show = true, auto_show_delay_ms = 200 },
-    --     },
-    --     fuzzy = { prebuilt_binaries = { force_version = "v1.6.0" } },
-    --     sources = { default = { "lsp", "path", "snippets", "buffer" } },
-    --   }
-    -- },
-
-    {
-      "Wansmer/symbol-usage.nvim",
-      opts = {
-        kinds = {
-          vim.lsp.protocol.SymbolKind.Function,
-          vim.lsp.protocol.SymbolKind.Method,
-          vim.lsp.protocol.SymbolKind.Interface,
-          vim.lsp.protocol.SymbolKind.Constant,
-        },
-        definition = { enabled = true },
-        implementation = { enabled = true },
-        vt_position = "end_of_line",
-      }
-    },
-
-    -- {
-    --   "lewis6991/gitsigns.nvim",
-    --   opts = {
-    --     numhl = true,
-    --     signcolumn = false,
-    --     on_attach = function(bufnr)
-    --       local gitsigns = require("gitsigns")
-    --       local opts = { buffer = bufnr }
-    --
-    --       vim.keymap.set("n", "]c", function() if vim.wo.diff then vim.cmd.normal({ "]c", bang = true }) else gitsigns.nav_hunk("next") end end, opts)
-    --       vim.keymap.set("n", "[c", function() if vim.wo.diff then vim.cmd.normal({ "[c", bang = true }) else gitsigns.nav_hunk("prev") end end, opts)
-    --
-    --       vim.keymap.set("n", "ghs", gitsigns.stage_hunk, opts)
-    --       vim.keymap.set("n", "ghu", gitsigns.reset_hunk, opts)
-    --       vim.keymap.set("v", "ghs", function() gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, opts)
-    --       vim.keymap.set("v", "ghu", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, opts)
-    --       vim.keymap.set("n", "ghS", gitsigns.stage_buffer, opts)
-    --       vim.keymap.set("n", "ghU", gitsigns.reset_buffer, opts)
-    --       vim.keymap.set("n", "ghp", gitsigns.preview_hunk_inline, opts)
-    --       vim.keymap.set("n", "ghd", gitsigns.diffthis, opts)
-    --       vim.keymap.set("n", "ghD", function() gitsigns.diffthis("~") end, opts)
-    --
-    --       vim.keymap.set({ "o", "x" }, "ih", gitsigns.select_hunk, opts)
-    --     end
-    --   }
-    -- },
-  },
-  checker = { enabled = false },
-})
-
-require("fzf-lua").register_ui_select()
 
 vim.opt.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
 
@@ -225,11 +51,7 @@ else
   vim.opt.grepprg = 'grep -RIn --exclude="zz_generated*" --exclude-dir="generated"'
 end
 
-if vim.fn.has('nvim-0.12') == 1 then
-  vim.o.diffopt = 'internal,filler,closeoff,inline:word,linematch:40'
-elseif vim.fn.has('nvim-0.11') == 1 then
-  vim.o.diffopt = 'internal,filler,closeoff,linematch:40'
-end
+vim.o.diffopt = 'internal,filler,closeoff,inline:word,linematch:40'
 
 vim.cmd.packadd("cfilter")
 
@@ -246,57 +68,30 @@ vim.diagnostic.config({ virtual_text = { prefix = "🐗", }, signs = false })
 
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("highlight_yank", {}),
-  pattern = "*",
-  callback = function()
-    vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = "*",
-  callback = function()
-    local save_cursor = vim.fn.getpos(".")
-    pcall(function() vim.cmd([[%s/\s\+$//e]]) end)
-    vim.fn.setpos(".", save_cursor)
-  end,
+  callback = function() require("user.fn").highlight_yank() end,
 })
 
 vim.api.nvim_create_autocmd("LspAttach", {
-  desc = "LSP actions",
-  callback = function(event)
-    local opts = { buffer = event.buf }
-    local client = vim.lsp.get_client_by_id(event.data.client_id)
-    if client == nil then return end
-
-    if client.server_capabilities.codeLensProvider then
-      vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold" },
-        { callback = function() vim.lsp.codelens.refresh() end })
-      vim.keymap.set("n", "grc", "<cmd>lua vim.lsp.codelens.run()<cr>", opts)
-    end
-
-    if client:supports_method("textDocument/formatting") then
-      vim.keymap.set({ "n", "x" }, "grf", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", opts)
-    end
-  end,
+  callback = function(event) require("user.fn").on_lsp_attach(event) end,
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  callback = function(details)
-    if vim.treesitter.get_parser(nil, nil, { error = false }) then
-      vim.treesitter.start()
-    end
-
-    local bufnr = details.buf
-    vim.bo[bufnr].syntax = "on"
-    vim.bo[bufnr].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-
-    vim.wo.foldlevel = 99
-    vim.wo.foldmethod = "expr"
-    vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-  end,
+  callback = function(details) require("user.fn").on_filetype(details) end,
 })
 
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function() require("user.fn").setup_highlights() end
+})
+
+vim.api.nvim_create_user_command("PackUpdate", function() require("user.pack").pack_update() end, {})
+vim.api.nvim_create_user_command("PackClean", function(opts) require("user.pack").pack_clean(opts) end, { bang = true })
+
+require("user.git_diff_signs").setup()
+
 vim.keymap.set("n", "<leader>gg", "<cmd>!tmux neww lazygit<cr>")
+vim.keymap.set("n", "<leader>gl", "<cmd>tab Git log --follow -p %<cr>")
+vim.keymap.set("n", "<leader>gL", "<cmd>tab Git log --follow %<cr>")
+vim.keymap.set("n", "<leader>gb", "<cmd>tab Git blame<cr>")
 
 vim.keymap.set("n", "<c-[>", "<cmd>noh<Return><esc>")
 
@@ -310,77 +105,18 @@ vim.keymap.set("n", "<leader>Y", [["+Y]])
 vim.keymap.set("n", "<leader>dd", "<cmd>let @+ = expand('%') . ':' . line('.')<CR>")
 
 vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
-vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
 
-local toggle_quickfix = function()
-  local quickfix_wins = vim.tbl_filter(function(win_id)
-    return vim.fn.getwininfo(win_id)[1].quickfix == 1
-  end, vim.api.nvim_tabpage_list_wins(0))
+vim.keymap.set("n", "<leader>q", require("user.fn").toggle_quickfix)
 
-  local command = #quickfix_wins == 0 and "copen" or "cclose"
-  vim.cmd(command)
-end
-vim.keymap.set("n", "<leader>q", toggle_quickfix)
+vim.keymap.set("n", "-", "<cmd>Oil<cr>")
 
-local function setup_highlights()
-  local link = vim.api.nvim_set_hl
-  local function hl(group, opts) link(0, group, opts) end
+vim.keymap.set("n", "<leader>f", require('fzf-lua').files)
+vim.keymap.set("n", "<leader>/", require('fzf-lua').live_grep)
+vim.keymap.set("n", "<leader>'", require('fzf-lua').resume)
+vim.keymap.set("n", "<leader>b", require('fzf-lua').buffers)
+vim.keymap.set("n", "<leader>D", require('fzf-lua').lsp_workspace_diagnostics)
 
-  hl("Normal", { bg = nil })
-  hl("SignColumn", { bg = nil })
+vim.keymap.set("n", "]c", require("user.git_diff_signs").next_hunk, { desc = "Next git hunk" })
+vim.keymap.set("n", "[c", require("user.git_diff_signs").prev_hunk, { desc = "Prev git hunk" })
 
-  hl("Added", { fg = "#00cd00" })
-  hl("Changed", { fg = "#00cdcd" })
-  hl("Removed", { fg = "#cd0000" })
-
-  hl("DiffAdded", { fg = "#00cd00" })
-  hl("DiffChanged", { fg = "#00cdcd" })
-  hl("DiffRemoved", { fg = "#cd0000" })
-
-
-  local highlight_keep = {
-    ["@function"] = "Function",
-    ["@function.call"] = "Function",
-    ["@function.method.call"] = "Function",
-    ["@function.builtin"] = "Normal",
-
-    ["@method"] = "Function",
-    ["@method.call"] = "Normal",
-
-    ["@comment"] = "Comment",
-    ["@string"] = "String",
-
-    ["@keyword"] = "Keyword",
-
-    ["@type"] = "Type",
-    ["@type.builtin"] = "Type",
-    ["@property.yaml"] = "Type",
-
-    ["@markup.heading"] = "Keyword",
-    ["@markup.raw"] = "String",
-    ["@markup.link"] = "Type",
-    ["@punctuation.special.markdown"] = "Type",
-  }
-
-  local function target_for(group)
-    if highlight_keep[group] then
-      return highlight_keep[group]
-    end
-    for keep, target in pairs(highlight_keep) do
-      if group:find("^" .. keep:gsub("%.", "%%.") .. "%.") then
-        return target
-      end
-    end
-    return "Normal"
-  end
-
-  for _, g in ipairs(vim.fn.getcompletion("@", "highlight")) do
-    hl(g, { link = target_for(g) })
-  end
-
-  for group, target in pairs(highlight_keep) do
-    hl(group, { link = target })
-  end
-end
-vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", callback = setup_highlights })
 vim.cmd.colorscheme("torte")
