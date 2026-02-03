@@ -32,6 +32,13 @@ require("lazy").setup({
     },
 
     {
+      "catppuccin/nvim",
+      name = "catppuccin",
+      priority = 1000,
+      opts = { transparent_background = true, float = { transparent = true, solid = false } }
+    },
+
+    {
       "tpope/vim-fugitive",
       lazy = false,
       keys = {
@@ -51,23 +58,10 @@ require("lazy").setup({
     },
 
     {
-      "chrisgrieser/nvim-origami",
-      opts = {
-        foldKeymaps = { setup = false },
-        autoFold = { enabled = false },
-      },
-    },
-
-    {
       'stevearc/oil.nvim',
       opts = { view_options = { show_hidden = true } },
       keys = { { "-", "<cmd>Oil<cr>" } },
       lazy = false,
-    },
-
-    {
-      "rmagatti/auto-session",
-      opts = { suppressed_dirs = { "~/", "~/Downloads", "/" } },
     },
 
     {
@@ -79,16 +73,10 @@ require("lazy").setup({
 
     {
       "nvim-treesitter/nvim-treesitter",
+      dependencies = { "nvim-treesitter/nvim-treesitter" },
+      lazy = false,
       build = ":TSUpdate",
-      config = function()
-        require("nvim-treesitter.configs").setup({
-          ensure_installed = { "lua", "vimdoc" },
-          auto_install = true,
-          highlight = { enable = false },
-          folds = { enable = true },
-          indent = { enable = true },
-        })
-      end,
+      config = function() require('nvim-treesitter').install({ "lua", "vimdoc", "go", "c", "helm", "markdown" }):wait(300000) end,
     },
 
     {
@@ -124,6 +112,7 @@ require("lazy").setup({
         { "<leader>/", "<cmd>lua require('fzf-lua').live_grep()<cr>" },
         { "<leader>'", "<cmd>lua require('fzf-lua').resume()<cr>" },
         { "<leader>b", "<cmd>lua require('fzf-lua').buffers()<cr>" },
+        { "<leader>H", "<cmd>lua require('fzf-lua').git_hunks()<cr>" },
         { "<leader>D", "<cmd>lua require('fzf-lua').lsp_workspace_diagnostics()<cr>" },
       }
     },
@@ -209,16 +198,16 @@ require("lazy").setup({
 vim.opt.termguicolors = true
 vim.cmd.colorscheme("torte")
 
-vim.api.nvim_set_hl(0, "Normal", { bg = nil })
-vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
+vim.cmd("highlight Normal guibg=NONE ctermbg=NONE")
+vim.cmd("highlight SignColumn guibg=NONE ctermbg=NONE")
 
-vim.api.nvim_set_hl(0, "Added", { fg = "#00cd00" })
-vim.api.nvim_set_hl(0, "Changed", { fg = "#00cdcd" })
-vim.api.nvim_set_hl(0, "Removed", { fg = "#cd0000" })
+vim.cmd("highlight Added guifg=#00cd00 ctermfg=22")
+vim.cmd("highlight Changed guifg=#00cdcd ctermfg=22")
+vim.cmd("highlight Removed guifg=#cd0000 ctermfg=9")
 
-vim.api.nvim_set_hl(0, "DiffAdded", { fg = "#00cd00" })
-vim.api.nvim_set_hl(0, "DiffChanged", { fg = "#00cdcd" })
-vim.api.nvim_set_hl(0, "DiffRemoved", { fg = "#cd0000" })
+vim.cmd("highlight DiffAdded guifg=#00cd00 ctermfg=22")
+vim.cmd("highlight DiffChanged guifg=#00cdcd ctermfg=22")
+vim.cmd("highlight DiffRemoved guifg=#cd0000 ctermfg=9")
 
 require("fzf-lua").register_ui_select()
 
@@ -237,9 +226,6 @@ vim.opt.smartindent = true
 vim.opt.softtabstop = 2
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
-
-vim.opt.foldlevel = 99
-vim.opt.foldlevelstart = 99
 
 vim.opt.signcolumn = "auto"
 vim.opt.laststatus = 0
@@ -297,15 +283,29 @@ vim.api.nvim_create_autocmd("LspAttach", {
     if client == nil then return end
 
     if client.server_capabilities.codeLensProvider then
-      ---@diagnostic disable-next-line: param-type-mismatch
-      vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold" },
-        { callback = function() vim.lsp.codelens.refresh() end })
+      vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold" }, { callback = function() vim.lsp.codelens.refresh() end })
       vim.keymap.set("n", "grc", "<cmd>lua vim.lsp.codelens.run()<cr>", opts)
     end
 
     if client:supports_method("textDocument/formatting") then
       vim.keymap.set({ "n", "x" }, "grf", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", opts)
     end
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function(details)
+    if vim.treesitter.get_parser(nil, nil, { error = false }) then
+      vim.treesitter.start()
+    end
+
+    local bufnr = details.buf
+    vim.bo[bufnr].syntax = "on"
+    vim.bo[bufnr].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+
+    vim.wo.foldlevel = 99
+    vim.wo.foldmethod = "expr"
+    vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
   end,
 })
 
