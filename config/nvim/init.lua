@@ -6,6 +6,7 @@ vim.pack.add({
   { src = "https://github.com/supermaven-inc/supermaven-nvim" },
   { src = "https://github.com/vim-test/vim-test" },
   { src = "https://github.com/tpope/vim-fugitive" },
+  { src = "https://github.com/lewis6991/gitsigns.nvim" },
   { src = "https://github.com/stevearc/oil.nvim" },
 })
 
@@ -17,6 +18,9 @@ require("fzf-lua").setup({ winopts = { fullscreen = true, preview = { layout = "
 require("fzf-lua").register_ui_select()
 
 require("supermaven-nvim").setup({})
+
+require("user.pack").setup()
+require("user.autocmds").setup()
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
@@ -66,28 +70,6 @@ vim.lsp.enable("rust_analyzer")
 
 vim.diagnostic.config({ virtual_text = { prefix = "🐗", }, signs = false })
 
-vim.api.nvim_create_autocmd("TextYankPost", {
-  group = vim.api.nvim_create_augroup("highlight_yank", {}),
-  callback = function() require("user.fn").highlight_yank() end,
-})
-
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(event) require("user.fn").on_lsp_attach(event) end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-  callback = function(details) require("user.fn").on_filetype(details) end,
-})
-
-vim.api.nvim_create_autocmd("ColorScheme", {
-  callback = function() require("user.fn").setup_highlights() end
-})
-
-vim.api.nvim_create_user_command("PackUpdate", function() require("user.pack").pack_update() end, {})
-vim.api.nvim_create_user_command("PackClean", function(opts) require("user.pack").pack_clean(opts) end, { bang = true })
-
-require("user.git_diff_signs").setup()
-
 vim.keymap.set("n", "<leader>gg", "<cmd>!tmux neww lazygit<cr>")
 vim.keymap.set("n", "<leader>gl", "<cmd>tab Git log --follow -p %<cr>")
 vim.keymap.set("n", "<leader>gL", "<cmd>tab Git log --follow %<cr>")
@@ -106,8 +88,6 @@ vim.keymap.set("n", "<leader>dd", "<cmd>let @+ = expand('%') . ':' . line('.')<C
 
 vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
 
-vim.keymap.set("n", "<leader>q", require("user.fn").toggle_quickfix)
-
 vim.keymap.set("n", "-", "<cmd>Oil<cr>")
 
 vim.keymap.set("n", "<leader>f", require('fzf-lua').files)
@@ -116,7 +96,12 @@ vim.keymap.set("n", "<leader>'", require('fzf-lua').resume)
 vim.keymap.set("n", "<leader>b", require('fzf-lua').buffers)
 vim.keymap.set("n", "<leader>D", require('fzf-lua').lsp_workspace_diagnostics)
 
-vim.keymap.set("n", "]c", require("user.git_diff_signs").next_hunk, { desc = "Next git hunk" })
-vim.keymap.set("n", "[c", require("user.git_diff_signs").prev_hunk, { desc = "Prev git hunk" })
+vim.keymap.set('n', 'ghs', require('gitsigns').stage_hunk)
+vim.keymap.set('n', 'ghr', require('gitsigns').reset_hunk)
+vim.keymap.set("n", "]c",  require("gitsigns").next_hunk)
+vim.keymap.set("n", "[c",  require("gitsigns").prev_hunk)
+vim.keymap.set("n", "ghp", require("gitsigns").preview_hunk_inline)
+
+vim.keymap.set("n", "<leader>q", require("user.functions").toggle_quickfix)
 
 vim.cmd.colorscheme("torte")
