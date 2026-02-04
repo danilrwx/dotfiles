@@ -107,9 +107,9 @@ match errorMsg '\s\+$'
 colorscheme torte
 highlight Normal ctermbg=none
 highlight SignColumn ctermbg=none
-# highlight DiffAdd ctermfg=16
-# highlight DiffChange ctermfg=16
-# highlight DiffDelete ctermfg=16
+highlight DiffAdd ctermfg=16
+highlight DiffChange ctermfg=16
+highlight DiffDelete ctermfg=16
 
 if has('patch-8.1.0311')
   packadd! cfilter

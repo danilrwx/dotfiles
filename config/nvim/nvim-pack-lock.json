@@ -28,9 +28,17 @@
       "rev": "4c4b31eeb8e8e12d1493a88b3870a257c7d15667",
       "src": "https://github.com/laktak/tome"
     },
+    "vim-delve": {
+      "rev": "41d6ad294fb6dd5090f5f938318fc4ed73b6e1ea",
+      "src": "https://github.com/sebdah/vim-delve"
+    },
     "vim-fugitive": {
       "rev": "61b51c09b7c9ce04e821f6cf76ea4f6f903e3cf4",
       "src": "https://github.com/tpope/vim-fugitive"
+    },
+    "vim-go-coverage": {
+      "rev": "8143faf8a0dc6cc4ddf450db79de97057a4d1c59",
+      "src": "https://github.com/kyoh86/vim-go-coverage"
     },
     "vim-test": {
       "rev": "c174652ef8e4959628a52e3134f102923b7a6f0d",
