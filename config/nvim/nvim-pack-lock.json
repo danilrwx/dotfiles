@@ -4,6 +4,14 @@
       "rev": "292492ab7af4bd8b9e37e28508bc8ce995722fd5",
       "src": "https://github.com/rmagatti/auto-session"
     },
+    "blink.cmp": {
+      "rev": "f85eb6252f4c0212be15c6c4213e9af587574cbe",
+      "src": "https://github.com/saghen/blink.cmp"
+    },
+    "colorful-menu.nvim": {
+      "rev": "b51a659459df8d078201aefc995db8175ed55e84",
+      "src": "https://github.com/xzbdmw/colorful-menu.nvim"
+    },
     "fzf-lua": {
       "rev": "36d60dd59cd9bc0442352119fc0e45e1c9011e03",
       "src": "https://github.com/ibhagwan/fzf-lua"
@@ -11,6 +19,10 @@
     "gitsigns.nvim": {
       "rev": "abf82a65f185bd54adc0679f74b7d6e1ada690c9",
       "src": "https://github.com/lewis6991/gitsigns.nvim"
+    },
+    "lensline.nvim": {
+      "rev": "bc14529d2d04804d65a73d0fb3bca50132902d3b",
+      "src": "https://github.com/oribarilan/lensline.nvim"
     },
     "nvim-treesitter": {
       "rev": "4967fa48b0fe7a7f92cee546c76bb4bb61bb14d5",
@@ -23,6 +35,10 @@
     "supermaven-nvim": {
       "rev": "07d20fce48a5629686aefb0a7cd4b25e33947d50",
       "src": "https://github.com/supermaven-inc/supermaven-nvim"
+    },
+    "symbol-usage.nvim": {
+      "rev": "e07c07dfe7504295a369281e95a24e1afa14b243",
+      "src": "https://github.com/Wansmer/symbol-usage.nvim"
     },
     "tome": {
       "rev": "4c4b31eeb8e8e12d1493a88b3870a257c7d15667",

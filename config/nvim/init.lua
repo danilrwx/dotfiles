@@ -10,10 +10,33 @@ vim.pack.add({
   { src = "https://github.com/stevearc/oil.nvim" },
   { src = "https://github.com/sebdah/vim-delve" },
   { src = "https://github.com/kyoh86/vim-go-coverage" },
-
-  --  { src = "https://github.com/Wansmer/symbol-usage.nvim" },
-  --  { src = "https://github.com/nvim-mini/mini.nvim" },
+  { src = "https://github.com/saghen/blink.cmp" },
+  { src = "https://github.com/xzbdmw/colorful-menu.nvim" },
+  { src = "https://github.com/Wansmer/symbol-usage.nvim" },
+  { src = "https://github.com/oribarilan/lensline.nvim" },
 })
+
+require("blink.cmp").setup({
+  keymap = { preset = "enter" },
+  signature = { enabled = true },
+  completion = {
+    accept = { auto_brackets = { enabled = true } },
+    menu = {
+      draw = {
+        columns = { { "kind_icon" }, { "label", gap = 1 } },
+        components = {
+          label = {
+            text = function(ctx) return require("colorful-menu").blink_components_text(ctx) end,
+            highlight = function(ctx) return require("colorful-menu").blink_components_highlight(ctx) end,
+          },
+        },
+      },
+    },
+    documentation = { auto_show = true, auto_show_delay_ms = 200 },
+  },
+  sources = { default = { "lsp", "path", "snippets", "buffer" } },
+})
+
 
 require("oil").setup({ view_options = { show_hidden = true } })
 
