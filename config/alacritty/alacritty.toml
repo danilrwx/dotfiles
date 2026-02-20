@@ -5,7 +5,7 @@ decorations_theme_variant = "Dark"
 
 [font]
 size = 16
-offset = { x = 0, y = 8 }
+offset = { x = 0, y = 4 }
 normal.family = "Iosevka Nerd Font"
 normal.style = "Regular"
 
