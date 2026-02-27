@@ -10,11 +10,12 @@ vim.pack.add({
   { src = "https://github.com/stevearc/oil.nvim" },
   { src = "https://github.com/sebdah/vim-delve" },
   { src = "https://github.com/kyoh86/vim-go-coverage" },
-  { src = "https://github.com/saghen/blink.cmp" },
+  { src = "https://github.com/saghen/blink.cmp", version = vim.version.range('1.0') },
   { src = "https://github.com/xzbdmw/colorful-menu.nvim" },
   { src = "https://github.com/Wansmer/symbol-usage.nvim" },
   { src = "https://github.com/oribarilan/lensline.nvim" },
 })
+
 
 require("blink.cmp").setup({
   keymap = { preset = "enter" },
@@ -35,6 +36,7 @@ require("blink.cmp").setup({
     documentation = { auto_show = true, auto_show_delay_ms = 200 },
   },
   sources = { default = { "lsp", "path", "snippets", "buffer" } },
+  -- fuzzy = { prebuilt_binaries = { force_version = "v1.9.1" } },
 })
 
 
@@ -90,7 +92,7 @@ vim.cmd.packadd("cfilter")
 vim.filetype.add({ extension = { yaml = "helm", tpl = "helm" } })
 
 vim.lsp.enable("gopls")
-vim.lsp.enable("golangci_lint_ls")
+-- vim.lsp.enable("golangci_lint_ls")
 vim.lsp.enable("lua_ls")
 vim.lsp.enable("helm_ls")
 vim.lsp.enable("clangd")
