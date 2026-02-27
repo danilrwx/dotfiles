@@ -13,28 +13,20 @@
       "rev": "b51a659459df8d078201aefc995db8175ed55e84",
       "src": "https://github.com/xzbdmw/colorful-menu.nvim"
     },
-    "diffs.nvim": {
-      "rev": "dfebc68a1fc3e93dae5b6d49133243ec1886cb19",
-      "src": "https://github.com/barrettruth/diffs.nvim"
-    },
     "fzf-lua": {
-      "rev": "72ec224172eea757eab6b349775ad5bada7521d7",
+      "rev": "d637241b34f2cb012309baebb2e35e440a946d8b",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
     "gitsigns.nvim": {
       "rev": "9f3c6dd7868bcc116e9c1c1929ce063b978fa519",
       "src": "https://github.com/lewis6991/gitsigns.nvim"
     },
-    "inlinediff-nvim": {
-      "rev": "e76028634dc42376feedb5ee755ad0018353c00c",
-      "src": "https://github.com/YouSame2/inlinediff-nvim"
-    },
     "lensline.nvim": {
       "rev": "bc14529d2d04804d65a73d0fb3bca50132902d3b",
       "src": "https://github.com/oribarilan/lensline.nvim"
     },
     "nvim-treesitter": {
-      "rev": "d660b7c002f3922b6bb3da47206645488a698426",
+      "rev": "b9171ede5de41b3f2dfa33fe33ebd585d795f928",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter"
     },
     "oil.nvim": {
@@ -66,7 +58,7 @@
       "src": "https://github.com/kyoh86/vim-go-coverage"
     },
     "vim-test": {
-      "rev": "f881edb21e7a092f5793687d058c257dddb961d3",
+      "rev": "931c6cfdd3069df52c4486b25200e4b10d0595c8",
       "src": "https://github.com/vim-test/vim-test"
     }
   }
