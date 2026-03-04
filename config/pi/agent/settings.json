@@ -1,0 +1,11 @@
+{
+  "lastChangelogVersion": "0.55.4",
+  "theme": "ocean-breeze",
+  "defaultProvider": "minimax",
+  "defaultModel": "MiniMax-M2.5-highspeed",
+  "defaultThinkingLevel": "off",
+  "packages": [
+    "npm:pi-cursor-agent",
+    "git:github.com/patleeman/task-factory"
+  ]
+}
