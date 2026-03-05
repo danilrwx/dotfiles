@@ -4,6 +4,10 @@
       "rev": "62437532b38495551410b3f377bcf4aaac574ebe",
       "src": "https://github.com/rmagatti/auto-session"
     },
+    "blame-column.nvim": {
+      "rev": "af31fdd83905d1a07a115ac28ba93bbf93940bfc",
+      "src": "https://github.com/Yu-Leo/blame-column.nvim"
+    },
     "blink.cmp": {
       "rev": "49f211fe5d729df53df4c042d7c3464cf47d199e",
       "src": "https://github.com/saghen/blink.cmp",
@@ -13,6 +17,10 @@
       "rev": "b51a659459df8d078201aefc995db8175ed55e84",
       "src": "https://github.com/xzbdmw/colorful-menu.nvim"
     },
+    "diffs.nvim": {
+      "rev": "dfebc68a1fc3e93dae5b6d49133243ec1886cb19",
+      "src": "https://github.com/barrettruth/diffs.nvim"
+    },
     "fzf-lua": {
       "rev": "d637241b34f2cb012309baebb2e35e440a946d8b",
       "src": "https://github.com/ibhagwan/fzf-lua"
@@ -21,9 +29,21 @@
       "rev": "9f3c6dd7868bcc116e9c1c1929ce063b978fa519",
       "src": "https://github.com/lewis6991/gitsigns.nvim"
     },
+    "inlinediff-nvim": {
+      "rev": "e76028634dc42376feedb5ee755ad0018353c00c",
+      "src": "https://github.com/YouSame2/inlinediff-nvim"
+    },
     "lensline.nvim": {
       "rev": "bc14529d2d04804d65a73d0fb3bca50132902d3b",
       "src": "https://github.com/oribarilan/lensline.nvim"
+    },
+    "mini.nvim": {
+      "rev": "9b935c218ddba02e5dc75c94f90143bce1f7c646",
+      "src": "https://github.com/nvim-mini/mini.nvim"
+    },
+    "nvim-origami": {
+      "rev": "c660a3d7e3db602faa5fb6b5ff19ba7a1d9e71fe",
+      "src": "https://github.com/chrisgrieser/nvim-origami"
     },
     "nvim-treesitter": {
       "rev": "b9171ede5de41b3f2dfa33fe33ebd585d795f928",
@@ -45,6 +65,14 @@
       "rev": "4c4b31eeb8e8e12d1493a88b3870a257c7d15667",
       "src": "https://github.com/laktak/tome"
     },
+    "treesj": {
+      "rev": "186084dee5e9c8eec40f6e39481c723dd567cb05",
+      "src": "https://github.com/Wansmer/treesj"
+    },
+    "unified.nvim": {
+      "rev": "6b9d94b83cdaf7a33afeb1d66a9de386f02d8c55",
+      "src": "https://github.com/axkirillov/unified.nvim"
+    },
     "vim-delve": {
       "rev": "41d6ad294fb6dd5090f5f938318fc4ed73b6e1ea",
       "src": "https://github.com/sebdah/vim-delve"
@@ -56,6 +84,10 @@
     "vim-go-coverage": {
       "rev": "8143faf8a0dc6cc4ddf450db79de97057a4d1c59",
       "src": "https://github.com/kyoh86/vim-go-coverage"
+    },
+    "vim-surround": {
+      "rev": "3d188ed2113431cf8dac77be61b842acb64433d9",
+      "src": "https://github.com/tpope/vim-surround"
     },
     "vim-test": {
       "rev": "931c6cfdd3069df52c4486b25200e4b10d0595c8",
