@@ -37,6 +37,8 @@ ln -snf $HOME/dotfiles/config/vim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
 ln -snf $HOME/dotfiles/config/kitty $HOME/.config/
+ln -snf $HOME/dotfiles/config/alacritty $HOME/.config/
+ln -snf $HOME/dotfiles/config/ghostty $HOME/.config/
 
 ln -sf $HOME/dotfiles/.profile $HOME/
 ln -sf $HOME/dotfiles/.bash_profile $HOME/
