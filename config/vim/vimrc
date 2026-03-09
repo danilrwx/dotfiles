@@ -7,8 +7,6 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   Plug 'markonm/traces.vim'
   Plug 'sheerun/vim-polyglot'
 
-  Plug 'mbbill/undotree'
-
   Plug 'tpope/vim-fugitive'
   Plug 'airblade/vim-gitgutter'
 
@@ -21,6 +19,8 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   Plug 'habamax/vim-dir'
 
   Plug 'laktak/tome'
+
+  Plug 'vim-fuzzbox/fuzzbox.vim'
   call plug#end()
 endif
 
@@ -60,6 +60,7 @@ set signcolumn=yes         " Always render signcolumn
 set shortmess=aoOtTI       " Avoid most of the 'Hit Enter ...' messages
 set wildmenu               " Better command-line completion
 set mouse=a                " Enable mouse support
+set autochdir              " Auto change dir to current file
 
 " The fish shell is not very compatible to other shells and unexpectedly
 " breaks things that use 'shell'.
@@ -91,22 +92,17 @@ endif
 match errorMsg '\s\+$'
 
 colorscheme torte
-highlight SignColumn ctermbg=none
-highlight LineNr ctermfg=243
+" highlight SignColumn ctermbg=none
+" highlight LineNr ctermfg=243
 " highlight Pmenu ctermbg=16 ctermfg=7
 " highlight PmenuSel ctermbg=7 ctermfg=16
 " highlight SpellBad ctermfg=16
 " highlight SpellCap ctermfg=16
 " highlight SpellRare ctermfg=16
 " highlight SpellLocal ctermfg=16
-highlight DiffAdd ctermfg=16
-highlight DiffChange ctermfg=16
-highlight DiffDelete ctermfg=16
-
-if has("gui_macvim")
-  set guifont=Iosevka\ Nerd\ Font:h20
-  let macvim_hig_shift_movement = 1
-endif
+" highlight DiffAdd ctermfg=16
+" highlight DiffChange ctermfg=16
+" highlight DiffDelete ctermfg=16
 
 if has('patch-8.1.0311')
   packadd! cfilter
@@ -169,7 +165,7 @@ let lspServers = [
       \ #{
       \    name: 'golang',
       \    filetype: ['go', 'gomod'],
-      \    path: '/home/linuxbrew/.linuxbrew/bin/gopls',
+      \    path: exepath('gopls'),
       \    args: ['serve'],
       \    syncInit: v:false,
       \    workspaceConfig: #{
@@ -218,3 +214,24 @@ function! TrimWhitespace()
   call winrestview(l:save)
 endfun
 autocmd BufWritePre * call TrimWhitespace()
+
+function! ToggleQuickFix()
+  if empty(filter(getwininfo(), 'v:val.quickfix'))
+    copen
+  else
+    cclose
+  endif
+endfunction
+
+set findfunc=Find
+func Find(arg, _)
+  if empty(s:filescache)
+    let s:filescache = globpath('.', '**', 1, 1)
+    call filter(s:filescache, '!isdirectory(v:val)')
+    call map(s:filescache, "fnamemodify(v:val, ':.')")
+  endif
+  return a:arg == '' ? s:filescache : matchfuzzy(s:filescache, a:arg)
+endfunc
+let s:filescache = []
+autocmd CmdlineEnter : let s:filescache = []
+
