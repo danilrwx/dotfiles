@@ -14,7 +14,7 @@
 
 [delta]
 	navigate = true
-	light = true
+	light = false
 	hyperlinks = true
 
 [merge]
