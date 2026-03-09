@@ -106,3 +106,4 @@ source ~/dotfiles/files/vim-configs/fzf.vim
 source ~/dotfiles/files/vim-configs/ale.vim
 source ~/dotfiles/files/vim-configs/coc.vim
 source ~/dotfiles/files/vim-configs/coc-plugins.vim
+source ~/dotfiles/files/vim-configs/debugger.vim
