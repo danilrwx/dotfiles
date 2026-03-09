@@ -7,11 +7,11 @@
 
 PS1='[\u@\h \W]\$ '
 
-alias cat='bat --theme ansi'
-alias ls='exa --sort=size'
 alias l='ls -lah'
 alias c='clear'
 alias grep='grep --color=auto'
+alias untar='tar -zxvf '
+alias wget='wget -c '
 
 alias be='bundle exec'
 alias rs='rails s'
@@ -22,6 +22,8 @@ alias rdrp='rails db:rollback:primary'
 
 alias lg='lazygit'
 
+alias cleanup="sudo pacman -Rsn $(pacman -Qtdq)"
+
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin/
 
@@ -29,7 +31,6 @@ export RUBYOPT="-W0"
 export TERM='xterm-256color'
 export EDITOR='hx'
 export VISUAL='hx'
-export GIT_PAGER='delta'
 export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/
 export PATH=$PATH:$HOME/dotfiles/scripts/

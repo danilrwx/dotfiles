@@ -34,9 +34,9 @@ newline = "none"
 
 [keys.normal]
 esc = ["collapse_selection", "keep_primary_selection"]
-C-g = ":sh topen_git"
-C-p = ":sh topen_lf"
-C-t = ":sh topen_bash"
+C-g = ":sh topen-git"
+C-p = ":sh topen-lf"
+C-t = ":sh topen-bash"
 A-f = ":format"
 A-q = ":buffer-close"
 A-w = [
