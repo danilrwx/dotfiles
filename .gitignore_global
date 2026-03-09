@@ -4,10 +4,13 @@
 .cursor
 .taskmaster
 .aid
-memory-bank
-custom_modes
+.opencode
+.opencode.old
+.agents
 tags
 CLAUDE.MD
+AGENTS.md
+AGENTS-RU.md
 AugmentChatHistory
 Session.vim
 
