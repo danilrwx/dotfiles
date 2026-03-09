@@ -9,6 +9,8 @@ fixtures/_build
 config/vim/files/undo/*
 config/vim/files/swap/*
 config/vim/files/backup/*
+config/vim/files/info/*
+config/vim/.netrwhist
 
 config/k9s/clusters
 
