@@ -32,7 +32,7 @@ git:
 	git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
 ubuntu-packages:
-	sudo apt install -y build-essential curl bash-completion i3 xcompmgr hsetroot \
+	sudo apt install -y build-essential curl bash-completion xorg i3 xcompmgr hsetroot \
 	xfce4-terminal pavucontrol dunst acpi maim xclip xsel
 
 brew-install:
