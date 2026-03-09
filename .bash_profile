@@ -1,3 +1,7 @@
+if [ -d /snap/bin ]; then
+  export PATH=/snap/bin:$PATH
+fi
+
 if [ -e "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 fi

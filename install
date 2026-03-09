@@ -39,11 +39,11 @@ ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
 
 if [ -e /usr/bin/i3 ]; then
   ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
+  ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
+  ln -sf $HOME/dotfiles/.Xresources $HOME/
 fi
 
-ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
-
-ln -sf $HOME/dotfiles/.Xresources $HOME/
+ln -sf $HOME/dotfiles/.profile $HOME/
 ln -sf $HOME/dotfiles/.bash_profile $HOME/
 ln -sf $HOME/dotfiles/.bashrc $HOME/
 
@@ -64,22 +64,23 @@ if [ "$ID" == "fedora" ]; then
 
   sudo dnf install -y lame\* --exclude=lame-devel
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
-  sudo dnf install -y tmux git wget zip unzip curl tigervnc openssh-askpass pinentry-gnome3 virt-manager flatpak gpg \
+  sudo dnf install -y tmux git wget zip unzip curl tigervnc openssh-askpass pinentry-gnome3 virt-manager gpg \
 	make
 elif [ "$ID" == "ubuntu" ]; then
   log "Installing ubuntu packages"
 
   sudo apt update -y
-  sudo apt purge -y snapd
-  sudo apt-mark hold snapd
-  sudo apt autoremove -y
 
   if [ -e /usr/bin/i3 ]; then
-    sudo apt install -y libx11-dev libxinerama-dev libxft2-dev hsetroot xcompmgr xclip xsel
+    sudo apt install -y libx11-dev libxinerama-dev libxft2-dev \
+    xcompmgr hsetroot	brightnessctl acpi maim xclip xsel lxappearance gtk-chtheme \
+      libnotify-bin ncal lxpolkit pavucontrol
   fi
 
-  sudo apt install -y tmux git wget zip unzip curl tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 \
-    virt-manager flatpak gpg
+  sudo apt install -y build-essential tmux git wget zip unzip curl tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 \
+    virt-manager gpg
+
+  sudo snap install telegram-desktop discord
 fi
 
 
@@ -162,15 +163,16 @@ fi
 
 # Install platpak repository and applications ───────────────────────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
-  # add flathub repository ──────────────────────────────────────────────────────────────────────────────────────────────
-  if ! flatpak remotes --columns=name | grep -q '\bflathub\b'; then
-    log "Adding flathub remote"
-    sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-  fi
-
   # install flapak applications ─────────────────────────────────────────────────────────────────────────────────────────
-  log "Installing flatpak apps"
-  flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
+  if [ "$ID" == "fedora" ]; then
+    if ! flatpak remotes --columns=name | grep -q '\bflathub\b'; then
+      log "Adding flathub remote"
+      sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    fi
+
+    log "Installing flatpak apps"
+    flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
+  fi
 
   # install docker ──────────────────────────────────────────────────────────────────────────────────────────────────────
   if [ ! -f /usr/bin/docker ]; then
@@ -213,8 +215,42 @@ if [[ "$OS" == "Linux" ]]; then
   fi
 
   # download wallpapers ─────────────────────────────────────────────────────────────────────────────────────────────────
-  if [ ! -d $HOME/Backgrounds ]; then
-    log "Installing wallpapers"
-    git clone https://github.com/orangci/walls-catppuccin-mocha.git $HOME/Backgrounds
+  # if [ ! -d $HOME/Backgrounds ]; then
+  #   log "Installing wallpapers"
+  #   git clone https://github.com/orangci/walls-catppuccin-mocha.git $HOME/Backgrounds
+  # fi
+
+  if [ ! -f /etc/X11/xorg.conf.d/00-input.conf ]; then
+    setxkbmap -model pc105 -layout us,ru -option grp:alt_shift_toggle -option caps:ctrl_modifier
+    cat << EOF | sudo tee -a /etc/X11/xorg.conf.d/00-input.conf >> /dev/null
+Section "InputClass"
+  Identifier "system-keyboard"
+  MatchIsKeyboard "on"
+  Option "XkbLayout" "us,ru"
+  Option "XkbModel" "pc105"
+  Option "XkbOptions" "grp:alt_shift_toggle,caps:ctrl_modifier"
+EndSection
+
+Section "InputClass"
+    Identifier "touchpad"
+    Driver "libinput"
+    MatchIsTouchpad "on"
+    Option "Tapping" "on"
+    Option "CircularScrolling" "on"
+    Option "NaturalScrolling" "true"
+EndSection
+EOF
+  fi
+
+# Setup amdgpu driver
+  if [ ! -f /etc/X11/xorg.conf.d/20-amdgpu.conf ]; then
+    cat << EOF | sudo tee -a /etc/X11/xorg.conf.d/20-amdgpu.conf >> /dev/null
+Section "Device"
+  Identifier "AMD"
+  Driver "amdgpu"
+  Option "TearFree" "true"
+  Option "DRI" "3"
+EndSection
+EOF
   fi
 fi

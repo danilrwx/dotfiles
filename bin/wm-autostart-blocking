@@ -1,9 +1,8 @@
 #!/bin/bash
 
-dex-autostart --autostart --environment dwm &
+dex --autostart --environment i3 &
 xss-lock --transfer-sleep-lock -- i3lock --nofork &
 dunst -conf ~/.config/dunst/dunstrc &
-xsetroot -cursor_name left_ptr &
 gpg-agent --daemon &
-baraction &
+# blueman-applet &
 xcompmgr &
