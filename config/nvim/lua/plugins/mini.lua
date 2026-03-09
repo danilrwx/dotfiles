@@ -26,12 +26,12 @@ return {
       require("mini.sessions").setup()
 
       require("mini.pick").setup()
-      -- vim.keymap.set("n", "<leader>f", "<cmd>Pick files<cr>")
-      -- vim.keymap.set("n", "<leader>/", "<cmd>Pick grep_live<cr>")
-      -- vim.keymap.set("n", "<leader>'", "<cmd>Pick resume<cr>")
-      -- vim.keymap.set("n", "<leader>sb", "<cmd>Pick buffers<cr>")
-      -- vim.keymap.set("n", "<leader>sh", "<cmd>Pick git_hunks<cr>")
-      -- vim.keymap.set("n", "<leader>sd", "<cmd>Pick diagnostic<cr>")
+      vim.keymap.set("n", "<leader>f", "<cmd>Pick files<cr>")
+      vim.keymap.set("n", "<leader>/", "<cmd>Pick grep_live<cr>")
+      vim.keymap.set("n", "<leader>'", "<cmd>Pick resume<cr>")
+      vim.keymap.set("n", "<leader>b", "<cmd>Pick buffers<cr>")
+      vim.keymap.set("n", "<leader>sh", "<cmd>Pick git_hunks<cr>")
+      vim.keymap.set("n", "<leader>sd", "<cmd>Pick diagnostic<cr>")
 
       local MiniAi = require("mini.ai")
       MiniAi.setup({
