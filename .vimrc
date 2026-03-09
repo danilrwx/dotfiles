@@ -197,6 +197,9 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
   inoremap <expr> <cr>pumvisible() ? asyncomplete#close_popup() : "\<cr>"
 
+	let g:gitgutter_sign_priority = 0
+	let g:gitgutter_preview_win_floating = 1
+
   let g:lsp_settings = {
         \  'golangci-lint-langserver': {
         \    'initialization_options': {'command': ['golangci-lint', 'run', '--out-format', 'json', '--issues-exit-code=1']}
@@ -214,12 +217,6 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
 	let g:lsp_diagnostics_highlights_delay = 50
   let g:lsp_diagnostics_highlights_insert_mode_enabled = 0
-
-	let g:lsp_diagnostics_signs_delay = 50
-  let g:lsp_diagnostics_signs_error = {'text': '💩'}
-  let g:lsp_diagnostics_signs_warning = {'text': '💫'}
-  let g:lsp_diagnostics_signs_information = {'text': '🔩'}
-  let g:lsp_diagnostics_signs_hint = {'text': '📎'}
 
 	let g:lsp_diagnostics_virtual_text_delay = 50
   let g:lsp_diagnostics_virtual_text_prefix = " 🐗 "

@@ -86,6 +86,8 @@ vim.api.nvim_set_hl(0, "DiagnosticOk", { fg = "#B8BB26" })
 --------------------------------------------------------------------------------
 
 vim.g.gitgutter_set_sign_backgrounds = 1
+vim.g.gitgutter_sign_priority = 0
+vim.g.gitgutter_preview_win_floating = 1
 
 vim.pack.add({
   { src = 'https://github.com/nvim-lua/plenary.nvim', },
@@ -296,3 +298,7 @@ vim.keymap.set("n", "<leader>gP", '<cmd>Git push<cr>')
 vim.keymap.set("n", "<leader>gp", '<cmd>Git pull --rebase<cr>')
 
 vim.keymap.set("n", "<leader>m", '<cmd>lua require("treesj").toggle()<cr>')
+
+vim.keymap.set("n", "ghs", "<cmd>GitGutterStageHunk<cr>")
+vim.keymap.set("n", "ghu", "<cmd>GitGutterUndoHunk<cr>")
+vim.keymap.set("n", "ghp", "<cmd>GitGutterPreviewHunk<cr>")
