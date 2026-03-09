@@ -44,4 +44,4 @@ vim.opt.showmode = true
 vim.opt.cursorline = false
 vim.opt.laststatus = 1
 vim.opt.cmdheight = 1
-vim.opt.clipboard = ""
+-- vim.opt.clipboard = ""
