@@ -50,6 +50,12 @@ ln -sf $HOME/dotfiles/.profile $HOME/
 ln -sf $HOME/dotfiles/.bash_profile $HOME/
 ln -sf $HOME/dotfiles/.bashrc $HOME/
 
+if [ -f $HOME/dotfiles/private/install ]; then
+  if ! "$HOME/dotfiles/private/install"; then
+    log "Failed to run private install. Continue installation."
+  fi
+fi
+
 if [ -e /usr/bin/i3 ]; then
   ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
   ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
