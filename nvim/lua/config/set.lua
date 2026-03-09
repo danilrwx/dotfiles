@@ -25,3 +25,8 @@ vim.g.rnvimr_enable_bw = 1
 
 -- Git blame
 vim.g.blamer_enabled = 1
+
+-- Coq
+vim.g.coq_settings = {
+    auto_start = true
+}
