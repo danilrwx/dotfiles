@@ -37,6 +37,7 @@ return require('packer').startup(function(Plug)
   Plug 'ms-jpq/coq.thirdparty'
   Plug 'neovim/nvim-lspconfig'
   Plug 'kosayoda/nvim-lightbulb'
+  Plug "b0o/schemastore.nvim"
 
   -- Подсветка синтаксиса
   Plug { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
