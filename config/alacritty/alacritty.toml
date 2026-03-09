@@ -4,12 +4,20 @@ padding.x = 0
 padding.y = 0
 decorations = "Full"
 decorations_theme_variant = "Dark"
+option_as_alt = "OnlyLeft"
 
 [font]
 normal.family = "Iosevka Nerd Font"
+normal.style = "Regular"
+
 bold.family = "Iosevka Nerd Font"
+bold.style = "Bold"
+
 italic.family = "Iosevka Nerd Font"
+italic.style = "Italic"
+
 bold_italic.family = "Iosevka Nerd Font"
+bold_italic.style = "Italic Bold"
 
 size = 14.5
 
