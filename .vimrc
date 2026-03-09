@@ -68,21 +68,12 @@ set viminfo='100,n$HOME/.vim/files/info/viminfo
 " mark trailing spaces as errors
 match errorMsg '\s\+$'
 
-if has("patch-9.0.1488") || has("nvim")
-	if has('termguicolors')
-		set termguicolors
-	endif
-
-	set background=dark
-	colorscheme retrobox
-	highlight Normal guibg=NONE
-	highlight SignColumn guibg=NONE
-else
-	set notermguicolors
-	highlight SignColumn ctermbg=NONE
-	highlight CursorLine cterm=none ctermbg=250
-	highlight CursorLineNr cterm=none ctermbg=250
-endif
+set notermguicolors
+highlight SignColumn ctermbg=none
+highlight CursorLine cterm=none ctermbg=250
+highlight CursorLineNr cterm=none ctermbg=250
+highlight Pmenu ctermbg=black ctermfg=white
+highlight PmenuSel ctermbg=white ctermfg=black
 
 if has("gui_macvim")
 	set guifont=Iosevka\ Nerd\ Font:h20
@@ -97,20 +88,107 @@ if has('patch-9.1.0375')
 	packadd! comment
 endif
 
-function! ToggleQuickFix()
-	if empty(filter(getwininfo(), 'v:val.quickfix'))
-		copen
-	else
-		cclose
-	endif
-endfunction
+let mapleader=" "
 
-function! TrimWhitespace()
-	let l:save = winsaveview()
-	keeppatterns %s/\s\+$//e
-	call winrestview(l:save)
-endfun
-autocmd BufWritePre * call TrimWhitespace()
+if executable('ugrep')
+	nnoremap <leader>f :call FzyCommand("ugrep '' . -Rl -I --ignore-files --exclude='zz_generated*' --exclude-dir='generated'", ":e")<cr>
+else
+	nnoremap <leader>f :call FzyCommand("find . -type f", ":e")<cr>
+endif
+
+nnoremap <silent> - :Lf<cr>
+
+nnoremap <leader>gg :!lazygit<cr><cr>
+
+nnoremap <leader>b :call FzyBuffer()<cr>
+nnoremap <leader>sf :call FzyCommand("find . -type f", ":e")<cr>
+nnoremap <leader>sg :call FzyCommand("git ls-files", ":e")<cr>
+
+nnoremap <silent> <leader>q :call ToggleQuickFix()<cr>
+nnoremap <c-j> :cnext<cr>
+nnoremap <c-k> :cprev<cr>
+
+nnoremap <c-d> <c-d>zz<cr>
+nnoremap <c-u> <c-u>zz<cr>
+
+nnoremap <c-l> :nohl<cr>
+
+nnoremap <silent> <leader>tr :TestNearest<cr>
+nnoremap <silent> <leader>tt :TestFile<cr>
+
+nnoremap <silent> <leader>gl :tab Git log --follow -p %<cr>
+nnoremap <silent> <leader>gL :tab Git log<cr>
+nnoremap <silent> <leader>gb :tab Git blame<cr>
+
+nnoremap <silent> ghs <cmd>GitGutterStageHunk<cr>
+nnoremap <silent> ghu <cmd>GitGutterUndoHunk<cr>
+nnoremap <silent> ghp <cmd>GitGutterPreviewHunk<cr>
+
+let g:gitgutter_sign_priority = 0
+let g:gitgutter_preview_win_floating = 1
+
+let lspOpts = #{
+			\  autoHighlightDiags: v:true,
+			\  useQuickfixForLocations: v:true,
+			\  semanticHighlight: v:false,
+			\  showInlayHints: v:false,
+			\ }
+
+autocmd User LspSetup call LspOptionsSet(lspOpts)
+
+let lspServers = [
+			\ #{
+			\    name: 'clangd',
+			\    filetype: ['c', 'cpp'],
+			\    path: '/usr/bin/clangd',
+			\    args: ['--background-index']
+			\  },
+			\ #{
+			\    name: 'golang',
+			\    filetype: ['go', 'gomod'],
+			\    path: '/Users/danil/go/bin/gopls',
+			\    args: ['serve'],
+			\    syncInit: v:false,
+			\    workspaceConfig: #{
+			\      gopls: #{
+			\        hints: #{
+			\          assignVariableTypes: v:true,
+			\          compositeLiteralFields: v:true,
+			\          compositeLiteralTypes: v:true,
+			\          constantValues: v:true,
+			\          functionTypeParameters: v:true,
+			\          parameterNames: v:true,
+			\          rangeVariableTypes: v:true,
+			\          semanticTokens: v:false
+			\        }
+			\      }
+			\    }
+			\ }
+			\]
+autocmd User LspSetup call LspAddServer(lspServers)
+
+function! s:on_lsp_buffer_enabled()
+	setlocal omnifunc=g:LspOmniFunc
+	setlocal tagfunc=lsp#lsp#TagFunc
+	setlocal formatexpr=lsp#lsp#FormatExpr()
+
+	nnoremap grr :LspShowReferences<cr>
+	nnoremap gri :LspPeekImpl<cr>
+	nnoremap K   :LspHover<cr>
+	nnoremap grs :LspDocumentSymbol<cr>
+	nnoremap grS :LspSymbolSearch<cr>
+	nnoremap gra :LspCodeAction<cr>
+	nnoremap grc :LspCodeLens<cr>
+	nnoremap grn :LspRename<cr>
+	nnoremap grf :LspFormat<cr>
+
+	nnoremap <c-w>d :LspDiag current<cr>
+	nnoremap [d :LspDiag prev<cr>
+	nnoremap ]d :LspDiag next<cr>
+
+	autocmd! BufWritePre *.go call execute('LspFormat')
+endfunction
+autocmd User LspAttached call s:on_lsp_buffer_enabled()
 
 function! FzyCommand(choice_command, vim_command)
 	try
@@ -150,27 +228,17 @@ function! Lf()
 endfunction
 command! -bar Lf call Lf()
 
-let mapleader=" "
+function! ToggleQuickFix()
+	if empty(filter(getwininfo(), 'v:val.quickfix'))
+		copen
+	else
+		cclose
+	endif
+endfunction
 
-if executable('ugrep')
-	nnoremap <leader>f :call FzyCommand("ugrep '' . -Rl -I --ignore-files --exclude='zz_generated*' --exclude-dir='generated'", ":e")<cr>
-else
-	nnoremap <leader>f :call FzyCommand("find . -type f", ":e")<cr>
-endif
-
-nnoremap <silent> - :Lf<cr>
-
-nnoremap <leader>gg :!lazygit<cr><cr>
-
-nnoremap <leader>b :call FzyBuffer()<cr>
-nnoremap <leader>sf :call FzyCommand("find . -type f", ":e")<cr>
-nnoremap <leader>sg :call FzyCommand("git ls-files", ":e")<cr>
-
-nnoremap <silent> <leader>q :call ToggleQuickFix()<cr>
-nnoremap <c-j> :cnext<cr>
-nnoremap <c-k> :cprev<cr>
-
-nnoremap <c-d> <c-d>zz<cr>
-nnoremap <c-u> <c-u>zz<cr>
-
-nnoremap <c-l> :nohl<cr>
+function! TrimWhitespace()
+	let l:save = winsaveview()
+	keeppatterns %s/\s\+$//e
+	call winrestview(l:save)
+endfun
+autocmd BufWritePre * call TrimWhitespace()
