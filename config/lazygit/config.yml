@@ -16,14 +16,13 @@ git:
   commit:
     signOff: true
   paging:
-    pager: delta --dark --paging=never
-    externalDiffCommand: difft --color=always --display=inline --syntax-highlight=on --tab-width=2
+    externalDiffCommand: difft --color=always --display=inline --syntax-highlight=on --tab-width=2 --background=dark
   autoFetch: false
   autoRefresh: false
 customCommands:
   - key: "<c-a>" # ctrl + a
     description: "Pick AI commit"
-    command: 'echo "{{.Form.Msg}}" > .git/COMMIT_EDITMSG && nvim .git/COMMIT_EDITMSG && [ -s .git/COMMIT_EDITMSG ] && git commit --signoff -F .git/COMMIT_EDITMSG || echo "Commit message is empty, commit aborted."'
+    command: 'echo "{{.Form.Msg}}" > .git/COMMIT_EDITMSG && vim .git/COMMIT_EDITMSG && [ -s .git/COMMIT_EDITMSG ] && git commit --signoff -F .git/COMMIT_EDITMSG || echo "Commit message is empty, commit aborted."'
     context: "files"
     subprocess: true
     prompts:

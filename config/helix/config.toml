@@ -1,4 +1,4 @@
-theme = "catppuccin_mocha"
+theme = "base16_transparent"
 
 [editor]
 bufferline = "multiple"
@@ -53,7 +53,7 @@ A-k = [ "extend_to_line_bounds", "delete_selection", "move_line_up", "paste_befo
 [keys.normal.tab]
 l = ":sh tmux neww git log -p %{buffer_name}"
 c = ":sh tmux neww git show $(git blame -L %{cursor_line},+1 %{buffer_name} | awk '{ print $1 }')"
-b = ":sh tmux splitw -hb git blame -L %{cursor_line} %{buffer_name}"
+b = ":sh tmux neww git blame -L %{cursor_line} %{buffer_name}"
 g = [":new", ":insert-output lazygit", ":buffer-close!", ":redraw"]
 e = [":sh rm -f /tmp/yazi-path", ":insert-output yazi %{buffer_name} --chooser-file=/tmp/yazi-path", ":open %sh{command cat /tmp/yazi-path}", ":redraw"]
 p = [
