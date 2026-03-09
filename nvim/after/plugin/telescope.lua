@@ -1,11 +1,11 @@
-require('telescope').setup {
+require("telescope").setup {
   defaults = {
     sorting_strategy = "ascending",
     mappings = {
       -- restore default behavior
       i = {
-        ['<C-u>'] = false,
-        ['<C-d>'] = false,
+        ["<C-u>"] = false,
+        ["<C-d>"] = false,
       },
     },
   },

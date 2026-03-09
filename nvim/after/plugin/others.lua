@@ -1,7 +1,7 @@
-require('neoscroll').setup()
+require("neoscroll").setup()
 
-require('lualine').setup {
+require("lualine").setup {
   options = {
-    theme = 'material-nvim' -- the default style
+    theme = "material-nvim" -- the default style
   }
 }
