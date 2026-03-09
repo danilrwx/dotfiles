@@ -7,6 +7,6 @@ line-number = "relative"
 hidden=false
 
 [keys.normal]
-C-g = ":sh foot lazygit"
+C-g = ":sh alacritty -e lazygit"
 C-f = ":format"
 A-w = ":buffer-close"
