@@ -17,7 +17,7 @@ arch-base:
 	sudo pacman --needed -S htop git curl zsh firefox lazygit helix go rust otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
 
 arch-i3:
-	sudo pacman --needed -S udiskie udisks2 gnome-keyring keychain feh alacritty rofi picom 
+	sudo pacman --needed -S udiskie udisks2 gnome-keyring keychain feh alacritty rofi picom polybar
 
 arch-laptop:
 	sudo pacman --needed -S tlp acpid brightnessctl thermald
