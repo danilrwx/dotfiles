@@ -91,14 +91,15 @@ return {
     end
   },
   {
-    "someone-stole-my-name/yaml-companion.nvim",
-    dependencies = {
-      { "neovim/nvim-lspconfig" },
-      { "nvim-lua/plenary.nvim" },
-      { "nvim-telescope/telescope.nvim" },
-    },
+    'stevearc/conform.nvim',
+    opts = {},
     config = function()
-      require("telescope").load_extension("yaml_schema")
-    end,
+      require("conform").setup({
+        format_on_save = {
+          timeout_ms = 500,
+          lsp_format = "fallback",
+        },
+      })
+    end
   }
 }

@@ -20,6 +20,14 @@ vim.keymap.set("i", "<C-c>", "<Esc>", { desc = 'Escape from insert mode' })
 vim.keymap.set("n", "<Leader>e", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
   { desc = 'Change word by cursor over all buffer' })
 
+vim.keymap.set('n', '<C-n>', function()
+  if vim.bo.filetype == 'netrw' then
+    vim.cmd 'bwipeout'
+  else
+    vim.cmd 'Explore'
+  end
+end, { silent = true })
+
 -- greatest remap ever
 vim.keymap.set("x", "<Leader>p", [["_dP]])
 
