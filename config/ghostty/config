@@ -10,7 +10,9 @@ font-family-bold-italic  = Iosevka Medium Italic
 
 maximize = true
 
-font-size = 15
+font-size = 16
+
 theme = dark:retrobox,light:Builtin Light
-background = #1C1C1C
+background = #000000
+
 

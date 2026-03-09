@@ -346,12 +346,13 @@ require("lazy").setup({
 
 
 vim.o.termguicolors = true
+vim.o.background = "dark"
 vim.cmd.colorscheme("retrobox")
 
--- vim.api.nvim_set_hl(0, "Normal", { bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "Visual", { bg = "#252525" })
--- vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
+vim.api.nvim_set_hl(0, "Normal", { bg = nil })
+vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#1C1C1C" })
+vim.api.nvim_set_hl(0, "Visual", { bg = "#252525" })
+vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
 
 -- vim.api.nvim_set_hl(0, "Pmenu", { bg = "#1C1C1C" })
 -- vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#303030" })
