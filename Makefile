@@ -35,3 +35,6 @@ git:
 	git config --global core.editor "helix"
 	git config --global user.name "Danil Antoshin"
 	git config --global user.email antoshindanil@ya.ru
+
+git-change-remote:
+	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
