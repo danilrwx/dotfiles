@@ -1,0 +1,8 @@
+*.swp
+*.swo
+.vagrant
+*.retry
+*.log
+TAGS
+
+fixtures/_build
