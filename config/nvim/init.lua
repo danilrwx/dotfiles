@@ -92,7 +92,7 @@ vim.cmd.packadd("cfilter")
 vim.filetype.add({ extension = { yaml = "helm", tpl = "helm" } })
 
 vim.lsp.enable("gopls")
--- vim.lsp.enable("golangci_lint_ls")
+vim.lsp.enable("golangci_lint_ls")
 vim.lsp.enable("lua_ls")
 vim.lsp.enable("helm_ls")
 vim.lsp.enable("clangd")
