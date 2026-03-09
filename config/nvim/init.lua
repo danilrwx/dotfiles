@@ -19,7 +19,7 @@ require("lazy").setup({
     { import = "plugins" },
   },
   install = { colorscheme = { "retrobox" } },
-  checker = { enabled = true },
+  checker = { enabled = false },
 })
 
 require("functions")

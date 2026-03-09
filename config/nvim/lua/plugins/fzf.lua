@@ -2,6 +2,7 @@ return {
   {
     "ibhagwan/fzf-lua",
     dependencies = { 'nvim-tree/nvim-web-devicons' },
+    lazy = false,
     opts = {
       winopts = {
         fullscreen = true,
@@ -20,7 +21,7 @@ return {
       { "<leader>gs", "<cmd>lua require('fzf-lua').git_status()<cr>" },
       { "<leader>gB", "<cmd>lua require('fzf-lua').git_branches()<cr>" },
       { "<leader>ss", "<cmd>lua require('fzf-lua').git_branches()<cr>" },
-      { "<leader>sD", "<cmd>lua require('fzf-lua').lsp_workspace_diagnostics()<cr>" },
+      { "<leader>D", "<cmd>lua require('fzf-lua').lsp_workspace_diagnostics()<cr>" },
     }
   }
 }
