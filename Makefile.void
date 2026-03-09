@@ -1,13 +1,11 @@
 all: 
+	mkdir -p ~/.config
 	make console-font
 	make base
-	make desktop-packages
-	make laptop-packages
 	make wm
+	make laptop
 	make runit
 	make pipewire
-	make virt 
-	make firewall
 	make git
 	make git-change-remote
 	make suckless
@@ -31,13 +29,15 @@ base-config:
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 
 base-packages:
-	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep neofetch vim lazygit mosh podman rsync
+	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep neofetch vim lazygit mosh podman rsync bash-completion
+
+laptop: laptop-packages desktop-packages
 
 laptop-packages:
 	sudo xbps-install -Syu acpi tlp intel-video-accel brightnessctl
 
 desktop-packages:
-	sudo xbps-install -Syu font-iosevka bashmount elogind dex flatpak xdg-user-dirs xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 firefox chromium
+	sudo xbps-install -Syu font-iosevka bashmount elogind dex xdg-user-dirs xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 firefox chromium
 
 dev-packages:
 	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl postgresql-libs postgresql-libs-devel
@@ -53,14 +53,13 @@ suckless-install:
 	cd ~/dotfiles/suckless/st && sudo make install
 
 wm-packages:
-	sudo xbps-install -Syu bspwm sxhkd dmenu maim xclip xdotool dunst xorg feh picom
+	sudo xbps-install -Syu bspwm sxhkd dmenu maim xclip xdotool dunst xorg hsetroot xcompmgr
 
 wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
 	ln -snf $(PWD)/.config/bspwm ~/.config/bspwm
 	ln -snf $(PWD)/.config/sxhkd ~/.config/sxhkd
-	ln -snf $(PWD)/.config/picom ~/.config/picom
 	ln -snf $(PWD)/.config/dunst ~/.config/dunst
 
 runit:
@@ -74,15 +73,6 @@ pipewire:
 	sudo ln -sf /usr/share/applications/pipewire.desktop /etc/xdg/autostart/pipewire.desktop
 	sudo ln -sf /usr/share/examples/wireplumber/10-wireplumber.conf /etc/pipewire/pipewire.conf.d/
 	sudo ln -sf /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
-
-alsa:
-	sudo xbps-install -Syu alsa-lib alsa-lib-devel alsa-plugins alsa-tools alsa-utils alsa-tools alsa-lib-devel alsaequal
-
-docker:
-	sudo xbps-install -Syu docker
-	sudo usermod -aG docker $(USER)
-	sudo ln -sf /etc/sv/containerd /var/service
-	sudo ln -sf /etc/sv/docker /var/service
 
 firewall:
 	sudo xbps-install -Syu ufw
@@ -113,7 +103,7 @@ flatpak-add:
 flatpak-install:
 	flatpak install -y flathub com.github.tchx84.Flatseal org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord io.github.spacingbat3.webcord
 
-asfd: asdf-install
+asdf: asdf-install
 
 asdf-install:
 	git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.12.0

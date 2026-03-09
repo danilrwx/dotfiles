@@ -3,8 +3,7 @@ all:
 	make console-font
 	make base
 	make wm
-	make desktop-packages
-	make laptop
+	make desktop
 	make git
 	make git-change-remote
 	make asdf
@@ -29,7 +28,7 @@ base-config:
 base-packages:
 	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep neofetch vim lazygit mosh podman rsync bash-completion
 
-laptop: laptop-packages laptop-enable laptop-gpu
+laptop: laptop-packages laptop-enable laptop-gpu desktop-packages
 
 laptop-packages:
 	sudo pacman -S --needed acpi acpid tlp brightnessctl throttled
