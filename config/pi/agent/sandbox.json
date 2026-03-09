@@ -1,0 +1,47 @@
+{
+  "enabled": true,
+  "mode": "interactive",
+  "network": {
+    "block": false
+  },
+  "filesystem": {
+    "allowRead": [
+      ".",
+      "~/w",
+      "~/.pi"
+    ],
+    "allowWrite": [
+      "/tmp",
+      "/private/tmp",
+      "/private/var/folders"
+    ],
+    "allowReadWrite": [
+      "."
+    ],
+    "denyRead": [
+      "~/.ssh",
+      "~/.aws",
+      "~/.kube",
+      "~/.kubeconfigs",
+      "~/.gnupg",
+      "~/.docker",
+      "~/.npmrc",
+      "~/.config/gcloud",
+      "~/.local/share/keyrings"
+    ],
+    "denyWrite": [
+      "~/.ssh",
+      "~/.aws",
+      "~/.kube",
+      "~/.kubeconfigs",
+      "~/.gnupg",
+      "~/.docker",
+      "~/.npmrc",
+      "~/.gitconfig",
+      "~/.zshrc",
+      "~/.bashrc",
+      "~/.profile",
+      "~/.bash_profile"
+    ]
+  }
+}
