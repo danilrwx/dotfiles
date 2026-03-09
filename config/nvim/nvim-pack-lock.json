@@ -1,35 +1,44 @@
 {
   "plugins": {
     "auto-session": {
-      "rev": "292492ab7af4bd8b9e37e28508bc8ce995722fd5",
+      "rev": "62437532b38495551410b3f377bcf4aaac574ebe",
       "src": "https://github.com/rmagatti/auto-session"
     },
     "blink.cmp": {
-      "rev": "f85eb6252f4c0212be15c6c4213e9af587574cbe",
-      "src": "https://github.com/saghen/blink.cmp"
+      "rev": "49f211fe5d729df53df4c042d7c3464cf47d199e",
+      "src": "https://github.com/saghen/blink.cmp",
+      "version": "1.0.0 - 1.1.0"
     },
     "colorful-menu.nvim": {
       "rev": "b51a659459df8d078201aefc995db8175ed55e84",
       "src": "https://github.com/xzbdmw/colorful-menu.nvim"
     },
+    "diffs.nvim": {
+      "rev": "dfebc68a1fc3e93dae5b6d49133243ec1886cb19",
+      "src": "https://github.com/barrettruth/diffs.nvim"
+    },
     "fzf-lua": {
-      "rev": "36d60dd59cd9bc0442352119fc0e45e1c9011e03",
+      "rev": "72ec224172eea757eab6b349775ad5bada7521d7",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
     "gitsigns.nvim": {
-      "rev": "abf82a65f185bd54adc0679f74b7d6e1ada690c9",
+      "rev": "9f3c6dd7868bcc116e9c1c1929ce063b978fa519",
       "src": "https://github.com/lewis6991/gitsigns.nvim"
+    },
+    "inlinediff-nvim": {
+      "rev": "e76028634dc42376feedb5ee755ad0018353c00c",
+      "src": "https://github.com/YouSame2/inlinediff-nvim"
     },
     "lensline.nvim": {
       "rev": "bc14529d2d04804d65a73d0fb3bca50132902d3b",
       "src": "https://github.com/oribarilan/lensline.nvim"
     },
     "nvim-treesitter": {
-      "rev": "4967fa48b0fe7a7f92cee546c76bb4bb61bb14d5",
+      "rev": "d660b7c002f3922b6bb3da47206645488a698426",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter"
     },
     "oil.nvim": {
-      "rev": "f55b25e493a7df76371cfadd0ded5004cb9cd48a",
+      "rev": "0fcc83805ad11cf714a949c98c605ed717e0b83e",
       "src": "https://github.com/stevearc/oil.nvim"
     },
     "supermaven-nvim": {
@@ -57,7 +66,7 @@
       "src": "https://github.com/kyoh86/vim-go-coverage"
     },
     "vim-test": {
-      "rev": "c174652ef8e4959628a52e3134f102923b7a6f0d",
+      "rev": "f881edb21e7a092f5793687d058c257dddb961d3",
       "src": "https://github.com/vim-test/vim-test"
     }
   }
