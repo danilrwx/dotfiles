@@ -25,13 +25,21 @@ vim.o.winborder = "single"
 
 vim.cmd.colorscheme("retrobox")
 vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#1C1C1C" })
+vim.api.nvim_set_hl(0, "Visual", { fg = nil, bg = "#2F2F2F" })
+
 vim.api.nvim_set_hl(0, "Pmenu", { bg = "#1C1C1C" })
-vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#83a598", bg = "#1C1C1C" })
-vim.api.nvim_set_hl(0, "PmenuKindSel", { fg = "#1C1C1C", bg = "#83a598" })
+vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#83A598", bg = "#1C1C1C" })
+vim.api.nvim_set_hl(0, "PmenuKindSel", { fg = "#1C1C1C", bg = "#83A598" })
 vim.api.nvim_set_hl(0, "PmenuExtra", { bg = "#1C1C1C" })
-vim.api.nvim_set_hl(0, "Added", { fg = "#b8bb26" })
-vim.api.nvim_set_hl(0, "Changed", { fg = "#83a598" })
-vim.api.nvim_set_hl(0, "Removed", { fg = "#fb4934" })
+
+vim.api.nvim_set_hl(0, "Added", { fg = "#B8BB26" })
+vim.api.nvim_set_hl(0, "Changed", { fg = "#83A598" })
+vim.api.nvim_set_hl(0, "Removed", { fg = "#FB4934" })
+
+vim.api.nvim_set_hl(0, "Identifier", { fg = "#EBDBB2" })
+vim.api.nvim_set_hl(0, "Delimiter", { fg = "#EBDBB2" })
+vim.api.nvim_set_hl(0, "@variable", { fg = "#83A598" })
+vim.api.nvim_set_hl(0, "@module", { fg = "#83A598" })
 
 vim.cmd.packadd("cfilter")
 
