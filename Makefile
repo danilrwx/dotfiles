@@ -9,6 +9,7 @@ config-sway:
 	ln -sf $(PWD)/.zprofile ~/.zprofile
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 	ln -snf $(PWD)/.config/waybar ~/.config/waybar
+	ln -snf $(PWD)/.config/sway ~/.config/sway
 	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/electron-flags.conf
 	ln -sf $(PWD)/.config/code-flags.conf ~/.config/code-flags.conf
 
