@@ -14,14 +14,13 @@ local packer_bootstrap = ensure_packer()
 return require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
 
+  use 'Mofiqul/adwaita.nvim'
+
+  use 'RRethy/nvim-base16'
+
   use 'slim-template/vim-slim'
 
   use 'echasnovski/mini.nvim'
-
-  use {
-    "jesseleite/nvim-noirbuddy",
-    requires = { "tjdevries/colorbuddy.nvim", branch = "dev" }
-  }
 
   use {
     'nvim-treesitter/nvim-treesitter',
