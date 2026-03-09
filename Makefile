@@ -1,6 +1,7 @@
 all: config-install
 
 config-install:
+	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 	ln -snf  $(PWD)/.config/sway ~/.config/sway
 	ln -snf $(PWD)/.config/foot ~/.config/foot
 	ln -snf $(PWD)/.config/helix ~/.config/helix
@@ -12,7 +13,7 @@ config-install:
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 
 arch-prepare:
-	sudo pacman --needed -S seatd htop git curl zsh firefox telegram-desktop discord tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
+	sudo pacman --needed -S seatd htop git curl zsh firefox telegram-desktop discord tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick swaybg
 deps: deps-gem deps-npm deps-go
 
 deps-go:
