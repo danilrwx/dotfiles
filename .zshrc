@@ -1,8 +1,8 @@
 export ZSH="$HOME/.oh-my-zsh"
 
 local path_color='%F{green}'
-local arrow_color='%F{magenta}'
-local time_color='%F{cyan}'
+local arrow_color='%F{blue}'
+local time_color='%F{yellow}'
 local reset_color='%f'
 PROMPT='[${time_color}%D{%H:%M:%S}${reset_color}] ${path_color}%~${reset_color} ${arrow_color}󰅂${reset_color} '
 

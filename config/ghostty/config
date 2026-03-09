@@ -11,8 +11,5 @@ font-family-bold-italic  = Iosevka Medium Italic
 maximize = true
 
 font-size = 20
-# theme = dark:GruvboxDark,light:Raycast_Light
-theme = dark:Dark Pastel,light:Raycast_Light
-# background = #1C1C1C
-# background = #000000
+theme = dark:retrobox,light:Raycast_Light
 
