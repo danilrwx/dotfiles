@@ -41,8 +41,8 @@ alias sp='source ~/.bash_profile'
 
 alias untar='tar -zxvf '
 
-# alias cat='nvimpager -c'
-# alias less='nvimpager -p'
+alias cat='nvimpager -c'
+alias less='nvimpager -p'
 
 alias kaf="kubectl apply -f"
 alias kad="kubectl delete -f"
@@ -57,3 +57,4 @@ export EDITOR='nvim'
 export VISUAL='nvim'
 export PAGER='nvimpager'
 export FZF_DEFAULT_OPTS=""
+
