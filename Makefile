@@ -26,6 +26,7 @@ deps-npm:
 	npm install -g typescript typescript-language-server vscode-langservers-extracted
 
 systemd:
+	sudo usermod -a -G seat $(USER)
 	systemctl enable seatd
 	systemctl enable tlp
 	systemctl enable acpid
