@@ -2,7 +2,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="robbyrussell"
 
-plugins=(sudo)
+plugins=(sudo fzf)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -13,7 +13,8 @@ alias grep='grep --color=auto'
 alias untar='tar -zxvf '
 alias wget='wget -c '
 alias lg='lazygit'
-alias vi='vim'
+# alias vi='nvim'
+# alias vim='nvim'
 
 export LANG=ru_RU.UTF-8
 export EDITOR='vim'
