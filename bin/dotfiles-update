@@ -60,7 +60,7 @@ if [ "$ID" == "fedora" ]; then
 elif [ "$ID" == "debian" ]; then
   log "Installing debian packages"
 
-  sudo apt upgdate -y
+  sudo apt update -y
   sudo apt install -y tmux git wget zip unzip curl zsh tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 virt-manager flatpak gpg
 fi
 
