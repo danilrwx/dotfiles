@@ -25,13 +25,12 @@ require("lazy").setup({
     { "charlespascoe/vim-go-syntax" },
 
     {
-      "catppuccin/nvim",
-      name = "catppuccin",
-      priority = 1000,
+      'mcncl/alabaster.nvim',
       lazy = false,
+      priority = 1000,
       opts = {
-        transparent_background = true,
-        term_colors = true,
+        style = "dark",
+        transparent = true,
       },
     },
 
@@ -141,17 +140,26 @@ require("lazy").setup({
     },
 
     {
-      "miroshQa/debugmaster.nvim",
-      dependencies = {
-        "mfussenegger/nvim-dap",
-        { 'https://github.com/leoluz/nvim-dap-go', opts = {} },
+      "sebdah/vim-delve",
+      keys = {
+        { "<leader>td", "<cmd>DlvTestCurrent<cr>" },
+        { "<leader>db", "<cmd>DlvToggleBreakpoint<cr>" },
+        { "<leader>dc", "<cmd>DlvConnect :2345<cr>" },
       },
-      config = function()
-        local dm = require("debugmaster")
-        vim.keymap.set({ "n", "v" }, "<leader>d", dm.mode.toggle, { nowait = true })
-        vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
-      end
     },
+
+    -- {
+    --   "miroshQa/debugmaster.nvim",
+    --   dependencies = {
+    --     "mfussenegger/nvim-dap",
+    --     { 'https://github.com/leoluz/nvim-dap-go', opts = {} },
+    --   },
+    --   config = function()
+    --     local dm = require("debugmaster")
+    --     vim.keymap.set({ "n", "v" }, "<leader>d", dm.mode.toggle, { nowait = true })
+    --     vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+    --   end
+    -- },
 
 
     {
@@ -237,22 +245,22 @@ require("lazy").setup({
       }
     },
 
-    {
-      "nvimtools/none-ls.nvim",
-      dependencies = { "nvim-lua/plenary.nvim" },
-      config = function()
-        local nls = require("null-ls")
-        nls.setup({
-          debug = true,
-          sources = {
-            nls.builtins.code_actions.gomodifytags,
-            nls.builtins.code_actions.impl,
-            nls.builtins.formatting.gofumpt,
-            nls.builtins.formatting.goimports,
-          },
-        })
-      end,
-    },
+    -- {
+    --   "nvimtools/none-ls.nvim",
+    --   dependencies = { "nvim-lua/plenary.nvim" },
+    --   config = function()
+    --     local nls = require("null-ls")
+    --     nls.setup({
+    --       debug = true,
+    --       sources = {
+    --         nls.builtins.code_actions.gomodifytags,
+    --         nls.builtins.code_actions.impl,
+    --         nls.builtins.formatting.gofumpt,
+    --         nls.builtins.formatting.goimports,
+    --       },
+    --     })
+    --   end,
+    -- },
 
     {
       "lewis6991/gitsigns.nvim",
@@ -288,9 +296,9 @@ require("lazy").setup({
   checker = { enabled = false },
 })
 
-
-vim.o.termguicolors = true
-vim.cmd.colorscheme("torte")
+vim.opt.background = "dark"
+vim.opt.termguicolors = false
+vim.cmd.colorscheme('torte')
 
 vim.api.nvim_set_hl(0, "Normal", { bg = nil })
 vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
@@ -440,7 +448,9 @@ vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>p", "+p")
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 
-vim.keymap.set("n", "<leader>c", function()
+vim.keymap.set("n", "<leader>dd", "<cmd>let @+ = expand('%') . ':' . line('.')<CR>")
+
+vim.keymap.set("n", "<leader>C", function()
   local line = vim.api.nvim_get_current_line()
   local total_len = 120
 
