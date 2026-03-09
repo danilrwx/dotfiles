@@ -4,11 +4,11 @@ k9s:
     active: all
     lockFavorites: false
     favorites:
-    - cloudnative-pg
     - all
+    - cloudnative-pg
     - questions
   view:
-    active: ingress
+    active: context
   featureGates:
     nodeShell: false
   portForwardAddress: localhost
