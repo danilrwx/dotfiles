@@ -11,6 +11,7 @@ call plug#begin('~/.vim/plugged')
 " Тема
 Plug 'RRethy/nvim-base16'
 Plug 'rktjmp/lush.nvim'
+Plug '~/dotfiles/files/theme'
 
 " Нижняя панель
 " Plug 'vim-airline/vim-airline'
@@ -127,4 +128,3 @@ source ~/dotfiles/files/vim-configs/debugger.vim
 source ~/dotfiles/files/vim-configs/spectre.vim
 source ~/dotfiles/files/vim-configs/gitsigns.vim
 source ~/dotfiles/files/vim-configs/terminal.vim
-

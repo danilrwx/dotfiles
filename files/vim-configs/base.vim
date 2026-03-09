@@ -3,7 +3,7 @@ filetype plugin on
 
 set langmap=ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz
 
-" colorscheme base16-default-dark
+colorscheme jellybeans-nvim
 " let g:airline_theme = 'base16_default_dark'
 let g:blamer_enabled = 1
 
