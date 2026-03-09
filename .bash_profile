@@ -33,7 +33,6 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export K9S_CONFIG_DIR=$HOME/.config/k9s
 export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
 export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':')
-export KUBECOLOR_PRESET="protanopia-dark"
 
 ! { which flint | grep -qsE "^/home/danil/.trdl/"; } && [[ -x "$HOME/bin/trdl" ]] && source $("$HOME/bin/trdl" use flint "2")
 
