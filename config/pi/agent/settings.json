@@ -1,11 +1,17 @@
 {
-  "lastChangelogVersion": "0.55.4",
+  "lastChangelogVersion": "0.56.1",
   "theme": "ocean-breeze",
-  "defaultProvider": "minimax",
-  "defaultModel": "MiniMax-M2.5-highspeed",
-  "defaultThinkingLevel": "off",
+  "defaultProvider": "flant",
+  "defaultModel": "gpt-5.2-codex",
+  "defaultThinkingLevel": "medium",
   "packages": [
     "npm:pi-cursor-agent",
-    "git:github.com/patleeman/task-factory"
-  ]
+    "npm:lsp-pi"
+  ],
+  "lsp": {
+    "hookMode": "edit_write"
+  },
+  "golangci-lint": {
+    "hookMode": "agent_end"
+  }
 }

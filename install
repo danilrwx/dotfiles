@@ -108,8 +108,8 @@ brew install htop fzf keychain lazygit gh yq xq jq difftastic \
   go golangci-lint-langserver gofumpt goimports go-task gopls \
   bash-language-server lua-language-server helm-ls \
   awk grep gnu-sed coreutils binutils findutils diffutils \
-  eza fastfetch ncdu ugrep \
-  bash bash-completion@2
+  eza fastfetch ncdu ugrep bash bash-completion@2 \
+  agent-browser
 brew install neovim --head
 brew install nvimpager
 
