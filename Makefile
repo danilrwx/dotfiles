@@ -24,6 +24,9 @@ arch-base:
 arch-i3:
 	sudo pacman --needed -S udiskie udisks2 gnome-keyring keychain feh alacritty
 
+arch-sway:
+	sudo pacman --needed -S waybar udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring keychain
+
 arch-laptop:
 	sudo pacman --needed -S tlp acpid brightnessctl thermald
 
