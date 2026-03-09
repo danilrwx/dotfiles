@@ -24,8 +24,8 @@ arch-base:
 arch-i3:
 	sudo pacman --needed -S udiskie udisks2 gnome-keyring keychain feh alacritty
 
-arch-sway:
-	sudo pacman --needed -S seatd tlp acpid waybar lua-language-server brightnessctl udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring keychain thermald
+arch-laptop:
+	sudo pacman --needed -S tlp acpid brightnessctl thermald
 
 wsl-base:
 	sudo apt install htop git curl zsh autoconf bison patch build-essential rustc libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libgmp-dev libncurses5-dev libffi-dev libgdbm6 libgdbm-dev libdb-dev uuid-dev imagemagick libmariadb-dev libpq-dev libmagickwand-dev
