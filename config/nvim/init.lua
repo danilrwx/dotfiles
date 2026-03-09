@@ -29,17 +29,6 @@ require("lazy").setup({
       },
     },
 
-    { 'kevinhwang91/nvim-bqf' },
-
-    {
-      "catppuccin/nvim",
-      name = "catppuccin",
-      priority = 1000,
-      opts = {
-        transparent_background = true,
-      },
-    },
-
     {
       "otavioschwanck/arrow.nvim",
       dependencies = { { "nvim-tree/nvim-web-devicons" } },
@@ -101,15 +90,6 @@ require("lazy").setup({
     },
 
     {
-      'andymass/vim-matchup',
-      opts = {
-        treesitter = {
-          stopline = 500,
-        }
-      }
-    },
-
-    {
       "rmagatti/auto-session",
       opts = { suppressed_dirs = { "~/", "~/Downloads", "/" } },
     },
@@ -133,7 +113,7 @@ require("lazy").setup({
         require("nvim-treesitter.configs").setup({
           ensure_installed = { "lua", "vimdoc" },
           auto_install = true,
-          highlight = { enable = true },
+          highlight = { enable = false },
           folds = { enable = true },
           indent = { enable = true },
         })
@@ -172,31 +152,6 @@ require("lazy").setup({
       keys = {
         { "<leader>gS", "<cmd>GHLitePRSelect<cr>" },
       },
-    },
-
-    {
-      "romgrk/barbar.nvim",
-      lazy = false,
-      dependencies = { 'lewis6991/gitsigns.nvim', 'nvim-tree/nvim-web-devicons' },
-      opts = {
-        animation = false,
-        icons = {
-          button = "",
-          modified = { button = "🔸" },
-          pinned = { button = "📌", filename = true },
-          diagnostics = { [vim.diagnostic.severity.ERROR] = { enabled = true, icon = "🔥" }, },
-        },
-      },
-      keys = {
-        { "<s-h>",   "<cmd>BufferPrevious<cr>" },
-        { "<a-s-h>", "<cmd>BufferMovePrevious<cr>" },
-
-        { "<s-l>",   "<cmd>BufferNext<cr>" },
-        { "<a-s-l>", "<cmd>BufferMoveNext<cr>" },
-
-        { "<a-q>",   "<cmd>BufferClose<cr>" },
-        { "<a-s-q>", "<cmd>BufferCloseAllButCurrent<cr>" },
-      }
     },
 
     {
@@ -327,7 +282,7 @@ require("lazy").setup({
 
 
 vim.o.termguicolors = true
-vim.cmd.colorscheme("catppuccin")
+vim.cmd.colorscheme("torte")
 
 require("fzf-lua").register_ui_select()
 

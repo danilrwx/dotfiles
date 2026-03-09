@@ -1,9 +1,11 @@
 PROMPT="[%F{11}%*%f] %F{10}%~%f %F{12}󰅂%f "
 
-if type brew &>/dev/null; then
-  FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
-  autoload -Uz compinit
-  compinit
+if [ -z "$PS1" ]; then
+  return
+fi
+
+if [ -e ~/private.zsh ]; then
+  source ~/private.zsh
 fi
 
 HISTFILE=~/.zsh_history
@@ -19,10 +21,9 @@ setopt HIST_SAVE_NO_DUPS
 alias ls='ls --color=auto'
 alias so='source ~/.zshrc'
 alias sp='source ~/.zprofile'
-alias c='clear'
-alias grep='grep --color=auto'
 alias untar='tar -zxvf '
-alias wget='wget -c '
+alias cat='nvimpager -c'
+alias less='nvimpager -p'
 alias kaf="kubectl apply -f"
 alias kad="kubectl delete -f"
 alias vi='nvim'
@@ -35,23 +36,18 @@ compdef kubecolor=kubectl
 if [ -e $(brew --prefix)/opt/zinit/zinit.zsh ]; then
   source $(brew --prefix)/opt/zinit/zinit.zsh
 
-  zinit light Aloxaf/fzf-tab
   zinit light jeffreytse/zsh-vi-mode
-  zinit light zdharma-continuum/fast-syntax-highlighting
-  zinit load zdharma-continuum/history-search-multi-word
+  function zvm_after_init() {
+    zinit load Aloxaf/fzf-tab
+    zinit load zdharma-continuum/fast-syntax-highlighting
+    zinit load zdharma-continuum/history-search-multi-word
+  }
 
   zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
 fi
 
-bindkey '^P' history-beginning-search-backward
-bindkey '^N' history-beginning-search-forward
-
 source <(flint completion --shell=zsh)
 source <(kubectl completion zsh)
-
-if [ -e ~/private.zsh ]; then
-  source ~/private.zsh
-fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   eval $( keychain --eval -q )
@@ -60,10 +56,10 @@ fi
 
 h=()
 if [[ -r ~/.ssh/config ]]; then
-  h=($h ${${${(@M)${(f)"$(cat ~/.ssh/config)"}:#Host *}#Host }:#*[*?]*})
+  h=($h ${${${(@M)${(f)"$(/usr/bin/cat ~/.ssh/config)"}:#Host *}#Host }:#*[*?]*})
 fi
 if [[ -r ~/.ssh/known_hosts ]]; then
-  h=($h ${${${(f)"$(cat ~/.ssh/known_hosts{,2} || true)"}%%\ *}%%,*}) 2>/dev/null
+  h=($h ${${${(f)"$(/usr/bin/cat ~/.ssh/known_hosts{,2} || true)"}%%\ *}%%,*}) 2>/dev/null
 fi
 if [[ $#h -gt 0 ]]; then
   zstyle ':completion:*:ssh:*' hosts $h
