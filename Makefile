@@ -1,39 +1,28 @@
 all: nvim-install
 
 TAGS := all
-
-macos-update: macos-prepare deps
-	nvim --headless +PlugUpdate +qall
-	nvim --headless +CocUpdate +qall
-
-ubuntu-update: ubuntu-prepare deps
-	nvim --headless +PlugUpdate +qall
-	nvim --headless +CocUpdate +qall
+PACKER_PATH=~/.local/share/nvim/site/pack/packer/start
 
 nvim-install:
-	mkdir -p ~/.config/nvim
-	ln -sf $(PWD)/files/vimrc ~/.config/nvim/init.vim
-	ln -sf $(PWD)/files/coc-settings.json ~/.config/nvim/coc-settings.json
-	ln -snf $(PWD)/files/vim-ftplugins ~/.config/nvim/ftplugin
+	rm -rf nvim/plugin || exit 0
+	rm -rf ~/.local/share/nvim || exit 0
+	rm -rf ~/.config/nvim || exit 0
+	rm -rf $(PACKER_PATH) || exit 0
+	git clone --depth 1 https://github.com/wbthomason/packer.nvim $(PACKER_PATH)/packer.nvim
+	ln -snf $(PWD)/nvim ~/.config/nvim
+	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
 
-macos-prepare:
-	brew install neovim git the_silver_searcher fzf bat htop fd ncdu tldr httpie git-delta ripgrep ranger lazygit
-	brew install --HEAD universal-ctags/universal-ctags/universal-ctags
+arch-prepare:
+	paru -S neovim git silversearcher-ag fd fzf bat htop ncdu tldr httpie ctags lazygit
 
-# ripgrep https://github.com/BurntSushi/ripgrep/issues/1562
-ubuntu-prepare:
-	curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-	apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(shell lsb_release -cs) main"
-	apt-get update
-	apt-get install -yy neovim git silversearcher-ag fd-find fzf bat htop ncdu tldr httpie exuberant-ctags terraform-ls
 
 deps: deps-gem deps-npm deps-pip
 
 deps-pip:
-	# pip2 install --upgrade pynvim
 	pip3 install --upgrade pynvim ranger-fm
 	pip3 install --upgrade vim-vint
 	pip3 install --upgrade autopep8 flake8 bandit pytype # black
+	pip3 install --upgrade ueberzug
 
 deps-gem:
 	gem install solargraph rubocop neovim
@@ -48,4 +37,4 @@ deps-npm:
 	npx install-peerdeps -g eslint-config-airbnb
 	npm install -g stylelint stylelint-config-recommended stylelint-config-standard
 	npm install -g yaml-language-server markdownlint bash-language-server
-	npm install -g dockerfile-language-server-nodejs
+

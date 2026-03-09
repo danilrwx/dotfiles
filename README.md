@@ -15,8 +15,8 @@
 git clone git@github.com:antoshindanil/dotfiles.git ~/dotfiles 
 cd dotfiles
 
-# ubuntu
-make ubuntu-prepare
+# arch
+make arch-prepare
 
 # macos
 make macos-prepare
