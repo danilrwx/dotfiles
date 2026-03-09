@@ -6,24 +6,24 @@ if [ -e "/opt/homebrew/bin/brew" ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-PATH="$HOME/bin:$PATH"
-PATH="$HOME/.local/bin:$PATH"
-PATH="$HOME/dotfiles/bin:$PATH"
-PATH="$HOME/.bun/bin:$PATH"
-PATH="$HOME/.cargo/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/dotfiles/bin:$PATH"
+export PATH="$HOME/.bun/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
 
 export GOPATH=$HOME/go
 export GOBIN=$GOPATH/bin
-PATH=$HOME/go/bin:$PATH
+export PATH=$HOME/go/bin:$PATH
 
 export KREW_ROOT="$HOME/.krew"
-PATH="$KREW_ROOT/bin:$PATH"
+export PATH="$KREW_ROOT/bin:$PATH"
 
 if [ -d "$(brew --prefix)/opt/glibc" ]; then
-  PATH="$(brew --prefix)/opt/glibc/sbin:$PATH"
-  PATH="$(brew --prefix)/opt/glibc/bin:$PATH"
-  LDFLAGS="-L$(brew --prefix)/opt/glibc/lib"
-  CPPFLAGS="-I$(brew --prefix)/opt/glibc/include"
+  export PATH="$(brew --prefix)/opt/glibc/sbin:$PATH"
+  export PATH="$(brew --prefix)/opt/glibc/bin:$PATH"
+  export LDFLAGS="-L$(brew --prefix)/opt/glibc/lib"
+  export CPPFLAGS="-I$(brew --prefix)/opt/glibc/include"
 fi
 
 export EDITOR='nvim'
