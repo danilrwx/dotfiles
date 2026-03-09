@@ -80,7 +80,7 @@ brew install htop fzf keychain neovim nvimpager lazygit gh yq xq jq difftastic \
   kubectl k9s kubecolor krew \
   go golangci-lint-langserver gofumpt goimports go-task gopls \
   bash-language-server lua-language-server helm-ls \
-  gawk grep gnu-sed coreutils \
+  awk gawk grep gnu-sed coreutils binutils findutils diffutils \
   bash bash-completion@2
 
 log "Installing golang apps"
