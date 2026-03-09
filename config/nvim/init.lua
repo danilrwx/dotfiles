@@ -21,6 +21,8 @@ require("lazy").setup({
   spec = {
     { "laktak/tome" },
     { "tpope/vim-surround" },
+    { "sheerun/vim-polyglot" },
+    { "charlespascoe/vim-go-syntax" },
 
     {
       "catppuccin/nvim",
@@ -124,7 +126,7 @@ require("lazy").setup({
         require("nvim-treesitter.configs").setup({
           ensure_installed = { "lua", "vimdoc" },
           auto_install = true,
-          highlight = { enable = true },
+          highlight = { enable = false },
           folds = { enable = true },
           indent = { enable = true },
         })
