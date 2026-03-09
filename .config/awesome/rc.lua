@@ -49,7 +49,7 @@ end
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "alacritty"
+terminal = "kitty"
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -458,6 +458,19 @@ client.connect_signal("mouse::enter", function(c)
     c:emit_signal("request::activate", "mouse_enter", {raise = false})
 end)
 
+-- Remove border when only one window
+local function set_border(c)
+    local s = awful.screen.focused()
+    if c.maximized or (#s.tiled_clients == 1 and not c.floating) or (s.selected_tag and s.selected_tag.layout.name == 'max')
+    then
+        c.border_width = 0
+    else
+        c.border_width = beautiful.border_width
+    end
+end
+
+
+client.connect_signal("manage", set_border)
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
