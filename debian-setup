@@ -26,7 +26,7 @@ sudo apt update -y
 sudo apt upgrade -y
 
 # Install i3 with xorg
-sudo apt install -y xorg xinit wireplumber pipewire pipewire-pulse pavucontrol pulseaudio-utils
+sudo apt install -y i3 xorg xinit wireplumber pipewire pipewire-pulse pavucontrol pulseaudio-utils
 
 # Install some software for i3
 sudo apt install -y xcompmgr hsetroot	brightnessctl acpi maim xclip xsel lxappearance gtk-chtheme \
