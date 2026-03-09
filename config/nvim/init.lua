@@ -22,7 +22,8 @@ vim.opt.updatetime = 100
 vim.opt.completeopt = 'menuone,noselect,noinsert,fuzzy,popup'
 
 if vim.fn.executable("ugrep") == 1 then
-  vim.opt.grepprg = "ugrep -RInk --tabs=1 --ignore-files --exclude='zz_generated*' --exclude-dir='generated'"
+  -- vim.opt.grepprg = "ugrep -RInk --tabs=1 --ignore-files --exclude='zz_generated*' --exclude-dir='generated'"
+  vim.opt.grepprg = "ugrep --tabs=1 --ignore-files --exclude='zz_generated*' --exclude-dir='generated'"
 else
   vim.opt.grepprg = "grep -RIn --exclude='zz_generated*' --exclude-dir='generated'"
 end
