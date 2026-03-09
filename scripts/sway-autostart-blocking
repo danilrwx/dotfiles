@@ -1,6 +1,0 @@
-#!/bin/bash
-
-mako &
-foot --server &
-clipmenud &
-dex --autostart --environment sway &

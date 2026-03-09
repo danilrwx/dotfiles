@@ -6,4 +6,4 @@
 TAGS
 
 fixtures/_build
-.config/helix/runtime/grammars
+config/helix/runtime
