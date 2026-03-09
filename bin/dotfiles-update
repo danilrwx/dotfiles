@@ -43,6 +43,7 @@ ln -snf ~/dotfiles/config/i3 ~/.config/
 ln -snf ~/dotfiles/config/dunst ~/.config/
 
 ln -sf ~/dotfiles/.zprofile ~/
+ln -sf ~/dotfiles/.zshrc ~/
 
 
 if [ "$ID" == "fedora" ]; then
@@ -81,8 +82,11 @@ fi
 
 
 log "Installing brew apps"
-brew install kubectl k9s kubecolor htop difftastic fzf keychain go golangci-lint-langserver gofumpt \
-  goimports go-task gopls neovim krew lazygit gh yq xq jq
+brew install htop fzf keychain neovim lazygit gh yq xq jq difftastic \
+  kubectl k9s kubecolor krew \
+  go golangci-lint-langserver gofumpt goimports go-task gopls \
+  bash-language-server lua-language-server helm-ls \
+  zsh-syntax-highlighting
 
 log "Installing golang apps"
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
@@ -119,17 +123,6 @@ fi
 if ! groups | grep -q '\blibvirt\b'; then
   log "Adding user to libvirt group"
   sudo usermod -aG libvirt $USER
-fi
-
-if [ ! -d ~/.oh-my-zsh ]; then
-  log "Installing ohmyzsh"
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-  rm ~/.zshrc
-  ln -sf ~/dotfiles/.zshrc ~/
-
-  source ~/.zshrc
-  source ~/.zprofile
 fi
 
 if [ ! -d ~/.tmux/plugins/tpm ]; then
