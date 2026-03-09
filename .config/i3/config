@@ -13,7 +13,7 @@ set $darkgray #707070
 set $dmenu_style -b -fn 'IosevkaTerm Nerd Font-14' -sb '#000000' -sf '#ffffff' -nb '#ffffff' -nf '#000000' "$@"
 set $term i3-sensible-terminal
 
-font pango:Iosevka Nerd Font 12
+font pango:IosevkaTerm Nerd Font 12
 
 exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id wm-autostart
