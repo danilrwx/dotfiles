@@ -1,36 +1,75 @@
-all: config-base
+all: 
+	make base-packages
+	make base-config
+	make console-font
+	make sway-packages
+	make sway-config
+	make runit
+	make pipewire
+	make virt 
+	make docker
+	make ufw
+	make flatpak
+	make flatpak-install
+	make git
+	make git-change-remote
 
 PACKER_PATH=~/.local/share/nvim/site/pack/packer/start
-
+	
 nvim-install:
 	rm -rf nvim/plugin || exit 0
 	rm -rf ~/.local/share/nvim || exit 0
 	rm -rf ~/.config/nvim || exit 0
 	rm -rf $(PACKER_PATH) || exit 0
-	ln -snf $(PWD)/.config/nvim ~/.config/nvim
-	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
-
-void-config:
-	ln -sf $(PWD)/.bashrc ~/.bashrc
+	ln -snf $(PWD)/.config/nvim ~/.config/nvim nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync' base-config: ln -sf $(PWD)/.bashrc ~/.bashrc
 	ln -sf $(PWD)/.vimrc ~/.vimrc
-	ln -sf $(PWD)/.bash_profile ~/.bash_profile
-	ln -sf $(PWD)/.xinitrc ~/.xinitrc
-	ln -sf $(PWD)/.Xresources ~/.Xresources
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
-	ln -snf $(PWD)/.config/i3 ~/.config/i3
 	ln -snf $(PWD)/.config/i3blocks ~/.config/i3blocks
 
-void-base:
-	sudo xbps-install base-devel htop git curl man zip unzip ranger jq keychain ripgrep acpi bashmount
+base-packages:
+	sudo xbps-install -Su base-devel htop git curl man zip unzip ranger jq keychain ripgrep acpi bashmount neofetch neovim i3blocks font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp intel-video-accel flatpak connman lazygit dex xdg-user-dirs xdg-utils xdg-desktop-portal-wlr
 
-void-xorg:
-	sudo xbps-install firefox rxvt-unicode maim xclip xdotool i3blocks rofi dunst feh i3 font-iosevka pipewire wireplumber pavucontrol elogind brightnessctl tlp dex xss-lock neofetch xorg intel-video-accel flatpak
+console-font:
+	echo 'FONT="cyr-sun16"' >> /etc/rc.conf
+
+sway-packages:
+	sudo xbps-install -Su sway foot mako wofi swaybg slurp grim wl-clipboard mesa-dri
+
+sway-config:
+	ln -sf $(PWD)/.bash_profile.wayland ~/.bash_profile
+	ln -snf $(PWD)/.config/foot ~/.config/foot
+	ln -snf $(PWD)/.config/wofi ~/.config/wofi
+	ln -snf $(PWD)/.config/sway ~/.config/sway
 
 runit:
-	sudo ln -s /etc/sv/elogind /var/service/
-	sudo ln -s /etc/sv/dbus /var/service/
-	sudo ln -s /etc/sv/connmand /var/service/
-	sudo ln -s /etc/sv/tlp /var/service/
+	sudo ln -sf /etc/sv/elogind /var/service/
+	sudo ln -sf /etc/sv/dbus /var/service/
+	sudo ln -sf /etc/sv/connmand /var/service/
+	sudo ln -sf /etc/sv/tlp /var/service/
+
+pipewire:
+	sudo mkdir -p /etc/pipewire/pipewire.conf.d
+	sudo ln -sf /usr/share/applications/pipewire.desktop /etc/xdg/autostart/pipewire.desktop
+	sudo ln -sf /usr/share/examples/wireplumber/10-wireplumber.conf /etc/pipewire/pipewire.conf.d/
+	sudo ln -sf /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
+
+docker:
+	sudo xbps-install -Su docker
+	sudo usermod -aG docker $USER
+	sudo ln -sf /etc/sv/containerd /var/service
+	sudo ln -sf /etc/sv/docker /var/service
+
+firewall:
+	sudo xbps-install -Su ufw
+	sudo ln -sf /etc/sv/ufw /var/service
+
+virt:
+	sudo xbps-install -Su virt-manager libvirt qemu
+	sudo usermod -aG libvirt $USER
+	modprobe kvm-intel
+	sudo ln -sf /etc/sv/libvirtd /var/service
+	sudo ln -sf /etc/sv/virtlockd /var/service
+	sudo ln -sf /etc/sv/virtlogd /var/service
 
 git:
 	git config --global core.editor "vim"
@@ -41,5 +80,8 @@ git:
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
 
+flatpak:
+	flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
 flatpak-install:
-	flatpak install flathub com.github.tchx84.Flatseal org.telegram.desktop com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord
+	flatpak install flathub com.github.tchx84.Flatseal org.telegram.desktop com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord org.mozilla.firefox
