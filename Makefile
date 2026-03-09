@@ -21,15 +21,22 @@ locale:
 git:
 	git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
+fedora-base:
+	ln -snf $(PWD)/config/sway  ~/.config/
+	ln -snf $(PWD)/config/foot  ~/.config/
+	ln -snf $(PWD)/config/dunst ~/.config/
+	ln -snf $(PWD)/Backgrounds ~/Backgrounds
+
+
 fedora-packages:
 	sudo dnf copr enable yohane-shiro/nekoray
-	sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$$(rpm -E %fedora).noarch.rpm
-	sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$$(rpm -E %fedora).noarch.rpm
+	sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$$(rpm -E %fedora).noarch.rpm
+	sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$$(rpm -E %fedora).noarch.rpm
 	sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
 	sudo dnf install -y lame\* --exclude=lame-devel
 	sudo dnf group upgrade -y --with-optional Multimedia
-	sudo dnf install -y telegram-desktop discord wireguard-tools nvtop nekoray
-	sudo dnf install -y  htop git tmux curl man zip unzip jq keychain ripgrep neofetch rsync bash-completion fzf wget fd-find go httpie bat openssl kubernetes-client podman zsh
+	sudo dnf install -y telegram-desktop wireguard-tools nvtop nekoray
+	sudo dnf install -y htop git tmux curl man zip unzip jq keychain ripgrep neofetch rsync bash-completion fzf wget fd-find go httpie bat openssl kubernetes-client zsh
 	sudo dnf install -y autoconf gcc rust patch make bzip2 openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
 	sudo dnf install -y ImageMagick-devel postgresql-devel mariadb-devel shared-mime-info libwebp
 
