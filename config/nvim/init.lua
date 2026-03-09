@@ -19,23 +19,12 @@ vim.g.maplocalleader = "\\"
 
 require("lazy").setup({
   spec = {
-    { "laktak/tome" },
-    { "tpope/vim-surround" },
-
     {
-      "kyoh86/vim-go-coverage",
-      lazy = false,
-      keys = {
-        { "<leader>tc", "<cmd>GoCover<cr>" },
-        { "<leader>tC", "<cmd>GoCoverClear<cr>" },
-      },
+      "laktak/tome",
     },
 
     {
-      "catppuccin/nvim",
-      name = "catppuccin",
-      priority = 1000,
-      opts = { transparent_background = true, float = { transparent = true, solid = false } }
+      "tpope/vim-surround",
     },
 
     {
@@ -46,6 +35,15 @@ require("lazy").setup({
         { "<leader>gl", "<cmd>tab Git log --follow -p %<cr>" },
         { "<leader>gL", "<cmd>tab Git log<cr>" },
         { "<leader>gb", "<cmd>tab Git blame<cr>" },
+      },
+    },
+
+    {
+      "kyoh86/vim-go-coverage",
+      lazy = false,
+      keys = {
+        { "<leader>tc", "<cmd>GoCover<cr>" },
+        { "<leader>tC", "<cmd>GoCoverClear<cr>" },
       },
     },
 
@@ -65,6 +63,11 @@ require("lazy").setup({
     },
 
     {
+      "rmagatti/auto-session",
+      opts = { suppressed_dirs = { "~/", "~/Downloads", "/" } },
+    },
+
+    {
       "supermaven-inc/supermaven-nvim",
       event = "InsertEnter",
       cmd = { "SupermavenUseFree", "SupermavenUsePro" },
@@ -76,7 +79,6 @@ require("lazy").setup({
       dependencies = { "nvim-treesitter/nvim-treesitter" },
       lazy = false,
       build = ":TSUpdate",
-      config = function() require('nvim-treesitter').install({ "lua", "vimdoc", "go", "c", "helm", "markdown" }):wait(300000) end,
     },
 
     {
@@ -170,12 +172,8 @@ require("lazy").setup({
           local gitsigns = require("gitsigns")
           local opts = { buffer = bufnr }
 
-          vim.keymap.set("n", "]c",
-            function() if vim.wo.diff then vim.cmd.normal({ "]c", bang = true }) else gitsigns.nav_hunk("next") end end,
-            opts)
-          vim.keymap.set("n", "[c",
-            function() if vim.wo.diff then vim.cmd.normal({ "[c", bang = true }) else gitsigns.nav_hunk("prev") end end,
-            opts)
+          vim.keymap.set("n", "]c", function() if vim.wo.diff then vim.cmd.normal({ "]c", bang = true }) else gitsigns.nav_hunk("next") end end, opts)
+          vim.keymap.set("n", "[c", function() if vim.wo.diff then vim.cmd.normal({ "[c", bang = true }) else gitsigns.nav_hunk("prev") end end, opts)
 
           vim.keymap.set("n", "ghs", gitsigns.stage_hunk, opts)
           vim.keymap.set("n", "ghu", gitsigns.reset_hunk, opts)
@@ -195,23 +193,11 @@ require("lazy").setup({
   checker = { enabled = false },
 })
 
-vim.opt.termguicolors = true
-vim.cmd.colorscheme("torte")
-
-vim.cmd("highlight Normal guibg=NONE ctermbg=NONE")
-vim.cmd("highlight SignColumn guibg=NONE ctermbg=NONE")
-
-vim.cmd("highlight Added guifg=#00cd00 ctermfg=22")
-vim.cmd("highlight Changed guifg=#00cdcd ctermfg=22")
-vim.cmd("highlight Removed guifg=#cd0000 ctermfg=9")
-
-vim.cmd("highlight DiffAdded guifg=#00cd00 ctermfg=22")
-vim.cmd("highlight DiffChanged guifg=#00cdcd ctermfg=22")
-vim.cmd("highlight DiffRemoved guifg=#cd0000 ctermfg=9")
-
 require("fzf-lua").register_ui_select()
 
 vim.opt.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
+
+vim.opt.termguicolors = true
 
 vim.opt.undodir = os.getenv("HOME") .. "/.local/nvim/undo"
 vim.opt.undofile = true
@@ -283,7 +269,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
     if client == nil then return end
 
     if client.server_capabilities.codeLensProvider then
-      vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold" }, { callback = function() vim.lsp.codelens.refresh() end })
+      vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold" },
+        { callback = function() vim.lsp.codelens.refresh() end })
       vim.keymap.set("n", "grc", "<cmd>lua vim.lsp.codelens.run()<cr>", opts)
     end
 
@@ -334,3 +321,66 @@ local toggle_quickfix = function()
   vim.cmd(command)
 end
 vim.keymap.set("n", "<leader>q", toggle_quickfix)
+
+local function setup_highlights()
+  local link = vim.api.nvim_set_hl
+  local function hl(group, opts) link(0, group, opts) end
+
+  hl("Normal", { bg = nil })
+  hl("SignColumn", { bg = nil })
+
+  hl("Added", { fg = "#00cd00" })
+  hl("Changed", { fg = "#00cdcd" })
+  hl("Removed", { fg = "#cd0000" })
+
+  hl("DiffAdded", { fg = "#00cd00" })
+  hl("DiffChanged", { fg = "#00cdcd" })
+  hl("DiffRemoved", { fg = "#cd0000" })
+
+
+  local highlight_keep = {
+    ["@function"] = "Function",
+    ["@function.call"] = "Function",
+    ["@function.method.call"] = "Function",
+    ["@function.builtin"] = "Normal",
+
+    ["@method"] = "Function",
+    ["@method.call"] = "Normal",
+
+    ["@comment"] = "Comment",
+    ["@string"] = "String",
+
+    ["@keyword"] = "Keyword",
+
+    ["@type"] = "Type",
+    ["@type.builtin"] = "Type",
+    ["@property.yaml"] = "Type",
+
+    ["@markup.heading"] = "Keyword",
+    ["@markup.raw"] = "String",
+    ["@markup.link"] = "Type",
+    ["@punctuation.special.markdown"] = "Type",
+  }
+
+  local function target_for(group)
+    if highlight_keep[group] then
+      return highlight_keep[group]
+    end
+    for keep, target in pairs(highlight_keep) do
+      if group:find("^" .. keep:gsub("%.", "%%.") .. "%.") then
+        return target
+      end
+    end
+    return "Normal"
+  end
+
+  for _, g in ipairs(vim.fn.getcompletion("@", "highlight")) do
+    hl(g, { link = target_for(g) })
+  end
+
+  for group, target in pairs(highlight_keep) do
+    hl(group, { link = target })
+  end
+end
+vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", callback = setup_highlights })
+vim.cmd.colorscheme("torte")
