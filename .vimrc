@@ -79,8 +79,11 @@ set viminfo='100,n$HOME/.vim/files/info/viminfo
 " mark trailing spaces as errors
 match errorMsg '\s\+$'
 
-if v:version >= 900
-  set termguicolors
+if has("patch-9.0.1488")
+  if has('termguicolors')
+    set termguicolors
+  endif
+
   set background=dark
   colorscheme retrobox
 else
@@ -141,9 +144,16 @@ endif
 nnoremap <leader>sf :call FzyCommand("find . -type f", ":e")<cr>
 nnoremap <leader>sg :call FzyCommand("git ls-files", ":e")<cr>
 
+if has('patch-8.1.0311')
+  packadd! cfilter
+endif
+
+if has('patch-9.1.0375')
+  packadd! comment
+endif
+
 if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.local/share/vim/plugins')
-    Plug 'tpope/vim-commentary'
     Plug 'tpope/vim-fugitive'
 
     Plug 'airblade/vim-gitgutter'
@@ -163,6 +173,15 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
     Plug 'prabirshrestha/asyncomplete-lsp.vim'
   call plug#end()
 
+  let g:gitgutter_sign_priority = 0
+  let g:gitgutter_preview_win_floating = 1
+
+  let g:gitgutter_sign_added = '🮈'
+  let g:gitgutter_sign_modified = '🮈'
+  let g:gitgutter_sign_removed = '▁'
+  let g:gitgutter_sign_removed_first_line = '▔'
+  let g:gitgutter_sign_modified_removed = "🮈~"
+
   let g:lsp_settings = {
         \  'golangci-lint-langserver': {
         \    'initialization_options': {'command': ['golangci-lint', 'run', '--out-format', 'json', '--issues-exit-code=1']}
@@ -173,11 +192,14 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
   let g:lsp_semantic_enabled = 1
 
-  let g:lsp_diagnostics_float_cursor = 1
-  let g:lsp_diagnostics_virtual_text_enabled = 0
+  " let g:lsp_diagnostics_float_cursor = 1
+  " let g:lsp_diagnostics_virtual_text_enabled = 0
+
   let g:lsp_diagnostics_virtual_text_align = 'right'
 
   let g:lsp_document_code_action_signs_enabled = 0
+
+  let g:lsp_experimental_workspace_folders = 1
 
   if v:version > 900
     let g:lsp_use_native_client = 1
