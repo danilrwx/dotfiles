@@ -28,16 +28,26 @@ vim.api.nvim_create_autocmd({ "LspAttach" }, {
   end,
 })
 
+DIAGNOSTIC_ICONS = {
+  [vim.diagnostic.severity.ERROR] = "🔥",
+  [vim.diagnostic.severity.WARN] = "💫",
+  [vim.diagnostic.severity.INFO] = "🔩",
+  [vim.diagnostic.severity.HINT] = "📎",
+}
+
 vim.diagnostic.config({
-  virtual_text = {
-    prefix = "🐗",
+  virtual_lines = {
+    format = function(diagnostic)
+      return string.format("%s %s", DIAGNOSTIC_ICONS[diagnostic.severity], diagnostic.message)
+    end,
+    spacing = 0,
   },
-  signs = {
-    text = {
-      [vim.diagnostic.severity.ERROR] = "🔥",
-      [vim.diagnostic.severity.WARN] = "💫",
-      [vim.diagnostic.severity.INFO] = "🔩",
-      [vim.diagnostic.severity.HINT] = "📎",
-    },
-  }
+  virtual_text = false,
+  -- virtual_text = {
+  --   prefix = "🐗",
+  -- },
+  signs = false,
+  -- signs = {
+  --   text = DIAGNOSTIC_ICONS,
+  -- }
 })
