@@ -1,5 +1,13 @@
 .aider*
+.claude
+.claude-collective
+.cursor
+.taskmaster
+.aid
+memory-bank
+custom_modes
 tags
+CLAUDE.MD
 AugmentChatHistory
 Session.vim
 

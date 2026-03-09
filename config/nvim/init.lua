@@ -20,6 +20,7 @@ vim.g.maplocalleader = "\\"
 require("lazy").setup({
   spec = {
     { "laktak/tome" },
+    { "tpope/vim-surround" },
 
     {
       "kyoh86/vim-go-coverage",
@@ -45,6 +46,7 @@ require("lazy").setup({
       "ellisonleao/gruvbox.nvim",
       priority = 1000,
       opts = {
+        transparent_mode = true,
         italic = {
           strings = false,
           emphasis = false,
@@ -85,7 +87,7 @@ require("lazy").setup({
 
     {
       'stevearc/oil.nvim',
-      dependencies = { "nvim-tree/nvim-web-devicons", "benomahony/oil-git.nvim" },
+      dependencies = { "nvim-tree/nvim-web-devicons" },
       opts = { view_options = { show_hidden = true } },
       keys = { { "-", "<cmd>Oil<cr>" } },
       lazy = false,
@@ -300,12 +302,22 @@ require("lazy").setup({
     {
       "coder/claudecode.nvim",
       dependencies = { "folke/snacks.nvim" },
+      lazy = false,
       config = true,
-      opts = { terminal = { split_width_percentage = 0.50 } },
+      opts = {
+        terminal = {
+          provider = "external",
+          provider_opts = {
+            external_terminal_cmd = "zellij run -n claude --width 250 -x 50 -y 50 -f -- %s",
+          },
+        },
+      },
       keys = {
         { "<leader>a",  nil,                              desc = "AI/Claude Code" },
         { "<leader>ac", "<cmd>ClaudeCode<cr>",            desc = "Toggle Claude" },
         { "<leader>af", "<cmd>ClaudeCodeFocus<cr>",       desc = "Focus Claude" },
+        { "<M-,>",      "<cmd>ClaudeCodeFocus<cr>",       desc = "Claude Code",        mode = { "n", "x" } },
+
         { "<leader>ar", "<cmd>ClaudeCode --resume<cr>",   desc = "Resume Claude" },
         { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
         { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
@@ -330,48 +342,6 @@ require("lazy").setup({
 
 vim.o.termguicolors = true
 vim.cmd.colorscheme("gruvbox")
-
--- vim.api.nvim_set_hl(0, "Normal", { bg = nil })
--- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "Visual", { bg = "#252525" })
--- vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
---
--- vim.api.nvim_set_hl(0, "Pmenu", { bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#303030" })
---
--- vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#83A598", bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "PmenuKindSel", { bg = "#303030" })
---
--- vim.api.nvim_set_hl(0, "PmenuExtra", { bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "PmenuExtraSel", { bg = "#303030" })
---
--- vim.api.nvim_set_hl(0, "PmenuMatch", { fg = "#B16286", bg = "#1C1C1C" })
--- vim.api.nvim_set_hl(0, "PmenuMatchSel", { bg = "#303030" })
---
--- vim.api.nvim_set_hl(0, "Added", { fg = "#B8BB26" })
--- vim.api.nvim_set_hl(0, "Changed", { fg = "#83A598" })
--- vim.api.nvim_set_hl(0, "Removed", { fg = "#FB4934" })
---
--- vim.api.nvim_set_hl(0, "DiffAdd", { bg = "#282808" })
--- vim.api.nvim_set_hl(0, "DiffChange", { bg = "#19231f" })
--- vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#420801" })
--- vim.api.nvim_set_hl(0, "DiffText", { bg = "#522500" })
---
--- vim.api.nvim_set_hl(0, "OilGitAdded", { fg = "#B8BB26" })
--- vim.api.nvim_set_hl(0, "OilGitModified", { fg = "#83A598" })
--- vim.api.nvim_set_hl(0, "OilGitRenamed", { fg = "#522500" })
--- vim.api.nvim_set_hl(0, "OilGitUntracked", { fg = "#FB4934" })
---
--- vim.api.nvim_set_hl(0, "Identifier", { fg = "#EBDBB2" })
--- vim.api.nvim_set_hl(0, "Delimiter", { fg = "#EBDBB2" })
--- vim.api.nvim_set_hl(0, "@variable", { fg = "#83A598" })
--- vim.api.nvim_set_hl(0, "@variable.parameter", { fg = "#83A598" })
---
--- vim.api.nvim_set_hl(0, "DiagnosticError", { fg = "#FB4934" })
--- vim.api.nvim_set_hl(0, "DiagnosticWarn", { fg = "#FE8019" })
--- vim.api.nvim_set_hl(0, "DiagnosticInfo", { fg = "#EBDBB2" })
--- vim.api.nvim_set_hl(0, "DiagnosticHint", { fg = "#EBDBB2" })
--- vim.api.nvim_set_hl(0, "DiagnosticOk", { fg = "#B8BB26" })
 
 require("fzf-lua").register_ui_select()
 
@@ -495,10 +465,7 @@ local toggle_quickfix = function()
 end
 vim.keymap.set("n", "<leader>q", toggle_quickfix)
 
-vim.keymap.set("n", "<leader>gg", "<cmd>tabnew term://lazygit<cr>")
-
--- vim.keymap.set("n", "<c-k>", "<cmd>cprev<cr>")
--- vim.keymap.set("n", "<c-j>", "<cmd>cnext<cr>")
+vim.keymap.set("n", "<leader>gg", "<cmd>!zellij run -i -- lazygit<cr>")
 
 vim.keymap.set("n", "<c-[>", "<cmd>noh<Return><esc>")
 
