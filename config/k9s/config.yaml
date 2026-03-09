@@ -4,7 +4,7 @@ k9s:
   maxConnRetry: 5
   readOnly: false
   ui:
-    enableMouse: true
+    # enableMouse: true
     logoless: true
     headless: true
     # skin: transparent
