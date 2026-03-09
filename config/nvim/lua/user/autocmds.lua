@@ -12,6 +12,24 @@ M.setup = function()
 
   vim.api.nvim_create_autocmd("LspAttach", {
     group = group,
+    callback = function()
+      require('symbol-usage').setup({
+        kinds = {
+          vim.lsp.protocol.SymbolKind.Function,
+          vim.lsp.protocol.SymbolKind.Method,
+          vim.lsp.protocol.SymbolKind.Interface,
+          vim.lsp.protocol.SymbolKind.Constant,
+        },
+        definition = { enabled = true },
+        implementation = { enabled = true },
+        references = { enabled = true, include_declaration = false },
+        vt_position = "end_of_line",
+      })
+    end,
+  })
+
+  vim.api.nvim_create_autocmd("LspAttach", {
+    group = group,
     callback = function(event)
       local opts = { buffer = event.buf }
       local client = vim.lsp.get_client_by_id(event.data.client_id)
@@ -27,10 +45,6 @@ M.setup = function()
 
       if client:supports_method("textDocument/formatting") then
         vim.keymap.set({ "n", "x" }, "grf", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", opts)
-      end
-
-      if client:supports_method("textDocument/completion") then
-        vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = true })
       end
     end,
   })
