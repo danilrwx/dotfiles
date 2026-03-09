@@ -85,6 +85,8 @@ set mouse=a
 
 set path=.,,**
 
+set signcolumn=number
+
 set updatetime=100
 
 " mark trailing spaces as errors
@@ -104,8 +106,18 @@ highlight SignColumn ctermbg=NONE
 highlight CursorLine cterm=none ctermbg=250
 highlight CursorLineNr cterm=none ctermbg=250
 
+" colorscheme retrobox
+hi StatusLine ctermbg=NONE
+hi StatusLineNC ctermbg=NONE
+hi Normal ctermbg=NONE
+hi LineNr ctermbg=NONE
+hi SpecialKey ctermbg=NONE
+hi ModeMsg cterm=NONE ctermbg=NONE
+hi MoreMsg ctermbg=NONE
+hi NonText ctermbg=NONE
+hi vimGlobal ctermbg=NONE
+
 set omnifunc=syntaxcomplete#Complete
-imap <tab><tab> <c-x><c-o>
 
 nnoremap <S-l> :bn<cr>
 nnoremap <S-h> :bp<cr>
@@ -114,8 +126,6 @@ nnoremap <C-j> :cnext<cr>
 nnoremap <C-k> :cprev<cr>
 
 nnoremap <C-l> :nohl<cr>
-
-nnoremap <Leader>l :ls<cr>:b<space>
 
 function! ToggleQuickFix()
     if empty(filter(getwininfo(), 'v:val.quickfix'))
@@ -133,8 +143,25 @@ function! TrimWhitespace()
 endfun
 autocmd BufWritePre * call TrimWhitespace()
 
+function! FzyCommand(choice_command, vim_command)
+  try
+    let output = system(a:choice_command . " | fzy ")
+  catch /Vim:Interrupt/
+    " Swallow errors from ^C, allow redraw! below
+  endtry
+  redraw!
+  if v:shell_error == 0 && !empty(output)
+    exec a:vim_command . ' ' . output
+  endif
+endfunction
+
+nnoremap <leader>f :call FzyCommand("find . -type f", ":e")<cr>
+nnoremap <leader>g :call FzyCommand("git ls-files", ":e")<cr>
+
 if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.local/share/vim/plugins')
+    Plug 'sheerun/vim-polyglot'
+
     Plug 'tpope/vim-commentary'
     Plug 'tpope/vim-fugitive'
     Plug 'tpope/vim-obsession'
@@ -143,9 +170,7 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
     Plug 'preservim/vimux'
 
-    Plug 'girishji/scope.vim'
-
-    Plug 'charlespascoe/vim-go-syntax'
+    " Plug 'charlespascoe/vim-go-syntax'
     Plug 'kyoh86/vim-go-coverage'
     Plug 'sebdah/vim-delve'
 
@@ -156,6 +181,8 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   let lspOpts = #{
         \  autoHighlightDiags: v:true,
         \  useQuickfixForLocations: v:true,
+        \  semanticHighlight: v:true,
+        \  showInlayHints: v:false,
         \ }
 
   autocmd User LspSetup call LspOptionsSet(lspOpts)
@@ -182,7 +209,8 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
         \          constantValues: v:true,
         \          functionTypeParameters: v:true,
         \          parameterNames: v:true,
-        \          rangeVariableTypes: v:true
+        \          rangeVariableTypes: v:true,
+        \          semanticTokens: v:true
         \        }
         \      }
         \    }
@@ -215,9 +243,6 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   nnoremap <silent> <leader>ta :TestSuite<cr>
   nnoremap <silent> <leader>tl :TestLast<cr>
   nnoremap <silent> <leader>tv :TestVisit<cr>
-
-  nnoremap <leader>f <cmd>Scope File<cr>
-  nnoremap <leader>/ <cmd>Scope Grep<cr>
 
   nnoremap <leader>gg :!lazygit<cr><cr>
   nnoremap <leader>gs :tab Git<cr>

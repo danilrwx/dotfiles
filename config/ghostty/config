@@ -11,6 +11,6 @@ font-family-bold-italic  = Iosevka NFM Medium Italic
 maximize = true
 
 font-size = 20
-theme = dark:Tomorrow Night Bright,light:Tomorrow
+theme = dark:GruvboxDarkHard,light:GruvboxLightHard
 
 
