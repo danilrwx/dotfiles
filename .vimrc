@@ -90,6 +90,8 @@ set signcolumn=yes
 
 set wildmenu
 
+set mouse=a
+
 " set background=l
 colorscheme lunaperche
 
@@ -147,6 +149,7 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
     Plug 'tpope/vim-fugitive'
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
     Plug 'junegunn/fzf.vim'
+    Plug 'augmentcode/augment.vim'
   call plug#end()
 
   let g:ale_set_signs = 1
