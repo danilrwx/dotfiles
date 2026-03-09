@@ -41,6 +41,8 @@ vim.keymap.set("n", "<S-Tab>", "<cmd>bp<CR>")
 vim.keymap.set("n", "<C-q>", Funcs.toggle_quickfix)
 
 vim.keymap.del("n", "<leader>gg")
+vim.keymap.del("n", "<leader>gs")
+vim.keymap.del("n", "<leader>gc")
 vim.keymap.del("n", "<leader>gG")
 vim.keymap.del("n", "<leader>gf")
 
@@ -56,7 +58,7 @@ vim.keymap.set("n", "<leader>gD", "<cmd>tab Git diff <CR>", { desc = "Git diff" 
 vim.keymap.set("n", "<leader>gP", "<cmd>Git push<CR>", { desc = "Git push" })
 vim.keymap.set("n", "<leader>gp", "<cmd>Git pull --rebase<CR>", { desc = "Git pull with rebase" })
 
-vim.keymap.set("n", "<leader>gS", "<cmd>FzfLua git_status<CR>", { desc = "Fzf git status" })
+vim.keymap.set("n", "<leader>gS", "<cmd>Telescope git_status<CR>", { desc = "Fzf git status" })
 
 local MiniFiles = require("mini.files")
 vim.keymap.set("n", "<C-f>", function()

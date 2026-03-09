@@ -56,20 +56,6 @@ return {
   },
 
   {
-    "ibhagwan/fzf-lua",
-    keys = {
-      { "<leader>gc", false },
-      { "<leader>gs", false },
-    },
-    opts = {
-      winopts = {
-        height = 0.95,
-        width = 0.95,
-      },
-    },
-  },
-
-  {
     "projekt0n/github-nvim-theme",
     lazy = false,
     priority = 1000,
@@ -136,7 +122,6 @@ return {
     end,
   },
 
-  { import = "lazyvim.plugins.extras.editor.fzf" },
   { import = "lazyvim.plugins.extras.editor.mini-files" },
   { import = "lazyvim.plugins.extras.editor.refactoring" },
   { import = "lazyvim.plugins.extras.test.core" },
