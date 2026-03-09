@@ -13,8 +13,8 @@ alias grep='grep --color=auto'
 alias untar='tar -zxvf '
 alias wget='wget -c '
 alias lg='lazygit'
-alias vi='nvim'
-alias vim='nvim'
+# alias vi='nvim'
+# alias vim='nvim'
 
 export LANG=ru_RU.UTF-8
 export EDITOR='vim'
@@ -41,3 +41,6 @@ export GOBIN=$GOPATH/bin
 export PATH=$PATH:$GOBIN
 
 [[ -e ~/private.zsh ]] && source ~/private.zsh
+
+[[ "$PATH" == *"$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
+! { which werf | grep -qsE "^/Users/danil/.trdl/"; } && [[ -x "$HOME/bin/trdl" ]] && source $("$HOME/bin/trdl" use werf "2" "stable")
