@@ -7,7 +7,6 @@
   "packages": [
     "npm:pi-cursor-agent",
     "npm:lsp-pi",
-    "npm:pi-amplike",
     "npm:@tmustier/pi-usage-extension"
   ],
   "lsp": {
