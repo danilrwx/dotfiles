@@ -7,7 +7,8 @@
 
 PS1='[\u@\h \W]\$ '
 
-alias ls='ls --color=auto'
+alias cat='bat'
+alias ls='exa'
 alias l='ls -lah'
 alias c='clear'
 alias grep='grep --color=auto'
