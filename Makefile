@@ -19,6 +19,7 @@ deps: deps-gem deps-npm deps-go
 deps-go:
 	go install github.com/go-delve/delve/cmd/dlv@latest
 	go install golang.org/x/tools/gopls@latest
+	go install -tags 'clickhouse' github.com/xo/usql@latest
 deps-gem:
 	gem install solargraph
 
