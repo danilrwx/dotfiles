@@ -15,8 +15,8 @@ if [ -e "$HOME/.ssh/id_rsa" ]; then
   keychain --ssh-allow-forwarded --confirm $HOME/.ssh/id_rsa -q
 fi
 
-if [ -f $HOME/private-dotfiles/.bashrc ]; then
-  source $HOME/private-dotfiles/.bashrc
+if [ -f $HOME/dotfiles/private/.bashrc ]; then
+  source $HOME/dotfiles/private/.bashrc
 fi
 
 shopt -s histappend

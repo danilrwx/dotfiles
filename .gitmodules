@@ -4,3 +4,6 @@
 [submodule "suckless/st"]
 	path = suckless/st
 	url = git@github.com:danilrwx/st.git
+[submodule "private"]
+	path = private
+	url = https://github.com/danilrwx/private-dotfiles
