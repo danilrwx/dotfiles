@@ -80,7 +80,6 @@ vim.pack.add({
   { src = 'https://github.com/ibhagwan/fzf-lua' },
 
   { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
-  { src = 'https://github.com/Wansmer/treesj' },
 
   { src = 'https://github.com/airblade/vim-gitgutter' },
   { src = 'https://github.com/tpope/vim-fugitive' },
@@ -123,8 +122,6 @@ require('symbol-usage').setup({
   implementation = { enabled = true },
   vt_position = "end_of_line",
 })
-
-require('treesj').setup({ use_default_keymaps = false, })
 
 require('dap-go').setup({})
 
@@ -187,16 +184,12 @@ vim.api.nvim_create_autocmd('LspAttach', {
 
 vim.keymap.set("n", "<c-l>", "<cmd>noh<Return><esc>")
 
-vim.keymap.set("n", "<a-q>", "<cmd>bd<cr>")
-vim.keymap.set("n", "<s-h>", "<cmd>bp<cr>")
-vim.keymap.set("n", "<s-l>", "<cmd>bn<cr>")
-
 vim.keymap.set("n", "<c-d>", "<c-d>zz")
 vim.keymap.set("n", "<c-u>", "<c-u>zz")
 
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
-vim.keymap.set("n", "<leader>p", "+p")
-vim.keymap.set("n", "<leader>Y", [["+Y]])
+-- vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
+-- vim.keymap.set("n", "<leader>p", "+p")
+-- vim.keymap.set("n", "<leader>Y", [["+Y]])
 
 vim.keymap.set("n", "-", "<cmd>Oil<cr>")
 
@@ -218,16 +211,12 @@ vim.keymap.set("n", "<leader>q", toggle_quickfix)
 vim.keymap.set("n", "<leader>tr", "<cmd>TestNearest<cr>")
 vim.keymap.set("n", "<leader>tt", "<cmd>TestFile<cr>")
 
-vim.keymap.set("n", "<leader>m", require("treesj").toggle)
-
 vim.keymap.set("n", "<leader>b", require('fzf-lua').buffers)
 vim.keymap.set("n", "<leader>f", require('fzf-lua').files)
-vim.keymap.set("n", "<leader>/", require('fzf-lua').live_grep)
-vim.keymap.set("n", "<leader>'", require('fzf-lua').resume)
-vim.keymap.set("n", "<leader>D", require('fzf-lua').lsp_workspace_diagnostics)
+
+vim.keymap.set("n", "<leader>D", vim.diagnostic.setqflist)
 
 vim.keymap.set({ "n", "v" }, "<leader>d", require("debugmaster").mode.toggle, { nowait = true })
--- vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 vim.keymap.set("n", "<leader>gl", "<cmd>tab Git log --follow -p %<cr>")
 vim.keymap.set("n", "<leader>gL", "<cmd>tab Git log<cr>")
