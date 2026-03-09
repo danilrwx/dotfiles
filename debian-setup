@@ -9,9 +9,7 @@ mkdir -p ~/.config
 ln -sf ~/dotfiles/.gitconfig ~/
 ln -sf ~/dotfiles/.gitignore_global ~/
 ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
-ln -snf ~/dotfiles/.vimrc ~/
 
-ln -snf ~/dotfiles/config/alacritty/ ~/.config/
 ln -snf ~/dotfiles/config/k9s ~/.config/
 ln -snf ~/dotfiles/config/htop ~/.config/
 ln -snf ~/dotfiles/config/lazygit ~/.config/
@@ -25,16 +23,8 @@ ln -snf ~/dotfiles/config/dunst ~/.config/
 sudo apt update -y
 sudo apt upgrade -y
 
-# Install i3 with xorg
-sudo apt install -y i3 xorg xinit wireplumber pipewire pipewire-pulse pavucontrol pulseaudio-utils
-
-# Install some software for i3
-sudo apt install -y xcompmgr hsetroot	brightnessctl acpi maim xclip xsel lxappearance gtk-chtheme \
- libnotify-bin ncal fonts-noto-color-emoji alacritty lxpolkit
-
 # Install base software
 sudo apt install -y curl zip unzip gpg keychain ssh-askpass-gnome zsh fzf neovim tigervnc-viewer
-sudo apt install -y libnss-extrausers openssh-server cron python3-distro python3-requests python3-crontab python3-pip python3-yaml
 
 # Install ohmyzsh
 if [ ! -d ~/.oh-my-zsh ]; then
@@ -43,39 +33,6 @@ fi
 
 rm ~/.zshrc
 ln -sf ~/dotfiles/.zshrc ~/
-
-# Setup keyboard layout
-if [ ! -f /etc/X11/xorg.conf.d/00-keyboard.conf ]; then
-cat << EOF | sudo tee -a /etc/X11/xorg.conf.d/00-keyboard.conf >> /dev/null
-Section "InputClass"
-	Identifier "system-keyboard"
-	MatchIsKeyboard "on"
-	Option "XkbLayout" "us,ru"
-	Option "XkbModel" "pc105"
-	Option "XkbOptions" "grp:ctr_space_toggle"
-EndSection
-EOF
-fi
-
-# Setup amdgpu driver
-if [ ! -f /etc/X11/xorg.conf.d/20-amdgpu.conf ]; then
-	cat << EOF | sudo tee -a /etc/X11/xorg.conf.d/20-amdgpu.conf >> /dev/null
-Section "Device"
-	Identifier "AMD"
-	Driver "amdgpu"
-	Option "TearFree" "true"
-	Option "DRI" "3"
-EndSection
-EOF
-fi
-
-# Install chrome
-if [ ! -f /usr/bin/google-chrome ]; then
-	curl -fSsL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor | sudo tee /usr/share/keyrings/google-chrome.gpg >> /dev/null
-	echo deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main | sudo tee /etc/apt/sources.list.d/google-chrome.list
-	sudo apt update
-	sudo apt install google-chrome-stable
-fi
 
 # Download Iosevka nerd font
 if [ ! -f ~/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then

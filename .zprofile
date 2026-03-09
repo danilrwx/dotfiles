@@ -13,3 +13,7 @@ if [ -d "$HOME/dotfiles/bin" ] ; then
 fi
 
 [[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && exec startx
+
+[[ "$PATH" == *"$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
+
+! { which flint | grep -qsE "^/home/danil/.trdl/"; } && [[ -x "$HOME/bin/trdl" ]] && source $("$HOME/bin/trdl" use flint "2")
