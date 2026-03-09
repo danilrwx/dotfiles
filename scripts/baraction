@@ -2,10 +2,9 @@
 
 vol() {
   icon="󰕾"
-  vol=$(pactl get-sink-volume @DEFAULT_SINK@ | awk '{ print $5 }')
+  vol=`pactl get-sink-volume @DEFAULT_SINK@ | awk '{ print $5 }'`
 
-  muted=$(pactl get-sink-mute @DEFAULT_SINK@ | awk '{ print $2 }')
-  [[ $muted = "да" ]] && icon="󰝟"
+  muted=`pactl get-sink-mute @DEFAULT_SINK@ | awk '{ print $2 }'`
   [[ $muted = "yes" ]] && icon="󰝟"
 
   echo -e " $icon $vol"
@@ -13,10 +12,9 @@ vol() {
 
 mic() {
   icon="󰍬"
-  vol=$(pactl get-source-volume @DEFAULT_SOURCE@ | awk '{ print $5 }')
+  vol=`pactl get-source-volume @DEFAULT_SOURCE@ | awk '{ print $5 }'`
 
-  muted=$(pactl get-source-mute @DEFAULT_SOURCE@ | awk '{ print $2 }')
-  [[ $muted = "да" ]] && icon="󰍭"
+  muted=`pactl get-source-mute @DEFAULT_SOURCE@ | awk '{ print $2 }'`
   [[ $muted = "yes" ]] && icon="󰍭"
 
   echo -e " $icon $vol"
@@ -82,7 +80,7 @@ bat0() {
   res=""
 
   if [[ -d /sys/class/power_supply/BAT0/ ]]; then
-    bat0=$(cat /sys/class/power_supply/BAT0/capacity)
+    bat0=`cat /sys/class/power_supply/BAT0/capacity`
     icon0="$(bat_icon 0)"
     res+="$icon0 $bat0%"
 
@@ -94,7 +92,7 @@ bat1() {
   res=""
 
   if [[ -d /sys/class/power_supply/BAT1/ ]]; then
-    bat1=$(cat /sys/class/power_supply/BAT1/capacity)
+    bat1=`cat /sys/class/power_supply/BAT1/capacity`
     icon1="$(bat_icon 1)"
     res+="$icon1 $bat1%"
 
@@ -104,9 +102,9 @@ bat1() {
 
 bri() {
   if [[ -e /usr/bin/brightnessctl ]]; then
-    c=$(brightnessctl get)
-    m=$(brightnessctl max)
-    bri=$(printf "%.0f" $(echo "scale=1; ($c / $m) * 100" | bc))
+    c=`brightnessctl get`
+    m=`brightnessctl max`
+    bri=`printf "%.0f" $(echo "scale=1; ($c / $m) * 100" | bc)`
     echo -e "$(del)   $bri%"
   fi
 }
@@ -116,18 +114,18 @@ del() {
 }
 
 dete() {
-  echo -e $(date)
+  echo -e ` date`
 }
 
 mem() {
-  val=$(free -h | awk '/Mem/{print $3}')
+  val=`free -h | awk '/Память/{print $3}'`
   icon="󰍛"
 
   echo -e " $icon $val"
 }
 
 vpn() {
-  status=$(ip link | grep vpn | wc -l)
+  status=`ip link | grep vpn | wc -l`
   icon="󰅛"
   text="DOWN"
 
@@ -136,27 +134,15 @@ vpn() {
   echo -e " $icon $text"
 }
 
-# vpn_work() {
-#   status=$(ip link | grep work | wc -l)
-#   icon="󰅛 W"
-#   text="DOWN"
-# 
-#   [[ $status -gt 0 ]] && icon="󰱓 W" && text="UP"
-# 
-#   echo -e " $icon $text"
-# }
-
 keyboard() {
   icon="󰌌"
-  # text=`xkblayout-state print "%s" | awk '{print toupper($0)}'`
-  text=$(swaymsg -t get_inputs | jq 'map(select(has("xkb_active_layout_name")))[0].xkb_active_layout_name' | sed 's/"//g' | awk '{print toupper(substr($0, 0, 2))}')
+  text=`xkblayout-state print "%s" | awk '{print toupper($0)}'`
 
   echo -e " $icon $text"
 }
 
-SLEEP_SEC=0.1
+SLEEP_SEC=0.2
 while true; do
-  # echo "$(vpn_work)$(del)$(vpn)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)  "
-  echo "$(vpn)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)  "
+  echo "$(mem)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)  "
   sleep $SLEEP_SEC
 done
