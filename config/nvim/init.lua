@@ -255,11 +255,6 @@ require("lazy").setup({
     },
 
     {
-      'stevearc/conform.nvim',
-      opts = { format_on_save = { timeout_ms = 500, lsp_format = "fallback" } },
-    },
-
-    {
       "lewis6991/gitsigns.nvim",
       opts = {
         numhl = true,
@@ -298,8 +293,6 @@ vim.o.termguicolors = true
 vim.cmd.colorscheme("torte")
 
 require("fzf-lua").register_ui_select()
-
-vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 
 vim.opt.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
 
@@ -351,6 +344,7 @@ vim.lsp.enable("gopls")
 vim.lsp.enable("golangci_lint_ls")
 vim.lsp.enable("lua_ls")
 vim.lsp.enable("helm_ls")
+vim.lsp.enable("clangd")
 vim.lsp.enable("rust_analyzer")
 
 vim.diagnostic.config({ virtual_text = { prefix = "🐗", }, signs = false })
@@ -386,16 +380,16 @@ vim.api.nvim_create_autocmd("LspAttach", {
     local client = vim.lsp.get_client_by_id(event.data.client_id)
     if client == nil then return end
 
-    if not client:supports_method("textDocument/willSaveWaitUntil")
-        and client:supports_method("textDocument/formatting") then
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        group = vim.api.nvim_create_augroup("my.lsp", { clear = false }),
-        buffer = event.buf,
-        callback = function()
-          vim.lsp.buf.format({ bufnr = event.buf, id = client.id, timeout_ms = 1000 })
-        end,
-      })
-    end
+    -- if not client:supports_method("textDocument/willSaveWaitUntil")
+    --     and client:supports_method("textDocument/formatting") then
+    --   vim.api.nvim_create_autocmd("BufWritePre", {
+    --     group = vim.api.nvim_create_augroup("my.lsp", { clear = false }),
+    --     buffer = event.buf,
+    --     callback = function()
+    --       vim.lsp.buf.format({ bufnr = event.buf, id = client.id, timeout_ms = 1000 })
+    --     end,
+    --   })
+    -- end
 
     if client.server_capabilities.codeLensProvider then
       ---@diagnostic disable-next-line: param-type-mismatch
