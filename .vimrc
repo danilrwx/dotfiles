@@ -7,13 +7,13 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   Plug 'markonm/traces.vim'
   Plug 'sheerun/vim-polyglot'
 
-  " Plug 'tpope/vim-fugitive'
+  Plug 'mbbill/undotree'
+
+  Plug 'tpope/vim-fugitive'
   Plug 'airblade/vim-gitgutter'
 
   Plug 'yegappan/lsp'
 
-  Plug 'christoomey/vim-tmux-navigator'
-  Plug 'preservim/vimux'
   Plug 'vim-test/vim-test'
   Plug 'sebdah/vim-delve'
   Plug 'charlespascoe/vim-go-syntax'
@@ -93,12 +93,12 @@ match errorMsg '\s\+$'
 " colorscheme koehler
 highlight SignColumn ctermbg=none
 highlight LineNr ctermfg=243
-highlight Pmenu ctermbg=16 ctermfg=7
-highlight PmenuSel ctermbg=7 ctermfg=16
-highlight SpellBad ctermfg=16
-highlight SpellCap ctermfg=16
-highlight SpellRare ctermfg=16
-highlight SpellLocal ctermfg=16
+" highlight Pmenu ctermbg=16 ctermfg=7
+" highlight PmenuSel ctermbg=7 ctermfg=16
+" highlight SpellBad ctermfg=16
+" highlight SpellCap ctermfg=16
+" highlight SpellRare ctermfg=16
+" highlight SpellLocal ctermfg=16
 highlight DiffAdd ctermfg=16
 highlight DiffChange ctermfg=16
 highlight DiffDelete ctermfg=16
@@ -161,10 +161,6 @@ nnoremap <silent> ghu <cmd>GitGutterUndoHunk<cr>
 nnoremap <silent> ghp <cmd>GitGutterPreviewHunk<cr>
 
 nnoremap <silent> - <cmd>Dir<cr>
-
-let g:VimuxHeight = "30%"
-let g:delve_use_vimux = 1
-let test#strategy = "vimux"
 
 let g:gitgutter_sign_priority = 0
 let g:gitgutter_preview_win_floating = 1
