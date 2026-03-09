@@ -91,7 +91,7 @@ brew install htop fzf keychain neovim nvimpager lazygit gh yq xq jq difftastic \
   go golangci-lint-langserver gofumpt goimports go-task gopls \
   bash-language-server lua-language-server helm-ls \
   awk grep gnu-sed coreutils binutils findutils diffutils \
-  eza fastfetch ncdu ugrep tree-sitter-cli \
+  eza fastfetch ncdu ugrep \
   bash bash-completion@2
 
 
