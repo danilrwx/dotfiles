@@ -1,0 +1,11 @@
+fork = true
+frame = "transparent"
+idle = true
+srgb = true
+vsync = true
+
+[font]
+normal = ["Iosevka Nerd Font"]
+size = 18
+[font.features]
+"Iosevka Nerd Font" = [ "+liga" ]

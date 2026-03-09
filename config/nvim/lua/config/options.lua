@@ -40,9 +40,10 @@ vim.opt.spelllang = "ru_ru,en_us"
 vim.opt.undofile = true
 vim.opt.list = false
 vim.opt.showmode = true
-vim.opt.cursorline = true
+vim.opt.cursorline = false
 vim.opt.laststatus = 1
 vim.opt.cmdheight = 1
+
 vim.g.snacks_animate = false
 
 vim.filetype.add({
@@ -50,3 +51,11 @@ vim.filetype.add({
     ["werf.inc.yaml"] = "helm",
   },
 })
+
+if vim.g.neovide then
+  vim.g.neovide_input_macos_option_key_is_meta = "only_left"
+
+  vim.o.guifont = "Iosevka Nerd Font:h16"
+
+  vim.g.neovide_refresh_rate = 120
+end

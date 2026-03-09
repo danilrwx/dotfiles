@@ -11,6 +11,10 @@ base:
 	ln -sf $(PWD)/.vimrc ~/.vimrc
 	ln -snf $(PWD)/config/htop ~/.config/
 	ln -snf $(PWD)/config/nvim ~/.config/
+	ln -snf $(PWD)/config/bat ~/.config/
+	ln -snf $(PWD)/config/lsd ~/.config/
+	ln -snf $(PWD)/config/delta ~/.config/
+	ln -snf $(PWD)/config/helix ~/.config/
 	ln -snf $(PWD)/config/vim ~/.config/vim
 	ln -snf $(PWD)/config/lazygit ~/.config/
 	ln -snf $(PWD)/config/ghostty ~/.config/
@@ -51,9 +55,8 @@ brew-install:
 	/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 brew-packages:
-	brew install brew-cask-completion sops regclient k9s lazygit fzf httpie asdf ripgrep \
-	neofetch jq keychain wget fd openssl readline libyaml gmp autoconf tmux neovim \
-	yq fx yh highlight moar difftastic
+	brew install brew-cask-completion kubectl k9s lazygit fzf ripgrep jq keychain wget fd openssl tmux neovim \
+	yq fx yh highlight lsd difftastic
 
 brew-mac:
 	brew install chromium --no-quarantine
