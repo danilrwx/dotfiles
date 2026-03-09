@@ -21,6 +21,9 @@ vim.opt.shiftwidth     = 2
 vim.opt.colorcolumn    = { 120 }
 vim.opt.signcolumn     = "number"
 
+-- vim.opt.listchars      = { space = ' ', tab = '│ ' }
+-- vim.opt.list           = true
+
 
 vim.opt.background = "dark"
 vim.cmd("colorscheme torte")

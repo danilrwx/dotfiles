@@ -5,6 +5,28 @@ return {
     config = function() vim.keymap.set("n", "<Leader>u", vim.cmd.UndotreeToggle, { desc = "Open UndoTree" }) end,
   },
   {
+    "folke/todo-comments.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = {}
+  },
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    main = "ibl",
+    opts = {},
+  },
+  {
+    "echasnovski/mini.nvim",
+    version = false,
+    config = function()
+      require("mini.bracketed").setup()
+      require("mini.diff").setup()
+      require("mini.pairs").setup()
+      require("mini.surround").setup()
+      require("mini.trailspace").setup()
+      require("mini.completion").setup()
+    end
+  },
+  {
     "tpope/vim-fugitive",
     dependencies = { "shumphrey/fugitive-gitlab.vim", "tpope/vim-rhubarb" },
     config = function()
