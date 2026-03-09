@@ -46,7 +46,7 @@ button:hover {
 }
 
 #workspaces button {
-  margin: 0px 5px 0px 0px;
+  margin: 8px 5px 8px 0px;
   padding: 2px 3px;
   border-radius: 6px;
   background-color: transparent;
@@ -79,7 +79,7 @@ button:hover {
 #temperature,
 #scratchpad {
   padding: 2px 10px;
-  margin: 0px 0px 0px 8px;
+  margin: 8px 8px 8px 0px;
   background: #fbf1c7;
   color: #282828;
   border-radius: 6px;
