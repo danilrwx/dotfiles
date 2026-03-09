@@ -33,6 +33,7 @@ ln -sf $HOME/dotfiles/.tmux.conf $HOME/.tmux.conf
 ln -snf $HOME/dotfiles/config/k9s $HOME/.config/
 ln -snf $HOME/dotfiles/config/htop $HOME/.config/
 ln -snf $HOME/dotfiles/config/lazygit $HOME/.config/
+ln -snf $HOME/dotfiles/config/vim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/
 ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
 
@@ -61,7 +62,8 @@ elif [ "$ID" == "debian" ]; then
   log "Installing debian packages"
 
   sudo apt update -y
-  sudo apt install -y tmux git wget zip unzip curl tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 virt-manager flatpak gpg
+  sudo apt install -y vim-X11 tmux git wget zip unzip curl tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 \
+    virt-manager flatpak gpg
 fi
 
 
@@ -87,8 +89,8 @@ brew install htop fzf keychain neovim nvimpager lazygit gh yq xq jq difftastic \
   kubectl k9s kubecolor krew \
   go golangci-lint-langserver gofumpt goimports go-task gopls \
   bash-language-server lua-language-server helm-ls \
-  awk gawk grep gnu-sed coreutils binutils findutils diffutils \
-  eza fastfetch \
+  awk grep gnu-sed coreutils binutils findutils diffutils \
+  eza fastfetch ncdu \
   bash bash-completion@2
 
 
@@ -152,7 +154,7 @@ if [[ "$OS" == "Linux" ]]; then
 
   # install flapak applications ─────────────────────────────────────────────────────────────────────────────────────────
   log "Installing flatpak apps"
-  flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
+  flatpak install flathub -y org.telegram.desktop com.discordapp.Discord com.valvesoftware.Steam
 
   # install docker ──────────────────────────────────────────────────────────────────────────────────────────────────────
   if [ ! -f /usr/bin/docker ]; then

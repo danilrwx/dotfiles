@@ -47,8 +47,8 @@ alias less='nvimpager -p'
 alias kaf="kubectl apply -f"
 alias kad="kubectl delete -f"
 
-alias vi='nvim'
-alias vim='nvim'
+# alias vi='nvim'
+# alias vim='nvim'
 
 alias lg='lazygit'
 
