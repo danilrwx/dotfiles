@@ -1,0 +1,40 @@
+{
+  "plugins": {
+    "auto-session": {
+      "rev": "292492ab7af4bd8b9e37e28508bc8ce995722fd5",
+      "src": "https://github.com/rmagatti/auto-session"
+    },
+    "fzf-lua": {
+      "rev": "36d60dd59cd9bc0442352119fc0e45e1c9011e03",
+      "src": "https://github.com/ibhagwan/fzf-lua"
+    },
+    "nvim-treesitter": {
+      "rev": "4967fa48b0fe7a7f92cee546c76bb4bb61bb14d5",
+      "src": "https://github.com/nvim-treesitter/nvim-treesitter"
+    },
+    "oil.nvim": {
+      "rev": "f55b25e493a7df76371cfadd0ded5004cb9cd48a",
+      "src": "https://github.com/stevearc/oil.nvim"
+    },
+    "pipeline.nvim": {
+      "rev": "0aedeb88a01b4fe93937f4f1a5ba7632d4a88a79",
+      "src": "https://github.com/topaxi/pipeline.nvim"
+    },
+    "supermaven-nvim": {
+      "rev": "07d20fce48a5629686aefb0a7cd4b25e33947d50",
+      "src": "https://github.com/supermaven-inc/supermaven-nvim"
+    },
+    "tome": {
+      "rev": "4c4b31eeb8e8e12d1493a88b3870a257c7d15667",
+      "src": "https://github.com/laktak/tome"
+    },
+    "vim-fugitive": {
+      "rev": "61b51c09b7c9ce04e821f6cf76ea4f6f903e3cf4",
+      "src": "https://github.com/tpope/vim-fugitive"
+    },
+    "vim-test": {
+      "rev": "c174652ef8e4959628a52e3134f102923b7a6f0d",
+      "src": "https://github.com/vim-test/vim-test"
+    }
+  }
+}
