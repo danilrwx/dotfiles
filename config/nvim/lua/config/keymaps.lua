@@ -12,11 +12,6 @@ vim.keymap.set(
   { desc = "Change word by cursor over all buffer" }
 )
 
--- vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>zz")
--- vim.keymap.set("n", "<C-k>", "<cmd>cprev<CR>zz")
-
-vim.keymap.set("n", "<C-q>", Funcs.toggle_quickfix)
-
 vim.keymap.del("n", "<leader>gg")
 vim.keymap.del("n", "<leader>gG")
 vim.keymap.del("n", "<leader>gf")
@@ -36,11 +31,10 @@ vim.keymap.set("n", "<leader>go", "<cmd>GBrowse<CR>", { desc = "Git browse" })
 vim.keymap.set("n", "<leader>gd", "<cmd>Gvdiffsplit<CR>", { desc = "Git diff file" })
 vim.keymap.set("n", "<leader>gD", "<cmd>Gvdiffsplit HEAD<CR>", { desc = "Git diff with staged" })
 
-vim.keymap.set("n", "<leader>gS", "<cmd>Telescope git_status<CR>", { desc = "Pick git status" })
+vim.keymap.set("n", "<leader>gS", "<cmd>FzfLua git_status<CR>", { desc = "Pick git status" })
 
 vim.keymap.set("n", "<Leader>su", vim.cmd.UndotreeToggle, { desc = "Open UndoTree" })
 
--- vim.keymap.set("n", "<C-f>", "<cmd>Oil<CR>")
 local MiniFiles = require("mini.files")
 vim.keymap.set("n", "<C-f>", function()
   if not MiniFiles.close() then
