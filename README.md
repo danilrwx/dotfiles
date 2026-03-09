@@ -11,6 +11,7 @@
 
 ## Setup
 
+```sh
 git clone git@github.com:antoshindanil/dotfiles.git ~/dotfiles 
 cd dotfiles
 
