@@ -1,6 +1,3 @@
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
 vim.g.mapleader = ' '
 vim.g.maplocalleader = '\\'
 
@@ -30,10 +27,6 @@ else
   vim.opt.grepprg = "grep -RIn --exclude='zz_generated*' --exclude-dir='generated'"
 end
 
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
-
 vim.cmd.packadd('cfilter')
 
 vim.filetype.add({ extension = { yaml = 'helm' } })
@@ -50,10 +43,6 @@ vim.fn.sign_define('DapBreakpointCondition', { text = '🫸', texthl = '', lineh
 vim.fn.sign_define('DapLogPoint', { text = '📄', texthl = '', linehl = '', numhl = '' })
 vim.fn.sign_define('DapStopped', { text = '👉', texthl = '', linehl = '', numhl = '' })
 vim.fn.sign_define('DapBreakpointRejected', { text = '🚫', texthl = '', linehl = '', numhl = '' })
-
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
 
 vim.cmd.colorscheme("retrobox")
 
@@ -80,10 +69,6 @@ vim.api.nvim_set_hl(0, "DiagnosticWarn", { fg = "#FE8019" })
 vim.api.nvim_set_hl(0, "DiagnosticInfo", { fg = "#EBDBB2" })
 vim.api.nvim_set_hl(0, "DiagnosticHint", { fg = "#EBDBB2" })
 vim.api.nvim_set_hl(0, "DiagnosticOk", { fg = "#B8BB26" })
-
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
 
 vim.g.gitgutter_set_sign_backgrounds = 1
 vim.g.gitgutter_sign_priority = 0
@@ -125,6 +110,7 @@ require('auto-session').setup({ suppressed_dirs = { '~/', '~/Downloads', '/' } }
 require('nvim-treesitter.configs').setup({ auto_install = true, highlight = { enable = true } })
 
 require('fzf-lua').setup({ winopts = { fullscreen = true, preview = { layout = "vertical", vertical = "up:55%", border = "single" } } })
+require('fzf-lua').register_ui_select()
 
 require('symbol-usage').setup({
   kinds = {
@@ -144,10 +130,7 @@ require('dap-go').setup({})
 
 require('ghlite').setup({ view_split = 'tabnew', diff_split = 'tabnew', comment_split = 'tabnew' })
 
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
-
+---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('highlight_yank', {}),
   pattern = '*',
@@ -190,6 +173,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
 
     if client.server_capabilities.codeLensProvider then
+      ---@diagnostic disable-next-line: param-type-mismatch
       vim.api.nvim_create_autocmd({ 'BufEnter', 'CursorHold' },
         { callback = function() vim.lsp.codelens.refresh() end })
       vim.keymap.set('n', 'grc', '<cmd>lua vim.lsp.codelens.run()<cr>', opts)
@@ -200,10 +184,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
   end,
 })
-
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
 
 vim.keymap.set("n", "<c-l>", "<cmd>noh<Return><esc>")
 
@@ -222,13 +202,6 @@ vim.keymap.set("n", "-", "<cmd>Oil<cr>")
 
 vim.keymap.set("n", "<c-j>", "<cmd>cnext<cr>zz")
 vim.keymap.set("n", "<c-k>", "<cmd>cprev<cr>zz")
-vim.keymap.set("n", "<leader>j", "<cmd>lnext<cr>zz")
-vim.keymap.set("n", "<leader>k", "<cmd>lprev<cr>zz")
-
-vim.keymap.set("n", "<c-t>l", "<cmd>tabnext<cr>")
-vim.keymap.set("n", "<c-t>h", "<cmd>tabprev<cr>")
-vim.keymap.set("n", "<c-t>n", "<cmd>tabnew<cr>")
-vim.keymap.set("n", "<c-t>c", "<cmd>tabclose<cr>")
 
 vim.keymap.set("n", "<leader>gg", "<cmd>!tmux neww lazygit<cr>")
 
@@ -242,38 +215,25 @@ local toggle_quickfix = function()
 end
 vim.keymap.set("n", "<leader>q", toggle_quickfix)
 
-vim.keymap.set("n", "<leader>tc", "<cmd>GoCover<cr>")
-vim.keymap.set("n", "<leader>tC", "<cmd>GoCoverClear<cr>")
+vim.keymap.set("n", "<leader>m", '<cmd>lua require("treesj").toggle()<cr>')
 
 vim.keymap.set("n", "<leader>tr", "<cmd>TestNearest<cr>")
 vim.keymap.set("n", "<leader>tt", "<cmd>TestFile<cr>")
-vim.keymap.set("n", "<leader>ta", "<cmd>TestSuite<cr>")
-vim.keymap.set("n", "<leader>tl", "<cmd>TestLast<cr>")
-vim.keymap.set("n", "<leader>tv", "<cmd>TestVisit<cr>")
 
 vim.keymap.set("n", "<leader>b", "<cmd>lua require('fzf-lua').buffers()<cr>")
 vim.keymap.set("n", "<leader>f", "<cmd>lua require('fzf-lua').files()<cr>")
 vim.keymap.set("n", "<leader>/", "<cmd>lua require('fzf-lua').live_grep()<cr>")
 vim.keymap.set("n", "<leader>'", "<cmd>lua require('fzf-lua').resume()<cr>")
-vim.keymap.set("n", "<leader>sb", "<cmd>lua require('fzf-lua').buffers()<cr>")
-vim.keymap.set("n", "<leader>gs", "<cmd>lua require('fzf-lua').git_status()<cr>")
-vim.keymap.set("n", "<leader>gB", "<cmd>lua require('fzf-lua').git_branches()<cr>")
-vim.keymap.set("n", "<leader>ss", "<cmd>lua require('fzf-lua').git_branches()<cr>")
 vim.keymap.set("n", "<leader>D", "<cmd>lua require('fzf-lua').lsp_workspace_diagnostics()<cr>")
 
 vim.keymap.set({ "n", "v" }, "<leader>d", require("debugmaster").mode.toggle, { nowait = true })
-vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+-- vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
-vim.keymap.set("n", "<leader>g=", "<cmd>tab Git<cr>")
 vim.keymap.set("n", "<leader>gl", "<cmd>tab Git log --follow -p %<cr>")
 vim.keymap.set("n", "<leader>gL", "<cmd>tab Git log<cr>")
 vim.keymap.set("n", "<leader>gb", "<cmd>tab Git blame<cr>")
-vim.keymap.set("n", "<leader>gd", "<cmd>tab Git diff %<cr>")
-vim.keymap.set("n", "<leader>gD", "<cmd>tab Git diff<cr>")
-vim.keymap.set("n", "<leader>gP", '<cmd>Git push<cr>')
-vim.keymap.set("n", "<leader>gp", '<cmd>Git pull --rebase<cr>')
 
-vim.keymap.set("n", "<leader>m", '<cmd>lua require("treesj").toggle()<cr>')
+vim.keymap.set("n", "<leader>gS", "<cmd>GHLitePRSelect<cr>")
 
 vim.keymap.set("n", "ghs", "<cmd>GitGutterStageHunk<cr>")
 vim.keymap.set("n", "ghu", "<cmd>GitGutterUndoHunk<cr>")

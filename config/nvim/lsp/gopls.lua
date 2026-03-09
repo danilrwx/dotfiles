@@ -82,7 +82,7 @@ local function get_root_dir(fname)
       return clients[#clients].config.root_dir
     end
   end
-  return vim.fs.root(fname, 'go.work') or vim.fs.root(fname, 'go.mod') or vim.fs.root(fname, '.git')
+  return vim.fs.root(fname, '.git')
 end
 
 return {
