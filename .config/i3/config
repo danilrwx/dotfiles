@@ -39,6 +39,7 @@ bindsym $mod+Shift+s exec --no-startup-id screenshot-select
 bindsym $mod+d       exec --no-startup-id dmenu_run $dmenu_style
 bindsym $mod+Shift+u exec --no-startup-id clipmenu  $dmenu_style
 bindsym $mod+Shift+p exec --no-startup-id passmenu  $dmenu_style
+bindsym $mod+Shift+y exec --no-startup-id ytfzf -D
 
 bindsym Control+Mod1+s exec sys-notify
 bindsym Control+Mod1+c exec cal-notify
