@@ -1,3 +1,0 @@
-#!/bin/sh
-dmenu -fn 'Iosevka-11' -sb '#000000' -sf '#ffffff' -nb '#ffffff' -nf '#000000' "$@"
-
