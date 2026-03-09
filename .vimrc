@@ -47,15 +47,11 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'sheerun/vim-polyglot'
 
-Plug 'dense-analysis/ale'
-
 Plug 'tpope/vim-endwise'
 
 Plug 'tpope/vim-commentary'
 
 Plug 'jsit/disco.vim'
-
-Plug 'jasonccox/vim-wayland-clipboard'
 
 Plug 'mbbill/undotree'
 
@@ -92,14 +88,3 @@ nnoremap <Leader>s :%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>
 
 nnoremap <esc> :noh<return><esc>
 
-nnoremap <Leader>gd :ALEGoToDefinition<CR>
-nnoremap <Leader>K :ALEHover<CR>
-nnoremap <Leader>ff :ALEFix<CR>
-nnoremap <Leader>vrr :ALEFindReferences<CR>
-nnoremap <Leader>vrn :ALERename<CR>
-nnoremap <Leader>vca :ALECodeAction<CR>
-nnoremap <Leader>vws :ALESymbolSearch
-set omnifunc=ale#completion#OmniFunc
-let g:ale_fix_on_save = 1
-let g:ale_completion_enabled = 1
-let g:ale_fixers = { 'go': ['gofmt', 'goimports'], 'ruby': ['trim_whitespace'] }

@@ -11,8 +11,6 @@ alias ls='ls --color=auto'
 alias l='ls -lah'
 alias c='clear'
 alias grep='grep --color=auto'
-alias vi='vim'
-alias vim='nvim'
 
 alias rs='rails s'
 alias rc='rails c'
@@ -25,9 +23,13 @@ export PATH=$PATH:$GOPATH/bin
 
 export RUBYOPT="-W0"
 export EDITOR=nvim
-export TERM=xterm-256color
+export TERM=xterm
 export PATH=$PATH:$HOME/.local/bin/
+export PATH=$PATH:/var/lib/flatpak/exports/bin
 
 eval `keychain --agents ssh --eval --quiet ~/.ssh/id_ed25519`
 
 set -o vi
+
+. "$HOME/.asdf/asdf.sh"
+. "$HOME/.asdf/completions/asdf.bash"
