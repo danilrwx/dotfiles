@@ -118,7 +118,7 @@ dete() {
 }
 
 mem() {
-  val=`free -h | awk '/Память/{print $3}'`
+  val=`free -h | awk '/Mem/{print $3}'`
   icon="󰍛"
 
   echo -e " $icon $val"
@@ -141,7 +141,7 @@ keyboard() {
   echo -e " $icon $text"
 }
 
-SLEEP_SEC=0.2
+SLEEP_SEC=1
 while true; do
   echo "$(mem)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)  "
   sleep $SLEEP_SEC

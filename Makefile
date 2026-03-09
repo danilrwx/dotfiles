@@ -33,7 +33,7 @@ git:
 
 ubuntu-packages:
 	sudo apt install -y build-essential curl bash-completion xorg i3 xcompmgr hsetroot \
-	xfce4-terminal pavucontrol dunst acpi maim xclip xsel
+	xfce4-terminal dunst acpi maim xclip xsel pipewire pipewire-pulse pavucontrol
 
 brew-install:
 	/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
