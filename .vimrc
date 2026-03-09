@@ -164,3 +164,136 @@ if has('patch-9.1.0375')
   packadd! comment
 endif
 
+if filereadable(expand("~/.vim/autoload/plug.vim"))
+  call plug#begin('~/.local/share/vim/plugins')
+    Plug 'ap/vim-buftabline'
+
+    Plug 'tpope/vim-fugitive'
+
+    Plug 'airblade/vim-gitgutter'
+
+    Plug 'mbbill/undotree'
+
+    Plug 'charlespascoe/vim-go-syntax'
+    Plug 'kyoh86/vim-go-coverage'
+    Plug 'sebdah/vim-delve'
+
+    Plug 'vim-test/vim-test'
+
+    Plug 'prabirshrestha/vim-lsp'
+    Plug 'mattn/vim-lsp-settings'
+    Plug 'prabirshrestha/asyncomplete.vim'
+    Plug 'prabirshrestha/asyncomplete-lsp.vim'
+
+    Plug 'markonm/traces.vim'
+
+    if has('vim9script')
+      Plug 'habamax/vim-dir'
+      Plug 'girishji/vimbits'
+    endif
+
+    Plug 'augmentcode/augment.vim'
+  call plug#end()
+
+  if has('vim9script')
+    nnoremap <bs> <cmd>Dir<cr>
+  endif
+
+  let g:gitgutter_sign_priority = 0
+  let g:gitgutter_preview_win_floating = 1
+
+  let g:gitgutter_sign_added = '🮊'
+  let g:gitgutter_sign_modified = '🮊'
+  let g:gitgutter_sign_removed = '▁'
+  let g:gitgutter_sign_removed_first_line = '▔'
+  let g:gitgutter_sign_modified_removed = "🭪"
+
+  inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
+
+  let g:lsp_settings = {
+        \  'golangci-lint-langserver': {
+        \    'initialization_options': {'command': ['golangci-lint', 'run', '--out-format', 'json', '--issues-exit-code=1']}
+        \   }
+        \}
+
+  let g:lsp_settings_filetype_go = ['golangci-lint-langserver', 'gopls']
+
+  let g:lsp_semantic_enabled = 1
+
+  let g:lsp_use_lua = has('nvim-0.4.0') || (has('lua') && has('patch-8.2.0775'))
+
+  let g:lsp_diagnostics_float_cursor = 1
+  let g:lsp_float_max_width = 80
+
+	let g:lsp_diagnostics_highlights_delay = 50
+  let g:lsp_diagnostics_highlights_insert_mode_enabled = 0
+
+	let g:lsp_diagnostics_signs_delay = 50
+  let g:lsp_diagnostics_signs_error = {'text': '💩'}
+  let g:lsp_diagnostics_signs_warning = {'text': '💫'}
+  let g:lsp_diagnostics_signs_information = {'text': '🔩'}
+  let g:lsp_diagnostics_signs_hint = {'text': '📎'}
+
+	let g:lsp_diagnostics_virtual_text_delay = 50
+  let g:lsp_diagnostics_virtual_text_prefix = " 🐗 "
+  let g:lsp_diagnostics_virtual_text_align = 'after'
+  let g:lsp_diagnostics_virtual_text_wrap = "truncate"
+
+  hi LspErrorText guifg=#fb4934 guibg=NONE
+
+  let g:lsp_document_code_action_signs_enabled = 0
+
+  let g:lsp_experimental_workspace_folders = 1
+
+  augroup lsp_install
+    au!
+    autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+  augroup END
+
+  function! s:on_lsp_buffer_enabled() abort
+    setlocal omnifunc=lsp#complete
+    if exists('+tagfunc') | setlocal tagfunc=lsp#tagfunc | endif
+
+    nnoremap <buffer> grs <plug>(lsp-document-symbol-search)
+    nnoremap <buffer> grS <plug>(lsp-workspace-symbol-search)
+    nnoremap <buffer> grr <plug>(lsp-references)
+    nnoremap <buffer> gri <plug>(lsp-implementation)
+    nnoremap <buffer> grn <plug>(lsp-rename)
+    nnoremap <buffer> grc <plug>(lsp-code-lens)
+    nnoremap <buffer> gra <plug>(lsp-code-action)
+
+    nnoremap <buffer> [d <plug>(lsp-previous-diagnostic)
+    nnoremap <buffer> ]d <plug>(lsp-next-diagnostic)
+
+    nnoremap <buffer> K <plug>(lsp-hover)
+
+    nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
+    nnoremap <buffer> <expr><c-b> lsp#scroll(-4)
+
+    inoremap <buffer> <expr><c-f> lsp#scroll(+4)
+    inoremap <buffer> <expr><c-d> lsp#scroll(-4)
+
+
+    autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
+  endfunction
+
+  nnoremap <silent> <leader>tr :TestNearest<cr>
+  nnoremap <silent> <leader>tt :TestFile<cr>
+  nnoremap <silent> <leader>ta :TestSuite<cr>
+  nnoremap <silent> <leader>tl :TestLast<cr>
+  nnoremap <silent> <leader>tv :TestVisit<cr>
+
+  nnoremap <silent> <leader>gl :tab Git log --follow -p %<cr>
+  nnoremap <silent> <leader>gL :tab Git log<cr>
+  nnoremap <silent> <leader>gb :tab Git blame<cr>
+  nnoremap <silent> <leader>gd :tab Git diff %<cr>
+  nnoremap <silent> <leader>gD :tab Git diff <cr>
+  nnoremap <silent> <leader>gP :Git push<cr>
+  nnoremap <silent> <leader>gp :Git pull --rebase<cr>
+
+  nnoremap <silent> <leader>u :UndotreeToggle<cr>
+
+  nnoremap ghs <plug>(GitGutterStageHunk)
+  nnoremap ghu <plug>(GitGutterUndoHunk)
+  nnoremap ghp <plug>(GitGutterPreviewHunk)
+endif
