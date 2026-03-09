@@ -17,7 +17,7 @@ for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnuman; do export MANPATH=$d:$MANPATH;
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/dotfiles/bin:$PATH"
-export PATH="$HOME/private-dotfiles/bin:$PATH"
+export PATH="$HOME/dotfiles/private/bin:$PATH"
 export PATH="$HOME/.bun/bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
 
@@ -44,8 +44,8 @@ if [ -f /etc/bashrc ]; then
   source /etc/bashrc
 fi
 
-if [ -f $HOME/private-dotfiles/.bash_profile ]; then
-  source $HOME/private-dotfiles/.bash_profile
+if [ -f $HOME/dotfiles/private/.bash_profile ]; then
+  source $HOME/dotfiles/private/.bash_profile
 fi
 
 if [ -f $HOME/private.bash ]; then
