@@ -1,5 +1,4 @@
 all: config-install
-
 config-install:
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 	ln -snf  $(PWD)/.config/sway ~/.config/sway
@@ -37,6 +36,7 @@ git:
 	git config --global core.editor "helix"
 	git config --global user.name "Danil Antoshin"
 	git config --global user.email antoshindanil@ya.ru
+	git config --global pull.rebase true
 
 git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
