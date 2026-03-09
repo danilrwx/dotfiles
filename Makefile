@@ -3,10 +3,10 @@ config-base:
 	ln -snf $(PWD)/.config/helix ~/.config/helix
 	ln -snf $(PWD)/.config/htop ~/.config/htop
 	ln -snf $(PWD)/.config/lazygit ~/.config/lazygit
-	ln -sf $(PWD)/.zprofile ~/.zprofile
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 
 config-sway:
+	ln -sf $(PWD)/.zprofile ~/.zprofile
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 	ln -snf $(PWD)/.config/waybar ~/.config/waybar
 	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/electron-flags.conf
@@ -17,6 +17,9 @@ arch-sway:
 
 arch-base:
 	sudo pacman --needed -S htop git curl zsh firefox lazygit helix go rust otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
+
+wsl-base:
+	sudo apt install htop git curl zsh autoconf bison patch build-essential rustc libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libgmp-dev libncurses5-dev libffi-dev libgdbm6 libgdbm-dev libdb-dev uuid-dev imagemagick libmariadb-dev libpq-dev libmagickwand-dev
 
 deps: deps-gem deps-npm deps-go
 
