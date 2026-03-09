@@ -7,7 +7,7 @@ vol() {
   muted=`pactl get-sink-mute @DEFAULT_SINK@ | awk '{ print $2 }'`
   [[ $muted = "yes" ]] && icon="󰝟"
 
-  echo -e "$icon $vol"
+  echo -e " $icon $vol"
 }
 
 mic() {
@@ -17,7 +17,7 @@ mic() {
   muted=`pactl get-source-mute @DEFAULT_SOURCE@ | awk '{ print $2 }'`
   [[ $muted = "yes" ]] && icon="󰍭"
 
-  echo -e "$icon $vol"
+  echo -e " $icon $vol"
 }
 
 bat_icon() {
@@ -83,9 +83,9 @@ bat0() {
     bat0=`cat /sys/class/power_supply/BAT0/capacity`
     icon0="$(bat_icon 0)"
     res+="$icon0 $bat0%"
-  fi
 
-  echo -e "$res"
+    echo -e " $(del)$res"
+  fi
 }
 
 bat1() {
@@ -95,16 +95,18 @@ bat1() {
     bat1=`cat /sys/class/power_supply/BAT1/capacity`
     icon1="$(bat_icon 1)"
     res+="$icon1 $bat1%"
-  fi
 
-  echo -e "$res"
+    echo -e " $(del)$res"
+  fi
 }
 
 bri() {
-  c=`brightnessctl get`
-  m=`brightnessctl max`
-  bri=`printf "%.0f" $(echo "scale=1; ($c / $m) * 100" | bc)`
-  echo -e "  $bri%"
+  if [[ -e /usr/bin/brightnessctl ]]; then
+    c=`brightnessctl get`
+    m=`brightnessctl max`
+    bri=`printf "%.0f" $(echo "scale=1; ($c / $m) * 100" | bc)`
+    echo -e "$(del)   $bri%"
+  fi
 }
 
 del() {
@@ -112,14 +114,14 @@ del() {
 }
 
 dete() {
-  echo -e `date`
+  echo -e ` date`
 }
 
 mem() {
   val=`free -h | awk '/Mem/{print $3}'`
   icon="󰍛"
 
-  echo -e "$icon $val"
+  echo -e " $icon $val"
 }
 
 vpn() {
@@ -129,18 +131,18 @@ vpn() {
 
   [[ $status -gt 0 ]] && icon="󰱓" && text="UP"
 
-  echo -e "$icon $text"
+  echo -e " $icon $text"
 }
 
 keyboard() {
   icon="󰌌"
   text=`xkblayout-state print "%s" | awk '{print toupper($0)}'`
 
-  echo -e "$icon $text"
+  echo -e " $icon $text"
 }
 
 SLEEP_SEC=1
 while true; do
-  echo "$(vpn) $(del) $(vol) $(del) $(mic) $(del) $(bat0) $(del) $(bat1) $(del) $(bri) $(del) $(keyboard) $(del) $(date)  "
+  echo "$(vpn)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)  "
   sleep $SLEEP_SEC
 done
