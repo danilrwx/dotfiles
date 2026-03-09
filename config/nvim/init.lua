@@ -282,7 +282,7 @@ require("lazy").setup({
 
 
 vim.o.termguicolors = true
-vim.cmd.colorscheme("torte")
+vim.cmd.colorscheme("koehler")
 
 require("fzf-lua").register_ui_select()
 
