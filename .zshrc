@@ -15,8 +15,8 @@ alias wget='wget -c '
 alias lg='lazygit'
 
 # export LANG=ru_RU.UTF-8
-export EDITOR='vim'
-export VISUAL='vim'
+export EDITOR='nvim'
+export VISUAL='nvim'
 
 export PATH=$PATH:$GOPATH/bin/
 export PATH=$PATH:$HOME/.cargo/bin/
