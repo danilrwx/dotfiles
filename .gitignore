@@ -23,6 +23,7 @@ config/k9s/clusters
 config/pi/agent/bin/*
 config/pi/agent/cache/*
 config/pi/agent/sessions/*
+config/pi/agent/extensions/node_modules/*
 config/pi/agent/git
 config/pi/agent/auth.json
 
