@@ -1,0 +1,11 @@
+k9s:
+  liveViewAutoRefresh: true
+  refreshRate: 2
+  maxConnRetry: 5
+  readOnly: false
+  ui:
+    enableMouse: true
+    logoless: true
+    # headless: true
+    skin: transparent
+    reactive: true
