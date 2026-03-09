@@ -8,12 +8,12 @@ endif
 
 call plug#begin('~/.vim/plugged')
 
-"Тема
-Plug 'joshdick/onedark.vim'
+" Тема
+Plug 'RRethy/nvim-base16'
 
 " Нижняя панель
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
+" Plug 'vim-airline/vim-airline'
+" Plug 'dawikur/base16-vim-airline-themes'
 
 " Стартовый экран
 Plug 'mhinz/vim-startify'
@@ -23,7 +23,7 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
 " Файловый менеджер
-Plug 'scrooloose/nerdtree'
+Plug 'kevinhwang91/rnvimr'
 
 " Удобные комментарии
 Plug 'preservim/nerdcommenter'
@@ -33,6 +33,11 @@ Plug 'dense-analysis/ale'
 
 " LSP
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'fannheyward/coc-marketplace'
+Plug 'sheerun/vim-polyglot'
+
+" Запуск кода
+Plug 'michaelb/sniprun', {'do': 'bash install.sh'}
 
 " Добавляет end в конец блока
 Plug 'tpope/vim-endwise'
@@ -44,10 +49,10 @@ Plug 'rlue/vim-barbaric'
 Plug 'puremourning/vimspector'
 
 " Терминал
-Plug 'kassio/neoterm'
+Plug 'akinsho/toggleterm.nvim'
 
 " Подсветка синтаксиса
-Plug 'sheerun/vim-polyglot'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
 " Для руби
 Plug 'tpope/vim-rails'
@@ -70,11 +75,26 @@ Plug 'Valloric/MatchTagAlways'
 Plug 'ntpeters/vim-better-whitespace'
 
 " Великий гит
+Plug 'kdheepak/lazygit.nvim'
 Plug 'tpope/vim-fugitive'
 
+" Подсветка изменений гита
+Plug 'lewis6991/gitsigns.nvim'
+
+" Найти и заменить
+Plug 'windwp/nvim-spectre'
+
+" Плавный скролл
+Plug 'karb94/neoscroll.nvim'
+
+" Подсветка отступов
+Plug 'nathanaelkane/vim-indent-guides'
+
+" Зависимости для popup плагинов
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-lua/popup.nvim'
+
 let g:coc_global_extensions = [
-      \ 'coc-angular',
-      \ 'coc-markdownlint',
       \ 'coc-tsserver',
       \ 'coc-prettier',
       \ 'coc-html',
@@ -85,25 +105,25 @@ let g:coc_global_extensions = [
       \ 'coc-stylelint',
       \ 'coc-vimlsp',
       \ 'coc-go',
-      \ 'coc-elixir',
       \ 'coc-json',
       \ 'coc-eslint',
-      \ 'coc-jest',
       \ 'coc-solargraph',
       \ 'coc-yaml',
       \ 'coc-highlight',
       \ 'coc-snippets',
       \ 'coc-diagnostic',
       \ 'coc-yank',
-      \ 'coc-git',
       \]
 
 call plug#end()
 
 source ~/dotfiles/files/vim-configs/base.vim
-source ~/dotfiles/files/vim-configs/nerdtree.vim
 source ~/dotfiles/files/vim-configs/fzf.vim
 source ~/dotfiles/files/vim-configs/ale.vim
 source ~/dotfiles/files/vim-configs/coc.vim
 source ~/dotfiles/files/vim-configs/coc-plugins.vim
 source ~/dotfiles/files/vim-configs/debugger.vim
+source ~/dotfiles/files/vim-configs/spectre.vim
+source ~/dotfiles/files/vim-configs/gitsigns.vim
+source ~/dotfiles/files/vim-configs/terminal.vim
+
