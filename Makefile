@@ -21,12 +21,11 @@ packages: copr-packages base-packages ruby-packages dev-packages brew-install br
 
 copr-packages:
 	sudo dnf copr enable yohane-shiro/nekoray
-	dnf copr enable che/nerd-fonts
 
 system-packages:
 	sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$$(rpm -E %fedora).noarch.rpm
 	sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$$(rpm -E %fedora).noarch.rpm
-	sudo dnf install -y nvtop nekoray nerd-fonts
+	sudo dnf install -y nvtop nekoray
 	sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
 	sudo dnf install -y lame\* --exclude=lame-devel
 	sudo dnf group upgrade -y --with-optional Multimedia
