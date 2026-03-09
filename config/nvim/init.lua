@@ -100,7 +100,7 @@ vim.pack.add({
   { src = 'https://github.com/airblade/vim-gitgutter' },
   { src = 'https://github.com/tpope/vim-fugitive' },
 
-  { src = 'https://github.com/nvim-lua/plenary.nvim', },
+  { src = 'https://github.com/miroshQa/debugmaster.nvim' },
   { src = 'https://github.com/mfussenegger/nvim-dap' },
   { src = 'https://github.com/leoluz/nvim-dap-go' },
 
@@ -110,6 +110,8 @@ vim.pack.add({
   { src = 'https://github.com/vim-test/vim-test' },
 
   { src = 'https://github.com/laktak/tome' },
+
+  { src = 'https://github.com/daliusd/ghlite.nvim' },
 
   { src = 'https://github.com/supermaven-inc/supermaven-nvim' },
 })
@@ -139,6 +141,8 @@ require('symbol-usage').setup({
 require('treesj').setup({ use_default_keymaps = false, })
 
 require('dap-go').setup({})
+
+require('ghlite').setup({ view_split = 'tabnew', diff_split = 'tabnew', comment_split = 'tabnew' })
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -257,22 +261,8 @@ vim.keymap.set("n", "<leader>gB", "<cmd>lua require('fzf-lua').git_branches()<cr
 vim.keymap.set("n", "<leader>ss", "<cmd>lua require('fzf-lua').git_branches()<cr>")
 vim.keymap.set("n", "<leader>D", "<cmd>lua require('fzf-lua').lsp_workspace_diagnostics()<cr>")
 
-vim.keymap.set("n", "<leader>dB", '<cmd>lua require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))<cr>')
-vim.keymap.set("n", "<leader>db", '<cmd>lua require("dap").toggle_breakpoint()<cr>')
-vim.keymap.set("n", "<leader>dc", '<cmd>lua require("dap").continue()<cr>')
-vim.keymap.set("n", "<leader>dC", '<cmd>lua require("dap").run_to_cursor()<cr>')
-vim.keymap.set("n", "<leader>dg", '<cmd>lua require("dap").goto_()<cr>')
-vim.keymap.set("n", "<leader>di", '<cmd>lua require("dap").step_into()<cr>')
-vim.keymap.set("n", "<leader>dj", '<cmd>lua require("dap").down()<cr>')
-vim.keymap.set("n", "<leader>dk", '<cmd>lua require("dap").up()<cr>')
-vim.keymap.set("n", "<leader>dl", '<cmd>lua require("dap").run_last()<cr>')
-vim.keymap.set("n", "<leader>do", '<cmd>lua require("dap").step_out()<cr>')
-vim.keymap.set("n", "<leader>dO", '<cmd>lua require("dap").step_over()<cr>')
-vim.keymap.set("n", "<leader>dP", '<cmd>lua require("dap").pause()<cr>')
-vim.keymap.set("n", "<leader>dr", '<cmd>lua require("dap").repl.toggle()<cr>')
-vim.keymap.set("n", "<leader>ds", '<cmd>lua require("dap").session()<cr>')
-vim.keymap.set("n", "<leader>dt", '<cmd>lua require("dap").terminate()<cr>')
-vim.keymap.set("n", "<leader>dw", '<cmd>lua require("dap.ui.widgets").hover()<cr>')
+vim.keymap.set({ "n", "v" }, "<leader>d", require("debugmaster").mode.toggle, { nowait = true })
+vim.keymap.set("t", "<C-\\>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 vim.keymap.set("n", "<leader>g=", "<cmd>tab Git<cr>")
 vim.keymap.set("n", "<leader>gl", "<cmd>tab Git log --follow -p %<cr>")
