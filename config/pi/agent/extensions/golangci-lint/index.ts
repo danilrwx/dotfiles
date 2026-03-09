@@ -13,7 +13,6 @@ import * as path from "node:path";
 import * as fs from "node:fs";
 import * as child_process from "node:child_process";
 import { type ExtensionAPI, type ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { Text } from "@mariozechner/pi-tui";
 
 type HookMode = "edit_write" | "agent_end" | "disabled";
 
@@ -21,7 +20,7 @@ const DEFAULT_HOOK_MODE: HookMode = "edit_write";
 const SETTINGS_NAMESPACE = "golangci-lint";
 const CONFIG_ENTRY = "golangci-lint-config";
 
-const DIM = "\x1b[2m", GREEN = "\x1b[32m", YELLOW = "\x1b[33m", RED = "\x1b[31m", RESET = "\x1b[0m";
+const GREEN = "\x1b[32m", YELLOW = "\x1b[33m", RESET = "\x1b[0m";
 
 interface HookConfigEntry {
   scope: "session" | "global";
@@ -37,7 +36,6 @@ function normalizeHookMode(value: unknown): HookMode | undefined {
 export default function (pi: ExtensionAPI) {
   let statusUpdateFn: ((key: string, text: string | undefined) => void) | null = null;
   let hookMode: HookMode = DEFAULT_HOOK_MODE;
-  let hookScope: "session" | "global" = "global";
   
   const touchedFiles: Set<string> = new Set();
   const globalSettingsPath = path.join(process.env.HOME || "", ".pi", "agent", "settings.json");
@@ -96,14 +94,12 @@ export default function (pi: ExtensionAPI) {
       const normalized = normalizeHookMode(entry.hookMode);
       if (normalized) {
         hookMode = normalized;
-        hookScope = "session";
         return;
       }
     }
 
     const globalSetting = getGlobalHookMode();
     hookMode = globalSetting ?? DEFAULT_HOOK_MODE;
-    hookScope = "global";
   }
 
   function persistHookEntry(entry: HookConfigEntry): void {
@@ -236,7 +232,6 @@ export default function (pi: ExtensionAPI) {
       }
 
       hookMode = nextMode;
-      hookScope = scope;
       touchedFiles.clear();
       persistHookEntry({ scope, hookMode: nextMode });
       updateStatus();
@@ -274,7 +269,7 @@ export default function (pi: ExtensionAPI) {
     touchedFiles.clear();
   });
 
-  pi.on("agent_end", async (event, ctx) => {
+  pi.on("agent_end", async (_event, ctx) => {
     if (hookMode !== "agent_end") return;
     if (touchedFiles.size === 0) return;
     if (!ctx.isIdle() || ctx.hasPendingMessages()) return;

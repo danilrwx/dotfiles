@@ -1,12 +1,14 @@
 {
-  "lastChangelogVersion": "0.56.1",
+  "lastChangelogVersion": "0.56.2",
   "theme": "ocean-breeze",
-  "defaultProvider": "flant",
-  "defaultModel": "gpt-5.2-codex",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.3-codex",
   "defaultThinkingLevel": "medium",
   "packages": [
     "npm:pi-cursor-agent",
-    "npm:lsp-pi"
+    "npm:lsp-pi",
+    "npm:pi-amplike",
+    "npm:@tmustier/pi-usage-extension"
   ],
   "lsp": {
     "hookMode": "edit_write"

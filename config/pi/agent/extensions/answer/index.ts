@@ -163,9 +163,11 @@ class QnAComponent implements Component {
 		const editorTheme: EditorTheme = {
 			borderColor: this.dim,
 			selectList: {
-				selectedBg: (s: string) => `\x1b[44m${s}\x1b[0m`,
-				matchHighlight: this.cyan,
-				itemSecondary: this.gray,
+				selectedPrefix: (s: string) => `\x1b[44m${s}\x1b[0m`,
+				selectedText: (s: string) => `\x1b[44m${s}\x1b[0m`,
+				description: this.gray,
+				scrollInfo: this.dim,
+				noMatch: this.yellow,
 			},
 		};
 
@@ -179,10 +181,6 @@ class QnAComponent implements Component {
 		};
 	}
 
-	private allQuestionsAnswered(): boolean {
-		this.saveCurrentAnswer();
-		return this.answers.every((a) => (a?.trim() || "").length > 0);
-	}
 
 	private saveCurrentAnswer(): void {
 		this.answers[this.currentIndex] = this.editor.getText();
