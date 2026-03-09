@@ -29,6 +29,9 @@ vim.api.nvim_set_hl(0, "Pmenu", { bg = "#1C1C1C" })
 vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#83a598", bg = "#1C1C1C" })
 vim.api.nvim_set_hl(0, "PmenuKindSel", { fg = "#1C1C1C", bg = "#83a598" })
 vim.api.nvim_set_hl(0, "PmenuExtra", { bg = "#1C1C1C" })
+vim.api.nvim_set_hl(0, "Added", { fg = "#b8bb26" })
+vim.api.nvim_set_hl(0, "Changed", { fg = "#83a598" })
+vim.api.nvim_set_hl(0, "Removed", { fg = "#fb4934" })
 
 vim.cmd.packadd("cfilter")
 
