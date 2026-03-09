@@ -13,6 +13,13 @@ config-i3:
 	ln -snf $(PWD)/.config/rofi ~/.config/rofi
 	ln -snf $(PWD)/.config/ranger ~/.config/ranger
 
+config-xorg:
+	ln -snf $(PWD)/Backgrounds ~/Backgrounds
+	ln -snf $(PWD)/.config/awesome ~/.config/awesome
+	ln -sf $(PWD)/.bash_profile ~/.bash_profile
+	ln -snf $(PWD)/.config/alacritty ~/.config/alacritty
+	ln -sf $(PWD)/.xinitrc ~/.xinitrc
+
 arch-base:
 	sudo pacman --needed -S htop git curl zsh lazygit go rust  man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick zip unzip ranger jq
 
