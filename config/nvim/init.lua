@@ -18,7 +18,7 @@ require("lazy").setup({
   spec = {
     { import = "plugins" },
   },
-  install = { colorscheme = { "retrobox" } },
+  install = { colorscheme = { "lunarperche" } },
   checker = { enabled = false },
 })
 
