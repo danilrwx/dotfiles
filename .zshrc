@@ -18,6 +18,7 @@ setopt HIST_SAVE_NO_DUPS
 
 alias ls='ls --color=auto'
 alias so='source ~/.zshrc'
+alias sp='source ~/.zprofile'
 alias c='clear'
 alias grep='grep --color=auto'
 alias untar='tar -zxvf '
@@ -33,11 +34,17 @@ compdef kubecolor=kubectl
 
 if [ -e $(brew --prefix)/opt/zinit/zinit.zsh ]; then
   source $(brew --prefix)/opt/zinit/zinit.zsh
+
+  zinit light Aloxaf/fzf-tab
+  zinit light jeffreytse/zsh-vi-mode
+  zinit light zdharma-continuum/fast-syntax-highlighting
+  zinit load zdharma-continuum/history-search-multi-word
+
+  zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
 fi
 
-zinit light Aloxaf/fzf-tab
-zinit light zdharma-continuum/fast-syntax-highlighting
-zinit load zdharma-continuum/history-search-multi-word
+bindkey '^P' history-beginning-search-backward
+bindkey '^N' history-beginning-search-forward
 
 source <(flint completion --shell=zsh)
 source <(kubectl completion zsh)
