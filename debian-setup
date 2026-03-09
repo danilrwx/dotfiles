@@ -6,8 +6,6 @@ git remote set-url origin git@github.com:danilrwx/dotfiles.git
 # Make symlinks for configs
 mkdir -p ~/.config
 
-ln -sf ~/dotfiles/.zshrc ~/
-
 ln -sf ~/dotfiles/.gitconfig ~/
 ln -sf ~/dotfiles/.gitignore_global ~/
 ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
@@ -42,6 +40,9 @@ sudo apt install -y libnss-extrausers openssh-server cron python3-distro python3
 if [ ! -d ~/.oh-my-zsh ]; then
 	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
+
+rm ~/.zshrc
+ln -sf ~/dotfiles/.zshrc ~/
 
 # Setup keyboard layout
 if [ ! -f /etc/X11/xorg.conf.d/00-keyboard.conf ]; then
