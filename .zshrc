@@ -20,6 +20,7 @@ alias kaf="kubectl apply -f"
 alias kad="kubectl delete -f"
 alias vi='nvim'
 alias vim='nvim'
+alias lg='lazygit'
 
 source <(kubectl completion zsh)
 compdef kubecolor=kubectl
@@ -29,19 +30,6 @@ alias k=kubecolor
 export EDITOR='nvim'
 export VISUAL='nvim'
 
-export PATH=$PATH:$HOME/.cargo/bin/
-export PATH=$PATH:$HOME/.local/bin/
-export PATH=$PATH:$HOME/dotfiles/bin/
-export PATH=$PATH:$HOME/.bun/bin
-export PATH=$PATH:$HOME/.aid/bin
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-
-[[ "$PATH" == *"$HOME/bin:"* ]] || export PATH="$HOME/bin:$PATH"
-
-export GOPATH=$HOME/go
-export GOBIN=$GOPATH/bin
-export PATH=$PATH:$GOBIN
-
 export XDG_CONFIG_HOME="$HOME/.config"
 export K9S_CONFIG_DIR=$HOME/.config/k9s
 export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
@@ -50,6 +38,7 @@ export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -na
 [[ -e /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 [[ -e /home/linuxbrew/.linuxbrew/bin/brew ]] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
+source <(flint completion --shell=zsh)
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   eval $( keychain --eval -q )
@@ -73,5 +62,3 @@ autoload -Uz compinit && compinit -i
 
 [[ -e ~/private.zsh ]] && source ~/private.zsh
 
-
-! { which flint | grep -qsE "^/home/danil/.trdl/"; } && [[ -x "$HOME/bin/trdl" ]] && source $("$HOME/bin/trdl" use flint "2")

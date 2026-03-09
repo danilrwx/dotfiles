@@ -5,13 +5,13 @@ set $down  j
 set $up    k
 set $right l
 
-set $bg       #000000
-set $fg       #ffffff
-set $red      #ff0000
-set $darkgray #707070
+set $bg       #1e1e2e
+set $fg       #cdd6f4
+set $red      #f38ba8
+set $darkgray #7f849c
 
-set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#000000' -sb '#ffffff' -nf '#ffffff' -nb '#000000' "$@"
-set $term alacritty
+set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1e1e2e' -sb '#cdd6f4' -nf '#cdd6f4' -nb '#1e1e2e' "$@"
+set $term xfce4-terminal
 
 font pango:Iosevka Nerd Font 12
 
@@ -37,6 +37,7 @@ bindsym $mod+d       exec --no-startup-id dmenu-apps $dmenu_style
 
 bindsym Control+Mod1+s exec sys-notify
 bindsym Control+Mod1+c exec cal-notify
+bindsym $mod+Shift+b exec update-wallpaper
 
 floating_modifier $mod
 
