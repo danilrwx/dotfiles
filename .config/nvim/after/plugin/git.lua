@@ -1,2 +1,1 @@
-require('neogit').setup {}
-vim.keymap.set("n", "<Leader>gg", ":Neogit<CR>")
+vim.keymap.set("n", "<Leader>gg", ":LazyGit<CR>")
