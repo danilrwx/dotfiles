@@ -1,19 +1,18 @@
+if [ -z "$PS1" ]; then
+  return
+fi
+
 if [ -f /etc/bashrc ]; then
-    . /etc/bashrc
+  source /etc/bashrc
 fi
 
 if [ -f ~/private.bash ]; then
-    . ~/private.bash
+  source ~/private.bash
 fi
 
-if [ -d ~/.bashrc.d ]; then
-    for rc in ~/.bashrc.d/*; do
-        if [ -f "$rc" ]; then
-            . "$rc"
-        fi
-    done
+if [ -e "$(brew --prefix)/etc/profile.d/bash_completion.sh" ]; then
+  source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
 fi
-unset rc
 
 SSH_ENV="/tmp/.ssh_environment_added"
 function start_agent {
@@ -30,7 +29,6 @@ else
   start_agent;
 fi
 
-PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
 
 source <(kubectl completion bash)
 source <(fzf --bash)

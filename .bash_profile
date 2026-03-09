@@ -25,16 +25,21 @@ PATH="$KREW_ROOT/bin:$PATH"
 
 ! { which flint | grep -qsE "^/home/danil/.trdl/"; } && [[ -x "$HOME/bin/trdl" ]] && source $("$HOME/bin/trdl" use flint "2")
 
-export EDITOR='nvim'
-export VISUAL='nvim'
-export XDG_CONFIG_HOME="$HOME/.config"
-export K9S_CONFIG_DIR=$HOME/.config/k9s
-export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
-export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':')
-export FZF_DEFAULT_OPTS=" \
---color=bg+:#313244,bg:-1,spinner:#F5E0DC,hl:#F38BA8 \
---color=fg:#CDD6F4,header:#F38BA8,info:#CBA6F7,pointer:#F5E0DC \
---color=marker:#B4BEFE,fg+:#CDD6F4,prompt:#CBA6F7,hl+:#F38BA8 \
---color=selected-bg:#45475A \
---color=border:#6C7086,label:#CDD6F4"
+EDITOR='nvim'
+VISUAL='nvim'
+XDG_CONFIG_HOME="$HOME/.config"
+K9S_CONFIG_DIR=$HOME/.config/k9s
+KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
+KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':')
+FZF_DEFAULT_OPTS=" \
+  --color=bg+:#313244,bg:-1,spinner:#F5E0DC,hl:#F38BA8 \
+  --color=fg:#CDD6F4,header:#F38BA8,info:#CBA6F7,pointer:#F5E0DC \
+  --color=marker:#B4BEFE,fg+:#CDD6F4,prompt:#CBA6F7,hl+:#F38BA8 \
+  --color=selected-bg:#45475A \
+  --color=border:#6C7086,label:#CDD6F4"
 
+PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
+
+if [ -e ~/.bashrc ]; then
+  source ~/.bashrc
+fi
