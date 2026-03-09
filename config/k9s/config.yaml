@@ -8,5 +8,5 @@ k9s:
     logoless: true
     headless: true
     # skin: transparent
-    skin: light
+    # skin: light
     reactive: true

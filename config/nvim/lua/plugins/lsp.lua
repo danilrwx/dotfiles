@@ -31,6 +31,7 @@ return {
         },
         helm_ls = {},
         clangd = {},
+        rust_analyzer = {}
       }
     },
     config = function(_, opts)
