@@ -16,6 +16,8 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+[[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && exec startx
+
 # export QT_SCALE_FACTOR=2
 # export XCURSOR_SIZE=48
 # export GDK_DPI_SCALE=0.5
