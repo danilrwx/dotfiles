@@ -20,6 +20,7 @@ return {
       { "<leader>gs", "<cmd>lua require('fzf-lua').git_status()<cr>" },
       { "<leader>gB", "<cmd>lua require('fzf-lua').git_branches()<cr>" },
       { "<leader>ss", "<cmd>lua require('fzf-lua').git_branches()<cr>" },
+      { "<leader>sD", "<cmd>lua require('fzf-lua').lsp_workspace_diagnostics()<cr>" },
     }
   }
 }
