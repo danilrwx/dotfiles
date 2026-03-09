@@ -18,7 +18,6 @@ alias lg='lazygit'
 alias vim='nvim'
 alias vi='nvim'
 
-export GOPATH=$HOME/go
 export RUBYOPT="-W0"
 export COLORTERM=truecolor
 export EDITOR='nvim'
@@ -29,7 +28,24 @@ export PATH=$PATH:$HOME/.cargo/bin/
 export PATH=$PATH:$HOME/.local/bin/
 export PATH=$PATH:$HOME/dotfiles/scripts/
 export K9S_CONFIG_DIR=$HOME/.config/k9s
-export FZF_DEFAULT_OPTS="--height 60% --layout=reverse --border --preview 'bat -n --color=always --theme ansi {}'"
+export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
+
+export FZF_DEFAULT_OPTS="
+  --tmux --height 60%
+  --layout=reverse --border
+  --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+export FZF_CTRL_R_OPTS="
+  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
+  --header 'Press CTRL-Y to copy command into clipboard'"
+export FZF_CTRL_T_OPTS="
+  --walker-skip .git,node_modules,target
+  --preview 'bat -n --color=always {}'
+  --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+export FZF_ALT_C_OPTS="
+  --walker-skip .git,node_modules,target
+  --preview 'tree -C {}'"
+
+export GPG_TTY=$(tty)
 
 [[ -e $HOME/.config/sops ]] && export PUB_KEY=$(cat $HOME/.config/sops/age/keys.txt | grep "public" | awk '{print $4}')
 [[ -e $HOME/.config/sops ]] && export SOPS_AGE_KEY_FILE=$HOME/.config/sops/age/keys.txt
@@ -45,3 +61,16 @@ export FZF_DEFAULT_OPTS="--height 60% --layout=reverse --border --preview 'bat -
 
 source <(fzf --zsh)
 
+go_bin_path="$(asdf which go 2>/dev/null)"
+if [[ -n "${go_bin_path}" ]]; then
+  abs_go_bin_path="$(readlink -f "${go_bin_path}")"
+
+  export GOROOT
+  GOROOT="$(dirname "$(dirname "${abs_go_bin_path}")")"
+
+  export GOPATH
+  GOPATH="$(dirname "${GOROOT}")/packages"
+
+  export GOBIN
+  GOBIN="$(dirname "${GOROOT}")/packages/bin"
+fi

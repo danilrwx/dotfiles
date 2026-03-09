@@ -16,10 +16,13 @@ vim.keymap.set(
   { desc = "Change word by cursor over all buffer" }
 )
 
--- greatest remap ever
-vim.keymap.set("x", "<leader>p", [["_dP]])
+-- vim.keymap.set
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+Y]])
+vim.keymap.set("n", "<leader>p", [["+p]])
+vim.keymap.set("n", "<leader>P", [["+P]])
+vim.keymap.set("x", "<leader>p", [["_d"+p]])
+vim.keymap.set("x", "<leader>P", [["_d"+P]])
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 
 vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>zz")
@@ -36,7 +39,7 @@ vim.keymap.del("n", "<leader>gg")
 vim.keymap.del("n", "<leader>gG")
 vim.keymap.del("n", "<leader>gf")
 
-vim.keymap.set("n", "<leader>gg", "<cmd>!topen-git<CR>", { desc = "LazyGit" })
+vim.keymap.set("n", "<leader>gl", "<cmd>tab Git log -p --follow %<CR>", { desc = "Git detailed file log" })
 vim.keymap.set("n", "<leader>gs", "<cmd>tab Git<CR>", { desc = "Fugitive" })
 
 vim.keymap.set("n", "<leader>gl", "<cmd>tab Git log -p --follow %<CR>", { desc = "Git detailed file log" })

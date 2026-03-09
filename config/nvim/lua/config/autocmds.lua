@@ -13,7 +13,7 @@ Funcs.toggle_quickfix = function()
 end
 
 -- vim.api.nvim_create_autocmd({ "FileType" }, {
---   pattern = { "*" },
+--   pattern = { "markdown" },
 --   callback = function()
 --     vim.o.wrap = false
 --   end,
