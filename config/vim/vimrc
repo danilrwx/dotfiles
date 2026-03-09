@@ -15,6 +15,7 @@ endif
 if filereadable(expand("~/.config/vim/autoload/plug.vim"))
 	plug#begin('~/.local/share/vim/plugins')
 
+	Plug 'tpope/vim-surround'
 	Plug 'markonm/traces.vim'
 	Plug 'sheerun/vim-polyglot'
 
@@ -73,7 +74,6 @@ set shortmess=aoOtTI       # Avoid most of the 'Hit Enter ...' messages
 set wildmenu               # Better command-line completion
 set mouse=a                # Enable mouse support
 set laststatus=0           # Disable status bar
-set autochdir              # Auto change dir to current file
 
 # The fish shell is not very compatible to other shells and unexpectedly
 # breaks things that use 'shell'.
@@ -103,12 +103,12 @@ set undodir=$XDG_CONFIG_HOME/vim/files/undo/
 # mark trailing spaces as errors
 match errorMsg '\s\+$'
 
-colorscheme torte
+# colorscheme torte
 highlight Normal ctermbg=none
 highlight SignColumn ctermbg=none
-highlight DiffAdd ctermfg=16
-highlight DiffChange ctermfg=16
-highlight DiffDelete ctermfg=16
+# highlight DiffAdd ctermfg=16
+# highlight DiffChange ctermfg=16
+# highlight DiffDelete ctermfg=16
 
 if has('patch-8.1.0311')
   packadd! cfilter
