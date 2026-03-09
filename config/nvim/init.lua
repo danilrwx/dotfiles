@@ -17,5 +17,5 @@ require("lazy").setup("plugins")
 require("autocmds")
 require("keymaps")
 
-vim.cmd("colorscheme lunaperche")
+vim.cmd("colorscheme torte")
 vim.cmd("hi Normal guibg=None")

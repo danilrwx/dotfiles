@@ -4,12 +4,12 @@ all:
 	make git
 
 base:
-	ln -sf $(PWD)/.zshrc ~/.zshrc
 	ln -sf $(PWD)/.bashrc ~/.bashrc
 	ln -sf $(PWD)/.gitconfig ~/.gitconfig
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
 	ln -snf $(PWD)/config/htop ~/.config/
 	ln -snf $(PWD)/config/nvim ~/.config/
+	ln -snf $(PWD)/config/vim ~/.vim
 	ln -snf $(PWD)/config/helix ~/.config/
 	ln -snf $(PWD)/config/k9s ~/.config/
 

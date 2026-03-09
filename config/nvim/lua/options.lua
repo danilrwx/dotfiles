@@ -19,7 +19,7 @@ vim.opt.softtabstop    = 2
 vim.opt.tabstop        = 2
 vim.opt.shiftwidth     = 2
 vim.opt.colorcolumn    = { 120 }
-vim.opt.signcolumn     = "number"
+vim.opt.signcolumn     = "yes"
 vim.opt.laststatus     = 1
 vim.opt.cmdheight      = 1
 

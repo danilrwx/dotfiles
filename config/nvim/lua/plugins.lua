@@ -42,7 +42,7 @@ return {
       })
     end
   },
-  { 'echasnovski/mini.completion', version = false,        opts = {} },
+  { 'echasnovski/mini.completion', version = false, opts = {} },
   {
     "stevearc/conform.nvim",
     opts = {
@@ -71,13 +71,6 @@ return {
     end
   },
   {
-    "tpope/vim-fugitive",
-    dependencies = { "shumphrey/fugitive-gitlab.vim", "tpope/vim-rhubarb" },
-    config = function()
-      vim.g.fugitive_gitlab_domains = { "https://rscz.ru" }
-    end
-  },
-  {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     config = function()
@@ -97,8 +90,22 @@ return {
       })
     end
   },
-  { "mbbill/undotree",             config = function() end },
-  { 'echasnovski/mini.diff',       version = false,        opts = {} },
-  { 'echasnovski/mini.surround',   version = false,        opts = {} },
-  { 'echasnovski/mini.trailspace', version = false,        opts = {} },
+  {
+    "ray-x/go.nvim",
+    dependencies = { -- optional packages
+      "ray-x/guihua.lua",
+      "neovim/nvim-lspconfig",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      require("go").setup()
+    end,
+    event = { "CmdlineEnter" },
+    ft = { "go", 'gomod' },
+    build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
+  },
+  { "tpope/vim-fugitive" },
+  { 'echasnovski/mini.diff',       version = false, opts = {} },
+  { 'echasnovski/mini.surround',   version = false, opts = {} },
+  { 'echasnovski/mini.trailspace', version = false, opts = {} },
 }
