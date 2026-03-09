@@ -12,7 +12,7 @@ fi
 
 if [ -e "$HOME/.ssh/id_rsa" ]; then
   eval $(keychain --eval -q)
-  keychain --inherit any --confirm $HOME/.ssh/id_rsa -q
+  keychain --ssh-allow-forwarded --confirm $HOME/.ssh/id_rsa -q
 fi
 
 alias kubectl=kubecolor
