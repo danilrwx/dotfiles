@@ -8,9 +8,11 @@ font-family-italic  = Iosevka NFM Medium Italic
 font-family-bold = Iosevka NFM SemiBold
 font-family-bold-italic  = Iosevka NFM Medium Italic
 
-font-size = 18
+font-size = 16
 # theme = dark:Raycast_Dark,light:Raycast_Light
+theme = dark:Adventure,light:Raycast_Light
+# theme = dark:3024 Night,light:Raycast_Light
 # theme = dark:Afterglow,light:Alabster
-theme = dark:Builtin Tango Dark,light:Builtin Tango Light
+# theme = dark:synthwave,light:Builtin Tango Light
 
 

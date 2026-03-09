@@ -1,5 +1,5 @@
 [core]
-  editor = nvim
+  editor = vim
   pager = delta
   attributesfile = /Users/danil/.gitattributes
 
@@ -15,5 +15,6 @@
 
 [alias]
   commit = commit --signoff
+
 [tag]
 	gpgSign = true
