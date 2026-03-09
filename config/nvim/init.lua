@@ -119,34 +119,34 @@ require("lazy").setup({
       }
     },
 
-    {
-      "saghen/blink.cmp",
-      dependencies = {
-        "xzbdmw/colorful-menu.nvim",
-      },
-      opts = {
-        keymap = { preset = "enter" },
-        signature = { enabled = true },
-        appearance = { nerd_font_variant = "normal" },
-        completion = {
-          accept = { auto_brackets = { enabled = true } },
-          menu = {
-            draw = {
-              columns = { { "kind_icon" }, { "label", gap = 1 } },
-              components = {
-                label = {
-                  text = function(ctx) return require("colorful-menu").blink_components_text(ctx) end,
-                  highlight = function(ctx) return require("colorful-menu").blink_components_highlight(ctx) end,
-                },
-              },
-            },
-          },
-          documentation = { auto_show = true, auto_show_delay_ms = 200 },
-        },
-        fuzzy = { prebuilt_binaries = { force_version = "v1.6.0" } },
-        sources = { default = { "lsp", "path", "snippets", "buffer" } },
-      }
-    },
+    -- {
+    --   "saghen/blink.cmp",
+    --   dependencies = {
+    --     "xzbdmw/colorful-menu.nvim",
+    --   },
+    --   opts = {
+    --     keymap = { preset = "enter" },
+    --     signature = { enabled = true },
+    --     appearance = { nerd_font_variant = "normal" },
+    --     completion = {
+    --       accept = { auto_brackets = { enabled = true } },
+    --       menu = {
+    --         draw = {
+    --           columns = { { "kind_icon" }, { "label", gap = 1 } },
+    --           components = {
+    --             label = {
+    --               text = function(ctx) return require("colorful-menu").blink_components_text(ctx) end,
+    --               highlight = function(ctx) return require("colorful-menu").blink_components_highlight(ctx) end,
+    --             },
+    --           },
+    --         },
+    --       },
+    --       documentation = { auto_show = true, auto_show_delay_ms = 200 },
+    --     },
+    --     fuzzy = { prebuilt_binaries = { force_version = "v1.6.0" } },
+    --     sources = { default = { "lsp", "path", "snippets", "buffer" } },
+    --   }
+    -- },
 
     {
       "Wansmer/symbol-usage.nvim",
@@ -163,32 +163,32 @@ require("lazy").setup({
       }
     },
 
-    {
-      "lewis6991/gitsigns.nvim",
-      opts = {
-        numhl = true,
-        signcolumn = false,
-        on_attach = function(bufnr)
-          local gitsigns = require("gitsigns")
-          local opts = { buffer = bufnr }
-
-          vim.keymap.set("n", "]c", function() if vim.wo.diff then vim.cmd.normal({ "]c", bang = true }) else gitsigns.nav_hunk("next") end end, opts)
-          vim.keymap.set("n", "[c", function() if vim.wo.diff then vim.cmd.normal({ "[c", bang = true }) else gitsigns.nav_hunk("prev") end end, opts)
-
-          vim.keymap.set("n", "ghs", gitsigns.stage_hunk, opts)
-          vim.keymap.set("n", "ghu", gitsigns.reset_hunk, opts)
-          vim.keymap.set("v", "ghs", function() gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, opts)
-          vim.keymap.set("v", "ghu", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, opts)
-          vim.keymap.set("n", "ghS", gitsigns.stage_buffer, opts)
-          vim.keymap.set("n", "ghU", gitsigns.reset_buffer, opts)
-          vim.keymap.set("n", "ghp", gitsigns.preview_hunk_inline, opts)
-          vim.keymap.set("n", "ghd", gitsigns.diffthis, opts)
-          vim.keymap.set("n", "ghD", function() gitsigns.diffthis("~") end, opts)
-
-          vim.keymap.set({ "o", "x" }, "ih", gitsigns.select_hunk, opts)
-        end
-      }
-    },
+    -- {
+    --   "lewis6991/gitsigns.nvim",
+    --   opts = {
+    --     numhl = true,
+    --     signcolumn = false,
+    --     on_attach = function(bufnr)
+    --       local gitsigns = require("gitsigns")
+    --       local opts = { buffer = bufnr }
+    --
+    --       vim.keymap.set("n", "]c", function() if vim.wo.diff then vim.cmd.normal({ "]c", bang = true }) else gitsigns.nav_hunk("next") end end, opts)
+    --       vim.keymap.set("n", "[c", function() if vim.wo.diff then vim.cmd.normal({ "[c", bang = true }) else gitsigns.nav_hunk("prev") end end, opts)
+    --
+    --       vim.keymap.set("n", "ghs", gitsigns.stage_hunk, opts)
+    --       vim.keymap.set("n", "ghu", gitsigns.reset_hunk, opts)
+    --       vim.keymap.set("v", "ghs", function() gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, opts)
+    --       vim.keymap.set("v", "ghu", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, opts)
+    --       vim.keymap.set("n", "ghS", gitsigns.stage_buffer, opts)
+    --       vim.keymap.set("n", "ghU", gitsigns.reset_buffer, opts)
+    --       vim.keymap.set("n", "ghp", gitsigns.preview_hunk_inline, opts)
+    --       vim.keymap.set("n", "ghd", gitsigns.diffthis, opts)
+    --       vim.keymap.set("n", "ghD", function() gitsigns.diffthis("~") end, opts)
+    --
+    --       vim.keymap.set({ "o", "x" }, "ih", gitsigns.select_hunk, opts)
+    --     end
+    --   }
+    -- },
   },
   checker = { enabled = false },
 })
