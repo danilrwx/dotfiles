@@ -8,6 +8,11 @@ vim.pack.add({
   { src = "https://github.com/tpope/vim-fugitive" },
   { src = "https://github.com/lewis6991/gitsigns.nvim" },
   { src = "https://github.com/stevearc/oil.nvim" },
+  { src = "https://github.com/sebdah/vim-delve" },
+  { src = "https://github.com/kyoh86/vim-go-coverage" },
+
+  --  { src = "https://github.com/Wansmer/symbol-usage.nvim" },
+  --  { src = "https://github.com/nvim-mini/mini.nvim" },
 })
 
 require("oil").setup({ view_options = { show_hidden = true } })
@@ -96,10 +101,17 @@ vim.keymap.set("n", "<leader>'", require('fzf-lua').resume)
 vim.keymap.set("n", "<leader>b", require('fzf-lua').buffers)
 vim.keymap.set("n", "<leader>D", require('fzf-lua').lsp_workspace_diagnostics)
 
+vim.keymap.set('n', '<leader>ts', "<cmd>TestSuite<cr>")
+vim.keymap.set('n', '<leader>tr', "<cmd>TestNearest<cr>")
+vim.keymap.set('n', '<leader>tt', "<cmd>TestFile<cr>")
+
+vim.keymap.set('n', '<leader>td', "<cmd>DlvTest<cr>")
+vim.keymap.set('n', '<leader>db', "<cmd>DlvToggleBreakpoint<cr>")
+
 vim.keymap.set('n', 'ghs', require('gitsigns').stage_hunk)
-vim.keymap.set('n', 'ghr', require('gitsigns').reset_hunk)
-vim.keymap.set("n", "]c",  require("gitsigns").next_hunk)
-vim.keymap.set("n", "[c",  require("gitsigns").prev_hunk)
+vim.keymap.set('n', 'ghu', require('gitsigns').reset_hunk)
+vim.keymap.set("n", "]c", require("gitsigns").next_hunk)
+vim.keymap.set("n", "[c", require("gitsigns").prev_hunk)
 vim.keymap.set("n", "ghp", require("gitsigns").preview_hunk_inline)
 
 vim.keymap.set("n", "<leader>q", require("user.functions").toggle_quickfix)
