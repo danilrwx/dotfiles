@@ -98,14 +98,14 @@ require("lazy").setup({
       opts = {},
     },
 
-    -- {
-    --   "sebdah/vim-delve",
-    --   keys = {
-    --     { "<leader>td", "<cmd>DlvTestCurrent<cr>" },
-    --     { "<leader>db", "<cmd>DlvToggleBreakpoint<cr>" },
-    --     { "<leader>dc", "<cmd>DlvConnect :2345<cr>" },
-    --   },
-    -- },
+    {
+      "sebdah/vim-delve",
+      keys = {
+        { "<leader>td", "<cmd>DlvTestCurrent<cr>" },
+        { "<leader>db", "<cmd>DlvToggleBreakpoint<cr>" },
+        { "<leader>dc", "<cmd>DlvConnect :2345<cr>" },
+      },
+    },
 
     {
       "ibhagwan/fzf-lua",
@@ -128,34 +128,34 @@ require("lazy").setup({
       }
     },
 
-    -- {
-    --   "saghen/blink.cmp",
-    --   dependencies = {
-    --     "xzbdmw/colorful-menu.nvim",
-    --   },
-    --   opts = {
-    --     keymap = { preset = "enter" },
-    --     signature = { enabled = true },
-    --     appearance = { nerd_font_variant = "normal" },
-    --     completion = {
-    --       accept = { auto_brackets = { enabled = true } },
-    --       menu = {
-    --         draw = {
-    --           columns = { { "kind_icon" }, { "label", gap = 1 } },
-    --           components = {
-    --             label = {
-    --               text = function(ctx) return require("colorful-menu").blink_components_text(ctx) end,
-    --               highlight = function(ctx) return require("colorful-menu").blink_components_highlight(ctx) end,
-    --             },
-    --           },
-    --         },
-    --       },
-    --       documentation = { auto_show = true, auto_show_delay_ms = 200 },
-    --     },
-    --     fuzzy = { prebuilt_binaries = { force_version = "v1.6.0" } },
-    --     sources = { default = { "lsp", "path", "snippets", "buffer" } },
-    --   }
-    -- },
+    {
+      "saghen/blink.cmp",
+      dependencies = {
+        "xzbdmw/colorful-menu.nvim",
+      },
+      opts = {
+        keymap = { preset = "enter" },
+        signature = { enabled = true },
+        appearance = { nerd_font_variant = "normal" },
+        completion = {
+          accept = { auto_brackets = { enabled = true } },
+          menu = {
+            draw = {
+              columns = { { "kind_icon" }, { "label", gap = 1 } },
+              components = {
+                label = {
+                  text = function(ctx) return require("colorful-menu").blink_components_text(ctx) end,
+                  highlight = function(ctx) return require("colorful-menu").blink_components_highlight(ctx) end,
+                },
+              },
+            },
+          },
+          documentation = { auto_show = true, auto_show_delay_ms = 200 },
+        },
+        fuzzy = { prebuilt_binaries = { force_version = "v1.6.0" } },
+        sources = { default = { "lsp", "path", "snippets", "buffer" } },
+      }
+    },
 
     {
       "Wansmer/symbol-usage.nvim",
@@ -209,8 +209,8 @@ require("lazy").setup({
 vim.opt.termguicolors = true
 vim.cmd.colorscheme("torte")
 
--- vim.api.nvim_set_hl(0, "Normal", { bg = nil })
--- vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
+vim.api.nvim_set_hl(0, "Normal", { bg = nil })
+vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
 
 vim.api.nvim_set_hl(0, "Added", { fg = "#00cd00" })
 vim.api.nvim_set_hl(0, "Changed", { fg = "#00cdcd" })
@@ -272,7 +272,6 @@ vim.lsp.enable("rust_analyzer")
 
 vim.diagnostic.config({ virtual_text = { prefix = "🐗", }, signs = false })
 
----@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("highlight_yank", {}),
   pattern = "*",
