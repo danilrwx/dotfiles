@@ -2,6 +2,28 @@ if has("eval")             " vim-tiny lacks 'eval'
 	let skip_defaults_vim = 1
 endif
 
+if filereadable(expand("~/.vim/autoload/plug.vim"))
+	call plug#begin('~/.local/share/vim/plugins')
+	Plug 'markonm/traces.vim'
+	Plug 'sheerun/vim-polyglot'
+
+	Plug 'tpope/vim-fugitive'
+	Plug 'airblade/vim-gitgutter'
+
+	Plug 'yegappan/lsp'
+
+	Plug 'christoomey/vim-tmux-navigator'
+	Plug 'preservim/vimux'
+	Plug 'vim-test/vim-test'
+	Plug 'sebdah/vim-delve'
+	Plug 'charlespascoe/vim-go-syntax'
+
+	Plug 'habamax/vim-dir'
+
+	Plug 'laktak/tome'
+	call plug#end()
+endif
+
 set nocompatible
 
 filetype plugin indent on  " Load plugins according to detected filetype.
@@ -68,12 +90,18 @@ set viminfo='100,n$HOME/.vim/files/info/viminfo
 " mark trailing spaces as errors
 match errorMsg '\s\+$'
 
-set notermguicolors
+" colorscheme koehler
 highlight SignColumn ctermbg=none
-highlight CursorLine cterm=none ctermbg=250
-highlight CursorLineNr cterm=none ctermbg=250
-highlight Pmenu ctermbg=black ctermfg=white
-highlight PmenuSel ctermbg=white ctermfg=black
+highlight LineNr ctermfg=243
+highlight Pmenu ctermbg=16 ctermfg=7
+highlight PmenuSel ctermbg=7 ctermfg=16
+highlight SpellBad ctermfg=16
+highlight SpellCap ctermfg=16
+highlight SpellRare ctermfg=16
+highlight SpellLocal ctermfg=16
+highlight DiffAdd ctermfg=16
+highlight DiffChange ctermfg=16
+highlight DiffDelete ctermfg=16
 
 if has("gui_macvim")
 	set guifont=Iosevka\ Nerd\ Font:h20
@@ -88,6 +116,14 @@ if has('patch-9.1.0375')
 	packadd! comment
 endif
 
+if has('patch-9.1.1230')
+	packadd! hlyank
+endif
+
+if has('patch-9.0.1799')
+	packadd! editorconfig
+endif
+
 let mapleader=" "
 
 if executable('ugrep')
@@ -95,10 +131,6 @@ if executable('ugrep')
 else
 	nnoremap <leader>f :call FzyCommand("find . -type f", ":e")<cr>
 endif
-
-nnoremap <silent> - :Lf<cr>
-
-nnoremap <leader>gg :!lazygit<cr><cr>
 
 nnoremap <leader>b :call FzyBuffer()<cr>
 nnoremap <leader>sf :call FzyCommand("find . -type f", ":e")<cr>
@@ -115,6 +147,10 @@ nnoremap <c-l> :nohl<cr>
 
 nnoremap <silent> <leader>tr :TestNearest<cr>
 nnoremap <silent> <leader>tt :TestFile<cr>
+nnoremap <silent> <leader>td :DlvTestCurrent<cr>
+
+nnoremap <silent> <leader>db :DlvToggleBreakpoint<cr>
+nnoremap <silent> <leader>dc :DlvConnect :2345<cr>
 
 nnoremap <silent> <leader>gl :tab Git log --follow -p %<cr>
 nnoremap <silent> <leader>gL :tab Git log<cr>
@@ -123,6 +159,12 @@ nnoremap <silent> <leader>gb :tab Git blame<cr>
 nnoremap <silent> ghs <cmd>GitGutterStageHunk<cr>
 nnoremap <silent> ghu <cmd>GitGutterUndoHunk<cr>
 nnoremap <silent> ghp <cmd>GitGutterPreviewHunk<cr>
+
+nnoremap <silent> - <cmd>Dir<cr>
+
+let g:VimuxHeight = "30%"
+let g:delve_use_vimux = 1
+let test#strategy = "vimux"
 
 let g:gitgutter_sign_priority = 0
 let g:gitgutter_preview_win_floating = 1
@@ -208,26 +250,6 @@ function! FzyBuffer()
 	call FzyCommand('echo "' . join(buffers, "\n") . '"', ":b")
 endfunction
 
-function! Lf()
-	let temp = tempname()
-	exec 'silent !lf -selection-path=' . shellescape(temp) . ' ' . expand('%:p')
-	if !filereadable(temp)
-		redraw!
-		return
-	endif
-	let names = readfile(temp)
-	if empty(names)
-		redraw!
-		return
-	endif
-	exec 'edit ' . fnameescape(names[0])
-	for name in names[1:]
-		exec 'argadd ' . fnameescape(name)
-	endfor
-	redraw!
-endfunction
-command! -bar Lf call Lf()
-
 function! ToggleQuickFix()
 	if empty(filter(getwininfo(), 'v:val.quickfix'))
 		copen
@@ -242,3 +264,4 @@ function! TrimWhitespace()
 	call winrestview(l:save)
 endfun
 autocmd BufWritePre * call TrimWhitespace()
+

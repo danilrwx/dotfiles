@@ -15,15 +15,14 @@ vim.opt.softtabstop = 2
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 
-vim.opt.signcolumn = 'yes'
+vim.opt.signcolumn = 'auto'
 vim.opt.laststatus = 1
 
 vim.opt.updatetime = 100
 vim.opt.completeopt = 'menuone,noselect,noinsert,fuzzy,popup'
 
 if vim.fn.executable("ugrep") == 1 then
-  -- vim.opt.grepprg = "ugrep -RInk --tabs=1 --ignore-files --exclude='zz_generated*' --exclude-dir='generated'"
-  vim.opt.grepprg = "ugrep --tabs=1 --ignore-files --exclude='zz_generated*' --exclude-dir='generated'"
+  vim.opt.grepprg = "ugrep -nk --tabs=1 --ignore-files --exclude='zz_generated*' --exclude-dir='generated'"
 else
   vim.opt.grepprg = "grep -RIn --exclude='zz_generated*' --exclude-dir='generated'"
 end
@@ -33,7 +32,7 @@ vim.cmd.packadd('cfilter')
 vim.filetype.add({ extension = { yaml = 'helm' } })
 
 vim.lsp.enable('gopls')
-vim.lsp.enable('golangci_lint_ls')
+-- vim.lsp.enable('golangci_lint_ls')
 vim.lsp.enable('lua_ls')
 vim.lsp.enable('helm_ls')
 
@@ -44,6 +43,67 @@ vim.fn.sign_define('DapBreakpointCondition', { text = '🫸', texthl = '', lineh
 vim.fn.sign_define('DapLogPoint', { text = '📄', texthl = '', linehl = '', numhl = '' })
 vim.fn.sign_define('DapStopped', { text = '👉', texthl = '', linehl = '', numhl = '' })
 vim.fn.sign_define('DapBreakpointRejected', { text = '🚫', texthl = '', linehl = '', numhl = '' })
+
+vim.pack.add({
+  { src = 'https://github.com/deparr/tairiki.nvim' },
+
+  { src = 'http://github.com/saghen/blink.cmp' },
+
+  { src = 'https://github.com/nvim-tree/nvim-web-devicons' },
+  { src = 'https://github.com/romgrk/barbar.nvim' },
+
+  { src = 'https://github.com/rmagatti/auto-session' },
+  { src = 'https://github.com/stevearc/oil.nvim' },
+  { src = 'https://github.com/ibhagwan/fzf-lua' },
+
+  { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
+
+  { src = 'https://github.com/lewis6991/gitsigns.nvim' },
+  { src = 'https://github.com/tpope/vim-fugitive' },
+
+  { src = 'https://github.com/miroshQa/debugmaster.nvim' },
+  { src = 'https://github.com/mfussenegger/nvim-dap' },
+  { src = 'https://github.com/leoluz/nvim-dap-go' },
+
+  { src = 'https://github.com/Wansmer/symbol-usage.nvim' },
+
+  { src = 'https://github.com/kyoh86/vim-go-coverage' },
+  { src = 'https://github.com/vim-test/vim-test' },
+
+  -- { src = 'https://github.com/christoomey/vim-tmux-navigator' },
+  { src = 'https://github.com/laktak/tome' },
+
+  { src = 'https://github.com/daliusd/ghlite.nvim' },
+
+  { src = 'https://github.com/supermaven-inc/supermaven-nvim' },
+})
+
+require('supermaven-nvim').setup({})
+
+require('oil').setup({ view_options = { show_hidden = true } })
+
+require('auto-session').setup({ suppressed_dirs = { '~/', '~/Downloads', '/' } })
+
+require('nvim-treesitter.configs').setup({ auto_install = true, highlight = { enable = true } })
+
+require('fzf-lua').setup({ winopts = { fullscreen = true, preview = { layout = "vertical", vertical = "up:55%", border = "single" } } })
+require('fzf-lua').register_ui_select()
+
+require('ghlite').setup({ view_split = 'tabnew', diff_split = 'tabnew', comment_split = 'tabnew' })
+
+require('dap-go').setup({})
+
+require('symbol-usage').setup({
+  kinds = {
+    vim.lsp.protocol.SymbolKind.Function,
+    vim.lsp.protocol.SymbolKind.Method,
+    vim.lsp.protocol.SymbolKind.Interface,
+    vim.lsp.protocol.SymbolKind.Constant,
+  },
+  definition = { enabled = true },
+  implementation = { enabled = true },
+  vt_position = "end_of_line",
+})
 
 vim.cmd.colorscheme("retrobox")
 
@@ -71,62 +131,57 @@ vim.api.nvim_set_hl(0, "DiagnosticInfo", { fg = "#EBDBB2" })
 vim.api.nvim_set_hl(0, "DiagnosticHint", { fg = "#EBDBB2" })
 vim.api.nvim_set_hl(0, "DiagnosticOk", { fg = "#B8BB26" })
 
-vim.g.gitgutter_set_sign_backgrounds = 1
-vim.g.gitgutter_sign_priority = 0
-vim.g.gitgutter_preview_win_floating = 1
 
-vim.pack.add({
-  { src = 'https://github.com/rmagatti/auto-session' },
-  { src = 'https://github.com/stevearc/oil.nvim' },
-  { src = 'https://github.com/ibhagwan/fzf-lua' },
-
-  { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
-
-  { src = 'https://github.com/airblade/vim-gitgutter' },
-  { src = 'https://github.com/tpope/vim-fugitive' },
-
-  { src = 'https://github.com/miroshQa/debugmaster.nvim' },
-  { src = 'https://github.com/mfussenegger/nvim-dap' },
-  { src = 'https://github.com/leoluz/nvim-dap-go' },
-
-  { src = 'https://github.com/Wansmer/symbol-usage.nvim' },
-
-  { src = 'https://github.com/kyoh86/vim-go-coverage' },
-  { src = 'https://github.com/vim-test/vim-test' },
-
-  { src = 'https://github.com/laktak/tome' },
-
-  { src = 'https://github.com/daliusd/ghlite.nvim' },
-
-  { src = 'https://github.com/supermaven-inc/supermaven-nvim' },
-})
-
-require('supermaven-nvim').setup({})
-
-require('oil').setup({ view_options = { show_hidden = true } })
-
-require('auto-session').setup({ suppressed_dirs = { '~/', '~/Downloads', '/' } })
-
-require('nvim-treesitter.configs').setup({ auto_install = true, highlight = { enable = true } })
-
-require('fzf-lua').setup({ winopts = { fullscreen = true, preview = { layout = "vertical", vertical = "up:55%", border = "single" } } })
-require('fzf-lua').register_ui_select()
-
-require('symbol-usage').setup({
-  kinds = {
-    vim.lsp.protocol.SymbolKind.Function,
-    vim.lsp.protocol.SymbolKind.Method,
-    vim.lsp.protocol.SymbolKind.Interface,
-    vim.lsp.protocol.SymbolKind.Constant,
+require('barbar').setup({
+  animation = false,
+  icons = {
+    button = '',
+    modified = { button = '🔸' },
+    pinned = { button = '📌', filename = true },
+    diagnostics = { [vim.diagnostic.severity.ERROR] = { enabled = true, icon = '🔥' }, }
   },
-  definition = { enabled = true },
-  implementation = { enabled = true },
-  vt_position = "end_of_line",
 })
 
-require('dap-go').setup({})
+require('blink.cmp').setup({
+  keymap = { preset = 'enter' },
+  signature = { enabled = true },
+  appearance = { nerd_font_variant = 'normal' },
+  completion = {
+    accept = { auto_brackets = { enabled = true } },
+    menu = { draw = { treesitter = { "lsp" } } },
+    documentation = { auto_show = true, auto_show_delay_ms = 200 },
+  },
+  fuzzy = { prebuilt_binaries = { force_version = "v1.6.0" } },
+  sources = { default = { 'lsp', 'path', 'snippets', 'buffer' } },
+})
 
-require('ghlite').setup({ view_split = 'tabnew', diff_split = 'tabnew', comment_split = 'tabnew' })
+require('gitsigns').setup({
+  numhl = true,
+  signcolumn = false,
+  on_attach = function(bufnr)
+    local gitsigns = require("gitsigns")
+
+    vim.keymap.set("n", "]c", function()
+      if vim.wo.diff then vim.cmd.normal({ "]c", bang = true }) else gitsigns.nav_hunk("next") end
+    end)
+    vim.keymap.set("n", "[c", function()
+      if vim.wo.diff then vim.cmd.normal({ "[c", bang = true }) else gitsigns.nav_hunk("prev") end
+    end)
+
+    vim.keymap.set("n", "ghs", gitsigns.stage_hunk)
+    vim.keymap.set("n", "ghu", gitsigns.reset_hunk)
+    vim.keymap.set("v", "ghs", function() gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end)
+    vim.keymap.set("v", "ghu", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end)
+    vim.keymap.set("n", "ghS", gitsigns.stage_buffer)
+    vim.keymap.set("n", "ghU", gitsigns.reset_buffer)
+    vim.keymap.set("n", "ghp", gitsigns.preview_hunk_inline)
+    vim.keymap.set("n", "ghd", gitsigns.diffthis)
+    vim.keymap.set("n", "ghD", function() gitsigns.diffthis("~") end)
+
+    vim.keymap.set({ "o", "x" }, "ih", gitsigns.select_hunk)
+  end
+})
+
 
 ---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_create_autocmd('TextYankPost', {
@@ -152,12 +207,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
     local opts = { buffer = event.buf }
     local client = vim.lsp.get_client_by_id(event.data.client_id)
     if client == nil then return end
-
-    if client:supports_method('textDocument/completion') then
-      local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
-      client.server_capabilities.completionProvider.triggerCharacters = chars
-      vim.lsp.completion.enable(true, client.id, event.buf, { autotrigger = true })
-    end
 
     if not client:supports_method('textDocument/willSaveWaitUntil')
         and client:supports_method('textDocument/formatting') then
@@ -197,8 +246,6 @@ vim.keymap.set("n", "-", "<cmd>Oil<cr>")
 vim.keymap.set("n", "<c-j>", "<cmd>cnext<cr>zz")
 vim.keymap.set("n", "<c-k>", "<cmd>cprev<cr>zz")
 
-vim.keymap.set("n", "<leader>gg", "<cmd>!tmux neww lazygit<cr>")
-
 local toggle_quickfix = function()
   local quickfix_wins = vim.tbl_filter(function(win_id)
     return vim.fn.getwininfo(win_id)[1].quickfix == 1
@@ -215,8 +262,7 @@ vim.keymap.set("n", "<leader>tt", "<cmd>TestFile<cr>")
 vim.keymap.set("n", "<leader>b", require('fzf-lua').buffers)
 vim.keymap.set("n", "<leader>f", require('fzf-lua').files)
 vim.keymap.set("n", "<leader>'", require('fzf-lua').resume)
-
-vim.keymap.set("n", "<leader>D", vim.diagnostic.setqflist)
+vim.keymap.set("n", "<leader>D", require('fzf-lua').lsp_workspace_diagnostics)
 
 vim.keymap.set({ "n", "v" }, "<leader>d", require("debugmaster").mode.toggle, { nowait = true })
 
@@ -225,6 +271,10 @@ vim.keymap.set("n", "<leader>gL", "<cmd>tab Git log<cr>")
 vim.keymap.set("n", "<leader>gb", "<cmd>tab Git blame<cr>")
 
 vim.keymap.set("n", "<leader>gS", "<cmd>GHLitePRSelect<cr>")
+
+vim.keymap.set("n", "<a-q>", "<cmd>bd<cr>")
+vim.keymap.set("n", "<s-h>", "<cmd>BufferPrevious<cr>")
+vim.keymap.set("n", "<s-l>", "<cmd>BufferNext<cr>")
 
 vim.keymap.set("n", "ghs", "<cmd>GitGutterStageHunk<cr>")
 vim.keymap.set("n", "ghu", "<cmd>GitGutterUndoHunk<cr>")
