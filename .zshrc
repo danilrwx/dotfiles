@@ -19,8 +19,8 @@ alias bat='highlight -O ansi --force'
 
 export RUBYOPT="-W0"
 export COLORTERM=truecolor
-export EDITOR='vim'
-export VISUAL='vim'
+export EDITOR='nvim'
+export VISUAL='nvim'
 export DFT_BACKGROUND=light
 
 export PATH=$PATH:$GOPATH/bin/
