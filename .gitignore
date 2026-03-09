@@ -7,3 +7,5 @@ TAGS
 
 fixtures/_build
 config/helix/runtime
+config/vim/undodir
+config/k9s/clusters
