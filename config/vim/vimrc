@@ -40,7 +40,7 @@ set synmaxcol=200          " Only highlight the first 200 columns.
 set laststatus=1           " Set minimal bottom statusline
 
 set nonumber               " Set line numbers
-set norelativenumber       " Set relative linenumbers
+set relativenumber         " Set relative linenumbers
 set numberwidth=2          " Set number width
 
 set updatetime=100         " Fast redraw
@@ -81,6 +81,8 @@ set viminfo='100,n$HOME/.vim/files/info/viminfo
 " mark trailing spaces as errors
 match errorMsg '\s\+$'
 
+set background=dark
+colorscheme lunaperche
 highlight SignColumn ctermbg=none
 
 if has("gui_macvim")
@@ -210,3 +212,7 @@ nnoremap <silent> <leader>u :UndotreeToggle<cr>
 nnoremap ghs <plug>(GitGutterStageHunk)
 nnoremap ghu <plug>(GitGutterUndoHunk)
 nnoremap ghp <plug>(GitGutterPreviewHunk)
+
+let g:vimspector_enable_mappings = 'HUMAN'
+let g:vimspector_install_gadgets = [ 'delve', 'CodeLLDB' ]
+
