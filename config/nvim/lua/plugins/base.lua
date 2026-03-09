@@ -1,15 +1,18 @@
 return {
   {
     "LazyVim/LazyVim",
+    opts = {
+      colorscheme = "github_dark",
+    },
+  },
+  {
+    "catppuccin/nvim",
+    enabled = false,
+  },
+  {
+    "folke/tokyonight.nvim",
+    enabled = false,
     opts = {},
-  },
-  {
-    "folke/flash.nvim",
-    enabled = false,
-  },
-  {
-    "folke/persistence.nvim",
-    enabled = false,
   },
   {
     "akinsho/bufferline.nvim",
@@ -20,38 +23,19 @@ return {
     enabled = false,
   },
   {
-    "MagicDuck/grug-far.nvim",
-    enabled = false,
-  },
-  {
-    "rcarriga/nvim-notify",
-    enabled = false,
-  },
-  {
     "nvimdev/dashboard-nvim",
     enabled = false,
-  },
-  {
-    "neovim/nvim-lspconfig",
-    opts = {
-      document_highlight = {
-        enabled = false,
-      },
-      codelens = {
-        enabled = false,
-      },
-      inlay_hints = {
-        enabled = false,
-      },
-    },
   },
   {
     "lewis6991/gitsigns.nvim",
     event = "LazyFile",
     opts = {
       signcolumn = true,
-      numhl = true,
       current_line_blame = true,
+      current_line_blame_opts = {
+        delay = 300,
+        virt_text_pos = "right_align",
+      },
     },
   },
 
@@ -60,11 +44,7 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-      require("github-theme").setup({
-        options = {
-          transparent = true,
-        },
-      })
+      require("github-theme").setup({ options = { transparent = true } })
     end,
   },
   {
@@ -92,9 +72,6 @@ return {
     "tpope/vim-fugitive",
     lazy = false,
     dependencies = { "shumphrey/fugitive-gitlab.vim", "tpope/vim-rhubarb" },
-    config = function()
-      vim.g.fugitive_gitlab_domains = { "https://rscz.ru" }
-    end,
   },
 
   {
@@ -106,35 +83,41 @@ return {
     end,
     ft = { "markdown" },
   },
+
   {
-    "OXY2DEV/markview.nvim",
-    lazy = false, -- Recommended
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-tree/nvim-web-devicons",
+    "Wansmer/treesj",
+    keys = { "<space>m", "<space>j", "<space>s" },
+    dependencies = { "nvim-treesitter/nvim-treesitter" }, -- if you install parsers with `nvim-treesitter`
+    opts = {},
+  },
+
+  { import = "lazyvim.plugins.extras.editor.mini-files" },
+  {
+    "echasnovski/mini.files",
+    opts = {
+      windows = { width_preview = 60 },
+      options = { use_as_default_explorer = true },
     },
   },
 
   {
-    "mbbill/undotree",
-    config = function()
-      vim.keymap.set("n", "<Leader>u", vim.cmd.UndotreeToggle, { desc = "Open UndoTree" })
-    end,
+    "nvim-telescope/telescope.nvim",
+    keys = { { "<leader>gc", false }, { "<leader>gs", false } },
   },
 
-  { import = "lazyvim.plugins.extras.editor.mini-files" },
-  { import = "lazyvim.plugins.extras.editor.refactoring" },
-  { import = "lazyvim.plugins.extras.test.core" },
-  { import = "lazyvim.plugins.extras.dap.core" },
-  { import = "lazyvim.plugins.extras.coding.blink" },
-  { import = "lazyvim.plugins.extras.coding.neogen" },
+  { "mbbill/undotree" },
   { import = "lazyvim.plugins.extras.coding.mini-surround" },
+  { import = "lazyvim.plugins.extras.coding.neogen" },
+  { import = "lazyvim.plugins.extras.dap.core" },
+  { import = "lazyvim.plugins.extras.editor.refactoring" },
   { import = "lazyvim.plugins.extras.lang.docker" },
+  { import = "lazyvim.plugins.extras.lang.git" },
   { import = "lazyvim.plugins.extras.lang.go" },
-  { import = "lazyvim.plugins.extras.lang.python" },
+  { import = "lazyvim.plugins.extras.lang.helm" },
   { import = "lazyvim.plugins.extras.lang.json" },
+  { import = "lazyvim.plugins.extras.lang.python" },
   { import = "lazyvim.plugins.extras.lang.ruby" },
   { import = "lazyvim.plugins.extras.lang.sql" },
   { import = "lazyvim.plugins.extras.lang.yaml" },
-  { import = "lazyvim.plugins.extras.lang.helm" },
+  { import = "lazyvim.plugins.extras.test.core" },
 }
