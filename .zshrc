@@ -1,6 +1,11 @@
 PROMPT="[%F{11}%*%f] %F{10}%~%f %F{12}󰅂%f "
 
-autoload -Uz compinit && compinit -i
+if type brew &>/dev/null; then
+  FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+
+  autoload -Uz compinit
+  compinit
+fi
 
 alias ls='ls --color=auto'
 alias so='source ~/.zshrc'
@@ -14,11 +19,6 @@ alias vi='nvim'
 alias vim='nvim'
 alias lg='lazygit'
 
-source <(kubectl completion zsh)
-compdef kubecolor=kubectl
-alias kubectl=kubecolor
-alias k=kubecolor
-
 export EDITOR='nvim'
 export VISUAL='nvim'
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -26,19 +26,25 @@ export K9S_CONFIG_DIR=$HOME/.config/k9s
 export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
 export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':')
 export FZF_DEFAULT_OPTS=" \
---color=bg+:#313244,bg:-1,spinner:#F5E0DC,hl:#F38BA8 \
---color=fg:#CDD6F4,header:#F38BA8,info:#CBA6F7,pointer:#F5E0DC \
---color=marker:#B4BEFE,fg+:#CDD6F4,prompt:#CBA6F7,hl+:#F38BA8 \
---color=selected-bg:#45475A \
---color=border:#6C7086,label:#CDD6F4"
+  --color=bg+:#313244,bg:-1,spinner:#F5E0DC,hl:#F38BA8 \
+  --color=fg:#CDD6F4,header:#F38BA8,info:#CBA6F7,pointer:#F5E0DC \
+  --color=marker:#B4BEFE,fg+:#CDD6F4,prompt:#CBA6F7,hl+:#F38BA8 \
+  --color=selected-bg:#45475A \
+  --color=border:#6C7086,label:#CDD6F4"
 
-source ~/.zprofile
+compdef kubecolor=kubectl
+alias kubectl=kubecolor
+alias k=kubecolor
+
 source <(fzf --zsh)
 source <(flint completion --shell=zsh)
+source <(kubectl completion zsh)
 
-if [ -e $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
-  source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [ -e $(brew --prefix)/opt/zinit/zinit.zsh ]; then
+  source $(brew --prefix)/opt/zinit/zinit.zsh
 fi
+
+zinit light Aloxaf/fzf-tab
 
 if [ -e ~/private.zsh ]; then
   source ~/private.zsh
