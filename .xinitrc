@@ -16,4 +16,4 @@ if which dbus-launch >/dev/null 2>&1 && test -z "$DBUS_SESSION_BUS_ADDRESS"; the
 fi
 
 # Autostart section
-exec spectrwm
+exec i3
