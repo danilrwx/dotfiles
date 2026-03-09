@@ -1,3 +1,0 @@
-#!/bin/sh
-
-swaymsg output "*" bg $HOME/Backgrounds/$(ls $HOME/Backgrounds | shuf -n 1) fill

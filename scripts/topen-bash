@@ -1,7 +1,0 @@
-#!/bin/bash
-
-if [ -n "$TMUX" ]; then
-	tmux neww zsh
-else
-	terminal-run zsh
-fi
