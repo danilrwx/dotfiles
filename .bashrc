@@ -14,6 +14,11 @@ alias grep='grep --color=auto'
 alias vi='vim'
 #alias vim='nvim'
 
+alias rs='rails s'
+alias rc='rails c'
+alias rdm='rails db:migrate'
+alias rdr='rails db:rollback:primary'
+
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
