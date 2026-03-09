@@ -35,8 +35,8 @@ source <(fzf --bash)
 source <(kubectl completion bash)
 source <(flint completion --shell=bash)
 
-source ~/fzf-tab-completion/bash/fzf-bash-completion.sh
-bind -x '"\t": fzf_bash_completion'
+# source ~/fzf-tab-completion/bash/fzf-bash-completion.sh
+# bind -x '"\t": fzf_bash_completion'
 
 alias kubectl=kubecolor
 complete -o default -F __start_kubectl kubecolor
