@@ -58,3 +58,6 @@ asdf-install:
 yay:
 	git clone https://aur.archlinux.org/yay.git ~/yay
 	cd ~/yay; makepkg -si
+
+printer:
+	yay -S pantum-driver gscan2pdf ghostscript
