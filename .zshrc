@@ -99,6 +99,7 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias hx="helix"
 alias e="emacs -nw"
+alias vim="nvim"
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
