@@ -47,5 +47,3 @@ export FZF_DEFAULT_OPTS="--height 60% --layout=reverse --border --preview 'bat -
 
 . "$HOME/.asdf/asdf.sh"
 . "$HOME/.asdf/completions/asdf.bash"
-
-. "$HOME/.cargo/env"
