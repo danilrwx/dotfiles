@@ -10,9 +10,9 @@ window:
   #  x: 0
   #  y: 0
 
-  padding:
-    x: 4
-    y: 4
+  #padding:
+  #  x: 4
+  #  y: 4
 
   #dynamic_padding: false
 

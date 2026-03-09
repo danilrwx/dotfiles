@@ -1,4 +1,4 @@
-set $mod Mod4
+set $mod Mod1
 set $left h
 set $down j
 set $up k
@@ -10,8 +10,13 @@ font pango:Iosevka Regular 10
 
 default_border pixel 2
 smart_borders on
-gaps inner 8
-client.focused #000000 #ffffff #ffffff
+#gaps inner 8
+
+client.focused			#cad3f5 #cad3f5 #cad3f5 #cad3f5
+client.focused_inactive	#24273a #24273a #24273a #24273a
+client.unfocused		#24273a #24273a #24273a #24273a
+client.urgent			#E78284 #E78284 #E78284 #E78284
+client.placeholder		#24273a #24273a #24273a #24273a
 
 exec_always "setxkbmap -model pc105 -layout us,ru -option grp:alt_space_toggle"
 exec_always --no-startup-id $HOME/.config/polybar/launch.sh &
@@ -19,15 +24,23 @@ exec --no-startup-id udiskie &
 exec --no-startup-id picom &
 exec --no-startup-id blueman-applet &
 exec --no-startup-id feh --bg-scale ~/Backgrounds/1.jpg &
+exec --no-startup-id dunst -conf ~/.config/dunst/dunstrc &
+
+floating_modifier $mod
 
 bindsym $mod+Return exec $term
 bindsym $mod+Shift+q kill
 bindsym $mod+d exec $menu
 
 bindsym $mod+Shift+c reload
-bindsym $mod+Shift+Return exec $term -e "ranger"
+bindsym $mod+Shift+r restart
 bindsym $mod+Shift+s exec --no-startup-id maim --format=png --select | xclip -selection clipboard -t image/png
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+
+bindsym $mod+Shift+Return exec $term -e "ranger"
+bindsym $mod+Shift+v exec $term -e "vim"
+bindsym $mod+Shift+w exec firefox
+bindsym $mod+Shift+BackSpace exec $term -e "htop"
 
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
