@@ -3,9 +3,14 @@ filetype plugin on
 
 set langmap=ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz
 
-colorscheme onedark
-set termguicolors
-let g:airline_theme='onedark'
+colorscheme tender
+let g:airline_theme='tender'
+
+let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+
+if (has("termguicolors"))
+ set termguicolors
+endif
 
 if has('mouse')
   set mouse=a

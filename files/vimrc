@@ -9,7 +9,7 @@ endif
 call plug#begin('~/.vim/plugged')
 
 "Тема
-Plug 'joshdick/onedark.vim'
+Plug 'jacoborus/tender.vim'
 
 " Нижняя панель
 Plug 'vim-airline/vim-airline'
@@ -68,6 +68,9 @@ Plug 'Valloric/MatchTagAlways'
 
 " Подсветка лишних пробелов
 Plug 'ntpeters/vim-better-whitespace'
+
+" Великий гит
+Plug 'tpope/vim-fugitive'
 
 let g:coc_global_extensions = [
       \ 'coc-angular',
