@@ -41,6 +41,6 @@
 [mergetool "nvimdiff"]
     cmd = "nvim -d \"$LOCAL\" \"$REMOTE\" \"$MERGED\" -c 'wincmd w' -c 'wincmd J'"
 
-[include]
-    path = ~/private-dotfiles/.gitconfig
+[includeIf "gitdir:~/w/"]
+    path = ~/private-dotfiles/.gitflant
 
