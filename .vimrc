@@ -92,30 +92,15 @@ set updatetime=100
 " mark trailing spaces as errors
 match errorMsg '\s\+$'
 
-" auto set background on mac
-let output =  system("defaults read -g AppleInterfaceStyle")
-if v:shell_error != 0
-    set background=light
+if v:version >= 900
+  set termguicolors
+  colorscheme retrobox
 else
-    set background=dark
+  set notermguicolors
+  highlight SignColumn ctermbg=NONE
+  highlight CursorLine cterm=none ctermbg=250
+  highlight CursorLineNr cterm=none ctermbg=250
 endif
-
-set notermguicolors
-highlight SignColumn ctermbg=NONE
-" highlight ColorColumn ctermbg=238
-highlight CursorLine cterm=none ctermbg=250
-highlight CursorLineNr cterm=none ctermbg=250
-
-" colorscheme retrobox
-hi StatusLine ctermbg=NONE
-hi StatusLineNC ctermbg=NONE
-hi Normal ctermbg=NONE
-hi LineNr ctermbg=NONE
-hi SpecialKey ctermbg=NONE
-hi ModeMsg cterm=NONE ctermbg=NONE
-hi MoreMsg ctermbg=NONE
-hi NonText ctermbg=NONE
-hi vimGlobal ctermbg=NONE
 
 set omnifunc=syntaxcomplete#Complete
 
@@ -170,7 +155,7 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
     Plug 'preservim/vimux'
 
-    " Plug 'charlespascoe/vim-go-syntax'
+    Plug 'charlespascoe/vim-go-syntax'
     Plug 'kyoh86/vim-go-coverage'
     Plug 'sebdah/vim-delve'
 
