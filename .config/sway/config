@@ -10,7 +10,7 @@ output * bg ~/Backgrounds/1.jpg fill
 
 font pango:Iosevka Regular 10
 
-xwayland disable
+xwayland enable
 default_border pixel 3
 smart_borders on
 gaps inner 8
