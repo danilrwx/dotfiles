@@ -49,6 +49,7 @@ wm: wm-packages wm-config
 
 wm-packages:
 	sudo pacman -S --needed bspwm sxhkd dmenu maim xclip xdotool dunst xorg xorg-xinit feh picom
+	cd ~/dotfiles/suckless/st && sudo make install
 
 wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
