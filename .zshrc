@@ -1,6 +1,10 @@
 export ZSH="$HOME/.oh-my-zsh"
 
-ZSH_THEME="robbyrussell"
+local path_color='%F{green}'
+local arrow_color='%F{magenta}'
+local time_color='%F{cyan}'
+local reset_color='%f'
+PROMPT='[${time_color}%D{%H:%M:%S}${reset_color}] ${path_color}%~${reset_color} ${arrow_color}󰅂${reset_color} '
 
 plugins=(sudo fzf)
 
@@ -15,11 +19,11 @@ alias wget='wget -c '
 alias lg='lazygit'
 alias k="kubectl"
 alias kaf="kubectl apply -f"
-# alias vi="nvim"
-# alias vim="nvim"
+alias vi="nvim"
+alias vim="nvim"
 
-export EDITOR='vim'
-export VISUAL='vim'
+export EDITOR='nvim'
+export VISUAL='nvim'
 
 export PATH=$PATH:$GOPATH/bin/
 export PATH=$PATH:$HOME/.cargo/bin/

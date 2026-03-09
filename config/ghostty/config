@@ -3,14 +3,14 @@ macos-option-as-alt = true
 keybind = alt+left=unbind
 keybind = alt+right=unbind
 
-font-family = Iosevka NFM Medium
-font-family-italic  = Iosevka NFM Medium Italic
-font-family-bold = Iosevka NFM SemiBold
-font-family-bold-italic  = Iosevka NFM Medium Italic
+font-family = Iosevka Medium
+font-family-italic  = Iosevka Medium Italic
+font-family-bold = Iosevka SemiBold
+font-family-bold-italic  = Iosevka Medium Italic
 
 maximize = true
 
-font-size = 16
+font-size = 20
 # theme = dark:GruvboxDark,light:Raycast_Light
 theme = dark:Dark Pastel,light:Raycast_Light
 # background = #1C1C1C
