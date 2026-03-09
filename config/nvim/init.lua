@@ -292,6 +292,17 @@ require("lazy").setup({
 vim.o.termguicolors = true
 vim.cmd.colorscheme("torte")
 
+vim.api.nvim_set_hl(0, "Normal", { bg = nil })
+vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
+
+vim.api.nvim_set_hl(0, "Added", { fg = "#00cd00" })
+vim.api.nvim_set_hl(0, "Changed", { fg = "#00cdcd" })
+vim.api.nvim_set_hl(0, "Removed", { fg = "#cd0000" })
+
+vim.api.nvim_set_hl(0, "DiffAdded", { fg = "#00cd00" })
+vim.api.nvim_set_hl(0, "DiffChanged", { fg = "#00cdcd" })
+vim.api.nvim_set_hl(0, "DiffRemoved", { fg = "#cd0000" })
+
 require("fzf-lua").register_ui_select()
 
 vim.opt.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
