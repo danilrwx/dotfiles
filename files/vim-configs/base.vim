@@ -3,8 +3,8 @@ filetype plugin on
 
 set langmap=ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz
 
-colorscheme base16-default-dark
-let g:airline_theme = 'base16_default_dark'
+" colorscheme base16-default-dark
+" let g:airline_theme = 'base16_default_dark'
 let g:blamer_enabled = 1
 
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1
@@ -87,6 +87,8 @@ nmap gcc <plug>NERDCommenterToggle
 " Открываем ranger
 nmap <silent> <leader><leader> :RnvimrToggle<CR>
 let g:rnvimr_presets = [{'width': 0.950, 'height': 0.950}]
+let g:rnvimr_enable_picker = 1
+let g:rnvimr_enable_bw = 1
 
 " Открываем LazyGit
 nnoremap <silent> <leader>gg :LazyGit<CR>
