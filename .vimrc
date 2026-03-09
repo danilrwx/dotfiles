@@ -42,7 +42,7 @@ set number                 " Set line numbers
 set relativenumber         " Set relative linenumbers
 
 set updatetime=100         " Fast redraw
-set signcolumn=yes         " Always render signcolumn
+set signcolumn=yes        " Always render signcolumn
 set shortmess=aoOtTI       " Avoid most of the 'Hit Enter ...' messages
 set wildmenu               " Better command-line completion
 set mouse=a                " Enable mouse support
@@ -79,7 +79,7 @@ set viminfo='100,n$HOME/.vim/files/info/viminfo
 " mark trailing spaces as errors
 match errorMsg '\s\+$'
 
-if has("patch-9.0.1488")
+if has("patch-9.0.1488") || has("nvim")
   if has('termguicolors')
     set termguicolors
   endif
@@ -100,10 +100,15 @@ endif
 
 let mapleader=" "
 
-nnoremap <S-l> :bn<cr>
-nnoremap <S-h> :bp<cr>
+nnoremap <c-d> <c-d>zz<cr>
+nnoremap <c-u> <c-u>zz<cr>
 
-nnoremap <C-l> :nohl<cr>
+execute "set <A-q>=\eq"
+nnoremap <a-q> :bd<cr>
+nnoremap <s-l> :bn<cr>
+nnoremap <s-h> :bp<cr>
+
+nnoremap <c-l> :nohl<cr>
 
 function! ToggleQuickFix()
     if empty(filter(getwininfo(), 'v:val.quickfix'))
@@ -113,8 +118,8 @@ function! ToggleQuickFix()
     endif
 endfunction
 nnoremap <silent> <leader>q :call ToggleQuickFix()<cr>
-nnoremap <C-j> :cnext<cr>
-nnoremap <C-k> :cprev<cr>
+nnoremap <c-j> :cnext<cr>
+nnoremap <c-k> :cprev<cr>
 
 function! TrimWhitespace()
     let l:save = winsaveview()
@@ -135,12 +140,19 @@ function! FzyCommand(choice_command, vim_command)
   endif
 endfunction
 
+function! FzyBuffer()
+  let bufnrs = filter(range(1, bufnr("$")), 'buflisted(v:val)')
+  let buffers = map(bufnrs, 'bufname(v:val)')
+  call FzyCommand('echo "' . join(buffers, "\n") . '"', ":b")
+endfunction
+
 if executable('ugrep')
   nnoremap <leader>f :call FzyCommand("ugrep '' . -Rl -I --ignore-files --exclude='zz_generated*' --exclude-dir='generated'", ":e")<cr>
 else
   nnoremap <leader>f :call FzyCommand("find . -type f", ":e")<cr>
 endif
 
+nnoremap <leader>b :call FzyBuffer()<cr>
 nnoremap <leader>sf :call FzyCommand("find . -type f", ":e")<cr>
 nnoremap <leader>sg :call FzyCommand("git ls-files", ":e")<cr>
 
@@ -154,6 +166,8 @@ endif
 
 if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.local/share/vim/plugins')
+    Plug 'ap/vim-buftabline'
+
     Plug 'tpope/vim-fugitive'
 
     Plug 'airblade/vim-gitgutter'
@@ -168,19 +182,33 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
     Plug 'prabirshrestha/vim-lsp'
     Plug 'mattn/vim-lsp-settings'
-
     Plug 'prabirshrestha/asyncomplete.vim'
     Plug 'prabirshrestha/asyncomplete-lsp.vim'
+
+    Plug 'markonm/traces.vim'
+
+    if has('vim9script')
+      Plug 'habamax/vim-dir'
+      Plug 'girishji/vimbits'
+    endif
+
+    Plug 'augmentcode/augment.vim'
   call plug#end()
+
+  if has('vim9script')
+    nnoremap <bs> <cmd>Dir<cr>
+  endif
 
   let g:gitgutter_sign_priority = 0
   let g:gitgutter_preview_win_floating = 1
 
-  let g:gitgutter_sign_added = '🮈'
-  let g:gitgutter_sign_modified = '🮈'
+  let g:gitgutter_sign_added = '🮊'
+  let g:gitgutter_sign_modified = '🮊'
   let g:gitgutter_sign_removed = '▁'
   let g:gitgutter_sign_removed_first_line = '▔'
-  let g:gitgutter_sign_modified_removed = "🮈~"
+  let g:gitgutter_sign_modified_removed = "🭪"
+
+  inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
 
   let g:lsp_settings = {
         \  'golangci-lint-langserver': {
@@ -192,19 +220,30 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
   let g:lsp_semantic_enabled = 1
 
-  " let g:lsp_diagnostics_float_cursor = 1
-  " let g:lsp_diagnostics_virtual_text_enabled = 0
+  let g:lsp_use_lua = has('nvim-0.4.0') || (has('lua') && has('patch-8.2.0775'))
 
-  let g:lsp_diagnostics_virtual_text_align = 'right'
+  let g:lsp_diagnostics_float_cursor = 1
+  let g:lsp_float_max_width = 80
+
+	let g:lsp_diagnostics_highlights_delay = 50
+  let g:lsp_diagnostics_highlights_insert_mode_enabled = 0
+
+	let g:lsp_diagnostics_signs_delay = 50
+  let g:lsp_diagnostics_signs_error = {'text': '💩'}
+  let g:lsp_diagnostics_signs_warning = {'text': '💫'}
+  let g:lsp_diagnostics_signs_information = {'text': '🔩'}
+  let g:lsp_diagnostics_signs_hint = {'text': '📎'}
+
+	let g:lsp_diagnostics_virtual_text_delay = 50
+  let g:lsp_diagnostics_virtual_text_prefix = " 🐗 "
+  let g:lsp_diagnostics_virtual_text_align = 'after'
+  let g:lsp_diagnostics_virtual_text_wrap = "truncate"
+
+  hi LspErrorText guifg=#fb4934 guibg=NONE
 
   let g:lsp_document_code_action_signs_enabled = 0
 
   let g:lsp_experimental_workspace_folders = 1
-
-  if v:version > 900
-    let g:lsp_use_native_client = 1
-    let g:lsp_format_sync_timeout = 1000
-  endif
 
   augroup lsp_install
     au!
