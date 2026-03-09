@@ -90,8 +90,6 @@ vim.g.gitgutter_sign_priority = 0
 vim.g.gitgutter_preview_win_floating = 1
 
 vim.pack.add({
-  { src = 'https://github.com/nvim-lua/plenary.nvim', },
-
   { src = 'https://github.com/rmagatti/auto-session' },
   { src = 'https://github.com/stevearc/oil.nvim' },
   { src = 'https://github.com/ibhagwan/fzf-lua' },
@@ -99,44 +97,32 @@ vim.pack.add({
   { src = 'https://github.com/nvim-treesitter/nvim-treesitter' },
   { src = 'https://github.com/Wansmer/treesj' },
 
+  { src = 'https://github.com/airblade/vim-gitgutter' },
   { src = 'https://github.com/tpope/vim-fugitive' },
 
-  { src = 'https://github.com/kyoh86/vim-go-coverage' },
+  { src = 'https://github.com/nvim-lua/plenary.nvim', },
   { src = 'https://github.com/mfussenegger/nvim-dap' },
   { src = 'https://github.com/leoluz/nvim-dap-go' },
+
   { src = 'https://github.com/Wansmer/symbol-usage.nvim' },
 
+  { src = 'https://github.com/kyoh86/vim-go-coverage' },
   { src = 'https://github.com/vim-test/vim-test' },
 
   { src = 'https://github.com/laktak/tome' },
 
   { src = 'https://github.com/supermaven-inc/supermaven-nvim' },
-  { src = 'https://github.com/airblade/vim-gitgutter' },
-
-  { src = 'https://github.com/ellisonleao/gruvbox.nvim' },
 })
 
 require('supermaven-nvim').setup({})
 
-require('oil').setup({
-  view_options = { show_hidden = true },
-})
+require('oil').setup({ view_options = { show_hidden = true } })
 
-require('auto-session').setup({
-  suppressed_dirs = { '~/', '~/Downloads', '/' },
-})
+require('auto-session').setup({ suppressed_dirs = { '~/', '~/Downloads', '/' } })
 
-require('nvim-treesitter.configs').setup({
-  auto_install = true,
-  highlight = { enable = true },
-})
+require('nvim-treesitter.configs').setup({ auto_install = true, highlight = { enable = true } })
 
-require('fzf-lua').setup({
-  winopts = {
-    fullscreen = true,
-    preview = { layout = "vertical", vertical = "up:55%", border = "single" },
-  }
-})
+require('fzf-lua').setup({ winopts = { fullscreen = true, preview = { layout = "vertical", vertical = "up:55%", border = "single" } } })
 
 require('symbol-usage').setup({
   kinds = {
