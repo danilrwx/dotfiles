@@ -143,11 +143,9 @@ helix-install:
 	hx --grammar build
 
 sad-install:
-cargo install --locked --all-features --git https://github.com/ms-jpq/sad --branch senpai
+	cargo install --locked --all-features --git https://github.com/ms-jpq/sad --branch senpai
 
 rust-tools-install:
-	cargo install exa git-delta fd-find
-	cargo install --locked bat
 	go install github.com/jesseduffield/lazygit@latest
 	env CGO_ENABLED=0 go install -ldflags="-s -w" github.com/gokcehan/lf@latest
 

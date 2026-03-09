@@ -37,9 +37,8 @@ ColorPalette=rgb(36,41,46);rgb(215,58,73);rgb(40,167,69);rgb(219,171,9);rgb(3,10
 ShortcutsNoHelpkey=TRUE
 ShortcutsNoMnemonics=TRUE
 ShortcutsNoMenukey=TRUE
-FontName=IosevkaTerm Nerd Font 14
+FontName=IosevkaTerm Nerd Font Medium 13
 BackgroundMode=TERMINAL_BACKGROUND_TRANSPARENT
-CellHeightScale=1,200000
 CustomCommand=/bin/bash
 ColorCursorForeground=#f4f4f4f4f4f4
 
