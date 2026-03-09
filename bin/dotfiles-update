@@ -36,8 +36,6 @@ ln -snf ~/dotfiles/config/xfce4-share/ ~/.local/share/xfce4
 ln -snf ~/dotfiles/config/i3 ~/.config/
 ln -snf ~/dotfiles/config/dunst ~/.config/
 
-# ln -sf ~/dotfiles/.zprofile ~/
-# ln -sf ~/dotfiles/.zshrc ~/
 ln -sf ~/dotfiles/.bash_profile ~/
 ln -sf ~/dotfiles/.bashrc ~/
 
@@ -53,12 +51,12 @@ if [ "$ID" == "fedora" ]; then
 
   sudo dnf install -y lame\* --exclude=lame-devel
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
-  sudo dnf install -y tmux git wget zip unzip curl zsh tigervnc openssh-askpass pinentry-gnome3 virt-manager flatpak gpg
+  sudo dnf install -y tmux git wget zip unzip curl tigervnc openssh-askpass pinentry-gnome3 virt-manager flatpak gpg
 elif [ "$ID" == "debian" ]; then
   log "Installing debian packages"
 
   sudo apt update -y
-  sudo apt install -y tmux git wget zip unzip curl zsh tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 virt-manager flatpak gpg
+  sudo apt install -y tmux git wget zip unzip curl tigervnc-viewer ssh-askpass-gnome pinentry-gnome3 virt-manager flatpak gpg
 fi
 
 
@@ -81,8 +79,7 @@ log "Installing brew apps"
 brew install htop fzf keychain neovim lazygit gh yq xq jq difftastic \
   kubectl k9s kubecolor krew \
   go golangci-lint-langserver gofumpt goimports go-task gopls \
-  bash-language-server lua-language-server helm-ls \
-  zsh-syntax-highlighting
+  bash-language-server lua-language-server helm-ls
 
 log "Installing golang apps"
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
@@ -99,8 +96,12 @@ if [ ! -d ~/.tmux/plugins/tpm ]; then
 fi
 
 if [[ "$SHELL" != "$(brew --prefix)/bin/bash" ]]; then
-  log "Setting bash as default shell"
-  echo $(brew --prefix)/bin/bash | sudo tee -a /etc/shells
+  if ! grep -w $(brew --prefix)/bin/bash /etc/shells; then
+    log "Adding brew bash to shells"
+    echo $(brew --prefix)/bin/bash | sudo tee -a /etc/shells
+  fi
+
+  log "Setting brew bash as default shell"
   chsh -s $(brew --prefix)/bin/bash
 fi
 
