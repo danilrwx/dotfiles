@@ -2,8 +2,14 @@
   "enabled": true,
   "mode": "interactive",
   "network": {
-    "block": false
+    "block": false,
+    "allowedDomains": [
+      "api.github.com:443",
+      "github.com:443",
+      "gitlab.com:443"
+    ]
   },
+  "enableWeakerNetworkIsolation": true,
   "filesystem": {
     "allowRead": [
       ".",
@@ -14,7 +20,9 @@
     "allowWrite": [
       "/tmp",
       "/private/tmp",
-      "/private/var/folders"
+      "/private/var/folders",
+      "~/w",
+      "~/.pi"
     ],
     "allowReadWrite": [
       "."

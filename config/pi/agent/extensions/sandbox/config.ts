@@ -25,7 +25,8 @@ export function normalizeConfig(partial: Partial<SandboxConfig>): SandboxConfig 
     enabled: partial.enabled ?? true,
     mode: normalizeMode(partial.mode) ?? "interactive",
     network: {
-      block: partial.network?.block ?? false,
+      allowedDomains: partial.network?.allowedDomains ?? [],
+      deniedDomains: partial.network?.deniedDomains ?? [],
     },
     filesystem: {
       allowRead: partial.filesystem?.allowRead ?? [],
@@ -34,6 +35,10 @@ export function normalizeConfig(partial: Partial<SandboxConfig>): SandboxConfig 
       denyRead: partial.filesystem?.denyRead ?? [],
       denyWrite: partial.filesystem?.denyWrite ?? [],
     },
+    ignoreViolations: partial.ignoreViolations,
+    enableWeakerNestedSandbox: partial.enableWeakerNestedSandbox,
+    enableWeakerNetworkIsolation: partial.enableWeakerNetworkIsolation,
+    allowPty: partial.allowPty,
   };
 }
 
@@ -61,7 +66,8 @@ export function loadConfig(cwd: string): SandboxConfig {
     enabled: projectSetsEnabled ? project.enabled : global.enabled,
     mode: projectSetsMode ? project.mode : global.mode,
     network: {
-      block: project.network?.block ?? global.network?.block,
+      allowedDomains: mergeArrays(global.network?.allowedDomains, project.network?.allowedDomains),
+      deniedDomains: mergeArrays(global.network?.deniedDomains, project.network?.deniedDomains),
     },
     filesystem: {
       allowRead: mergeArrays(global.filesystem?.allowRead, project.filesystem?.allowRead),
@@ -70,6 +76,10 @@ export function loadConfig(cwd: string): SandboxConfig {
       denyRead: mergeArrays(global.filesystem?.denyRead, project.filesystem?.denyRead),
       denyWrite: mergeArrays(global.filesystem?.denyWrite, project.filesystem?.denyWrite),
     },
+    ignoreViolations: global.ignoreViolations ?? project.ignoreViolations,
+    enableWeakerNestedSandbox: project.enableWeakerNestedSandbox ?? global.enableWeakerNestedSandbox,
+    enableWeakerNetworkIsolation: project.enableWeakerNetworkIsolation ?? global.enableWeakerNetworkIsolation,
+    allowPty: project.allowPty ?? global.allowPty,
   });
 }
 

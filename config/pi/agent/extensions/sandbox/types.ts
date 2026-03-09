@@ -5,7 +5,8 @@ export interface SandboxConfig {
   enabled?: boolean;
   mode?: SandboxMode;
   network?: {
-    block?: boolean;
+    allowedDomains?: string[];
+    deniedDomains?: string[];
   };
   filesystem?: {
     allowRead?: string[];
@@ -14,6 +15,10 @@ export interface SandboxConfig {
     denyRead?: string[];
     denyWrite?: string[];
   };
+  ignoreViolations?: Record<string, string[]>;
+  enableWeakerNestedSandbox?: boolean;
+  enableWeakerNetworkIsolation?: boolean;
+  allowPty?: boolean;
 }
 
 export interface RuntimeConfigExtras {

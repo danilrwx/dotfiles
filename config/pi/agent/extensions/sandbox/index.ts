@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 
-import { SandboxManager } from "@anthropic-ai/sandbox-runtime";
+import { SandboxManager, type NetworkHostPattern } from "@anthropic-ai/sandbox-runtime";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType, type BashOperations, createBashTool } from "@mariozechner/pi-coding-agent";
 
@@ -52,6 +52,7 @@ export default function (pi: ExtensionAPI) {
   let runtimeAvailable = false;
   let runtimeReason = "not_initialized";
   let allowUnsandboxedBashForSession = false;
+  let sandboxUi: ExtensionContext["ui"] | null = null;
 
   function addSessionGrant(filePath: string, accessMode: AccessMode): string {
     const resolved = resolvePath(filePath);
@@ -98,12 +99,70 @@ export default function (pi: ExtensionAPI) {
       return;
     }
 
+    const networkAskCallback = async (params: NetworkHostPattern): Promise<boolean> => {
+      if (!sandboxUi) return false;
+
+      const host = params.port ? `${params.host}:${params.port}` : params.host;
+
+      // Check if host is already allowed in config
+      const allowedDomains = config.network?.allowedDomains ?? [];
+      const isAlreadyAllowed = allowedDomains.some((domain) => {
+        if (domain === "*") return true;
+        if (domain === host) return true;
+        if (domain.startsWith("*.") && host.endsWith(domain.slice(1))) return true;
+        if (host.endsWith(`.${domain}`)) return true;
+        return false;
+      });
+
+      if (isAlreadyAllowed) {
+        return true;
+      }
+
+      const choice = await sandboxUi.select(
+        `🛡️ Sandbox: Blocked network access\nHost: ${host}`,
+        ["Allow for this session", "Allow & save to project config", "Allow & save to global config", "Block"],
+      );
+
+      if (choice === "Block" || choice === undefined) return false;
+
+      // Always add to current session config
+      config.network = config.network || { allowedDomains: [], deniedDomains: [] };
+      config.network.allowedDomains = [...(config.network.allowedDomains ?? []), host];
+
+      if (choice === "Allow & save to project config" || choice === "Allow & save to global config") {
+        const scope: ConfigScope = choice.includes("global") ? "global" : "project";
+        const configPath = configPathForScope(scope, ctx.cwd);
+        const fs = await import("node:fs");
+        let existing: Record<string, unknown> = {};
+        if (fs.existsSync(configPath)) {
+          try { existing = JSON.parse(fs.readFileSync(configPath, "utf-8")); } catch {}
+        }
+        if (!existing.network) existing.network = {};
+        const current = (existing.network as Record<string, unknown>).allowedDomains as string[] || [];
+        (existing.network as Record<string, unknown>).allowedDomains = [...new Set([...current, host])];
+        fs.mkdirSync(require("node:path").dirname(configPath), { recursive: true });
+        fs.writeFileSync(configPath, JSON.stringify(existing, null, 2) + "\n");
+        sandboxUi.notify(`Saved to ${configPath}`, "info");
+
+        // Reload config to get updated values
+        config = loadConfig(ctx.cwd);
+      }
+
+      // Update runtime config so the host is allowed for future requests
+      const runtimeConfig = buildRuntimeConfig(config, sessionGrantedWrites, ctx.cwd);
+      if (SandboxManager.isSandboxingEnabled()) {
+        SandboxManager.updateConfig(runtimeConfig);
+      }
+
+      return true;
+    };
+
     try {
       const runtimeConfig = buildRuntimeConfig(config, sessionGrantedWrites, ctx.cwd);
       if (SandboxManager.isSandboxingEnabled()) {
         SandboxManager.updateConfig(runtimeConfig);
       } else {
-        await SandboxManager.initialize(runtimeConfig);
+        await SandboxManager.initialize(runtimeConfig, networkAskCallback);
       }
 
       runtimeAvailable = true;
@@ -323,6 +382,7 @@ export default function (pi: ExtensionAPI) {
     const noSandbox = pi.getFlag("no-sandbox") as boolean;
     const flagMode = pi.getFlag("sandbox-mode") as string | undefined;
 
+    sandboxUi = ctx.ui;
     config = loadConfig(ctx.cwd);
 
     if (noSandbox) {
@@ -443,7 +503,6 @@ export default function (pi: ExtensionAPI) {
         `Backend: ${runtimeAvailable ? "sandbox-runtime" : `policy-only (${runtimeReason})`}`,
         `Sandbox active: ${sandboxReady}`,
         `Session grants: ${grants}`,
-        `Network: ${config.network?.block ? "blocked" : "allowed"}`,
         `Global config: ${globalPath}`,
         `Project config: ${projectPath}`,
         `ReadWrite paths: ${effective.readWrite.length}`,

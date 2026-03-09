@@ -20,9 +20,12 @@ export function buildRuntimeConfig(
   const denyRead = toUniqueResolved(config.filesystem?.denyRead ?? []);
   const denyWrite = toUniqueResolved(config.filesystem?.denyWrite ?? []);
 
-  const network = config.network?.block
-    ? { allowedDomains: [], deniedDomains: ["*"] }
-    : { allowedDomains: ["*"], deniedDomains: [] };
+  const network = {
+    allowedDomains: config.network?.allowedDomains && config.network.allowedDomains.length > 0
+      ? config.network.allowedDomains
+      : ["*"],
+    deniedDomains: config.network?.deniedDomains ?? [],
+  };
 
   const extras = config as SandboxConfig & RuntimeConfigExtras;
 
