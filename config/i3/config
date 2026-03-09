@@ -6,6 +6,7 @@ set $up    k
 set $right l
 
 set $bg       #1e1e2e
+set $bg_t     #1e1e2ee6
 set $fg       #cdd6f4
 set $red      #f38ba8
 set $darkgray #7f849c
@@ -127,15 +128,16 @@ client.unfocused               $bg        $bg       $darkgray      $bg          
 client.urgent                  $red       $bg       $red           $red         $red
 
 bar {
+  i3bar_command i3bar --transparency
   status_command baraction
 	position top
   colors {
-     background $bg
+     background $bg_t
      statusline $fg
      #class               border  backgr. text
-     focused_workspace    $bg     $bg     $fg
-     inactive_workspace   $bg     $bg     $darkgray
-     active_workspace     $bg     $bg     $darkgray
-     urgent_workspace     $bg     $bg     $red
+     focused_workspace    $bg_t     $bg_t     $fg
+     inactive_workspace   $bg_t     $bg_t     $darkgray
+     active_workspace     $bg_t     $bg_t     $darkgray
+     urgent_workspace     $bg_t     $bg_t     $red
   }
 }
