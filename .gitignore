@@ -20,6 +20,12 @@ config/vim/.netrwhist
 
 config/k9s/clusters
 
+config/pi/agent/bin/*
+config/pi/agent/cache/*
+config/pi/agent/sessions/*
+config/pi/agent/git
+config/pi/agent/auth.json
+
 .gitignore
 *.orig
 *.rej
