@@ -3,4 +3,5 @@
 dunst -conf ~/.config/dunst/dunstrc &
 xsetroot -cursor_name left_ptr &
 xcompmgr &
+clipmenud &
 dex --autostart --environment spectrwm &

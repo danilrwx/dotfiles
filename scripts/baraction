@@ -133,13 +133,13 @@ vpn() {
 }
 
 keyboard() {
-  icon="󰥻"
-  text="US"
+  icon="󰌌"
+  text=`xkblayout-state print "%s" | awk '{print toupper($0)}'`
 
   echo -e "$icon $text"
 }
 
-SLEEP_SEC=0.5
+SLEEP_SEC=1
 while true; do
   echo "$(vpn) $(del) $(vol) $(del) $(mic) $(del) $(bat0) $(del) $(bat1) $(del) $(bri) $(del) $(keyboard) $(del) $(date)  "
   sleep $SLEEP_SEC
