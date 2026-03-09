@@ -2,6 +2,7 @@ all:
 	make console-font
 	make base
 	make desktop-packages
+	make laptop-packages
 	make wm
 	make runit
 	make pipewire
@@ -10,6 +11,7 @@ all:
 	make git
 	make git-change-remote
 	make suckless
+	make asdf
 
 nvim-install:
 	rm -rf nvim/plugin || exit 0
@@ -48,11 +50,10 @@ suckless-packages:
 	sudo xbps-install -Syu libX11-devel libXft-devel
 
 suckless-install:
-	cd ~/dotfiles/suckless/st
-	sudo make install
+	cd ~/dotfiles/suckless/st && sudo make install
 
 wm-packages:
-	sudo xbps-install -Syu bspwm sxhkd dmenu maim xclip xdotool dunst xorg
+	sudo xbps-install -Syu bspwm sxhkd dmenu maim xclip xdotool dunst xorg feh picom
 
 wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
@@ -60,6 +61,7 @@ wm-config:
 	ln -snf $(PWD)/.config/bspwm ~/.config/bspwm
 	ln -snf $(PWD)/.config/sxhkd ~/.config/sxhkd
 	ln -snf $(PWD)/.config/picom ~/.config/picom
+	ln -snf $(PWD)/.config/dunst ~/.config/dunst
 
 runit:
 	sudo ln -sf /etc/sv/elogind /var/service/
@@ -67,7 +69,7 @@ runit:
 	sudo ln -sf /etc/sv/tlp /var/service/
 
 pipewire:
-	sudo xbps-install -Syu pipewire wireplumber pavucontrol easyeffects 
+	sudo xbps-install -Syu pipewire wireplumber pavucontrol
 	sudo mkdir -p /etc/pipewire/pipewire.conf.d 
 	sudo ln -sf /usr/share/applications/pipewire.desktop /etc/xdg/autostart/pipewire.desktop
 	sudo ln -sf /usr/share/examples/wireplumber/10-wireplumber.conf /etc/pipewire/pipewire.conf.d/
@@ -110,3 +112,8 @@ flatpak-add:
 
 flatpak-install:
 	flatpak install -y flathub com.github.tchx84.Flatseal org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord io.github.spacingbat3.webcord
+
+asfd: asdf-install
+
+asdf-install:
+	git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.12.0
