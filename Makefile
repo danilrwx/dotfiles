@@ -12,6 +12,7 @@ base:
 	ln -snf $(PWD)/config/nvim ~/.config/
 	ln -snf $(PWD)/config/vim ~/.vim
 	ln -snf $(PWD)/config/helix ~/.config/
+	ln -snf $(PWD)/config/lazygit ~/.config/
 	ln -snf $(PWD)/config/k9s ~/.config/
 
 i3-config:
@@ -36,7 +37,7 @@ brew-install:
 brew-packages:
 	brew install brew-cask-completion sops regclient k9s lazygit fzf httpie asdf ripgrep \ 
 	neofetch jq keychain wget fd openssl readline libyaml gmp autoconf tmux  neovim python3 \
-	yq
+	yq fx yh highlight moar difftastic
 
 brew-mac:
 	brew install chromium --no-quarantine

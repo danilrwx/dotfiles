@@ -90,8 +90,8 @@ set signcolumn=yes
 
 set wildmenu
 
-set background=dark
-colorscheme torte
+" set background=l
+colorscheme lunaperche
 
 set omnifunc=syntaxcomplete#Complete
 imap <tab><tab> <c-x><c-o>
