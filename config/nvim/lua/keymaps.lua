@@ -23,5 +23,6 @@ vim.keymap.set("n", "<c-t>h", "<cmd>tabprev<cr>")
 vim.keymap.set("n", "<c-t>n", "<cmd>tabnew<cr>")
 vim.keymap.set("n", "<c-t>c", "<cmd>tabclose<cr>")
 
-vim.keymap.set("n", "<leader>q", Funcs.toggle_quickfix)
+vim.keymap.set("n", "<leader>gg", "<cmd>!tmux neww lazygit<cr>")
 
+vim.keymap.set("n", "<leader>q", Funcs.toggle_quickfix)

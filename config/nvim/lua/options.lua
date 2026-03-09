@@ -1,54 +1,17 @@
-local langmap_keys = {
-  "ёЁ;`~",
-  "№;#",
-  "йЙ;qQ",
-  "цЦ;wW",
-  "уУ;eE",
-  "кК;rR",
-  "еЕ;tT",
-  "нН;yY",
-  "гГ;uU",
-  "шШ;iI",
-  "щЩ;oO",
-  "зЗ;pP",
-  "хХ;[{",
-  "ъЪ;]}",
-  "фФ;aA",
-  "ыЫ;sS",
-  "вВ;dD",
-  "аА;fF",
-  "пП;gG",
-  "рР;hH",
-  "оО;jJ",
-  "лЛ;kK",
-  "дД;lL",
-  [[жЖ;\;:]],
-  [[эЭ;'\"]],
-  "яЯ;zZ",
-  "чЧ;xX",
-  "сС;cC",
-  "мМ;vV",
-  "иИ;bB",
-  "тТ;nN",
-  "ьЬ;mM",
-  [[бБ;\,<]],
-  "юЮ;.>",
-}
-
-vim.o.langmap = table.concat(langmap_keys, ",")
-vim.g.mapleader = " "
 vim.opt.undodir = os.getenv("HOME") .. "/.vim/nfiles/undo"
 vim.opt.undofile = true
-vim.g.maplocalLeader = "\\"
+
 vim.opt.number = false
 vim.opt.numberwidth = 2
 vim.opt.relativenumber = true
+
 vim.opt.expandtab = true
 vim.opt.smarttab = true
 vim.opt.smartindent = true
 vim.opt.softtabstop = 2
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
+
 vim.opt.signcolumn = "yes"
 vim.opt.laststatus = 1
 
@@ -58,12 +21,16 @@ else
   vim.opt.grepprg = "grep -RIn --exclude='zz_generated*' --exclude-dir='generated'"
 end
 
-vim.fn.sign_define("DiagnosticSignError", { text = "🤡", texthl = "DiagnosticSignError" })
-vim.fn.sign_define("DiagnosticSignWarn", { text = "💫", texthl = "DiagnosticSignWarn" })
-vim.fn.sign_define("DiagnosticSignInfo", { text = "🔩", texthl = "DiagnosticSignInfo" })
-vim.fn.sign_define("DiagnosticSignHint", { text = "📎", texthl = "DiagnosticSignHint" })
+vim.o.winborder = "single"
 
-vim.diagnostic.config({ virtual_text = { prefix = "🐗" } })
+vim.cmd.colorscheme("retrobox")
+vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#1C1C1C" })
+vim.api.nvim_set_hl(0, "Pmenu", { bg = "#1C1C1C" })
+vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#83a598", bg = "#1C1C1C" })
+vim.api.nvim_set_hl(0, "PmenuKindSel", { fg = "#1C1C1C", bg = "#83a598" })
+vim.api.nvim_set_hl(0, "PmenuExtra", { bg = "#1C1C1C" })
+
+vim.cmd.packadd("cfilter")
 
 vim.filetype.add({
   filename = {

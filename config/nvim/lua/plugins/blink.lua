@@ -1,23 +1,23 @@
 return {
-  {
-    'saghen/blink.compat',
-    version = '*',
-    lazy = true,
-    opts = {},
-  },
+  -- {
+  --   'saghen/blink.compat',
+  --   version = '*',
+  --   lazy = true,
+  --   opts = {},
+  -- },
 
   {
     'saghen/blink.cmp',
     dependencies = {
-      "supermaven-nvim",
-      "saghen/blink.compat",
+      -- "supermaven-nvim",
+      -- "saghen/blink.compat",
       'rafamadriz/friendly-snippets',
     },
     version = '*',
     opts = {
       keymap = { preset = 'enter' },
       signature = { enabled = true },
-      appearance = { nerd_font_variant = 'mono' },
+      appearance = { nerd_font_variant = 'normal' },
       completion = {
         accept = { auto_brackets = { enabled = true } },
         menu = { draw = { treesitter = { "lsp" } } },
@@ -25,14 +25,15 @@ return {
       },
       fuzzy = { implementation = "prefer_rust_with_warning" },
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'buffer', 'supermaven' },
+        -- default = { 'lsp', 'path', 'snippets', 'buffer', 'supermaven' },
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
         providers = {
-          supermaven = {
-            module = 'blink.compat.source',
-            name = "supermaven",
-            score_offset = 100,
-            async = true,
-          },
+          -- supermaven = {
+          --   module = 'blink.compat.source',
+          --   name = "supermaven",
+          --   score_offset = 100,
+          --   async = true,
+          -- },
         }
       },
     },
@@ -50,7 +51,7 @@ return {
       keymaps = {
         accept_suggestion = nil,
       },
-      disable_inline_completion = vim.g.ai_cmp,
+      -- disable_inline_completion = true,
       ignore_filetypes = { "bigfile", "snacks_input", "snacks_notif" },
     },
   },

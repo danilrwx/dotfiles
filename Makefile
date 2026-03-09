@@ -12,7 +12,7 @@ base:
 	ln -snf $(PWD)/config/vim ~/.vim
 	ln -snf $(PWD)/config/nvim ~/.config/
 	ln -snf $(PWD)/config/htop ~/.config/
-	# ln -snf $(PWD)/config/lazygit ~/.config/
+	ln -snf $(PWD)/config/lazygit ~/.config/
 	ln -snf $(PWD)/config/ghostty ~/.config/
 
 sway:

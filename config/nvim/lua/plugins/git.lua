@@ -2,7 +2,6 @@ return {
   {
     "tpope/vim-fugitive",
     lazy = false,
-    dependencies = { "tpope/vim-rhubarb" },
     keys = {
       { "<leader>g=", "<cmd>tab Git<cr>"},
       { "<leader>gl", "<cmd>tab Git log --follow -p %<cr>"},
