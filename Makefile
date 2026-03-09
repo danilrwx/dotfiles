@@ -1,39 +1,36 @@
-all: nvim-install
+all: config-install
 
-TAGS := all
-PACKER_PATH=~/.local/share/nvim/site/pack/packer/start
-
-nvim-install:
-	rm -rf nvim/plugin || exit 0
-	rm -rf ~/.local/share/nvim || exit 0
-	rm -rf ~/.config/nvim || exit 0
-	rm -rf $(PACKER_PATH) || exit 0
-	git clone --depth 1 https://github.com/wbthomason/packer.nvim $(PACKER_PATH)/packer.nvim
-	ln -snf $(PWD)/nvim ~/.config/nvim
-	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+config-install:
+	ln -snf  $(PWD)/.config/sway ~/.config/sway
+	ln -snf $(PWD)/.config/foot ~/.config/foot
+	ln -snf $(PWD)/.config/helix ~/.config/helix
+	ln -snf $(PWD)/.config/waybar ~/.config/waybar
+	ln -snf $(PWD)/.config/htop ~/.config/htop
+	ln -snf $(PWD)/.config/lazygit ~/.config/lazygit
+	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/electron-flags.conf
+	ln -sf $(PWD)/.zprofile ~/.zprofile
+	ln -sf $(PWD)/.zshrc ~/.zshrc
 
 arch-prepare:
-	paru -S neovim git silversearcher-ag fd fzf bat htop ncdu tldr httpie ctags lazygit ripgrep
+	sudo pacman --needed -S seatd htop git  curl zsh firefox telegram-desktop discord tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man
 
-deps: deps-gem deps-npm deps-pip
+deps: deps-gem deps-npm deps-go
 
-deps-pip:
-	pip3 install --upgrade pynvim ranger-fm
-	pip3 install --upgrade vim-vint
-	pip3 install --upgrade autopep8 flake8 bandit pytype # black
-	pip3 install --upgrade ueberzug
-
+deps-go:
+	go install github.com/go-delve/delve/cmd/dlv@latest
+	go install golang.org/x/tools/gopls@latest
 deps-gem:
-	gem install solargraph rubocop neovim
-	gem install rubocop-rspec rubocop-rails rubocop-performance rubocop-rake
-	gem install sorbet sorbet-runtime
-	gem install haml_lint slim_lint
-	gem install brakeman reek
+	gem install solargraph
 
 deps-npm:
-	npm install -g neovim
-	npm install -g prettier eslint @babel/eslint-parser eslint-plugin-import eslint-plugin-node
-	npx install-peerdeps -g eslint-config-airbnb
-	npm install -g stylelint stylelint-config-recommended stylelint-config-standard
-	npm install -g yaml-language-server markdownlint bash-language-server
+	npm install -g typescript typescript-language-server vscode-langservers-extracted
 
+systemd:
+	systemctl enable seatd
+	systemctl enable tlp
+	systemctl enable acpid
+
+git:
+	git config --global core.editor "helix"
+	git config --global user.name "Danil Antoshin"
+	git config --global user.email antoshindanil@ya.ru
