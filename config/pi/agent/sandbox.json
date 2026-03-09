@@ -8,7 +8,8 @@
     "allowRead": [
       ".",
       "~/w",
-      "~/.pi"
+      "~/.pi",
+      "/opt/homebrew"
     ],
     "allowWrite": [
       "/tmp",
