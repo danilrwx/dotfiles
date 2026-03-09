@@ -32,8 +32,8 @@ require("lazy").setup({
     { 'kevinhwang91/nvim-bqf' },
 
     {
-      'p00f/alabaster.nvim',
-      lazy = false,
+      "catppuccin/nvim",
+      name = "catppuccin",
       priority = 1000,
     },
 
@@ -333,7 +333,7 @@ require("lazy").setup({
 
 
 vim.o.termguicolors = true
-vim.cmd.colorscheme("alabaster")
+vim.cmd.colorscheme("catppuccin")
 
 require("fzf-lua").register_ui_select()
 

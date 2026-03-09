@@ -12,4 +12,4 @@ maximize = true
 
 font-size = 17
 
-theme = dark:Alabaster Dark,light:Alabaster Dark
+theme = Catppuccin Mocha
