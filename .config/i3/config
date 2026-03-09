@@ -20,7 +20,7 @@ set $black    #000000
 
 font pango:Iosevka Regular 10
 
-default_border pixel 1
+default_border pixel 3
 smart_borders  on
 gaps           inner 0
 
