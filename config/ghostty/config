@@ -1,0 +1,15 @@
+macos-option-as-alt = true
+
+window-decoration = false
+
+keybind = alt+left=unbind
+keybind = alt+right=unbind
+
+font-family = Iosevka NFM
+
+maximize = true
+
+font-size = 16
+
+theme = Kitty Default
+
