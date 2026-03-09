@@ -1,7 +1,7 @@
 all: 
 	make console-font
 	make base
-	make i3
+	make wm
 	make runit
 	make pipewire
 	make virt 
@@ -35,35 +35,25 @@ laptop-packages:
 	sudo xbps-install -Syu acpi tlp intel-video-accel brightnessctl
 
 desktop-packages:
-	sudo xbps-install -Syu font-iosevka bashmount pipewire wireplumber pavucontrol elogind dex flatpak xdg-user-dirs xdg-user-dirs-gtk xdg-utils easyeffects libavcodec ffmpeg mesa-dri udisks2 
+	sudo xbps-install -Syu font-iosevka bashmount elogind dex flatpak xdg-user-dirs xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 
 
 dev-packages:
-	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl 
+	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl postgresql-libs postgresql-libs-devel
 
-i3: i3-packages i3-config
+wm: wm-packages wm-config
 
 suckless-packages:
 	sudo xbps-install -Syu libX11-devel libXft-devel
 
-i3-packages:
-	sudo xbps-install -Syu rxvt-unicode maim xclip xdotool rofi dunst feh i3 xorg
+wm-packages:
+	sudo xbps-install -Syu bspwm sxhkd dmenu maim xclip xdotool dunst xorg
 
-i3-config:
+wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
-	ln -sf $(PWD)/.Xresources ~/.Xresources
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
-	ln -snf $(PWD)/.config/i3 ~/.config/i3
-
-sway: sway-packages sway-config
-
-sway-packages:
-	sudo xbps-install -Syu sway foot mako wofi swaybg slurp grim wl-clipboard xdg-desktop-portal-wlr xdg-desktop-portal-gtk xdg-desktop-portal 
-
-sway-config:
-	ln -sf $(PWD)/.bash_profile.wayland ~/.bash_profile
-	ln -snf $(PWD)/.config/foot ~/.config/foot
-	ln -snf $(PWD)/.config/wofi ~/.config/wofi
-	ln -snf $(PWD)/.config/sway ~/.config/sway
+	ln -snf $(PWD)/.config/bspwm ~/.config/bspwm
+	ln -snf $(PWD)/.config/sxhkd ~/.config/sxhkd
+	ln -snf $(PWD)/.config/picom ~/.config/picom
 
 runit:
 	sudo ln -sf /etc/sv/elogind /var/service/
@@ -71,10 +61,14 @@ runit:
 	sudo ln -sf /etc/sv/tlp /var/service/
 
 pipewire:
-	sudo mkdir -p /etc/pipewire/pipewire.conf.d
+	sudo xbps-install -Syu pipewire wireplumber pavucontrol easyeffects 
+	sudo mkdir -p /etc/pipewire/pipewire.conf.d 
 	sudo ln -sf /usr/share/applications/pipewire.desktop /etc/xdg/autostart/pipewire.desktop
 	sudo ln -sf /usr/share/examples/wireplumber/10-wireplumber.conf /etc/pipewire/pipewire.conf.d/
 	sudo ln -sf /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
+
+alsa:
+	sudo xbps-install -Syu alsa-lib alsa-lib-devel alsa-plugins alsa-tools alsa-utils alsa-tools alsa-lib-devel alsaequal
 
 docker:
 	sudo xbps-install -Syu docker
@@ -109,4 +103,4 @@ flatpak-add:
 	sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak-install:
-	flatpak install -y flathub com.github.tchx84.Flatseal com.google.Chrome org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord io.github.spacingbat3.webcord
+	flatpak install -y flathub com.github.tchx84.Flatseal org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord io.github.spacingbat3.webcord
