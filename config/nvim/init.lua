@@ -59,17 +59,9 @@ vim.g.maplocalleader = "\\"
 require("lazy").setup({
   spec = {
     { "laktak/tome" },
-
-    {
-      'projekt0n/github-nvim-theme',
-      name = 'github-theme',
-      lazy = false,
-      priority = 1000,
-      config = function()
-        require('github-theme').setup({ transparent_background = false })
-        vim.cmd('colorscheme github_light')
-      end,
-    },
+    { "tpope/vim-surround" },
+    { "sheerun/vim-polyglot" },
+    { "charlespascoe/vim-go-syntax" },
 
     {
       "kyoh86/vim-go-coverage",
@@ -140,7 +132,7 @@ require("lazy").setup({
         require("nvim-treesitter.configs").setup({
           ensure_installed = { "lua", "vimdoc" },
           auto_install = true,
-          highlight = { enable = true },
+          highlight = { enable = false },
           folds = { enable = true },
           indent = { enable = true },
         })
@@ -273,6 +265,20 @@ require("lazy").setup({
   checker = { enabled = false },
 })
 
+vim.opt.termguicolors = false
+vim.cmd.colorscheme("torte")
+
+vim.api.nvim_set_hl(0, "Normal", { bg = nil })
+vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
+
+vim.api.nvim_set_hl(0, "Added", { fg = "#00cd00" })
+vim.api.nvim_set_hl(0, "Changed", { fg = "#00cdcd" })
+vim.api.nvim_set_hl(0, "Removed", { fg = "#cd0000" })
+
+vim.api.nvim_set_hl(0, "DiffAdded", { fg = "#00cd00" })
+vim.api.nvim_set_hl(0, "DiffChanged", { fg = "#00cdcd" })
+vim.api.nvim_set_hl(0, "DiffRemoved", { fg = "#cd0000" })
+
 require("fzf-lua").register_ui_select()
 
 vim.opt.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
@@ -375,3 +381,16 @@ vim.keymap.set("n", "<leader>p", "+p")
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 
 vim.keymap.set("n", "<leader>dd", "<cmd>let @+ = expand('%') . ':' . line('.')<CR>")
+
+vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
+vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>")
+
+local toggle_quickfix = function()
+  local quickfix_wins = vim.tbl_filter(function(win_id)
+    return vim.fn.getwininfo(win_id)[1].quickfix == 1
+  end, vim.api.nvim_tabpage_list_wins(0))
+
+  local command = #quickfix_wins == 0 and "copen" or "cclose"
+  vim.cmd(command)
+end
+vim.keymap.set("n", "<leader>q", toggle_quickfix)
