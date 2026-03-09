@@ -1,0 +1,31 @@
+promptToReturnFromSubprocess: false
+disableStartupPopups: true
+update:
+  method: background
+  days: 2
+refresher:
+  refreshInterval: 10
+  fetchInterval: 60
+gui:
+  nerdFontsVersion: "3"
+git:
+  commit:
+    signOff: true
+  paging:
+    externalDiffCommand: difft --color=always --display=inline --syntax-highlight=on --tab-width=2 --background=dark
+  autoFetch: false
+  autoRefresh: false
+customCommands:
+  - key: "<c-a>" # ctrl + a
+    description: "Pick AI commit"
+    command: 'echo "{{.Form.Msg}}" > .git/COMMIT_EDITMSG && vim .git/COMMIT_EDITMSG && [ -s .git/COMMIT_EDITMSG ] && git commit --signoff -F .git/COMMIT_EDITMSG || echo "Commit message is empty, commit aborted."'
+    context: "files"
+    prompts:
+      - type: "menuFromCommand"
+        title: "AI Commits"
+        key: "Msg"
+        command: "bunx bunnai"
+        filter: '^(?P<number>\d+)\.\s(?P<message>.+)$'
+        valueFormat: "{{ .message }}"
+        labelFormat: "{{ .number }}: {{ .message | green }}"
+    output: terminal

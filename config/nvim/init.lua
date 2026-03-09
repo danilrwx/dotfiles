@@ -41,30 +41,34 @@ require("lazy").setup({
       },
     },
 
-    -- {
-    --   'tanvirtin/vgit.nvim',
-    --   dependencies = {
-    --     'nvim-lua/plenary.nvim',
-    --     'nvim-tree/nvim-web-devicons',
-    --   },
-    --   event = 'VimEnter',
-    --   opts = {},
-    --   keys = {
-    --     { "]c",  "<cmd>VGit hunk_down<cr>" },
-    --     { "[c",  "<cmd>VGit hunk_up<cr>" },
-    --
-    --     { "ghs", "<cmd>VGit buffer_hunk_stage<cr>" },
-    --     { "ghu", "<cmd>VGit buffer_hunk_reset<cr>" },
-    --     { "ghp", "<cmd>VGit buffer_hunk_preview<cr>" },
-    --
-    --     -- { "<leader>gb", "<cmd>VGit buffer_blame_preview<cr>" },
-    --     -- { "<leader>gl", "<cmd>VGit buffer_history_preview<cr>" },
-    --     -- { "<leader>gL", "<cmd>VGit project_logs_preview<cr>" },
-    --
-    --     -- { "<leader>gd", "<cmd>VGit buffer_diff_preview<cr>" },
-    --     -- { "<leader>gD", "<cmd>VGit project_diff_preview<cr>" },
-    --   },
-    -- },
+    {
+      "ellisonleao/gruvbox.nvim",
+      priority = 1000,
+      opts = {
+        italic = {
+          strings = false,
+          emphasis = false,
+          comments = false,
+          operators = false,
+          folds = false,
+        },
+      }
+    },
+
+    {
+      'mrjones2014/smart-splits.nvim',
+      lazy = false,
+      keys = {
+        { "<A-h>", "<cmd>SmartResizeLeft<cr>" },
+        { "<A-j>", "<cmd>SmartResizeDown<cr>" },
+        { "<A-k>", "<cmd>SmartResizeUp<cr>" },
+        { "<A-l>", "<cmd>SmartResizeRight<cr>" },
+        { "<C-h>", "<cmd>SmartCursorMoveLeft<cr>" },
+        { "<C-j>", "<cmd>SmartCursorMoveDown<cr>" },
+        { "<C-k>", "<cmd>SmartCursorMoveUp<cr>" },
+        { "<C-l>", "<cmd>SmartCursorMoveRight<cr>" },
+      },
+    },
 
     {
       "vim-test/vim-test",
@@ -136,6 +140,7 @@ require("lazy").setup({
 
     {
       "daliusd/ghlite.nvim",
+      lazy = false,
       opts = {
         view_split = "tabnew",
         diff_split = "tabnew",
@@ -249,8 +254,8 @@ require("lazy").setup({
           sources = {
             nls.builtins.code_actions.gomodifytags,
             nls.builtins.code_actions.impl,
-            -- nls.builtins.formatting.gofumpt,
-            -- nls.builtins.formatting.goimports,
+            nls.builtins.formatting.gofumpt,
+            nls.builtins.formatting.goimports,
           },
         })
       end,
@@ -258,32 +263,7 @@ require("lazy").setup({
 
     {
       'stevearc/conform.nvim',
-      opts = {
-        format_on_save = { timeout_ms = 500, lsp_format = "fallback" },
-        formatters_by_ft = { go = { "golangci", "gofmt" } },
-        -- formatters = {
-        --   golangci = {
-        --     command = "golangci-lint",
-        --     args = { "run", "--out-format", "json", "--fix", "$FILENAME" },
-        --   },
-        -- },
-        formatters = {
-          golangci = {
-            command = "golangci-lint",
-            args = {
-              "run",
-              -- "--out-format=json",
-              '--output.json.path=stdout',
-              "--issues-exit-code=0",
-              "--show-stats=false",
-              "--fix",
-              "$FILENAME",
-            },
-            -- cwd = require("conform.util").root_file({ ".golangci.yaml" }),
-          },
-        },
-
-      },
+      opts = { format_on_save = { timeout_ms = 500, lsp_format = "fallback" } },
     },
 
     {
@@ -318,29 +298,30 @@ require("lazy").setup({
     },
 
     {
-      "greggh/claude-code.nvim",
-      dependencies = {
-        "nvim-lua/plenary.nvim",
-      },
-      config = function()
-        require("claude-code").setup()
-      end
-    },
-
-    {
-      "ldelossa/gh.nvim",
-      dependencies = {
+      "coder/claudecode.nvim",
+      dependencies = { "folke/snacks.nvim" },
+      config = true,
+      opts = { terminal = { split_width_percentage = 0.50 } },
+      keys = {
+        { "<leader>a",  nil,                              desc = "AI/Claude Code" },
+        { "<leader>ac", "<cmd>ClaudeCode<cr>",            desc = "Toggle Claude" },
+        { "<leader>af", "<cmd>ClaudeCodeFocus<cr>",       desc = "Focus Claude" },
+        { "<leader>ar", "<cmd>ClaudeCode --resume<cr>",   desc = "Resume Claude" },
+        { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
+        { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
+        { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>",       desc = "Add current buffer" },
+        { "<leader>as", "<cmd>ClaudeCodeSend<cr>",        mode = "v",                  desc = "Send to Claude" },
         {
-          "ldelossa/litee.nvim",
-          config = function()
-            require("litee.lib").setup()
-          end,
+          "<leader>as",
+          "<cmd>ClaudeCodeTreeAdd<cr>",
+          desc = "Add file",
+          ft = { "NvimTree", "neo-tree", "oil", "minifiles" },
         },
+        -- Diff management
+        { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
+        { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",   desc = "Deny diff" },
       },
-      config = function()
-        require("litee.gh").setup()
-      end,
-    }
+    },
 
   },
   checker = { enabled = false },
@@ -348,49 +329,49 @@ require("lazy").setup({
 
 
 vim.o.termguicolors = true
-vim.cmd.colorscheme("retrobox")
+vim.cmd.colorscheme("gruvbox")
 
-vim.api.nvim_set_hl(0, "Normal", { bg = nil })
-vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#1C1C1C" })
-vim.api.nvim_set_hl(0, "Visual", { bg = "#252525" })
-vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
-
-vim.api.nvim_set_hl(0, "Pmenu", { bg = "#1C1C1C" })
-vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#303030" })
-
-vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#83A598", bg = "#1C1C1C" })
-vim.api.nvim_set_hl(0, "PmenuKindSel", { bg = "#303030" })
-
-vim.api.nvim_set_hl(0, "PmenuExtra", { bg = "#1C1C1C" })
-vim.api.nvim_set_hl(0, "PmenuExtraSel", { bg = "#303030" })
-
-vim.api.nvim_set_hl(0, "PmenuMatch", { fg = "#B16286", bg = "#1C1C1C" })
-vim.api.nvim_set_hl(0, "PmenuMatchSel", { bg = "#303030" })
-
-vim.api.nvim_set_hl(0, "Added", { fg = "#B8BB26" })
-vim.api.nvim_set_hl(0, "Changed", { fg = "#83A598" })
-vim.api.nvim_set_hl(0, "Removed", { fg = "#FB4934" })
-
-vim.api.nvim_set_hl(0, "DiffAdd", { bg = "#282808" })
-vim.api.nvim_set_hl(0, "DiffChange", { bg = "#19231f" })
-vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#420801" })
-vim.api.nvim_set_hl(0, "DiffText", { bg = "#522500" })
-
-vim.api.nvim_set_hl(0, "OilGitAdded", { fg = "#B8BB26" })
-vim.api.nvim_set_hl(0, "OilGitModified", { fg = "#83A598" })
-vim.api.nvim_set_hl(0, "OilGitRenamed", { fg = "#522500" })
-vim.api.nvim_set_hl(0, "OilGitUntracked", { fg = "#FB4934" })
-
-vim.api.nvim_set_hl(0, "Identifier", { fg = "#EBDBB2" })
-vim.api.nvim_set_hl(0, "Delimiter", { fg = "#EBDBB2" })
-vim.api.nvim_set_hl(0, "@variable", { fg = "#83A598" })
-vim.api.nvim_set_hl(0, "@variable.parameter", { fg = "#83A598" })
-
-vim.api.nvim_set_hl(0, "DiagnosticError", { fg = "#FB4934" })
-vim.api.nvim_set_hl(0, "DiagnosticWarn", { fg = "#FE8019" })
-vim.api.nvim_set_hl(0, "DiagnosticInfo", { fg = "#EBDBB2" })
-vim.api.nvim_set_hl(0, "DiagnosticHint", { fg = "#EBDBB2" })
-vim.api.nvim_set_hl(0, "DiagnosticOk", { fg = "#B8BB26" })
+-- vim.api.nvim_set_hl(0, "Normal", { bg = nil })
+-- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "Visual", { bg = "#252525" })
+-- vim.api.nvim_set_hl(0, "SignColumn", { bg = nil })
+--
+-- vim.api.nvim_set_hl(0, "Pmenu", { bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#303030" })
+--
+-- vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#83A598", bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "PmenuKindSel", { bg = "#303030" })
+--
+-- vim.api.nvim_set_hl(0, "PmenuExtra", { bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "PmenuExtraSel", { bg = "#303030" })
+--
+-- vim.api.nvim_set_hl(0, "PmenuMatch", { fg = "#B16286", bg = "#1C1C1C" })
+-- vim.api.nvim_set_hl(0, "PmenuMatchSel", { bg = "#303030" })
+--
+-- vim.api.nvim_set_hl(0, "Added", { fg = "#B8BB26" })
+-- vim.api.nvim_set_hl(0, "Changed", { fg = "#83A598" })
+-- vim.api.nvim_set_hl(0, "Removed", { fg = "#FB4934" })
+--
+-- vim.api.nvim_set_hl(0, "DiffAdd", { bg = "#282808" })
+-- vim.api.nvim_set_hl(0, "DiffChange", { bg = "#19231f" })
+-- vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#420801" })
+-- vim.api.nvim_set_hl(0, "DiffText", { bg = "#522500" })
+--
+-- vim.api.nvim_set_hl(0, "OilGitAdded", { fg = "#B8BB26" })
+-- vim.api.nvim_set_hl(0, "OilGitModified", { fg = "#83A598" })
+-- vim.api.nvim_set_hl(0, "OilGitRenamed", { fg = "#522500" })
+-- vim.api.nvim_set_hl(0, "OilGitUntracked", { fg = "#FB4934" })
+--
+-- vim.api.nvim_set_hl(0, "Identifier", { fg = "#EBDBB2" })
+-- vim.api.nvim_set_hl(0, "Delimiter", { fg = "#EBDBB2" })
+-- vim.api.nvim_set_hl(0, "@variable", { fg = "#83A598" })
+-- vim.api.nvim_set_hl(0, "@variable.parameter", { fg = "#83A598" })
+--
+-- vim.api.nvim_set_hl(0, "DiagnosticError", { fg = "#FB4934" })
+-- vim.api.nvim_set_hl(0, "DiagnosticWarn", { fg = "#FE8019" })
+-- vim.api.nvim_set_hl(0, "DiagnosticInfo", { fg = "#EBDBB2" })
+-- vim.api.nvim_set_hl(0, "DiagnosticHint", { fg = "#EBDBB2" })
+-- vim.api.nvim_set_hl(0, "DiagnosticOk", { fg = "#B8BB26" })
 
 require("fzf-lua").register_ui_select()
 
@@ -514,10 +495,10 @@ local toggle_quickfix = function()
 end
 vim.keymap.set("n", "<leader>q", toggle_quickfix)
 
-vim.keymap.set("n", "<leader>gg", "<cmd>tabnew term://lazygit<cr>i")
+vim.keymap.set("n", "<leader>gg", "<cmd>tabnew term://lazygit<cr>")
 
-vim.keymap.set("n", "<c-k>", "<cmd>cprev<cr>")
-vim.keymap.set("n", "<c-j>", "<cmd>cnext<cr>")
+-- vim.keymap.set("n", "<c-k>", "<cmd>cprev<cr>")
+-- vim.keymap.set("n", "<c-j>", "<cmd>cnext<cr>")
 
 vim.keymap.set("n", "<c-[>", "<cmd>noh<Return><esc>")
 
