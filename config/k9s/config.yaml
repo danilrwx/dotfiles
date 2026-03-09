@@ -7,6 +7,5 @@ k9s:
     # enableMouse: true
     logoless: true
     headless: true
-    skin: catppuccin-mocha-transparent
-    # skin: light
+    # skin: catppuccin-mocha-transparent
     reactive: true
