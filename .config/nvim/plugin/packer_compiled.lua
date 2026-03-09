@@ -109,10 +109,10 @@ _G.packer_plugins = {
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/friendly-snippets",
     url = "https://github.com/rafamadriz/friendly-snippets"
   },
-  ["gruvbox.nvim"] = {
+  ["gitui.nvim"] = {
     loaded = true,
-    path = "/home/danil/.local/share/nvim/site/pack/packer/start/gruvbox.nvim",
-    url = "https://github.com/ellisonleao/gruvbox.nvim"
+    path = "/home/danil/.local/share/nvim/site/pack/packer/start/gitui.nvim",
+    url = "https://github.com/aspeddro/gitui.nvim"
   },
   ["lsp-zero.nvim"] = {
     loaded = true,
@@ -129,6 +129,11 @@ _G.packer_plugins = {
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/mason.nvim",
     url = "https://github.com/williamboman/mason.nvim"
   },
+  ["mini.nvim"] = {
+    loaded = true,
+    path = "/home/danil/.local/share/nvim/site/pack/packer/start/mini.nvim",
+    url = "https://github.com/echasnovski/mini.nvim"
+  },
   ["nvim-cmp"] = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-cmp",
@@ -139,10 +144,20 @@ _G.packer_plugins = {
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-lspconfig",
     url = "https://github.com/neovim/nvim-lspconfig"
   },
+  ["nvim-pqf"] = {
+    loaded = true,
+    path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-pqf",
+    url = "https://github.com/yorickpeterse/nvim-pqf"
+  },
   ["nvim-treesitter"] = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-treesitter",
     url = "https://github.com/nvim-treesitter/nvim-treesitter"
+  },
+  ["nvim-treesitter-endwise"] = {
+    loaded = true,
+    path = "/home/danil/.local/share/nvim/site/pack/packer/start/nvim-treesitter-endwise",
+    url = "https://github.com/RRethy/nvim-treesitter-endwise"
   },
   ["packer.nvim"] = {
     loaded = true,
@@ -163,11 +178,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/danil/.local/share/nvim/site/pack/packer/start/undotree",
     url = "https://github.com/mbbill/undotree"
-  },
-  ["vim-fugitive"] = {
-    loaded = true,
-    path = "/home/danil/.local/share/nvim/site/pack/packer/start/vim-fugitive",
-    url = "https://github.com/tpope/vim-fugitive"
   },
   ["vim-slim"] = {
     loaded = true,

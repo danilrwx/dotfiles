@@ -11,7 +11,9 @@ alias ls='ls --color=auto'
 alias l='ls -lah'
 alias c='clear'
 alias grep='grep --color=auto'
+alias vim='nvim'
 
+alias be='bundle exec'
 alias rs='rails s'
 alias rc='rails c'
 alias rdm='rails db:migrate'
@@ -32,3 +34,6 @@ eval `keychain --agents ssh --eval --quiet ~/.ssh/id_ed25519`
 
 . "$HOME/.asdf/asdf.sh"
 . "$HOME/.asdf/completions/asdf.bash"
+
+eval "$(starship init bash)"
+. "$HOME/.cargo/env"

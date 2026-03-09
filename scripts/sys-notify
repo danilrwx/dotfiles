@@ -1,6 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 
-notify-send -t 8000 "$(top -bn1 | grep load | awk '{printf "CPU Load: %.2f\n", $(NF-2)}')
 
-$(free -m | awk 'NR==2{printf "MEM Usage: %s/%sMB (%.2f%%)\n", $3,$2,$3*100/$2 }')"
+CPU=`top -bn1 | grep load | awk '{printf "CPU Load: %.2f\n", $(NF-2)}'`
+MEM=`free -m | awk 'NR==2{printf "MEM Usage: %s/%sMB (%.2f%%)\n", $3,$2,$3*100/$2 }'`
+BAT=`acpi -b`
+
+notify-send -t 8000 "$CPU
+
+$MEM
+
+$BAT"
 

@@ -1,9 +1,9 @@
-all: 
+all:
 	mkdir -p ~/.config
 	make console-font
 	make base
 	make wm
-	make desktop
+	make laptop
 	make git
 	make git-change-remote
 	make asdf
@@ -13,7 +13,13 @@ nvim-install:
 	rm -rf ~/.local/share/nvim || exit 0
 	rm -rf ~/.config/nvim || exit 0
 	ln -snf $(PWD)/.config/nvim ~/.config/nvim
-	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync' 
+	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+
+vim-install:
+	rm -rf ~/.vim
+	mkdir -p ~/.vim
+	ln -snf $(PWD)/.config/vim/autoload ~/.vim/autoload
+	ln -sf $(PWD)/.vimrc ~/.vimrc
 
 console-font:
 	echo 'FONT="cyr-sun16"' | sudo tee -a /etc/vconsole.conf
@@ -26,7 +32,7 @@ base-config:
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 
 base-packages:
-	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep neofetch vim lazygit mosh podman rsync bash-completion
+	sudo pacman -S --needed base-devel htop git tmux curl man zip unzip jq keychain ripgrep neofetch vim lazygit mosh podman rsync bash-completion lf helix
 
 laptop: laptop-packages laptop-enable laptop-gpu desktop-packages
 
@@ -43,16 +49,18 @@ laptop-gpu:
 	sudo ln -sf $(PWD)/20-intel.conf /etc/X11/xorg.conf.d/
 
 desktop-packages:
-	sudo pacman -S --needed ttc-iosevka dex xdg-user-dirs xdg-user-dirs-gtk xdg-utils ffmpeg udisks2 firefox chromium libnotify polkit
+	sudo pacman -S --needed ttc-iosevka dex xdg-user-dirs xdg-user-dirs-gtk xdg-utils ffmpeg udisks2 firefox chromium libnotify polkit starship sxiv
+
+desktop-install:
+	xdg-mime default sxiv.desktop image/jpeg
 
 dev-packages:
-	sudo pacman -S --needed libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagic
+	sudo pacman -S --needed libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
 
 wm: wm-packages wm-config
 
 wm-packages:
-	sudo pacman -S --needed bspwm sxhkd dmenu maim xclip xdotool dunst xorg xorg-xinit hsetroot xcompmgr
-	cd ~/dotfiles/suckless/st && sudo make install
+	sudo pacman -S --needed i3 dmenu maim xclip xdotool dunst xorg xorg-xinit hsetroot xcompmgr
 
 wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
