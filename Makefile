@@ -23,15 +23,10 @@ base-config:
 	ln -sf $(PWD)/.bashrc ~/.bashrc
 
 base-packages:
-	doas apt install htop git tmux curl man zip unzip jq keychain ripgrep neofetch mosh rsync bash-completion
+	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip lf jq keychain ripgrep neofetch vim neovim lazygit mosh podman rsync bash-completion exa bat
 
 dev-packages:
-	doas  apt install autoconf patch build-essential rustc libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libgmp-dev libncurses5-dev libffi-dev libgdbm6 libgdbm-dev libdb-dev uuid-dev imagemagick libmariadb-dev libpq-dev libmagickwand-dev
-
-debian:
-	ln -snf $(PWD)/Backgrounds ~/Backgrounds
-	# doas ln -sf $(PWD)/20-intel.conf /etc/X11/xorg.conf.d/
-	doas apt install maim xclip i3 rofi dunst xcompmgr udisks2 sxiv qterminal firefox-esr acpi libnotify-bin
+	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl postgresql-libs postgresql-libs-devel
 
 git: git-config git-change-remote
 
@@ -54,6 +49,12 @@ asdf-setup:
 	asdf plugin-add neovim
 	asdf plugin-add ruby
 	asdf plugin-add nodejs
+
+asdf-inst:
+	asdf install nodejs 16.20.2
+	asdf install golang 1.21.0
+	asdf install ruby 3.0.1
+	asdf install ruby 3.1.2
 
 flatpak: flatpak-add flatpak-install
 
