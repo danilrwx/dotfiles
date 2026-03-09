@@ -37,7 +37,6 @@ local langmap_keys = {
 
 vim.opt.langmap = table.concat(langmap_keys, ",")
 vim.opt.spelllang = "ru_ru,en_us"
-vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
 vim.opt.undofile = true
 vim.opt.list = false
 vim.opt.showmode = true
