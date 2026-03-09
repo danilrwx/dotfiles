@@ -3,7 +3,7 @@ set $left h
 set $down j
 set $up k
 set $right l
-set $term kitty
+set $term urxvt
 set $menu rofi -show drun
 
 # transparent
@@ -27,9 +27,10 @@ smart_borders on
 gaps inner 0
 
 exec_always "setxkbmap -model pc105 -layout us,ru -option grp:alt_shift_toggle"
-exec --no-startup-id udiskie &
-exec --no-startup-id picom &
-exec --no-startup-id easyeffects --gapplication-service &
+# exec --no-startup-id udiskie &
+# exec --no-startup-id picom &
+# exec --no-startup-id easyeffects --gapplication-service &
+exec --no-startup-id dex --autostart --environment i3
 exec --no-startup-id feh --bg-scale ~/Backgrounds/1.png &
 exec --no-startup-id dunst -conf ~/.config/dunst/dunstrc &
 
