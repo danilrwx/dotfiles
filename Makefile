@@ -16,10 +16,10 @@ config-i3:
 	ln -snf $(PWD)/.config/ranger ~/.config/ranger
 
 arch-base:
-	sudo pacman --needed -S htop git curl zsh firefox lazygit helix go rust otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
+	sudo pacman --needed -S htop git curl zsh firefox lazygit helix go rust otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick zip unzip ranger
 
 arch-i3:
-	sudo pacman --needed -S udiskie udisks2 gnome-keyring keychain feh alacritty rofi picom polybar
+	sudo pacman --needed -S udiskie udisks2 gnome-keyring keychain feh alacritty rofi picom polybar maim xclip xdotool jq ttf-nerd-fonts-symbols ttf-jetbrains-mono ttf-jetbrains-mono-nerd
 
 arch-laptop:
 	sudo pacman --needed -S tlp acpid brightnessctl thermald
