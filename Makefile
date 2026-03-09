@@ -13,7 +13,8 @@ config-install:
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 
 arch-prepare:
-	sudo pacman --needed -S seatd htop git curl zsh firefox tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick swaybg gnome-keyring keychain thermald
+	sudo pacman --needed -S seatd htop git curl zsh firefox tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick swaybg gnome-keyring keychain thermald flatpak
+
 deps: deps-gem deps-npm deps-go
 
 deps-go:
@@ -43,7 +44,7 @@ git-change-remote:
 	git remote set-url origin git@github.com:antoshindanil/dotfiles.git
 
 ohmyzsh:
-	sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+	sh -c "$$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 
 asdf:
 	git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.11.2
@@ -59,6 +60,7 @@ asdf-install:
 yay:
 	git clone https://aur.archlinux.org/yay.git ~/yay
 	cd ~/yay; makepkg -si
+	rm -rf ~/yay
 
 printer:
 	yay -S pantum-driver gscan2pdf ghostscript
