@@ -6,11 +6,11 @@ set $up    k
 set $right l
 
 # catppuccin ────────────────────────────────────────────────────────────────────────────────────────────────────────────
-set $bg       #1e1e2e
-set $fg       #cdd6f4
-set $accent   #a6e3a1
-set $darkgray #7f849c
-set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1e1e2e' -sb '#cdd6f4' -nf '#cdd6f4' -nb '#1e1e2e' "$@"
+# set $bg       #1e1e2e
+# set $fg       #cdd6f4
+# set $accent   #a6e3a1
+# set $darkgray #7f849c
+# set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1e1e2e' -sb '#cdd6f4' -nf '#cdd6f4' -nb '#1e1e2e' "$@"
 
 # habamax ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # set $bg       #1c1c1c
@@ -20,13 +20,13 @@ set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1e1e2e' -sb '#cdd6f4' -nf '#cd
 # set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#1c1c1c' -sb '#c7c7c7' -nf '#c7c7c7' -nb '#1c1c1c' "$@"
 
 # base ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# set $bg       #000000
-# set $fg       #ffffff
-# set $accent   #00cd00
-# set $darkgray #7f849c
-# set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#000000' -sb '#ffffff' -nf '#ffffff' -nb '#000000' "$@"
+set $bg       #000000cc
+set $fg       #ffffff
+set $accent   #00cd00
+set $darkgray #7f849c
+set $dmenu_style -fn 'Iosevka Nerd Font-14' -sf '#000000' -sb '#ffffff' -nf '#ffffff' -nb '#000000' "$@"
 
-set $term st
+set $term xfce4-terminal
 
 font pango:Iosevka Nerd Font 12
 
@@ -136,14 +136,21 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
+for_window [class="Firefox" window_role="alert"] floating enable
+for_window [class="steam"] floating enable
+for_window [class="steam" title="^Steam$"] floating disable
+for_window [class="pavucontrol"] floating enable, border normal
+for_window [class="Telegram"] floating enable, border normal
+
 client.focused                 $bg        $bg       $fg            $accent      $accent
 client.focused_inactive        $bg        $bg       $darkgray      $bg          $bg
 client.unfocused               $bg        $bg       $darkgray      $bg          $bg
 client.urgent                  $accent    $bg       $accent        $accent      $accent
 
 bar {
-  # i3bar_command i3bar --transparency
+  i3bar_command i3bar --transparency
   status_command baraction
+  tray_padding 6
 	position top
   colors {
      background $bg

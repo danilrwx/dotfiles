@@ -26,6 +26,7 @@ export PATH="$KREW_ROOT/bin:$PATH"
 export XDG_CONFIG_HOME="$HOME/.config"
 export K9S_CONFIG_DIR=$HOME/.config/k9s
 export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':')
+export KUBECOLOR_PRESET="protanopia-dark"
 
 if [ -e "$HOME/bin/trdl" ]; then
   source $("$HOME/bin/trdl" use flint "2")

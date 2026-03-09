@@ -1,23 +1,23 @@
 #!/bin/bash
 
 vol() {
-  icon="󰕾"
+  icon="🔊"
   vol=`pactl get-sink-volume @DEFAULT_SINK@ | awk '{ print $5 }'`
 
   muted=`pactl get-sink-mute @DEFAULT_SINK@ | awk '{ print $2 }'`
-  [[ $muted = "yes" ]] && icon="󰝟"
+  [[ $muted = "yes" ]] && icon="🔇"
 
-  echo -e " $icon $vol"
+  echo -e " $icon$vol"
 }
 
 mic() {
-  icon="󰍬"
+  icon="🎙️"
   vol=`pactl get-source-volume @DEFAULT_SOURCE@ | awk '{ print $5 }'`
 
   muted=`pactl get-source-mute @DEFAULT_SOURCE@ | awk '{ print $2 }'`
-  [[ $muted = "yes" ]] && icon="󰍭"
+  [[ $muted = "yes" ]] && icon="🙊"
 
-  echo -e " $icon $vol"
+  echo -e " $icon$vol"
 }
 
 bat_icon() {
@@ -105,45 +105,43 @@ bri() {
     c=`brightnessctl get`
     m=`brightnessctl max`
     bri=`printf "%.0f" $(echo "scale=1; ($c / $m) * 100" | bc)`
-    echo -e "$(del)   $bri%"
+    echo -e "$(del) 🌞$bri%"
   fi
 }
 
 del() {
-  echo -e "  "
+  echo -e " "
 }
 
-dete() {
-  echo -e ` date`
+datef() {
+  val=`date +'%d/%m/%Y %H:%M'`
+
+  echo -e "$val"
 }
 
 mem() {
   val=`free -h | awk '/Mem/{print $3}'`
-  icon="󰍛"
+  icon="🧠"
 
-  echo -e " $icon $val"
-}
-
-vpn() {
-  status=`ip link | grep vpn | wc -l`
-  icon="󰅛"
-  text="DOWN"
-
-  [[ $status -gt 0 ]] && icon="󰱓" && text="UP"
-
-  echo -e " $icon $text"
+  echo -e " $icon$val"
 }
 
 keyboard() {
   icon="󰌌"
   text=`xkblayout-state print "%s" | awk '{print toupper($0)}'`
 
-  echo -e " $icon $text"
+  if [[ $text = "US" ]]; then
+    icon="🇺🇸"
+  elif [[ $text = "RU" ]]; then
+    icon="🇷🇺"
+  fi
+
+  echo -e " $icon$text"
 }
 
 SLEEP_SEC=1
 while true; do
-  echo "$(mem)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)"
-  xsetroot -name "$(mem)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(date)"
+  echo "$(mem)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(datef)"
+  xsetroot -name "$(mem)$(del)$(vol)$(del)$(mic)$(bat0)$(bat1)$(bri)$(del)$(keyboard)$(del)$(datef)"
   sleep $SLEEP_SEC
 done
