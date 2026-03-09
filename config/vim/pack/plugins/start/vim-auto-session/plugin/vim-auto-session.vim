@@ -6,7 +6,7 @@
 
 " Sessiondir config.
 if !exists('g:sessiondir')
-    let g:sessiondir = $HOME . "/.vim/sessions"
+    let g:sessiondir = $HOME . "/.vim/files/sessions"
 endif
 
 if !exists('g:sessionfile')
