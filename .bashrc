@@ -10,23 +10,10 @@ if [ -d "$HOME/.local/share/completions" ]; then
   done
 fi
 
-SSH_ENV="/tmp/.ssh_environment_added"
-function start_agent {
-  echo "Initializing new SSH agent..."
-  echo > "${SSH_ENV}"
-  /usr/bin/ssh-add -c $HOME/.ssh/id_rsa;
-}
-
-if [ -f "${SSH_ENV}" ]; then
-  ps -ef | grep ssh-agent > /dev/null || {
-    start_agent;
-  }
-else
-  start_agent;
+if [ -e "$HOME/.ssh/id_rsa" ]; then
+  eval $( keychain --eval -q )
+  /usr/bin/keychain --inherit any --confirm $HOME/.ssh/id_rsa
 fi
-
-# source $HOME/fzf-tab-completion/bash/fzf-bash-completion.sh
-# bind -x '"\t": fzf_bash_completion'
 
 alias kubectl=kubecolor
 complete -o default -F __start_kubectl kubecolor
