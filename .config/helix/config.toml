@@ -5,3 +5,8 @@ line-number = "relative"
 
 [editor.file-picker]
 hidden=false
+
+[keys.normal]
+C-g = ":sh foot lazygit"
+C-f = ":format"
+A-w = ":buffer-close"
