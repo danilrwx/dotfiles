@@ -7,7 +7,7 @@ dex --autostart --environment bspwm &
 dunst -conf ~/.config/dunst/dunstrc &
 xsetroot -solid "#282828" &
 xsetroot -cursor_name left_ptr &
-picom &
+xcompmgr &
 
 bspc monitor -d I II III IV V
 

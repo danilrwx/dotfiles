@@ -47,11 +47,11 @@ super + {t,shift + t,s}
 
 # alternate between the tiled and monocle layout
 super + f
-        bspc desktop -l next
+  bspc desktop -l next
 
 # focus the next/previous window in the current desktop
 super + {_,shift + }c
-        bspc node -f {next,prev}.local.!hidden.window
+  bspc node -f {next,prev}.local.!hidden.window
 
 # focus the node in the given direction
 super + {_,shift + }{h,j,k,l}
@@ -63,7 +63,7 @@ super + {_,shift + }{1-5}
 
 # focus the last node/desktop
 super + {grave,Tab}
-        bspc {node,desktop} -f last
+  bspc {node,desktop} -f last
 
 # preselect the direction
 super + ctrl + {h,j,k,l}

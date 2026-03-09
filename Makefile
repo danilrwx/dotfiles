@@ -4,6 +4,7 @@ all:
 	make base
 	make wm
 	make desktop-packages
+	make laptop
 	make git
 	make git-change-remote
 	make asdf
