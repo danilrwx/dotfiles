@@ -65,9 +65,10 @@ wm-packages:
 wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
-	ln -snf $(PWD)/.config/bspwm ~/.config/bspwm
-	ln -snf $(PWD)/.config/sxhkd ~/.config/sxhkd
+	ln -snf $(PWD)/.config/i3 ~/.config/i3
+	ln -snf $(PWD)/.config/i3status ~/.config/i3status
 	ln -snf $(PWD)/.config/dunst ~/.config/dunst
+	ln -snf $(PWD)/.config/kitty ~/.config/kitty
 
 pipewire:
 	sudo pacman -S --needed pipewire pipewire-alsa pipewire-pulse wireplumber pavucontrol
