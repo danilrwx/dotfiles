@@ -1,19 +1,22 @@
-all: config-install
-config-install:
-	ln -snf $(PWD)/Backgrounds ~/Backgrounds
-	ln -snf  $(PWD)/.config/sway ~/.config/sway
-	ln -snf $(PWD)/.config/foot ~/.config/foot
+all: config-base
+config-base:
 	ln -snf $(PWD)/.config/helix ~/.config/helix
-	ln -snf $(PWD)/.config/waybar ~/.config/waybar
 	ln -snf $(PWD)/.config/htop ~/.config/htop
 	ln -snf $(PWD)/.config/lazygit ~/.config/lazygit
-	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/electron-flags.conf
-	ln -sf $(PWD)/.config/code-flags.conf ~/.config/code-flags.conf
 	ln -sf $(PWD)/.zprofile ~/.zprofile
 	ln -sf $(PWD)/.zshrc ~/.zshrc
 
-arch-prepare:
-	sudo pacman --needed -S seatd htop git curl zsh firefox tlp acpid waybar lua-language-server lazygit helix brightnessctl udiskie udisks2 go rust mako xorg-xwayland xdg-desktop-portal wofi otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick swaybg gnome-keyring keychain thermald flatpak
+config-sway:
+	ln -snf $(PWD)/Backgrounds ~/Backgrounds
+	ln -snf $(PWD)/.config/waybar ~/.config/waybar
+	ln -sf $(PWD)/.config/electron-flags.conf ~/.config/electron-flags.conf
+	ln -sf $(PWD)/.config/code-flags.conf ~/.config/code-flags.conf
+
+arch-sway:
+	sudo pacman --needed -S seatd tlp acpid waybar lua-language-server brightnessctl udiskie udisks2 mako xorg-xwayland xdg-desktop-portal wofi swaybg gnome-keyring keychain thermald
+
+arch-base:
+	sudo pacman --needed -S htop git curl zsh firefox lazygit helix go rust otf-font-awesome ttc-iosevka man base-devel libffi libyaml openssl zlib postgresql-libs mariadb-libs imagemagick
 
 deps: deps-gem deps-npm deps-go
 
