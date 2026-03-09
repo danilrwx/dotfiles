@@ -4,7 +4,7 @@ set $down j
 set $up k
 set $right l
 set $term alacritty
-set $menu dmenu_run
+set $menu rofi -show drun
 
 font pango:Iosevka Regular 10
 
@@ -14,7 +14,7 @@ gaps inner 8
 client.focused #000000 #ffffff #ffffff
 
 exec_always "setxkbmap -model pc105 -layout us,ru -option grp:alt_space_toggle"
-#exec_always --no-startup-id $HOME/.config/polybar/launch.sh
+exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 exec --no-startup-id udiskie
 exec --no-startup-id picom
 exec --no-startup-id blueman-applet
@@ -25,6 +25,7 @@ bindsym $mod+Shift+q kill
 bindsym $mod+d exec $menu
 
 bindsym $mod+Shift+c reload
+bindsym $mod+Shift+Return exec $term -e "ranger"
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 bindsym $mod+$left focus left
