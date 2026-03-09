@@ -36,8 +36,8 @@ input "1739:32382:PNP0C50:0e_06CB:7E7E_Touchpad" {
 
 input "type:keyboard" {
     xkb_layout us,ru
-    xkb_options grp:alt_shift_toggle
-    xkb_options caps:escape
+    xkb_options grp:alt_shift_toggle,caps:escape
+    xkb_numlock disabled
 }
 
 bindsym $mod+Return exec $term
