@@ -40,7 +40,7 @@ vim.o.laststatus = 1
 vim.o.cmdheight = 1
 vim.o.list = false
 vim.o.showmode = true
--- vim.o.cursorline = false
+vim.o.cursorline = false
 vim.o.colorcolumn = "120"
 
 vim.g.lazyvim_picker = "fzf"
