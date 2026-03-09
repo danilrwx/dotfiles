@@ -19,6 +19,8 @@
   <property name="color-use-theme" type="bool" value="false"/>
   <property name="tab-activity-color" type="string" value="#aa0000"/>
   <property name="misc-confirm-close" type="bool" value="false"/>
-  <property name="font-name" type="string" value="Iosevka Nerd Font Medium 13"/>
+  <property name="font-name" type="string" value="Iosevka Nerd Font Medium 12"/>
   <property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>
+  <property name="background-mode" type="string" value="TERMINAL_BACKGROUND_TRANSPARENT"/>
+  <property name="background-darkness" type="double" value="0.80000000000000004"/>
 </channel>
