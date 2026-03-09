@@ -10,7 +10,7 @@ font-family-bold-italic  = Iosevka NFM Medium Italic
 
 maximize = true
 
-font-size = 16
+font-size = 18
 theme = dark:deep,light:Builtin Tango Light
 
 
