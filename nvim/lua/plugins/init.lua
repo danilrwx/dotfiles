@@ -32,12 +32,18 @@ return require("packer").startup(function(Plug)
 
   -- LSP
   Plug "williamboman/nvim-lsp-installer"
+  Plug "neovim/nvim-lspconfig"
+  Plug "lukas-reineke/lsp-format.nvim"
+
+  -- Автокомплит
   Plug { "ms-jpq/coq_nvim", run = "python3 -m coq deps" }
   Plug "ms-jpq/coq.artifacts"
   Plug "ms-jpq/coq.thirdparty"
-  Plug "neovim/nvim-lspconfig"
+
+  -- Приятные мелочи
   Plug "kosayoda/nvim-lightbulb"
   Plug "b0o/schemastore.nvim"
+  Plug "ziontee113/syntax-tree-surfer"
 
   -- Подсветка синтаксиса
   Plug { "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" }
@@ -52,11 +58,17 @@ return require("packer").startup(function(Plug)
   Plug "tpope/vim-bundler"
   Plug "slim-template/vim-slim"
 
+  -- Для go
+  Plug "ray-x/go.nvim"
+
   -- Парные теги
   Plug "windwp/nvim-autopairs"
 
   -- Подсветка парных тегов
   Plug "Valloric/MatchTagAlways"
+
+  -- Работа с парными тегами
+  Plug "kylechui/nvim-surround"
 
   -- Плавный скролл
   Plug "karb94/neoscroll.nvim"
@@ -73,4 +85,12 @@ return require("packer").startup(function(Plug)
 
   -- Найти и заменить
   Plug "windwp/nvim-spectre"
+
+  -- Прозрачность
+  Plug "xiyaowong/nvim-transparent"
+
+  Plug "numToStr/Comment.nvim"
+
+  -- Terminal
+  Plug "s1n7ax/nvim-terminal"
 end)

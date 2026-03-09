@@ -5,3 +5,9 @@ require("lualine").setup {
     theme = "material-nvim" -- the default style
   }
 }
+
+require("go").setup()
+
+require("Comment").setup()
+
+require("nvim-surround").setup()
