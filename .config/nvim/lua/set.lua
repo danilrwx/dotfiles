@@ -1,6 +1,6 @@
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.signcolumn = 'number'
+-- vim.opt.signcolumn = 'number'
 
 vim.opt.hlsearch = true
 vim.opt.ignorecase = true
