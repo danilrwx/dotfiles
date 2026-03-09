@@ -14,15 +14,32 @@ vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
-vim.g.delve_breakpoint_sign = '✊'
+vim.g.delve_breakpoint_sign = "✊"
 
 require("lazy").setup({
   spec = {
     { import = "plugins" },
   },
   install = { colorscheme = { "retrobox" } },
-  rocks = { enabled = false },
+  -- rocks = { enabled = false },
   checker = { enabled = true },
+  ui = {
+    icons = vim.g.have_nerd_font and {} or {
+      cmd = '⌘',
+      config = '🛠',
+      event = '📅',
+      ft = '📂',
+      init = '⚙',
+      keys = '🗝',
+      plugin = '🔌',
+      runtime = '💻',
+      require = '🌙',
+      source = '📄',
+      start = '🚀',
+      task = '📌',
+      lazy = '💤 ',
+    },
+  }
 })
 
 require("functions")

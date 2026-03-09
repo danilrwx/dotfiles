@@ -1,8 +1,8 @@
-vim.keymap.set('n', '<c-l>', '<cmd>noh<Return><esc>')
+vim.keymap.set("n", "<c-l>", "<cmd>noh<Return><esc>")
 
-vim.keymap.set('n', '<a-q>', '<cmd>bd<cr>')
-vim.keymap.set('n', '<s-h>', '<cmd>bp<cr>')
-vim.keymap.set('n', '<s-l>', '<cmd>bn<cr>')
+vim.keymap.set("n", "<a-q>", "<cmd>bd<cr>")
+vim.keymap.set("n", "<s-h>", "<cmd>bp<cr>")
+vim.keymap.set("n", "<s-l>", "<cmd>bn<cr>")
 
 vim.keymap.set("n", "<c-d>", "<c-d>zz")
 vim.keymap.set("n", "<c-u>", "<c-u>zz")
@@ -24,3 +24,4 @@ vim.keymap.set("n", "<c-t>n", "<cmd>tabnew<cr>")
 vim.keymap.set("n", "<c-t>c", "<cmd>tabclose<cr>")
 
 vim.keymap.set("n", "<leader>q", Funcs.toggle_quickfix)
+
