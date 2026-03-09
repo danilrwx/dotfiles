@@ -18,6 +18,10 @@ return require('packer').startup(function(use)
 
   use 'echasnovski/mini.nvim'
 
+  use 'mbbill/undotree'
+
+  use 'projekt0n/github-nvim-theme'
+
   use {
     'nvim-treesitter/nvim-treesitter',
     run = ':TSUpdate',
@@ -34,12 +38,6 @@ return require('packer').startup(function(use)
       { 'ThePrimeagen/harpoon' }
     }
   }
-
-  use 'mbbill/undotree'
-
-  use 'nvim-tree/nvim-web-devicons'
-
-  use 'folke/trouble.nvim'
 
   use 'kdheepak/lazygit.nvim'
 

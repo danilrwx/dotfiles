@@ -1,6 +1,3 @@
-require('mini.ai').setup()
-
-require('mini.basics').setup()
 
 require('mini.files').setup()
 local minifiles_toggle = function()

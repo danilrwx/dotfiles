@@ -30,12 +30,15 @@ base: base-config base-packages
 base-config:
 	ln -sf $(PWD)/.bashrc ~/.bashrc
 	ln -sf $(PWD)/.tmux.conf ~/.tmux.conf
+	ln -snf $(PWD)/.config/helix ~/.config/
+	ln -snf $(PWD)/.config/htop ~/.config/
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 
 base-packages:
-	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip lf \
-		jq keychain ripgrep neofetch neovim lazygit mosh podman rsync \
-		bash-completion exa bat
+	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip \
+		jq keychain ripgrep neofetch mosh podman rsync \
+		bash-completion fzf wget manpages-ru rustup \
+		lf lazygit delta helix fd exa bat
 
 laptop: laptop-packages desktop-packages
 
@@ -90,7 +93,7 @@ virt:
 	sudo ln -sf /etc/sv/virtlogd /var/service
 
 git:
-	git config --global core.editor "nvim"
+	git config --global core.editor "hx"
 	git config --global user.name "Danil Antoshin"
 	git config --global user.email antoshindanil@ya.ru
 	git config --global pull.rebase true
@@ -122,5 +125,30 @@ asdf-inst:
 	asdf install golang 1.21.0
 	asdf install ruby 3.0.1
 	asdf install ruby 3.1.2
+
+lsp-install:
+	npm i -g "awk-language-server@>=0.5.2" bash-language-server vscode-langservers-extracted typescript typescript-language-server sql-language-server yaml-language-server@next
+	go install golang.org/x/tools/gopls@latest
+	go install github.com/go-delve/delve/cmd/dlv@latest
+	go install golang.org/x/tools/cmd/goimports@latest
+	gem install --user-install solargraph
+	rustup component add rust-analyzer
+	cargo install taplo-cli --locked --features lsp
+
+helix-install:
+	mkdir -p ~/src
+	git clone https://github.com/helix-editor/helix ~/src/
+	cd ~/src/helix && RUSTFLAGS="-C target-feature=-crt-static" cargo install --path helix-term --locked
+	hx --grammar fetch
+	hx --grammar build
+
+sad-install:
+cargo install --locked --all-features --git https://github.com/ms-jpq/sad --branch senpai
+
+rust-tools-install:
+	cargo install exa git-delta fd-find
+	cargo install --locked bat
+	go install github.com/jesseduffield/lazygit@latest
+	env CGO_ENABLED=0 go install -ldflags="-s -w" github.com/gokcehan/lf@latest
 
 

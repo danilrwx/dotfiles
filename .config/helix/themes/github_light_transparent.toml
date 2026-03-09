@@ -1,0 +1,18 @@
+inherits = "github_light"
+"ui.background" = {}
+"ui.menu" = { fg = "fg.default" }
+"ui.menu.selected" = { modifiers = ["reversed"] }
+
+"ui.statusline" = { fg = "fg.muted" }
+"ui.statusline.active" = { fg = "fg.default" }
+"ui.statusline.normal" = { fg = "fg.default" }
+"ui.statusline.insert" = { fg = "fg.default" }
+"ui.statusline.select" = { fg = "fg.default" }
+"ui.popup" = {}
+"ui.popup.info" = { fg = "fg.default" }
+"ui.window" = { fg = "border.default" }
+"ui.help" = { fg = "fg.default" }
+
+"ui.virtual.whitespace" = "scale.gray.3"
+"ui.virtual" = { fg = "fg.muted" }
+"ui.virtual.ruler" = { bg = "scale.gray.2" }

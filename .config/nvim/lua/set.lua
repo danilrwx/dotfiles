@@ -27,4 +27,4 @@ vim.opt.wildignore = "*/dist*/*,*/target/*,*/builds/*,*/node_modules/*"
 vim.opt.laststatus = 0
 vim.opt.colorcolumn = { 80 }
 
-vim.g.mapleader = ' '
+vim.g.mapLeader = ' '

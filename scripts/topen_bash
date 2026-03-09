@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ -n "$TMUX" ]; then
+	tmux neww bash
+else
+	xfce4-terminal -e bash
+fi

@@ -1,5 +1,0 @@
-vim.keymap.set("n", "<Leader>xx", function() require("trouble").toggle() end)
-vim.keymap.set("n", "<Leader>xw", function() require("trouble").toggle("workspace_diagnostics") end)
-vim.keymap.set("n", "<Leader>xd", function() require("trouble").toggle("document_diagnostics") end)
-vim.keymap.set("n", "<Leader>xq", function() require("trouble").toggle("quickfix") end)
-vim.keymap.set("n", "<Leader>xl", function() require("trouble").toggle("loclist") end)

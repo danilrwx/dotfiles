@@ -29,6 +29,8 @@ set colorcolumn=80
 set laststatus=0
 set showcmd
 
+set diffopt=vertical,filler,context:3,indent-heuristic,algorithm:patience,internal
+
 set mouse=a
 filetype plugin on
 
@@ -37,9 +39,9 @@ syntax enable
 if filereadable(expand("~/.vim/autoload/plug.vim"))
 	call plug#begin('~/.vim/plugged')
 
-	Plug 'sheerun/vim-polyglot'
+	Plug 'jsit/disco.vim'
 
-	" Plug 'tpope/vim-sensible'
+	Plug 'sheerun/vim-polyglot'
 
 	Plug 'tpope/vim-unimpaired'
 
@@ -55,13 +57,17 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
 
 	Plug 'fatih/vim-go'
 
+	Plug 'dense-analysis/ale'
+
 	Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 	Plug 'junegunn/fzf.vim'
 
 	call plug#end()
 endif
 
-let mapleader = "\<Space>"
+colorscheme disco
+
+let mapLeader = "\<Space>"
 
 nnoremap <Leader>gg :!lazygit<CR>
 
@@ -119,3 +125,14 @@ let g:go_highlight_diagnostic_errors = 1
 let g:go_highlight_diagnostic_warnings = 1
 let g:go_auto_sameids = 0
 set updatetime=100
+
+nnoremap <Leader>gd :ALEGoToDefinition<CR>
+nnoremap <Leader>K :ALEHover<CR>
+nnoremap <Leader>ff :ALEFix<CR>
+nnoremap <Leader>rr :ALEFindReferences<CR>
+nnoremap <Leader>rn :ALERename<CR>
+nnoremap <Leader>ca :ALECodeAction<CR>
+nnoremap <Leader>ws :ALESymbolSearch
+set omnifunc=ale#completion#OmniFunc
+let g:ale_completion_enabled = 1
+let g:ale_fixers = { 'go': ['gofmt', 'goimports'], 'ruby': ['rubocop', 'trim_whitespace'] }
