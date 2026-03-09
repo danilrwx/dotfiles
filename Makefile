@@ -34,14 +34,18 @@ font:
 ubuntu-packages:
 	sudo apt install -y curl bash-completion  unzip
 
-fedora-packages:
-	# sudo dnf copr enable pgdev/ghostty -y
-	# sudo dnf install ghostty
+fedora-copr:
 	sudo dnf copr enable atim/lazygit -y
+	sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$$(rpm -E %fedora).noarch.rpm
+	sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$$(rpm -E %fedora).noarch.rpm
+	sudo dnf install -y lame\* --exclude=lame-devel
+	sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
+
+fedora-packages:
 	sudo dnf install lazygit
+	sudo dnf install -y google-chrome-stable neovim sensors jq yq difft wl-clipboard docker htop tmux curl man zip unzip jq keychain ripgrep rsync fzf wget fd-find openssl kubernetes-client zsh
 	sudo dnf install -y autoconf gcc rust patch make bzip2 openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
-	sudo dnf install google-chrome-stable neovim unzip htop sensors zsh fzf jq \
-		keychain wget tmux yq kubernetes-client difft wl-clipboard
+	sudo dnf install -y ImageMagick-devel postgresql-devel mariadb-devel shared-mime-info libwebp
 
 brew-install:
 	/bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
