@@ -1,5 +1,5 @@
 super + Return
-	xfce4-terminal
+  xfce4-terminal
 
 super + d
   dmenu_drun
@@ -14,7 +14,7 @@ ctrl + alt + a
   sys-notify
 
 ctrl + alt + s
-  base-notify
+  cal-notify
 
 XF86AudioRaiseVolume
   pactl set-sink-volume @DEFAULT_SINK@ +10%

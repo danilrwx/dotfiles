@@ -32,7 +32,7 @@ base-config:
 	ln -snf $(PWD)/Backgrounds ~/Backgrounds
 
 base-packages:
-	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip ranger jq keychain ripgrep neofetch vim lazygit mosh podman rsync bash-completion
+	sudo xbps-install -Syu base-devel htop git tmux curl man zip unzip lf jq keychain ripgrep neofetch neovim lazygit mosh podman rsync bash-completion exa bat
 
 laptop: laptop-packages desktop-packages
 
@@ -40,7 +40,7 @@ laptop-packages:
 	sudo xbps-install -Syu acpi tlp intel-video-accel brightnessctl
 
 desktop-packages:
-	sudo xbps-install -Syu font-iosevka bashmount elogind dex xdg-user-dirs xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 firefox chromium
+	sudo xbps-install -Syu font-iosevka bashmount elogind dex xdg-user-dirs xdg-user-dirs-gtk xdg-utils libavcodec ffmpeg mesa-dri udisks2 firefox flatpak
 
 dev-packages:
 	sudo xbps-install -Syu rust libffi-devel libyaml-devel zlib-devel openssl postgresql-libs postgresql-libs-devel
@@ -48,14 +48,15 @@ dev-packages:
 wm: wm-packages wm-config
 
 wm-packages:
-	sudo xbps-install -Syu bspwm sxhkd dmenu maim xclip xdotool dunst xorg hsetroot xcompmgr
+	sudo xbps-install -Syu bspwm sxhkd dmenu maim xclip xdotool dunst xorg hsetroot xcompmgr xfce4-terminal
 
 wm-config:
 	ln -sf $(PWD)/.bash_profile ~/.bash_profile
 	ln -sf $(PWD)/.xinitrc ~/.xinitrc
-	ln -snf $(PWD)/.config/bspwm ~/.config/bspwm
-	ln -snf $(PWD)/.config/sxhkd ~/.config/sxhkd
-	ln -snf $(PWD)/.config/dunst ~/.config/dunst
+	ln -snf $(PWD)/.config/bspwm ~/.config/
+	ln -snf $(PWD)/.config/sxhkd ~/.config/
+	ln -snf $(PWD)/.config/dunst ~/.config/
+	ln -snf $(PWD)/.config/lemonbar ~/.config/
 
 runit:
 	sudo ln -sf /etc/sv/elogind /var/service/
@@ -82,7 +83,7 @@ virt:
 	sudo ln -sf /etc/sv/virtlogd /var/service
 
 git:
-	git config --global core.editor "vim"
+	git config --global core.editor "nvim"
 	git config --global user.name "Danil Antoshin"
 	git config --global user.email antoshindanil@ya.ru
 	git config --global pull.rebase true
@@ -96,7 +97,7 @@ flatpak-add:
 	sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak-install:
-	flatpak install -y flathub com.github.tchx84.Flatseal org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord io.github.spacingbat3.webcord
+	flatpak install -y flathub org.telegram.desktop io.dbeaver.DBeaverCommunity org.libreoffice.LibreOffice com.discordapp.Discord io.github.spacingbat3.webcord
 
 asdf: asdf-install
 
@@ -105,7 +106,6 @@ asdf-install:
 
 asdf-setup:
 	asdf plugin-add golang
-	asdf plugin-add neovim
 	asdf plugin-add ruby
 	asdf plugin-add nodejs
 
