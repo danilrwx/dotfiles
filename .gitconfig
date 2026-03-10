@@ -42,5 +42,5 @@
     cmd = "nvim -d \"$LOCAL\" \"$REMOTE\" \"$MERGED\" -c 'wincmd w' -c 'wincmd J'"
 
 [includeIf "gitdir:~/w/"]
-    path = ~/dotfiles/private/.gitflant
+    path = ~/dotfiles/private/flant.gitconfig
 
