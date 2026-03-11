@@ -116,7 +116,7 @@ fi
 log "Installing brew apps"
 brew install htop fzf keychain lazygit gh yq xq jq difftastic \
   kubectl k9s kubecolor krew \
-  go golangci-lint-langserver gofumpt goimports go-task gopls \
+  go golangci-lint golangci-lint-langserver gofumpt goimports go-task gopls \
   bash-language-server lua-language-server helm-ls \
   awk grep gnu-sed coreutils binutils findutils diffutils \
   eza fastfetch ncdu ugrep bash bash-completion@2 \
@@ -127,7 +127,6 @@ brew install nvimpager
 
 # Install golang applications ───────────────────────────────────────────────────────────────────────────────────────────
 log "Installing golang apps"
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
 go install github.com/matryer/moq@latest
 
