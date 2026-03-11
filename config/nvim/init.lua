@@ -79,6 +79,8 @@ vim.opt.cmdheight = 1
 
 vim.opt.updatetime = 500
 
+vim.o.winborder = 'rounded'
+
 if vim.fn.executable("ugrep") == 1 then
   vim.opt.grepprg = 'ugrep -nk --tabs=1 --ignore-files --exclude="zz_generated*" --exclude-dir="generated"'
 else
