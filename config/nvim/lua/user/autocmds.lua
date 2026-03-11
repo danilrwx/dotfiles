@@ -72,14 +72,18 @@ M.setup = function()
       local link = vim.api.nvim_set_hl
       local function hl(group, opts) link(0, group, opts) end
 
-      hl("Normal", { bg = nil })
-      hl("SignColumn", { bg = nil })
+      vim.cmd("highlight Normal guibg=NONE")
+      vim.cmd("highlight SignColumn guibg=NONE")
 
       hl("Added", { fg = "#00cd00" })
       hl("Changed", { fg = "#00cdcd" })
       hl("Removed", { fg = "#cd0000" })
 
       local highlight_keep = {
+        ["Pmenu"] = "Normal",
+        ["NormalFloat"] = "Normal",
+        ["WinSeparator"] = "Normal",
+
         ["@function"] = "Function",
         ["@function.call"] = "Function",
         ["@function.method.call"] = "Function",
