@@ -120,7 +120,7 @@ brew install htop fzf keychain lazygit gh yq xq jq difftastic \
   bash-language-server lua-language-server helm-ls \
   awk grep gnu-sed coreutils binutils findutils diffutils \
   eza fastfetch ncdu ugrep bash bash-completion@2 \
-  agent-browser typescript-language-server
+  agent-browser typescript-language-server rtk
 brew install neovim --head
 brew install nvimpager
 

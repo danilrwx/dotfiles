@@ -1,18 +1,23 @@
 {
   "lastChangelogVersion": "0.57.1",
-  "theme": "ocean-breeze",
+  "theme": "dark",
   "defaultProvider": "minimax",
   "defaultModel": "MiniMax-M2.5-highspeed",
   "defaultThinkingLevel": "medium",
   "packages": [
-    "npm:pi-cursor-agent",
     "npm:lsp-pi",
-    "npm:@tmustier/pi-usage-extension"
+    "npm:@tmustier/pi-usage-extension",
+    "npm:pi-ask-user",
+    "npm:pi-rtk-optimizer"
   ],
   "lsp": {
     "hookMode": "edit_write"
   },
   "golangci-lint": {
     "hookMode": "agent_end"
-  }
+  },
+  "steeringMode": "one-at-a-time",
+  "transport": "sse",
+  "hideThinkingBlock": true,
+  "collapseChangelog": false
 }
