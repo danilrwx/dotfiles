@@ -21,10 +21,10 @@
     "allowWrite": [
       "~/w",
       "~/.pi",
+      "~/Library/Caches",
       "/tmp",
       "/private/tmp",
-      "/private/var/folders",
-      "/Users/danil/Library/Caches"
+      "/private/var/folders"
     ],
     "allowReadWrite": [
       "."

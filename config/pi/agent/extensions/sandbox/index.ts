@@ -234,6 +234,16 @@ export default function (pi: ExtensionAPI) {
   ): Promise<boolean> {
     if (mode !== "interactive" || paths.length === 0) return false;
 
+    // Check if already granted (e.g., via /sandbox command) - skip dialog and retry
+    const alreadyGranted = paths.every((path) => {
+      const resolved = resolvePath(path);
+      return sessionGrantedReads.includes(resolved) && sessionGrantedWrites.includes(resolved);
+    });
+
+    if (alreadyGranted) {
+      return true;
+    }
+
     const options = [
       "Grant for this session & retry",
       "Grant & save to project config & retry",
@@ -266,6 +276,9 @@ export default function (pi: ExtensionAPI) {
   }
 
   function createSandboxedOps(ctx: ExtensionContext): BashOperations {
+    let retryCount = 0;
+    const MAX_RETRIES = 1;
+
     return {
       async exec(command, cwd, { onData, signal, timeout }) {
         if (!existsSync(cwd)) throw new Error(`Working directory does not exist: ${cwd}`);
@@ -296,18 +309,40 @@ export default function (pi: ExtensionAPI) {
           return { exitCode: firstRun.exitCode };
         }
 
-        const granted = await promptForBashGrant(command, deniedPaths, ctx);
-        if (!granted) {
-          SandboxManager.cleanupAfterCommand();
-          return { exitCode: firstRun.exitCode };
+        // Always retry after grant (even if previously blocked), up to MAX_RETRIES
+        if (retryCount < MAX_RETRIES) {
+          // Check if paths are already granted (e.g., via /sandbox command)
+          const alreadyGranted = deniedPaths.every((path) => {
+            const resolved = resolvePath(path);
+            return sessionGrantedReads.includes(resolved) && sessionGrantedWrites.includes(resolved);
+          });
+
+          if (alreadyGranted) {
+            retryCount++;
+            onData?.(Buffer.from("[sandbox] Permission granted, retrying...\n"));
+
+            const retryWrapped = await SandboxManager.wrapWithSandbox(command);
+            const retryRun = await runBashCommand(retryWrapped, cwd, signal, timeout, onData);
+            SandboxManager.cleanupAfterCommand();
+            return { exitCode: retryRun.exitCode };
+          }
+
+          // Prompt for grant - always retry after grant
+          const granted = await promptForBashGrant(command, deniedPaths, ctx);
+          if (granted) {
+            retryCount++;
+            onData?.(Buffer.from("[sandbox] Permission granted, retrying...\n"));
+
+            const retryWrapped = await SandboxManager.wrapWithSandbox(command);
+            const retryRun = await runBashCommand(retryWrapped, cwd, signal, timeout, onData);
+            SandboxManager.cleanupAfterCommand();
+            return { exitCode: retryRun.exitCode };
+          }
         }
 
-        onData?.(Buffer.from("[sandbox] Permission granted, retrying...\n"));
-
-        const retryWrapped = await SandboxManager.wrapWithSandbox(command);
-        const retryRun = await runBashCommand(retryWrapped, cwd, signal, timeout, onData);
+        // Max retries reached or blocked - return first run result
         SandboxManager.cleanupAfterCommand();
-        return { exitCode: retryRun.exitCode };
+        return { exitCode: firstRun.exitCode };
       },
     };
   }
