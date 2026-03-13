@@ -4,6 +4,28 @@ import { dirname, join, resolve } from "node:path";
 
 import type { ConfigScope, EffectivePaths, SandboxConfig, SandboxMode } from "./types";
 
+function stripJsonTrailingCommas(text: string): string {
+  return text.replace(/,\s*([\]}])/g, "$1");
+}
+
+function parseJsonPermissive(text: string): Record<string, any> | null {
+  try {
+    return JSON.parse(text);
+  } catch {
+    try {
+      return JSON.parse(stripJsonTrailingCommas(text));
+    } catch {
+      return null;
+    }
+  }
+}
+
+function readConfigFile(path: string): Record<string, any> | null {
+  if (!existsSync(path)) return null;
+  const content = readFileSync(path, "utf-8");
+  return parseJsonPermissive(content);
+}
+
 export function normalizeMode(value: unknown): SandboxMode | undefined {
   if (value === "strict" || value === "interactive" || value === "permissive") return value;
   return undefined;
@@ -46,15 +68,8 @@ export function loadConfig(cwd: string): SandboxConfig {
   const globalPath = join(homedir(), ".pi", "agent", "sandbox.json");
   const projectPath = join(cwd, ".pi", "sandbox.json");
 
-  let global: Partial<SandboxConfig> = {};
-  let project: Partial<SandboxConfig> = {};
-
-  if (existsSync(globalPath)) {
-    try { global = JSON.parse(readFileSync(globalPath, "utf-8")); } catch {}
-  }
-  if (existsSync(projectPath)) {
-    try { project = JSON.parse(readFileSync(projectPath, "utf-8")); } catch {}
-  }
+  const global: Partial<SandboxConfig> = readConfigFile(globalPath) ?? {};
+  const project: Partial<SandboxConfig> = readConfigFile(projectPath) ?? {};
 
   const projectSetsEnabled = Object.prototype.hasOwnProperty.call(project, "enabled");
   const projectSetsMode = Object.prototype.hasOwnProperty.call(project, "mode");
@@ -92,13 +107,9 @@ export function saveGrantToConfig(
   scope: ConfigScope,
   cwd: string,
   grant: { reads?: string[]; writes?: string[] },
-) {
+): { error?: string } {
   const path = configPathForScope(scope, cwd);
-  let existing: Record<string, any> = {};
-
-  if (existsSync(path)) {
-    try { existing = JSON.parse(readFileSync(path, "utf-8")); } catch {}
-  }
+  const existing = readConfigFile(path) ?? {};
 
   if (!existing.filesystem) existing.filesystem = {};
 
@@ -114,6 +125,24 @@ export function saveGrantToConfig(
 
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, JSON.stringify(existing, null, 2) + "\n", "utf-8");
+  return {};
+}
+
+export function saveDomainToConfig(
+  scope: ConfigScope,
+  cwd: string,
+  host: string,
+): { error?: string } {
+  const path = configPathForScope(scope, cwd);
+  const existing = readConfigFile(path) ?? {};
+
+  if (!existing.network) existing.network = {};
+  const current: string[] = existing.network.allowedDomains ?? [];
+  existing.network.allowedDomains = [...new Set([...current, host])];
+
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, JSON.stringify(existing, null, 2) + "\n", "utf-8");
+  return {};
 }
 
 export function toUniqueResolved(paths: string[]): string[] {

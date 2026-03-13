@@ -10,6 +10,7 @@ import {
   loadConfig,
   normalizeConfig,
   resolvePath,
+  saveDomainToConfig,
   saveGrantToConfig,
 } from "./config";
 import {
@@ -131,20 +132,8 @@ export default function (pi: ExtensionAPI) {
 
       if (choice === "Allow & save to project config" || choice === "Allow & save to global config") {
         const scope: ConfigScope = choice.includes("global") ? "global" : "project";
-        const configPath = configPathForScope(scope, ctx.cwd);
-        const fs = await import("node:fs");
-        let existing: Record<string, unknown> = {};
-        if (fs.existsSync(configPath)) {
-          try { existing = JSON.parse(fs.readFileSync(configPath, "utf-8")); } catch {}
-        }
-        if (!existing.network) existing.network = {};
-        const current = (existing.network as Record<string, unknown>).allowedDomains as string[] || [];
-        (existing.network as Record<string, unknown>).allowedDomains = [...new Set([...current, host])];
-        fs.mkdirSync(require("node:path").dirname(configPath), { recursive: true });
-        fs.writeFileSync(configPath, JSON.stringify(existing, null, 2) + "\n");
-        sandboxUi.notify(`Saved to ${configPath}`, "info");
-
-        // Reload config to get updated values
+        saveDomainToConfig(scope, ctx.cwd, host);
+        sandboxUi.notify(`Saved to ${configPathForScope(scope, ctx.cwd)}`, "info");
         config = loadConfig(ctx.cwd);
       }
 

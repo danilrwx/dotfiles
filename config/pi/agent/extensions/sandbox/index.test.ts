@@ -1,9 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 
-import { getEffectivePaths, normalizeConfig } from "./config";
+import { getEffectivePaths, normalizeConfig, saveGrantToConfig, saveDomainToConfig } from "./config";
 import { checkPathAccess, extractDeniedPaths, isDeniedByConfig, formatToolCommand, filterIgnoredDeniedPaths } from "./policy";
 import { buildRuntimeConfig } from "./runtime";
 
@@ -276,4 +278,136 @@ test("buildRuntimeConfig resolves paths", () => {
 
   assert.ok(runtime.filesystem.allowWrite.length > 0);
   assert.ok(runtime.filesystem.denyRead.length > 0);
+});
+
+// --- Config persistence tests ---
+
+function createTempDir(): string {
+  const dir = join(tmpdir(), `sandbox-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+test("saveGrantToConfig preserves existing fields with trailing commas", () => {
+  const dir = createTempDir();
+  const configDir = join(dir, ".pi");
+  mkdirSync(configDir, { recursive: true });
+  const configPath = join(configDir, "sandbox.json");
+
+  writeFileSync(configPath, JSON.stringify({
+    enabled: true,
+    mode: "interactive",
+    network: { allowedDomains: ["api.github.com:443"] },
+    enableWeakerNetworkIsolation: true,
+    filesystem: { allowRead: ["/tmp/existing"] },
+  }, null, 2).replace(']\n}', ']\n}\n') + "\n");
+
+  saveGrantToConfig("project", dir, { reads: ["/tmp/new-path"] });
+
+  const result = JSON.parse(readFileSync(configPath, "utf-8"));
+  assert.equal(result.enabled, true);
+  assert.equal(result.mode, "interactive");
+  assert.deepEqual(result.network.allowedDomains, ["api.github.com:443"]);
+  assert.equal(result.enableWeakerNetworkIsolation, true);
+  assert.ok(result.filesystem.allowRead.includes("/tmp/existing"));
+  assert.ok(result.filesystem.allowRead.includes("/tmp/new-path"));
+
+  rmSync(dir, { recursive: true });
+});
+
+test("saveGrantToConfig handles JSON with trailing commas", () => {
+  const dir = createTempDir();
+  const configDir = join(dir, ".pi");
+  mkdirSync(configDir, { recursive: true });
+  const configPath = join(configDir, "sandbox.json");
+
+  const jsonWithTrailingCommas = `{
+  "enabled": true,
+  "network": {
+    "allowedDomains": [
+      "api.github.com:443",
+      "github.com:443",
+    ]
+  },
+  "filesystem": {
+    "allowRead": [
+      "/tmp/a",
+      "/tmp/b",
+    ],
+  },
+}`;
+  writeFileSync(configPath, jsonWithTrailingCommas);
+
+  saveGrantToConfig("project", dir, { reads: ["/tmp/c"] });
+
+  const result = JSON.parse(readFileSync(configPath, "utf-8"));
+  assert.equal(result.enabled, true);
+  assert.deepEqual(result.network.allowedDomains, ["api.github.com:443", "github.com:443"]);
+  assert.ok(result.filesystem.allowRead.includes("/tmp/a"));
+  assert.ok(result.filesystem.allowRead.includes("/tmp/b"));
+  assert.ok(result.filesystem.allowRead.includes("/tmp/c"));
+
+  rmSync(dir, { recursive: true });
+});
+
+test("saveDomainToConfig preserves existing fields", () => {
+  const dir = createTempDir();
+  const configDir = join(dir, ".pi");
+  mkdirSync(configDir, { recursive: true });
+  const configPath = join(configDir, "sandbox.json");
+
+  writeFileSync(configPath, JSON.stringify({
+    enabled: true,
+    mode: "strict",
+    filesystem: { allowRead: ["/tmp/keep"], denyRead: ["~/.ssh"] },
+    network: { allowedDomains: ["existing.com"] },
+  }, null, 2) + "\n");
+
+  saveDomainToConfig("project", dir, "new-host.com:443");
+
+  const result = JSON.parse(readFileSync(configPath, "utf-8"));
+  assert.equal(result.enabled, true);
+  assert.equal(result.mode, "strict");
+  assert.deepEqual(result.filesystem.allowRead, ["/tmp/keep"]);
+  assert.deepEqual(result.filesystem.denyRead, ["~/.ssh"]);
+  assert.ok(result.network.allowedDomains.includes("existing.com"));
+  assert.ok(result.network.allowedDomains.includes("new-host.com:443"));
+
+  rmSync(dir, { recursive: true });
+});
+
+test("saveDomainToConfig handles JSON with trailing commas", () => {
+  const dir = createTempDir();
+  const configDir = join(dir, ".pi");
+  mkdirSync(configDir, { recursive: true });
+  const configPath = join(configDir, "sandbox.json");
+
+  const jsonWithTrailingCommas = `{
+  "enabled": true,
+  "mode": "interactive",
+  "network": {
+    "allowedDomains": [
+      "api.github.com:443",
+    ],
+  },
+  "enableWeakerNetworkIsolation": true,
+  "filesystem": {
+    "allowRead": [
+      "/tmp/a",
+    ],
+  },
+}`;
+  writeFileSync(configPath, jsonWithTrailingCommas);
+
+  saveDomainToConfig("project", dir, "new.com:443");
+
+  const result = JSON.parse(readFileSync(configPath, "utf-8"));
+  assert.equal(result.enabled, true);
+  assert.equal(result.mode, "interactive");
+  assert.equal(result.enableWeakerNetworkIsolation, true);
+  assert.ok(result.network.allowedDomains.includes("api.github.com:443"));
+  assert.ok(result.network.allowedDomains.includes("new.com:443"));
+  assert.deepEqual(result.filesystem.allowRead, ["/tmp/a"]);
+
+  rmSync(dir, { recursive: true });
 });
