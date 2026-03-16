@@ -8,7 +8,9 @@
     "npm:lsp-pi",
     "npm:@tmustier/pi-usage-extension",
     "npm:pi-ask-user",
-    "npm:pi-rtk-optimizer"
+    "npm:pi-rtk-optimizer",
+    "git:git@fox.flant.com:team/virtualization/pi-flant-provider.git",
+    "git:git@fox.flant.com:team/virtualization/pi-virtualization-extras.git"
   ],
   "lsp": {
     "hookMode": "edit_write"
@@ -18,6 +20,6 @@
   },
   "steeringMode": "one-at-a-time",
   "transport": "sse",
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "collapseChangelog": false
 }
