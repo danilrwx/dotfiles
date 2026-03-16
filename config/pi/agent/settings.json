@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.57.1",
+  "lastChangelogVersion": "0.58.3",
   "theme": "dark",
   "defaultProvider": "minimax",
   "defaultModel": "MiniMax-M2.5-highspeed",
