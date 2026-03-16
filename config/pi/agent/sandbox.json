@@ -7,7 +7,8 @@
       "api.github.com:443",
       "github.com:443",
       "gitlab.com:443",
-      "githubusercontent.com:443"
+      "githubusercontent.com:443",
+      "openrouter.ai:443"
     ]
   },
   "enableWeakerNetworkIsolation": true,
