@@ -1,0 +1,1193 @@
+{
+  "updatedAt": "2026-03-17T18:40:30.598Z",
+  "models": [
+    {
+      "id": "cc/claude-haiku-4-5",
+      "name": "Cc Claude Haiku 4 5",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": null,
+      "baseId": "claude-haiku-4-5",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 1,
+        "output": 5,
+        "cacheRead": 0.1,
+        "cacheWrite": 0
+      },
+      "contextWindow": 200000,
+      "maxTokens": 64000
+    },
+    {
+      "id": "cc/claude-opus-4-6",
+      "name": "Cc Claude Opus 4 6",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": null,
+      "baseId": "claude-opus-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cc/claude-opus-4-6-1m",
+      "name": "Cc Claude Opus 4 6 1m",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": null,
+      "baseId": "claude-opus-4-6-1m",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cc/claude-opus-4-6-200k",
+      "name": "Cc Claude Opus 4 6 200k",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": null,
+      "baseId": "claude-opus-4-6-200k",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cc/claude-opus-4-6-high",
+      "name": "Cc Claude Opus 4 6 High",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": "high",
+      "baseId": "claude-opus-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cc/claude-opus-4-6-max",
+      "name": "Cc Claude Opus 4 6 Max",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": null,
+      "baseId": "claude-opus-4-6-max",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cc/claude-opus-4-6-medium",
+      "name": "Cc Claude Opus 4 6 Medium",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": "medium",
+      "baseId": "claude-opus-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cc/claude-sonnet-4-6",
+      "name": "Cc Claude Sonnet 4 6",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": null,
+      "baseId": "claude-sonnet-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.3,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cc/claude-sonnet-4-6-high",
+      "name": "Cc Claude Sonnet 4 6 High",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": "high",
+      "baseId": "claude-sonnet-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.3,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cc/claude-sonnet-4-6-max",
+      "name": "Cc Claude Sonnet 4 6 Max",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": null,
+      "baseId": "claude-sonnet-4-6-max",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.3,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cc/claude-sonnet-4-6-medium",
+      "name": "Cc Claude Sonnet 4 6 Medium",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cc",
+      "suffix": "medium",
+      "baseId": "claude-sonnet-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant-claude",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.3,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "claude-haiku-4-5",
+      "name": "Claude Haiku 4 5",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "claude-haiku-4-5",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 1,
+        "output": 5,
+        "cacheRead": 0.1,
+        "cacheWrite": 0
+      },
+      "contextWindow": 200000,
+      "maxTokens": 64000
+    },
+    {
+      "id": "claude-opus-4-6",
+      "name": "Claude Opus 4 6",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "claude-opus-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "claude-opus-4-6-1m",
+      "name": "Claude Opus 4 6 1m",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "claude-opus-4-6-1m",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "claude-opus-4-6-200k",
+      "name": "Claude Opus 4 6 200k",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "claude-opus-4-6-200k",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "claude-opus-4-6-high",
+      "name": "Claude Opus 4 6 High",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": "high",
+      "baseId": "claude-opus-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "claude-opus-4-6-max",
+      "name": "Claude Opus 4 6 Max",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "claude-opus-4-6-max",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "claude-opus-4-6-medium",
+      "name": "Claude Opus 4 6 Medium",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": "medium",
+      "baseId": "claude-opus-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "claude-sonnet-4-6",
+      "name": "Claude Sonnet 4 6",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "claude-sonnet-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.3,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "claude-sonnet-4-6-high",
+      "name": "Claude Sonnet 4 6 High",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": "high",
+      "baseId": "claude-sonnet-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.3,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "claude-sonnet-4-6-max",
+      "name": "Claude Sonnet 4 6 Max",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "claude-sonnet-4-6-max",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.3,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "claude-sonnet-4-6-medium",
+      "name": "Claude Sonnet 4 6 Medium",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": "medium",
+      "baseId": "claude-sonnet-4-6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.3,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cx/gpt-5.2",
+      "name": "Cx Gpt 5.2",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cx",
+      "suffix": null,
+      "baseId": "gpt-5.2",
+      "openRouterPrefix": "openai",
+      "provider": "flant-codex",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cx/gpt-5.2-codex",
+      "name": "Cx Gpt 5.2 Codex",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cx",
+      "suffix": null,
+      "baseId": "gpt-5.2-codex",
+      "openRouterPrefix": "openai",
+      "provider": "flant-codex",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cx/gpt-5.3-codex",
+      "name": "Cx Gpt 5.3 Codex",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cx",
+      "suffix": null,
+      "baseId": "gpt-5.3-codex",
+      "openRouterPrefix": "openai",
+      "provider": "flant-codex",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cx/gpt-5.3-codex-high",
+      "name": "Cx Gpt 5.3 Codex High",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cx",
+      "suffix": "high",
+      "baseId": "gpt-5.3-codex",
+      "openRouterPrefix": "openai",
+      "provider": "flant-codex",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cx/gpt-5.3-codex-low",
+      "name": "Cx Gpt 5.3 Codex Low",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cx",
+      "suffix": "low",
+      "baseId": "gpt-5.3-codex",
+      "openRouterPrefix": "openai",
+      "provider": "flant-codex",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cx/gpt-5.3-codex-medium",
+      "name": "Cx Gpt 5.3 Codex Medium",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cx",
+      "suffix": "medium",
+      "baseId": "gpt-5.3-codex",
+      "openRouterPrefix": "openai",
+      "provider": "flant-codex",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cx/gpt-5.3-codex-none",
+      "name": "Cx Gpt 5.3 Codex None",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cx",
+      "suffix": null,
+      "baseId": "gpt-5.3-codex-none",
+      "openRouterPrefix": "openai",
+      "provider": "flant-codex",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cx/gpt-5.3-codex-xhigh",
+      "name": "Cx Gpt 5.3 Codex Xhigh",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cx",
+      "suffix": null,
+      "baseId": "gpt-5.3-codex-xhigh",
+      "openRouterPrefix": "openai",
+      "provider": "flant-codex",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "cx/gpt-5.4",
+      "name": "Cx Gpt 5.4",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "cx",
+      "suffix": null,
+      "baseId": "gpt-5.4",
+      "openRouterPrefix": "openai",
+      "provider": "flant-codex",
+      "cost": {
+        "input": 2.5,
+        "output": 15,
+        "cacheRead": 0.25,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1050000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "deepseek-r1",
+      "name": "Deepseek R1",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "deepseek-r1",
+      "openRouterPrefix": "deepseek",
+      "provider": "flant",
+      "cost": {
+        "input": 0.7,
+        "output": 2.5,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "contextWindow": 64000,
+      "maxTokens": 16000
+    },
+    {
+      "id": "deepseek-v3",
+      "name": "Deepseek V3",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "deepseek-v3",
+      "openRouterPrefix": "deepseek",
+      "provider": "flant",
+      "cost": {
+        "input": 0.2,
+        "output": 0.77,
+        "cacheRead": 0.135,
+        "cacheWrite": 0
+      },
+      "contextWindow": 163840,
+      "maxTokens": 0
+    },
+    {
+      "id": "gemini-3-flash",
+      "name": "Gemini 3 Flash",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "gemini-3-flash",
+      "openRouterPrefix": "google",
+      "provider": "flant",
+      "cost": {
+        "input": 0.5,
+        "output": 3,
+        "cacheRead": 0.05,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1048576,
+      "maxTokens": 65536
+    },
+    {
+      "id": "gemini-3.1-flash",
+      "name": "Gemini 3.1 Flash",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "gemini-3.1-flash",
+      "openRouterPrefix": "google",
+      "provider": "flant",
+      "cost": {
+        "input": 0.25,
+        "output": 1.5,
+        "cacheRead": 0.025,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1048576,
+      "maxTokens": 65536
+    },
+    {
+      "id": "gemini-3.1-pro",
+      "name": "Gemini 3.1 Pro",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "gemini-3.1-pro",
+      "openRouterPrefix": "google",
+      "provider": "flant",
+      "cost": {
+        "input": 2,
+        "output": 12,
+        "cacheRead": 0.2,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1048576,
+      "maxTokens": 65536
+    },
+    {
+      "id": "gpt-4o",
+      "name": "Gpt 4o",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "gpt-4o",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 2.5,
+        "output": 10,
+        "cacheRead": 1.25,
+        "cacheWrite": 0
+      },
+      "contextWindow": 128000,
+      "maxTokens": 16384
+    },
+    {
+      "id": "gpt-5.2",
+      "name": "Gpt 5.2",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "gpt-5.2",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "gpt-5.2-codex",
+      "name": "Gpt 5.2 Codex",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "gpt-5.2-codex",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "gpt-5.3-codex",
+      "name": "Gpt 5.3 Codex",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "gpt-5.3-codex",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "gpt-5.3-codex-high",
+      "name": "Gpt 5.3 Codex High",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": "high",
+      "baseId": "gpt-5.3-codex",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "gpt-5.3-codex-low",
+      "name": "Gpt 5.3 Codex Low",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": "low",
+      "baseId": "gpt-5.3-codex",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "gpt-5.3-codex-medium",
+      "name": "Gpt 5.3 Codex Medium",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": "medium",
+      "baseId": "gpt-5.3-codex",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "gpt-5.3-codex-none",
+      "name": "Gpt 5.3 Codex None",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "gpt-5.3-codex-none",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "gpt-5.3-codex-xhigh",
+      "name": "Gpt 5.3 Codex Xhigh",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "gpt-5.3-codex-xhigh",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 1.75,
+        "output": 14,
+        "cacheRead": 0.175,
+        "cacheWrite": 0
+      },
+      "contextWindow": 400000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "gpt-5.4",
+      "name": "Gpt 5.4",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "gpt-5.4",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 2.5,
+        "output": 15,
+        "cacheRead": 0.25,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1050000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "grok-4",
+      "name": "Grok 4",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "grok-4",
+      "openRouterPrefix": "x-ai",
+      "provider": "flant",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.75,
+        "cacheWrite": 0
+      },
+      "contextWindow": 256000,
+      "maxTokens": 0
+    },
+    {
+      "id": "minimax-m2.5",
+      "name": "Minimax M2.5",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "minimax-m2.5",
+      "openRouterPrefix": "minimax",
+      "provider": "flant",
+      "cost": {
+        "input": 0.2,
+        "output": 1.2,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "contextWindow": 196608,
+      "maxTokens": 196608
+    },
+    {
+      "id": "o3-mini",
+      "name": "O3 Mini",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "o3-mini",
+      "openRouterPrefix": "openai",
+      "provider": "flant",
+      "cost": {
+        "input": 1.1,
+        "output": 4.4,
+        "cacheRead": 0.55,
+        "cacheWrite": 0
+      },
+      "contextWindow": 200000,
+      "maxTokens": 100000
+    },
+    {
+      "id": "or/claude-haiku-4.5",
+      "name": "Or Claude Haiku 4.5",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "or",
+      "suffix": null,
+      "baseId": "claude-haiku-4.5",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 1,
+        "output": 5,
+        "cacheRead": 0.1,
+        "cacheWrite": 0
+      },
+      "contextWindow": 200000,
+      "maxTokens": 64000
+    },
+    {
+      "id": "or/claude-opus-4.6",
+      "name": "Or Claude Opus 4.6",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "or",
+      "suffix": null,
+      "baseId": "claude-opus-4.6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 5,
+        "output": 25,
+        "cacheRead": 0.5,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "or/claude-sonnet-4.5",
+      "name": "Or Claude Sonnet 4.5",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "or",
+      "suffix": null,
+      "baseId": "claude-sonnet-4.5",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.3,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 64000
+    },
+    {
+      "id": "or/claude-sonnet-4.6",
+      "name": "Or Claude Sonnet 4.6",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": "or",
+      "suffix": null,
+      "baseId": "claude-sonnet-4.6",
+      "openRouterPrefix": "anthropic",
+      "provider": "flant",
+      "cost": {
+        "input": 3,
+        "output": 15,
+        "cacheRead": 0.3,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 128000
+    },
+    {
+      "id": "qwen3-coder-plus",
+      "name": "Qwen3 Coder Plus",
+      "reasoning": true,
+      "input": [
+        "text",
+        "image"
+      ],
+      "prefix": null,
+      "suffix": null,
+      "baseId": "qwen3-coder-plus",
+      "openRouterPrefix": "qwen",
+      "provider": "flant",
+      "cost": {
+        "input": 0.65,
+        "output": 3.25,
+        "cacheRead": 0.13,
+        "cacheWrite": 0
+      },
+      "contextWindow": 1000000,
+      "maxTokens": 65536
+    }
+  ]
+}

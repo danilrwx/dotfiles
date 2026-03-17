@@ -1,14 +1,11 @@
 {
-  "lastChangelogVersion": "0.58.3",
+  "lastChangelogVersion": "0.59.0",
   "theme": "dark",
-  "defaultProvider": "minimax",
-  "defaultModel": "MiniMax-M2.5-highspeed",
+  "defaultProvider": "flant-codex",
+  "defaultModel": "cx/gpt-5.4",
   "defaultThinkingLevel": "medium",
   "packages": [
-    "npm:lsp-pi",
-    "npm:@tmustier/pi-usage-extension",
-    "npm:pi-ask-user",
-    "npm:pi-rtk-optimizer",
+    "git:github.com/danilrwx/pi-core.git",
     "git:git@fox.flant.com:team/virtualization/pi-flant-provider.git",
     "git:git@fox.flant.com:team/virtualization/pi-virtualization-extras.git"
   ],
