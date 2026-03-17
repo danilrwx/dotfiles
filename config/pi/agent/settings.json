@@ -2,7 +2,7 @@
   "lastChangelogVersion": "0.59.0",
   "theme": "dark",
   "defaultProvider": "flant-codex",
-  "defaultModel": "cx/gpt-5.4",
+  "defaultModel": "cx/gpt-5.3-codex",
   "defaultThinkingLevel": "medium",
   "packages": [
     "git:github.com/danilrwx/pi-core.git",
