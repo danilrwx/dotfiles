@@ -2,60 +2,41 @@
   "enabled": true,
   "mode": "interactive",
   "network": {
-    "block": false,
     "allowedDomains": [
-      "api.github.com:443",
-      "github.com:443",
-      "gitlab.com:443",
-      "githubusercontent.com:443",
-      "openrouter.ai:443",
-      "registry.npmjs.org:443"
-    ]
+      "*"
+    ],
+    "deniedDomains": []
   },
   "enableWeakerNetworkIsolation": true,
   "filesystem": {
     "allowRead": [
-      ".",
-      "~/w",
-      "~/.pi",
-      "/opt/homebrew"
+      "/**"
     ],
     "allowWrite": [
-      "~/w",
-      "~/.pi",
-      "~/Library/Caches",
-      "/tmp",
+      ".",
       "/private/tmp",
-      "/private/var/folders",
-      "/tmp"
+      "/private/tmp",
+      "/tmp",
+      "/tmp",
+      "/var/tmp",
+      "/var/tmp",
+      "~/.cache",
+      "~/.config",
+      "~/.local",
+      "~/.npm",
+      "~/.pi",
+      "~/.pnpm-store",
+      "~/.yarn",
+      "~/Library/Caches"
     ],
-    "allowReadWrite": [
-      "."
-    ],
-    "denyRead": [
-      "~/.ssh",
-      "~/.aws",
-      "~/.kube",
-      "~/.kubeconfigs",
-      "~/.gnupg",
-      "~/.docker",
-      "~/.npmrc",
-      "~/.config/gcloud",
-      "~/.local/share/keyrings"
-    ],
+    "denyRead": [],
     "denyWrite": [
       "~/.ssh",
+      "~/.gnupg",
       "~/.aws",
       "~/.kube",
-      "~/.kubeconfigs",
-      "~/.gnupg",
-      "~/.docker",
-      "~/.npmrc",
-      "~/.gitconfig",
-      "~/.zshrc",
-      "~/.bashrc",
-      "~/.profile",
-      "~/.bash_profile"
+      "~/.kubeconfig",
+      "~/Library/Keychains"
     ]
   }
 }

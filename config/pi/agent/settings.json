@@ -2,12 +2,13 @@
   "lastChangelogVersion": "0.60.0",
   "theme": "dark",
   "defaultProvider": "flant",
-  "defaultModel": "gpt-5.3-codex",
+  "defaultModel": "claude-sonnet-4-6",
   "defaultThinkingLevel": "medium",
   "packages": [
     "git:github.com/danilrwx/pi-core.git",
     "git:git@fox.flant.com:team/virtualization/pi-flant-provider.git",
-    "git:git@fox.flant.com:team/virtualization/pi-virtualization-extras.git"
+    "git:git@fox.flant.com:team/virtualization/pi-virtualization-extras.git",
+    "npm:@tintinweb/pi-subagents"
   ],
   "lsp": {
     "hookMode": "edit_write"
