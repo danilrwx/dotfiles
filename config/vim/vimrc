@@ -123,9 +123,9 @@ if has('patch-9.1.1230')
   packadd! hlyank
 endif
 
-if has('patch-9.0.1799')
-  packadd! editorconfig
-endif
+# if has('patch-9.0.1799')
+#   packadd! editorconfig
+# endif
 
 g:mapleader = " "
 

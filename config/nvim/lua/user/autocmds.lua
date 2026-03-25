@@ -35,14 +35,6 @@ M.setup = function()
       local client = vim.lsp.get_client_by_id(event.data.client_id)
       if client == nil then return end
 
-      if client.server_capabilities.codeLensProvider then
-        vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold" }, {
-          group = group,
-          callback = function() vim.lsp.codelens.refresh() end,
-        })
-        vim.keymap.set("n", "grc", "<cmd>lua vim.lsp.codelens.run()<cr>", opts)
-      end
-
       if client:supports_method("textDocument/formatting") then
         vim.keymap.set({ "n", "x" }, "grf", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", opts)
       end
