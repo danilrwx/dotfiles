@@ -1,15 +1,15 @@
 {
   "lastChangelogVersion": "0.62.0",
   "theme": "dark",
-  "defaultProvider": "minimax",
-  "defaultModel": "MiniMax-M2.7-highspeed",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.3-codex",
   "defaultThinkingLevel": "medium",
   "packages": [
     "git:github.com/danilrwx/pi-core.git",
     "git:git@fox.flant.com:team/virtualization/pi-flant-provider.git",
     "git:git@fox.flant.com:team/virtualization/pi-virtualization-extras.git",
-    "npm:@tintinweb/pi-subagents",
-    "npm:pi-cursor-agent"
+    "npm:pi-cursor-agent",
+    "npm:@calesennett/pi-codex-usage"
   ],
   "lsp": {
     "hookMode": "edit_write"
@@ -20,5 +20,9 @@
   "steeringMode": "one-at-a-time",
   "transport": "sse",
   "hideThinkingBlock": false,
-  "collapseChangelog": false
+  "collapseChangelog": false,
+  "pi-codex-usage": {
+    "usageMode": "left",
+    "refreshWindow": "7d"
+  }
 }
