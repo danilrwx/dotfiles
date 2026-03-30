@@ -1,14 +1,13 @@
 {
-  "lastChangelogVersion": "0.62.0",
+  "lastChangelogVersion": "0.63.1",
   "theme": "dark",
-  "defaultProvider": "openai-codex",
+  "defaultProvider": "flant",
   "defaultModel": "gpt-5.3-codex",
   "defaultThinkingLevel": "medium",
   "packages": [
     "git:github.com/danilrwx/pi-core.git",
     "git:git@fox.flant.com:team/virtualization/pi-flant-provider.git",
     "git:git@fox.flant.com:team/virtualization/pi-virtualization-extras.git",
-    "npm:pi-cursor-agent",
     "npm:@calesennett/pi-codex-usage"
   ],
   "lsp": {
