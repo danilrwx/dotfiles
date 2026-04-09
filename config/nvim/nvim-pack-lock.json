@@ -14,11 +14,11 @@
       "src": "https://github.com/xzbdmw/colorful-menu.nvim"
     },
     "fzf-lua": {
-      "rev": "bde73a6886b607246095aa59f396de5e0d036890",
+      "rev": "3f194300c92e3ec2de8f9307d6a7ce988b7b6d0c",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
     "gitsigns.nvim": {
-      "rev": "68912ba2b1ad67fc48751f27183046682cb8094d",
+      "rev": "944ef13cc8d8fe8b846c91f36041c8dfb85ca000",
       "src": "https://github.com/lewis6991/gitsigns.nvim"
     },
     "lensline.nvim": {
@@ -26,7 +26,7 @@
       "src": "https://github.com/oribarilan/lensline.nvim"
     },
     "nvim-treesitter": {
-      "rev": "6620ae1c44dfa8623b22d0cbf873a9e8d073b849",
+      "rev": "2098db61dcca4857465c340ee29c81f12c7355e8",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter"
     },
     "oil.nvim": {
@@ -58,7 +58,7 @@
       "src": "https://github.com/kyoh86/vim-go-coverage"
     },
     "vim-test": {
-      "rev": "8fe182032e4c7c933e2e598fe402d24cbf782b8d",
+      "rev": "36c501a89696e5ec18fb653e958957d0826e5c0b",
       "src": "https://github.com/vim-test/vim-test"
     }
   }
