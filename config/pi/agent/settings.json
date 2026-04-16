@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.67.2",
+  "lastChangelogVersion": "0.67.3",
   "theme": "dark",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.4",
@@ -7,8 +7,7 @@
   "packages": [
     "git:github.com/danilrwx/pi-core.git",
     "git:git@fox.flant.com:team/virtualization/pi-flant-provider.git",
-    "git:git@fox.flant.com:team/virtualization/pi-virtualization-extras.git",
-    "npm:@calesennett/pi-codex-usage"
+    "git:git@fox.flant.com:team/virtualization/pi-virtualization-extras.git"
   ],
   "lsp": {
     "hookMode": "edit_write"
@@ -23,5 +22,7 @@
   "pi-codex-usage": {
     "usageMode": "left",
     "refreshWindow": "7d"
-  }
+  },
+  "editorPaddingX": 1,
+  "permissionLevel": "medium"
 }

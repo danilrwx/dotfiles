@@ -36,6 +36,8 @@ export KUBECOLOR_PRESET="protanopia-dark"
 export HISTSIZE=-1
 export HISTFILESIZE=-1
 
+export PI_OFFLINE=1
+
 if [ -e "$HOME/bin/trdl" ]; then
   source $("$HOME/bin/trdl" use flint "2")
 fi
