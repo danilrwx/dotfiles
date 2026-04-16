@@ -79,6 +79,53 @@ pi install git:git@fox.flant.com:team/virtualization/pi-flant-provider.git
 - провайдер `flant` в Pi для корпоративных моделей;
 - команду `/flant-update-models` для обновления списка моделей.
 
+### 2.4 `pi-permissions` (рекомендуется)
+
+```bash
+pi install npm:pi-permissions
+```
+
+Что дает:
+
+- allow/deny rules для tool calls агента;
+- контроль над тем, какие `bash`, `read`, `write`, `edit` действия разрешены;
+- возможность явно запретить опасные операции, например `git push` или запись в чувствительные файлы.
+
+Базовая идея:
+
+- `deny`-правила блокируют действие всегда;
+- `allow`-правила позволяют собрать whitelist для нужных операций;
+- конфиг можно хранить локально в проекте (`.pi/permissions.json`) или глобально (`~/.pi/agent/permissions.json`).
+
+Минимальный пример `.pi/permissions.json`:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git commit *)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)"
+    ],
+    "deny": [
+      "Bash(git push *)",
+      "Bash(rm -rf *)",
+      "Write(*.env)",
+      "Edit(*.env)"
+    ]
+  }
+}
+```
+
+После изменения `permissions.json` внутри Pi выполни:
+
+```text
+/reload
+```
+
 ---
 
 ## 3) Краткая выжимка по обязательным плагинам
@@ -168,6 +215,13 @@ VPN:
 
 Вместо старого `sandbox` теперь для изоляции Pi рекомендуем использовать `nono`.
 
+Важно не путать `nono` и `pi-permissions`:
+
+- **`pi-permissions`** — это слой правил для самого агента: какие tool calls разрешены, что нужно ограничить, что надо явно запретить;
+- **`nono`** — это слой системной изоляции процесса Pi: доступ к файловой системе, рантаймам, сетям и другим ресурсам окружения.
+
+То есть `pi-permissions` отвечает за **policy/approval на уровне действий агента**, а `nono` — за **изоляцию на уровне ОС/ядра и runtime environment**. Они не заменяют друг друга, а закрывают разные классы рисков.
+
 ### Установка `nono`
 
 #### macOS
@@ -183,6 +237,11 @@ brew install nono
 ### Базовая идея
 
 Pi запускается через `nono` с профилем, который ограничивает доступ к файловой системе, но оставляет доступ к нужным рабочим директориям, кэшу и сетям.
+
+Практически это стоит использовать вместе с `pi-permissions`:
+
+- `pi-permissions` ограничивает, **что агенту логически можно делать**;
+- `nono` ограничивает, **к чему процесс технически имеет доступ**, даже если агент или extension попробует сделать лишнее.
 
 Пример запуска:
 
@@ -517,6 +576,7 @@ npm install -g @mariozechner/pi-coding-agent
 pi install git:github.com/danilrwx/pi-core
 pi install git:git@fox.flant.com:team/virtualization/pi-virtualization-extras.git
 pi install git:git@fox.flant.com:team/virtualization/pi-flant-provider.git
+pi install npm:pi-permissions
 
 # отдельно ставим rtk, если хотим экономить токены на shell-output
 brew install rtk
@@ -529,4 +589,4 @@ pi
 # /flant-update-models
 ```
 
-Готово: после этого у тебя будет рабочий Pi с обязательными корпоративными навыками, провайдером FLANT, изоляцией через `nono` и отдельным `rtk` для оптимизации shell-вывода.
+Готово: после этого у тебя будет рабочий Pi с обязательными корпоративными навыками, провайдером FLANT, rules layer через `pi-permissions`, изоляцией через `nono` и отдельным `rtk` для оптимизации shell-вывода.
