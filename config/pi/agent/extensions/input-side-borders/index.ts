@@ -1,6 +1,7 @@
 import { CustomEditor, type ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 
+const VERTICAL_PADDING = 1;
 const ANSI_RESET = /\x1b\[0m/g;
 const OSC_CURSOR_MARKER = /\x1b\]133;A\x07/g;
 const OSC_SHELL_INTEGRATION = /\x1b\]133;[BC]\x07/g;
@@ -51,8 +52,11 @@ class ScreenshotEditor extends CustomEditor {
 			const withPersistentBg = padded.replace(ANSI_RESET, `\x1b[0m${bgAnsi}`);
 			return `${bgAnsi}${withPersistentBg}\x1b[49m`;
 		});
+		const emptyLine = `${bgAnsi}${" ".repeat(width)}\x1b[49m`;
+		const topPadding = Array.from({ length: VERTICAL_PADDING }, () => emptyLine);
+		const bottomPadding = Array.from({ length: VERTICAL_PADDING }, () => emptyLine);
 
-		return [...styledBody, ...extraLines];
+		return [...topPadding, ...styledBody, ...bottomPadding, ...extraLines];
 	}
 }
 
