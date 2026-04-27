@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.67.3",
+  "lastChangelogVersion": "0.70.2",
   "theme": "dark",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.4",
+  "defaultModel": "gpt-5.5",
   "defaultThinkingLevel": "medium",
   "packages": [
     "git:github.com/danilrwx/pi-core.git",

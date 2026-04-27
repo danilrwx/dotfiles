@@ -1,0 +1,15 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 0,
+  "workspaces": {
+    "": {
+      "name": "youtube-transcript",
+      "dependencies": {
+        "youtube-transcript-plus": "^1.0.4",
+      },
+    },
+  },
+  "packages": {
+    "youtube-transcript-plus": ["youtube-transcript-plus@1.2.0", "", {}, "sha512-SRjVft8V+vUulMKgakgfzC+pnFLSy4tolX7xGnSvp9juUNocikMFmUx5GlhzLDILzxYrijcYtmNqz0qyklnPmA=="],
+  }
+}

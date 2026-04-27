@@ -4,8 +4,8 @@ option_as_alt = "OnlyLeft"
 decorations_theme_variant = "Dark"
 
 [font]
-size = 14
-offset = { x = 0, y = 4 }
+size = 16
+offset = { x = 0, y = 2 }
 normal.family = "Iosevka Nerd Font"
 normal.style = "Regular"
 
