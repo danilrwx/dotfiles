@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.70.2",
+  "lastChangelogVersion": "0.75.3",
   "theme": "dark",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
+  "defaultProvider": "flant",
+  "defaultModel": "minimax-m3",
   "defaultThinkingLevel": "medium",
   "packages": [
     "git:github.com/danilrwx/pi-core.git",
@@ -25,5 +25,5 @@
     "refreshWindow": "7d"
   },
   "editorPaddingX": 1,
-  "permissionLevel": "medium"
+  "permissionLevel": "high"
 }
