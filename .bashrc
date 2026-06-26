@@ -10,9 +10,23 @@ if [ -d "$HOME/.local/share/completions" ]; then
   done
 fi
 
-if [ -e "$HOME/.ssh/id_rsa" ]; then
-  eval $(keychain --eval -q)
-  keychain --ssh-allow-forwarded --confirm $HOME/.ssh/id_rsa -q
+if [[ $- == *i* ]] && [ -e "$HOME/.ssh/id_rsa" ]; then
+  fp=$(ssh-keygen -lf "$HOME/.ssh/id_rsa.pub" 2>/dev/null | awk '{print $2}')
+  if ! { [ -n "$fp" ] && ssh-add -l 2>/dev/null | grep -q "$fp"; }; then
+    case "$(uname -s)" in
+      Darwin)
+        ssh-add -c --apple-use-keychain "$HOME/.ssh/id_rsa" 2>/dev/null
+        ;;
+      Linux)
+        [ -S "${SSH_AUTH_SOCK:-}" ] || eval "$(ssh-agent -s)" >/dev/null
+        if [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && [ -n "${SSH_ASKPASS:-}" ]; then
+          ssh-add -c "$HOME/.ssh/id_rsa"
+        else
+          ssh-add "$HOME/.ssh/id_rsa"
+        fi
+        ;;
+    esac
+  fi
 fi
 
 if [ -f $HOME/dotfiles/private/.bashrc ]; then

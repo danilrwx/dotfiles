@@ -11,21 +11,5 @@ gui:
 git:
   commit:
     signOff: true
-  pagers:
-    - externalDiffCommand: difft --color=always --display=inline --syntax-highlight=on --tab-width=2 --background=dark
   autoFetch: false
   autoRefresh: false
-customCommands:
-  - key: "<c-a>" # ctrl + a
-    description: "Pick AI commit"
-    command: 'echo "{{.Form.Msg}}" > .git/COMMIT_EDITMSG && vim .git/COMMIT_EDITMSG && [ -s .git/COMMIT_EDITMSG ] && git commit --signoff -F .git/COMMIT_EDITMSG || echo "Commit message is empty, commit aborted."'
-    context: "files"
-    prompts:
-      - type: "menuFromCommand"
-        title: "AI Commits"
-        key: "Msg"
-        command: "bunx bunnai"
-        filter: '^(?P<number>\d+)\.\s(?P<message>.+)$'
-        valueFormat: "{{ .message }}"
-        labelFormat: "{{ .number }}: {{ .message | green }}"
-    output: terminal

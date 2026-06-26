@@ -45,6 +45,7 @@ ln -snf $HOME/dotfiles/config/kitty $HOME/.config/
 ln -snf $HOME/dotfiles/config/alacritty $HOME/.config/
 ln -snf $HOME/dotfiles/config/ghostty $HOME/.config/
 ln -snf $HOME/dotfiles/config/pi $HOME/.pi
+ln -snf $HOME/dotfiles/config/claude $HOME/.claude
 
 ln -sf $HOME/dotfiles/.profile $HOME/
 ln -sf $HOME/dotfiles/.bash_profile $HOME/
@@ -114,15 +115,11 @@ fi
 
 # Install brew applications ─────────────────────────────────────────────────────────────────────────────────────────────
 log "Installing brew apps"
-brew install htop fzf keychain lazygit gh yq xq jq difftastic \
+brew install htop fzf lazygit gh yq xq jq difftastic
   kubectl k9s kubecolor krew \
   go golangci-lint golangci-lint-langserver gofumpt goimports go-task gopls \
-  bash-language-server lua-language-server helm-ls \
-  awk grep gnu-sed coreutils binutils findutils diffutils \
-  eza fastfetch ncdu ugrep bash bash-completion@2 \
-  agent-browser typescript-language-server rtk
-brew install neovim --head
-brew install nvimpager
+  bash-language-server lua-language-server helm-ls typescript-language-server \
+  awk grep gnu-sed coreutils binutils findutils diffutils ncdu ugrep bash bash-completion@2
 
 
 # Install golang applications ───────────────────────────────────────────────────────────────────────────────────────────
