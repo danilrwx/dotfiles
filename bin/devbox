@@ -44,6 +44,14 @@ esac
 # answer (rc 2 = cannot connect); ssh-agent forwarding is on by default.
 setup_forwarding() {
   gpgconf --launch gpg-agent 2>/dev/null || true
+  # Self-heal a dead/missing ssh-agent (rc 2) so DevPod has a live agent to
+  # forward: start one and load the keys from the macOS keychain.
+  ssh-add -l >/dev/null 2>&1; local rc=$?
+  if [ "$rc" -eq 2 ]; then
+    eval "$(ssh-agent -s)" >/dev/null 2>&1 || true
+    ssh-add --apple-load-keychain >/dev/null 2>&1 || ssh-add >/dev/null 2>&1 || true
+  fi
+  # If it is still dead, drop the socket so DevPod does not abort on it.
   ssh-add -l >/dev/null 2>&1 || [ $? -ne 2 ] || {
     log "ssh-agent unreachable (SSH_AUTH_SOCK=${SSH_AUTH_SOCK:-unset}) — skipping ssh-agent forwarding"
     unset SSH_AUTH_SOCK
@@ -59,6 +67,9 @@ link_config() {
   if [ "$PROVIDER" = kubernetes ]; then
     cp "$CONFIG" "$SRC/.devcontainer/devcontainer.json"
     cp "$DOT/bootstrap.sh" "$SRC/.devcontainer/bootstrap.sh"
+    # Public keys for the pod's gpg keyring — DevPod's own public-key import
+    # (localhost:12049) is unreliable on the k8s provider. Not secret.
+    gpg --export --armor > "$SRC/.devcontainer/pubkeys.asc" 2>/dev/null || true
   else
     ln -sf "$CONFIG" "$SRC/.devcontainer/devcontainer.json"
   fi
