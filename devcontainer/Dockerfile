@@ -1,6 +1,6 @@
-# Global dev container image, built for linux/amd64 in CI and pushed to
-# ghcr.io/danilrwx/devbox. Projects reference it via image: in devcontainer.json.
-FROM golang:1.25-bookworm
+# Global dev container image (Fedora base — most tools come from dnf), built for
+# linux/amd64 in CI and pushed to ghcr.io/danilrwx/devbox.
+FROM fedora:44
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
@@ -9,49 +9,38 @@ ARG USERNAME=v12n
 ARG UID=1000
 ARG GID=1000
 
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-      ca-certificates curl git openssh-client jq make gnupg unzip sudo vim tmux \
- && install -m0755 -d /etc/apt/keyrings \
- && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
- && chmod a+r /etc/apt/keyrings/docker.asc \
- && arch="$(dpkg --print-architecture)" \
- && echo "deb [arch=${arch} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" \
-      > /etc/apt/sources.list.d/docker.list \
- && curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
- && apt-get install -y --no-install-recommends docker-ce-cli docker-buildx-plugin nodejs \
- && rm -rf /var/lib/apt/lists/*
+# Most tools straight from dnf.
+RUN dnf install -y --setopt=install_weak_deps=False \
+      golang go-task yq helm golangci-lint k9s gh gopls \
+      golang-x-tools-goimports delve \
+      docker-cli git-core tmux vim-enhanced jq make gnupg2 unzip sudo \
+      openssh-clients bsdtar findutils procps-ng which \
+ && dnf clean all \
+ && ln -sf /usr/bin/go-task /usr/local/bin/task
 
-# task, yq, werf, kubectl, d8, claude-code, helm, golangci-lint, gh
-RUN arch="$(dpkg --print-architecture)" \
- && sh -c "$(curl -fsSL https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin \
- && curl -fsSL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${arch}" -o /usr/local/bin/yq \
- && chmod +x /usr/local/bin/yq \
- && werf_ver="$(curl -fsSL https://tuf.werf.io/targets/channels/2/stable)" \
- && curl -fsSL "https://tuf.werf.io/targets/releases/${werf_ver}/linux-${arch}/bin/werf" -o /usr/local/bin/werf \
- && chmod +x /usr/local/bin/werf \
+# node (nodesource) + claude-code
+RUN curl -fsSL "https://rpm.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
+ && dnf install -y nodejs \
+ && dnf clean all \
+ && npm install -g @anthropic-ai/claude-code
+
+# Not in dnf: kubectl, werf, d8; plus go-installed ginkgo (pinned), gofumpt, moq, crane.
+RUN arch="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" \
  && kube_ver="$(curl -fsSL https://dl.k8s.io/release/stable.txt)" \
  && curl -fsSL "https://dl.k8s.io/release/${kube_ver}/bin/linux/${arch}/kubectl" -o /usr/local/bin/kubectl \
  && chmod +x /usr/local/bin/kubectl \
+ && werf_ver="$(curl -fsSL https://tuf.werf.io/targets/channels/2/stable)" \
+ && curl -fsSL "https://tuf.werf.io/targets/releases/${werf_ver}/linux-${arch}/bin/werf" -o /usr/local/bin/werf \
+ && chmod +x /usr/local/bin/werf \
  && d8_ver="$(curl -fsSL https://api.github.com/repos/deckhouse/deckhouse-cli/releases/latest | grep '"tag_name"' | cut -d'"' -f4)" \
  && d8_tmp="$(mktemp -d)" \
- && curl -fsSL "https://github.com/deckhouse/deckhouse-cli/releases/download/${d8_ver}/d8-${d8_ver}-linux-${arch}.tar.gz" | tar -xz -C "$d8_tmp" \
+ && curl -fsSL "https://github.com/deckhouse/deckhouse-cli/releases/download/${d8_ver}/d8-${d8_ver}-linux-${arch}.tar.gz" | bsdtar -xzf - -C "$d8_tmp" \
  && install "$(find "$d8_tmp" -type f -name d8)" /usr/local/bin/d8 \
- && npm install -g @anthropic-ai/claude-code \
- && curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash \
- && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b /usr/local/bin \
- && mkdir -p -m0755 /etc/apt/keyrings \
- && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /etc/apt/keyrings/githubcli.gpg \
- && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
- && apt-get update && apt-get install -y --no-install-recommends gh && rm -rf /var/lib/apt/lists/*
-
-# Go dev tools (into /usr/local/bin so all users see them).
-RUN GOBIN=/usr/local/bin go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0 \
+ && GOBIN=/usr/local/bin go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0 \
  && GOBIN=/usr/local/bin go install mvdan.cc/gofumpt@latest \
- && GOBIN=/usr/local/bin go install golang.org/x/tools/cmd/goimports@latest \
- && GOBIN=/usr/local/bin go install golang.org/x/tools/gopls@latest \
  && GOBIN=/usr/local/bin go install github.com/matryer/moq@latest \
- && GOBIN=/usr/local/bin go install github.com/google/go-containerregistry/cmd/crane@latest
+ && GOBIN=/usr/local/bin go install github.com/google/go-containerregistry/cmd/crane@latest \
+ && rm -rf /root/go /root/.cache
 
 # Unprivileged user; gid 0 for docker.sock and the forwarded ssh-agent (both
 # exposed by Docker Desktop as root:root 0660). Passwordless sudo.
@@ -67,9 +56,9 @@ USER ${USERNAME}
 RUN mkdir -p "/home/${USERNAME}/w"
 
 # krew + ctx/ns/df-pv plugins (user-scope ~/.krew; PATH set via remoteEnv).
-RUN arch="$(dpkg --print-architecture)" \
+RUN arch="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" \
  && tmp="$(mktemp -d)" \
- && curl -fsSL "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew-linux_${arch}.tar.gz" | tar -xz -C "$tmp" \
+ && curl -fsSL "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew-linux_${arch}.tar.gz" | bsdtar -xzf - -C "$tmp" \
  && "$tmp/krew-linux_${arch}" install krew \
  && export PATH="${HOME}/.krew/bin:$PATH" \
  && kubectl krew install ctx ns df-pv
