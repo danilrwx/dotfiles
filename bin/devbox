@@ -18,6 +18,42 @@ set -euo pipefail
 
 log() { echo -e "\033[0;31m$1\033[0m"; }
 
+usage() {
+  cat <<'EOF'
+devbox — manage the global dev container via DevPod
+
+Usage:
+  devbox [-k|--k8s] <command> [devpod args...]
+
+Provider (default: docker):
+  -k, --k8s        use the kubernetes provider (remote pod on a PVC) instead of
+                   docker (local, binds ~/w and the host docker.sock)
+
+Commands:
+  shell            open a shell in the container (default; creates it if needed)
+  up               create/start the workspace
+  update           pull the latest image and recreate the workspace
+  down             stop the workspace (data is kept)
+  delete           remove the workspace
+  provider         register/configure the DevPod provider (one-time setup)
+  help             show this help
+
+The host ssh-agent and gpg-agent are forwarded, so git auth and commit signing
+use the host keys with nothing copied into the container.
+
+Kubernetes env knobs:
+  DEVBOX_K8S_NS    namespace (default: devbox)
+  DEVBOX_K8S_DISK  PVC size (default: 50Gi)
+  DEVBOX_K8S_SC    storage class (default: cluster default)
+
+Examples:
+  devbox                 shell into the local (docker) container
+  devbox up              start it without attaching
+  devbox -k provider     one-time: register the kubernetes provider
+  devbox -k shell        shell into the remote (kubernetes) pod
+EOF
+}
+
 IMAGE="ghcr.io/danilrwx/devbox:latest"
 DOT="$HOME/dotfiles/devcontainer"
 WS="$HOME/w"
@@ -148,6 +184,8 @@ YAML
 
 cmd="${1:-shell}"; shift || true
 
+case "$cmd" in -h|--help|help) usage; exit 0 ;; esac
+
 # DevPod reads KUBECONFIG from the env and cannot handle a colon-merged list, so
 # pin it to the flattened per-cluster config written by `devbox -k provider`.
 if [ "$PROVIDER" = kubernetes ] && [ "$cmd" != provider ]; then
@@ -180,7 +218,8 @@ case "$cmd" in
     devpod delete "$NAME" --force "$@"
     ;;
   *)
-    echo "usage: devbox [-k|--k8s] {provider|shell|up|update|down|delete} [devpod args...]" >&2
+    echo "devbox: unknown command '$cmd'" >&2
+    usage >&2
     exit 1
     ;;
 esac
