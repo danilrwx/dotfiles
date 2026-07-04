@@ -10,24 +10,24 @@ if [ -d "$HOME/.local/share/completions" ]; then
   done
 fi
 
-if [[ $- == *i* ]] && [ -e "$HOME/.ssh/id_rsa" ]; then
-  fp=$(ssh-keygen -lf "$HOME/.ssh/id_rsa.pub" 2>/dev/null | awk '{print $2}')
-  if ! { [ -n "$fp" ] && ssh-add -l 2>/dev/null | grep -q "$fp"; }; then
-    case "$(uname -s)" in
-      Darwin)
-        ssh-add -c --apple-use-keychain "$HOME/.ssh/id_rsa" 2>/dev/null
-        ;;
-      Linux)
-        [ -S "${SSH_AUTH_SOCK:-}" ] || eval "$(ssh-agent -s)" >/dev/null
-        if [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && [ -n "${SSH_ASKPASS:-}" ]; then
-          ssh-add -c "$HOME/.ssh/id_rsa"
-        else
-          ssh-add "$HOME/.ssh/id_rsa"
-        fi
-        ;;
-    esac
-  fi
-fi
+# if [[ $- == *i* ]] && [ -e "$HOME/.ssh/id_rsa" ]; then
+#   fp=$(ssh-keygen -lf "$HOME/.ssh/id_rsa.pub" 2>/dev/null | awk '{print $2}')
+#   if ! { [ -n "$fp" ] && ssh-add -l 2>/dev/null | grep -q "$fp"; }; then
+#     case "$(uname -s)" in
+#       Darwin)
+#         ssh-add -c --apple-use-keychain "$HOME/.ssh/id_rsa" 2>/dev/null
+#         ;;
+#       Linux)
+#         [ -S "${SSH_AUTH_SOCK:-}" ] || eval "$(ssh-agent -s)" >/dev/null
+#         if [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && [ -n "${SSH_ASKPASS:-}" ]; then
+#           ssh-add -c "$HOME/.ssh/id_rsa"
+#         else
+#           ssh-add "$HOME/.ssh/id_rsa"
+#         fi
+#         ;;
+#     esac
+#   fi
+# fi
 
 if [ -f $HOME/dotfiles/private/.bashrc ]; then
   source $HOME/dotfiles/private/.bashrc
@@ -53,19 +53,12 @@ alias sp='source ~/.bash_profile'
 
 alias untar='tar -zxvf '
 
-if [ -x "$(command -v nvimpager)" ]; then
-  alias cat='nvimpager -c'
-  alias less='nvimpager -p'
-
-  export PAGER='nvimpager'
-fi
-
 alias kaf="kubectl apply -f"
 alias kad="kubectl delete -f"
 
 if [ -x "$(command -v nvim)" ]; then
-  # alias vi='nvim'
-  # alias vim='nvim'
+  alias vi='nvim'
+  alias vim='nvim'
 
   export EDITOR='nvim'
   export VISUAL='nvim'
@@ -73,6 +66,10 @@ fi
 
 alias lg='lazygit'
 
-export PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
+if [ -n "${DEVCONTAINER:-}" ]; then
+  export PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[91m\][dev]\[\e[0m\] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
+else
+  export PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
+fi
 
 

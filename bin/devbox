@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Manage the global devbox devcontainer: mounts ~/w (persistent, all repos live
+# on the host) with the prebuilt ghcr image. No cloning.
+set -euo pipefail
+
+log() { echo -e "\033[0;31m$1\033[0m"; }
+
+IMAGE="ghcr.io/danilrwx/devbox:latest"
+CONFIG="$HOME/dotfiles/devcontainer/devcontainer.json"
+WS="$HOME/w"
+
+up() { devcontainer up --workspace-folder "$WS" --config "$CONFIG" "$@"; }
+
+case "${1:-shell}" in
+  update)
+    log "Pulling $IMAGE"
+    docker pull "$IMAGE"
+    up --remove-existing-container
+    ;;
+  up|start)
+    up
+    ;;
+  shell|sh|"")
+    up >/dev/null
+    devcontainer exec --workspace-folder "$WS" --config "$CONFIG" bash
+    ;;
+  down|stop)
+    docker ps -aq --filter "label=devcontainer.local_folder=$WS" | xargs -r docker rm -f
+    ;;
+  *)
+    echo "usage: devbox {shell|up|update|down}" >&2
+    exit 1
+    ;;
+esac
