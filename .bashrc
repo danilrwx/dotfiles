@@ -1,5 +1,8 @@
-if [ -e "$(brew --prefix)/etc/profile.d/bash_completion.sh" ]; then
-  source "$(brew --prefix)/etc/profile.d/bash_completion.sh"
+# brew bash-completion on hosts with brew; the container gets it from apt.
+if command -v brew >/dev/null 2>&1; then
+  bc="$(brew --prefix)/etc/profile.d/bash_completion.sh"
+  [ -e "$bc" ] && source "$bc"
+  unset bc
 fi
 
 if [ -d "$HOME/.local/share/completions" ]; then
