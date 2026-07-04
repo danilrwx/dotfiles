@@ -42,6 +42,11 @@ RUN arch="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')" \
  && GOBIN=/usr/local/bin go install github.com/google/go-containerregistry/cmd/crane@latest \
  && rm -rf /root/go /root/.cache
 
+# Match the module's go version (Fedora ships a newer go; the toolchain is
+# fetched on first build into the persistent home). Set after the go installs
+# above so they use Fedora's go directly.
+ENV GOTOOLCHAIN=go1.25.11
+
 # Unprivileged user; gid 0 for docker.sock and the forwarded ssh-agent (both
 # exposed by Docker Desktop as root:root 0660). Passwordless sudo.
 RUN groupadd -g "${GID}" "${USERNAME}" \
