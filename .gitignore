@@ -60,3 +60,7 @@ dmenu/config.h
 /config/claude/paste-cache
 /config/claude/.last-update-result.json
 /config/claude/settings.json.bak.*
+
+# internal pi agent config (kept on disk, out of the public repo)
+config/pi/agent/settings.json
+config/pi/agent/PI_QUICKSTART.md
