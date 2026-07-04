@@ -143,8 +143,6 @@ if ! command -v d8 &> /dev/null; then
   INSTALL_DIR=/usr/local/bin UNATTENDED=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/deckhouse/deckhouse-cli/main/tools/install.sh)"
 fi
 
-# ***REMOVED***
-
 
 # Set bash shell for macOS ──────────────────────────────────────────────────────────────────────────────────────────────
 if [[ "$SHELL" == "/bin/zsh" ]]; then
