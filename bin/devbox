@@ -122,9 +122,19 @@ link_config() {
   fi
 }
 
+# k8s has no host bind mount, so push the current host ~/.ssh/config into the pod
+# on every up/shell (DevPod has no live sync). docker binds ~/.ssh already.
+push_ssh_config() {
+  [ "$PROVIDER" = kubernetes ] || return 0
+  [ -f "$HOME/.ssh/config" ] || return 0
+  devpod ssh "$NAME" --command 'umask 077; mkdir -p ~/.ssh; cat > ~/.ssh/config' \
+    < "$HOME/.ssh/config" 2>/dev/null || true
+}
+
 up() {
   link_config
   devpod up "$SRC" --id "$NAME" --provider "$PROVIDER" --ide none "${FWD[@]}" "$@"
+  push_ssh_config
 }
 
 # Register (or reconfigure) the DevPod provider for the selected mode.
