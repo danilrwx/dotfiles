@@ -27,9 +27,6 @@ export GOPATH=$HOME/go
 export GOBIN=$GOPATH/bin
 export PATH=$HOME/go/bin:$PATH
 
-export KREW_ROOT="$HOME/.krew"
-export PATH="$KREW_ROOT/bin:$PATH"
-
 export XDG_CONFIG_HOME="$HOME/.config"
 export K9S_CONFIG_DIR=$HOME/.config/k9s
 kube_merge=$HOME/.kubeconfigs/cluster-merge
@@ -40,7 +37,6 @@ if find $HOME/.kubeconfigs -name kubeconfig 2>/dev/null | grep -q .; then
   export KUBECONFIG=$kube_merge
 fi
 unset kube_merge
-export KUBECOLOR_PRESET="protanopia-dark"
 
 export HISTSIZE=-1
 export HISTFILESIZE=-1
