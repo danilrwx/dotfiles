@@ -20,30 +20,7 @@ config/vim/.netrwhist
 
 config/k9s/clusters
 
-config/pi/agent/bin/*
-config/pi/agent/cache/*
-config/pi/agent/sessions/*
-config/pi/agent/extensions/node_modules/*
-config/pi/agent/git
-config/pi/agent/auth.json
 
-config/claude/history.jsonl
-config/claude/policy-limits.json
-config/claude/remote-settings.json
-config/claude/mcp-needs-auth-cache.json
-config/claude/claude.json
-config/claude/.last-cleanup
-config/claude/.ponytail-active
-config/claude/sessions/
-config/claude/projects/
-config/claude/cache/
-config/claude/telemetry/
-config/claude/shell-snapshots/
-config/claude/plugins/
-config/claude/chrome/
-config/claude/.pnpm-store/
-config/claude/file-history/
-config/claude/skills/*/node_modules/
 
 .gitignore
 *.orig
@@ -55,12 +32,3 @@ st/st
 st/config.h
 dmenu/dmenu
 dmenu/config.h
-/config/pi/agent/extensions/flant-provider/models.json
-/config/claude/backups
-/config/claude/paste-cache
-/config/claude/.last-update-result.json
-/config/claude/settings.json.bak.*
-
-# internal pi agent config (kept on disk, out of the public repo)
-config/pi/agent/settings.json
-config/pi/agent/PI_QUICKSTART.md

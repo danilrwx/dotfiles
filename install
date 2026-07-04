@@ -33,12 +33,15 @@ mkdir -p $HOME/.local/share
 # CLI/shell configs shared with the devbox container
 bash $HOME/dotfiles/devcontainer/links.sh
 
-# Host-only configs (GUI terminals, claude symlinked on host)
+# Host-only GUI terminal configs
 ln -snf $HOME/dotfiles/config/kitty $HOME/.config/
 ln -snf $HOME/dotfiles/config/alacritty $HOME/.config/
 ln -snf $HOME/dotfiles/config/ghostty $HOME/.config/
-ln -snf $HOME/dotfiles/config/pi $HOME/.pi
-ln -snf $HOME/dotfiles/config/claude $HOME/.claude
+
+# Private configs (claude, pi, CLAUDE.md) live in the private submodule
+ln -snf $HOME/dotfiles/private/config/pi $HOME/.pi
+ln -snf $HOME/dotfiles/private/config/claude $HOME/.claude
+ln -sf $HOME/dotfiles/private/CLAUDE.md $HOME/CLAUDE.md
 
 if [ -f $HOME/dotfiles/private/install ]; then
   if ! "$HOME/dotfiles/private/install"; then
