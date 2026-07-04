@@ -120,7 +120,7 @@ if ! command -v devpod &> /dev/null; then
   curl -fsSL -o "$HOME/.local/bin/devpod" \
     "https://github.com/loft-sh/devpod/releases/latest/download/devpod-${os}-${arch}"
   chmod +x "$HOME/.local/bin/devpod"
-  devpod provider add docker --use 2>/dev/null || true
+  bash "$HOME/dotfiles/bin/devbox" provider || true
 fi
 
 
