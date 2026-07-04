@@ -44,18 +44,25 @@ esac
 # answer (rc 2 = cannot connect); ssh-agent forwarding is on by default.
 setup_forwarding() {
   gpgconf --launch gpg-agent 2>/dev/null || true
-  # Self-heal a dead/missing ssh-agent (rc 2) so DevPod has a live agent to
-  # forward: start one and load the keys from the macOS keychain. Capture rc via
-  # `|| rc=` so a non-zero ssh-add does not trip `set -e`.
+  # If the inherited SSH_AUTH_SOCK is dead (rc 2), point at the persistent
+  # launchd ssh-agent on macOS — it supports the native confirm dialog, which a
+  # plain spawned agent does not. Capture rc via `|| rc=` so a non-zero ssh-add
+  # does not trip `set -e`.
   local rc=0
   ssh-add -l >/dev/null 2>&1 || rc=$?
-  if [ "$rc" -eq 2 ]; then
-    eval "$(ssh-agent -s)" >/dev/null 2>&1 || true
-    ssh-add --apple-load-keychain >/dev/null 2>&1 || ssh-add >/dev/null 2>&1 || true
-    rc=0
-    ssh-add -l >/dev/null 2>&1 || rc=$?
+  if [ "$rc" -eq 2 ] && [ "$(uname -s)" = Darwin ]; then
+    local sock
+    sock=$(launchctl asuser "$(id -u)" launchctl getenv SSH_AUTH_SOCK 2>/dev/null || true)
+    [ -n "$sock" ] && export SSH_AUTH_SOCK="$sock"
   fi
-  # If it is still dead, drop the socket so DevPod does not abort on it.
+  # Load the key with confirmation required (-c) so each forwarded use prompts on
+  # the host; re-adding updates the flag even if it was already loaded without it.
+  if [ -e "$HOME/.ssh/id_rsa" ]; then
+    ssh-add -c --apple-use-keychain "$HOME/.ssh/id_rsa" >/dev/null 2>&1 \
+      || ssh-add -c "$HOME/.ssh/id_rsa" >/dev/null 2>&1 || true
+  fi
+  rc=0
+  ssh-add -l >/dev/null 2>&1 || rc=$?
   if [ "$rc" -eq 2 ]; then
     log "ssh-agent unreachable (SSH_AUTH_SOCK=${SSH_AUTH_SOCK:-unset}) — skipping ssh-agent forwarding"
     unset SSH_AUTH_SOCK
