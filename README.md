@@ -57,10 +57,10 @@ devbox -k shell      # shell into the remote pod
 
 The k8s pod has no host bind mounts, so the workspace repos are cloned into a PVC
 on first `up`, the kubeconfig is mounted from a Secret, and `~/.ssh/config` is
-pushed from the host on each connect. The repos to clone are read from
-`~/.config/devbox/repos` (one git URL per line, kept out of this public repo).
-Knobs (env): `DEVBOX_K8S_NS` (default `devbox`), `DEVBOX_K8S_DISK` (`50Gi`),
-`DEVBOX_K8S_SC` (storage class).
+pushed from the host on each connect. The repos to clone are read from the
+private dotfiles submodule (`private/devbox-repos`, one git URL per line) so they
+stay out of this public repo. Knobs (env): `DEVBOX_K8S_NS` (default `devbox`),
+`DEVBOX_K8S_DISK` (`50Gi`), `DEVBOX_K8S_SC` (storage class).
 
 ## Layout
 
