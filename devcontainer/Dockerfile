@@ -3,7 +3,7 @@
 # and pushed to ghcr.io/danilrwx/devbox. Tool installs are split into tools/*.sh;
 # each phase is COPYed right before its RUN so editing one only rebuilds its
 # layer. This image is the dev/build environment — the host stays thin.
-FROM debian:trixie-slim
+FROM debian:trixie
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
