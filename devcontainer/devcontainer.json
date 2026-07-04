@@ -10,7 +10,7 @@
     "DEVCONTAINER": "1"
   },
   "remoteEnv": {
-    "PATH": "${containerEnv:PATH}:/home/v12n/.krew/bin"
+    "PATH": "${containerEnv:PATH}:/home/v12n/go/bin:/home/v12n/.krew/bin"
   },
   "mounts": [
     "source=devbox-home,target=/home/v12n,type=volume",
@@ -20,6 +20,8 @@
     "source=${localEnv:HOME}/.claude,target=/home/v12n/.claude,type=bind",
     "source=${localEnv:HOME}/.claude.json,target=/home/v12n/.claude.json,type=bind",
     "source=${localEnv:HOME}/.kube,target=/home/v12n/.kube,type=bind",
-    "source=${localEnv:HOME}/.kubeconfigs,target=/home/v12n/.kubeconfigs,type=bind"
-  ]
+    "source=${localEnv:HOME}/.kubeconfigs,target=/home/v12n/.kubeconfigs,type=bind",
+    "source=${localEnv:HOME}/.gnupg,target=/mnt/host-gnupg,type=bind,readonly"
+  ],
+  "postStartCommand": "bash /usr/local/lib/devbox-gnupg-setup.sh"
 }

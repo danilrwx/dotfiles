@@ -113,24 +113,19 @@ elif [[ "$OS" == "Darwin" ]]; then
 fi
 
 
-# Install brew applications ─────────────────────────────────────────────────────────────────────────────────────────────
+# Install brew applications (host-only extras; dev tools come from tools.sh) ─────────────────────────────────────────────
 log "Installing brew apps"
-brew install htop fzf lazygit gh yq xq jq difftastic
-  kubectl k9s kubecolor krew \
-  go golangci-lint golangci-lint-langserver gofumpt goimports go-task gopls \
+brew install htop fzf lazygit xq difftastic kubecolor \
+  golangci-lint-langserver \
   bash-language-server lua-language-server helm-ls typescript-language-server \
   awk grep gnu-sed coreutils binutils findutils diffutils ncdu ugrep bash bash-completion@2
 
 
-# Install golang applications ───────────────────────────────────────────────────────────────────────────────────────────
-log "Installing golang apps"
-go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
-go install github.com/matryer/moq@latest
-
-
-# Install kubectl plugins ───────────────────────────────────────────────────────────────────────────────────────────────
-log "Installing kubectl plugins"
-kubectl krew install ctx ns df-pv
+# Install dev tools shared with the devbox container ────────────────────────────────────────────────────────────────────
+log "Installing dev tools"
+for phase in repo binaries go krew; do
+  bash "$HOME/dotfiles/devcontainer/tools/${phase}.sh"
+done
 
 
 # Set bash shell for macOS ──────────────────────────────────────────────────────────────────────────────────────────────
