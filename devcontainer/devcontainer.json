@@ -6,7 +6,6 @@
   "containerUser": "v12n",
   "remoteUser": "v12n",
   "containerEnv": {
-    "SSH_AUTH_SOCK": "/run/host-services/ssh-auth.sock",
     "DEVCONTAINER": "1"
   },
   "remoteEnv": {
@@ -15,13 +14,10 @@
   "mounts": [
     "source=devbox-home,target=/home/v12n,type=volume",
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
-    "source=/run/host-services/ssh-auth.sock,target=/run/host-services/ssh-auth.sock,type=bind",
     "source=${localEnv:HOME}/.ssh,target=/home/v12n/.ssh,type=bind,readonly",
     "source=${localEnv:HOME}/.claude,target=/home/v12n/.claude,type=bind",
     "source=${localEnv:HOME}/.claude.json,target=/home/v12n/.claude.json,type=bind",
     "source=${localEnv:HOME}/.kube,target=/home/v12n/.kube,type=bind",
-    "source=${localEnv:HOME}/.kubeconfigs,target=/home/v12n/.kubeconfigs,type=bind",
-    "source=${localEnv:HOME}/.gnupg,target=/mnt/host-gnupg,type=bind,readonly"
-  ],
-  "postStartCommand": "bash /usr/local/lib/devbox-gnupg-setup.sh"
+    "source=${localEnv:HOME}/.kubeconfigs,target=/home/v12n/.kubeconfigs,type=bind"
+  ]
 }

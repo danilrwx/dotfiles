@@ -4,7 +4,6 @@ log() {
   echo -e "\033[0;31m$1\033[0m"
 }
 
-
 # Some useful functions ─────────────────────────────────────────────────────────────────────────────────────────────────
 OS=$(uname -s)
 if [ -f /etc/os-release ]; then
@@ -31,25 +30,15 @@ fi
 mkdir -p $HOME/.config
 mkdir -p $HOME/.local/share
 
-ln -sf $HOME/dotfiles/.gitconfig $HOME/
-ln -sf $HOME/dotfiles/.gitignore_global $HOME/
-ln -sf $HOME/dotfiles/.tmux.conf $HOME/.tmux.conf
+# CLI/shell configs shared with the devbox container
+bash $HOME/dotfiles/devcontainer/links.sh
 
-ln -snf $HOME/dotfiles/config/k9s $HOME/.config/
-ln -snf $HOME/dotfiles/config/htop $HOME/.config/
-ln -snf $HOME/dotfiles/config/lazygit $HOME/.config/
-ln -snf $HOME/dotfiles/config/vim $HOME/.config/
-ln -snf $HOME/dotfiles/config/nvim $HOME/.config/
-ln -snf $HOME/dotfiles/config/nvim $HOME/.config/nvimpager
+# Host-only configs (GUI terminals, claude symlinked on host)
 ln -snf $HOME/dotfiles/config/kitty $HOME/.config/
 ln -snf $HOME/dotfiles/config/alacritty $HOME/.config/
 ln -snf $HOME/dotfiles/config/ghostty $HOME/.config/
 ln -snf $HOME/dotfiles/config/pi $HOME/.pi
 ln -snf $HOME/dotfiles/config/claude $HOME/.claude
-
-ln -sf $HOME/dotfiles/.profile $HOME/
-ln -sf $HOME/dotfiles/.bash_profile $HOME/
-ln -sf $HOME/dotfiles/.bashrc $HOME/
 
 if [ -f $HOME/dotfiles/private/install ]; then
   if ! "$HOME/dotfiles/private/install"; then
@@ -121,6 +110,20 @@ brew install htop fzf lazygit xq difftastic kubecolor \
   awk grep gnu-sed coreutils binutils findutils diffutils ncdu ugrep bash bash-completion@2
 
 
+# Install DevPod CLI (runs the devbox dev container: docker locally, kubernetes
+# for remote; forwards ssh-agent and gpg-agent) ─────────────────────────────────────────────────────────────────────────
+if ! command -v devpod &> /dev/null; then
+  log "Installing devpod CLI"
+  arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+  os=$(uname -s | tr '[:upper:]' '[:lower:]')
+  mkdir -p "$HOME/.local/bin"
+  curl -fsSL -o "$HOME/.local/bin/devpod" \
+    "https://github.com/loft-sh/devpod/releases/latest/download/devpod-${os}-${arch}"
+  chmod +x "$HOME/.local/bin/devpod"
+  devpod provider add docker --use 2>/dev/null || true
+fi
+
+
 # Install dev tools shared with the devbox container ────────────────────────────────────────────────────────────────────
 log "Installing dev tools"
 for phase in repo binaries go krew; do
@@ -147,23 +150,9 @@ if [[ "$OS" == "Linux" && "$(which bash)" == "$(brew --prefix)/bin/bash" ]]; the
 fi
 
 
-# Save completions to files for better performance ──────────────────────────────────────────────────────────────────────
-if [ ! -d $HOME/.local/share/completions ]; then
-  log "Installing completions"
-
-  mkdir -p $HOME/.local/share/completions
-
-  fzf --bash > $HOME/.local/share/completions/fzf.bash
-  kubectl completion bash > $HOME/.local/share/completions/kubectl.bash
-  flint completion --shell=bash > $HOME/.local/share/completions/flint.bash
-fi
-
-
-# Install tmux plugin manager ───────────────────────────────────────────────────────────────────────────────────────────
-if [ ! -d $HOME/.tmux/plugins/tpm ]; then
-  log "Installing tmux plugins"
-  git clone https://github.com/tmux-plugins/tpm $HOME/.tmux/plugins/tpm
-fi
+# Shell extras (completions + tmux plugins) shared with the devbox container ────────────────────────────────────────────
+log "Installing shell extras"
+bash "$HOME/dotfiles/devcontainer/shell-setup.sh"
 
 
 # Install platpak repository and applications ───────────────────────────────────────────────────────────────────────────

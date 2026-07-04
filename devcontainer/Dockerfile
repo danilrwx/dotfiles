@@ -27,10 +27,11 @@ RUN curl -fsSL "https://rpm.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
  && dnf clean all \
  && npm install -g @anthropic-ai/claude-code
 
-# GPG needs a tty for the pinentry passphrase prompt.
+# GPG needs a tty for the pinentry passphrase prompt. The agent itself is
+# forwarded from the host by DevPod, so no keys are copied into the image.
 RUN echo 'export GPG_TTY=$(tty)' > /etc/profile.d/gpg.sh
 
-COPY gnupg-setup.sh /usr/local/lib/devbox-gnupg-setup.sh
+COPY links.sh /usr/local/lib/devbox-links.sh
 
 # Unprivileged user; gid 0 for docker.sock and the forwarded ssh-agent (both
 # exposed by Docker Desktop as root:root 0660). Passwordless sudo.
@@ -47,6 +48,14 @@ COPY tools/go.sh ${LIB}/go.sh
 RUN bash ${LIB}/go.sh
 COPY tools/krew.sh ${LIB}/krew.sh
 RUN bash ${LIB}/krew.sh
+
+# Clone dotfiles (public, shallow, no private submodules) and symlink the
+# CLI/shell configs. Refreshed on image rebuild; recreate the home volume to pick
+# up changes.
+COPY shell-setup.sh /usr/local/lib/devbox-shell-setup.sh
+RUN git clone --depth 1 https://github.com/danilrwx/dotfiles.git "/home/${USERNAME}/dotfiles" \
+ && bash /usr/local/lib/devbox-links.sh \
+ && bash /usr/local/lib/devbox-shell-setup.sh
 
 # Working dir mirrors the host ~/w layout so relative go-replace paths match.
 RUN mkdir -p "/home/${USERNAME}/w"

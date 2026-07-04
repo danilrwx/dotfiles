@@ -1,35 +1,58 @@
 #!/usr/bin/env bash
 
-# Manage the global devbox devcontainer: mounts ~/w (persistent, all repos live
-# on the host) with the prebuilt ghcr image. No cloning.
+# Manage the global devbox dev container via DevPod (docker provider locally,
+# swap to the kubernetes provider for remote). DevPod forwards the host
+# ssh-agent and gpg-agent, so auth and commit signing use the host keys with no
+# key material copied into the container.
 set -euo pipefail
 
 log() { echo -e "\033[0;31m$1\033[0m"; }
 
 IMAGE="ghcr.io/danilrwx/devbox:latest"
-CONFIG="$HOME/dotfiles/devcontainer/devcontainer.json"
 WS="$HOME/w"
+NAME="w"
 
-up() { devcontainer up --workspace-folder "$WS" --config "$CONFIG" "$@"; }
+# Forward the host gpg-agent (commit signing) and ssh-agent (git auth). DevPod
+# aborts hard if SSH_AUTH_SOCK points at a dead socket, so drop it when the
+# agent does not answer (rc 2 = cannot connect); ssh-agent forwarding is on by
+# default when the socket is live.
+gpgconf --launch gpg-agent 2>/dev/null || true
+ssh-add -l >/dev/null 2>&1 || [ $? -ne 2 ] || {
+  log "ssh-agent unreachable (SSH_AUTH_SOCK=${SSH_AUTH_SOCK:-unset}) — skipping ssh-agent forwarding"
+  unset SSH_AUTH_SOCK
+}
+FWD=(--gpg-agent-forwarding)
+
+# DevPod discovers .devcontainer/devcontainer.json in the workspace root; the
+# real config lives in dotfiles and is exposed via a symlink.
+link_config() {
+  mkdir -p "$WS/.devcontainer"
+  ln -sf "$HOME/dotfiles/devcontainer/devcontainer.json" "$WS/.devcontainer/devcontainer.json"
+}
+
+up() { link_config; devpod up "$WS" --id "$NAME" --ide none "${FWD[@]}" "$@"; }
 
 case "${1:-shell}" in
   update)
     log "Pulling $IMAGE"
     docker pull "$IMAGE"
-    up --remove-existing-container
+    up --recreate
     ;;
   up|start)
     up
     ;;
   shell|sh|"")
     up >/dev/null
-    devcontainer exec --workspace-folder "$WS" --config "$CONFIG" bash
+    devpod ssh "$NAME" "${FWD[@]}"
     ;;
   down|stop)
-    docker ps -aq --filter "label=devcontainer.local_folder=$WS" | xargs -r docker rm -f
+    devpod stop "$NAME"
+    ;;
+  delete|rm)
+    devpod delete "$NAME" --force
     ;;
   *)
-    echo "usage: devbox {shell|up|update|down}" >&2
+    echo "usage: devbox {shell|up|update|down|delete}" >&2
     exit 1
     ;;
 esac
