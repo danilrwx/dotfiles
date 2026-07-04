@@ -3,14 +3,13 @@
 # and pushed to ghcr.io/danilrwx/devbox. Tool installs are split into tools/*.sh;
 # each phase is COPYed right before its RUN so editing one only rebuilds its
 # layer. This image is the dev/build environment — the host stays thin.
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 ARG USERNAME=v12n
 ARG UID=1000
 ARG GID=1000
-ARG NODE_MAJOR=22
 
 ENV LIB=/usr/local/lib/devbox
 ENV PATH=/usr/local/go/bin:/home/${USERNAME}/go/bin:${PATH}
@@ -31,9 +30,9 @@ RUN bash ${LIB}/repo.sh
 COPY tools/binaries.sh ${LIB}/binaries.sh
 RUN bash ${LIB}/binaries.sh
 
-# node (nodesource) + claude-code + npm-based language servers.
-RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
- && apt-get install -y nodejs \
+# node (apt) + claude-code + npm-based language servers.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends nodejs npm \
  && rm -rf /var/lib/apt/lists/* \
  && npm install -g @anthropic-ai/claude-code bash-language-server typescript-language-server
 
