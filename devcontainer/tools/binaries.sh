@@ -41,7 +41,5 @@ werf_ver="$(curl -fsSL "https://tuf.werf.io/targets/channels/${WERF_CHANNEL}")"
 curl -fsSL "https://tuf.werf.io/targets/releases/${werf_ver}/linux-${ARCH}/bin/werf" | $SUDO tee /usr/local/bin/werf >/dev/null
 $SUDO chmod +x /usr/local/bin/werf
 
-# d8 / deckhouse-cli
-d8_ver="$(latest_tag deckhouse/deckhouse-cli)"
-curl -fsSL "https://github.com/deckhouse/deckhouse-cli/releases/download/${d8_ver}/d8-${d8_ver}-linux-${ARCH}.tar.gz" | tar -xzf - -C "$tmp"
-$SUDO install "$(find "$tmp" -type f -name d8)" /usr/local/bin/d8
+# d8 / deckhouse-cli (official installer; default INSTALL_DIR is /opt not on PATH)
+INSTALL_DIR=/usr/local/bin UNATTENDED=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/deckhouse/deckhouse-cli/main/tools/install.sh)"

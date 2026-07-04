@@ -137,15 +137,10 @@ brew install kubectl gh tmux fzf ripgrep jq yq gnupg node bash-completion@2
 # claude-code via the brew node
 npm install -g @anthropic-ai/claude-code
 
-# d8 / deckhouse-cli (no brew formula)
+# d8 / deckhouse-cli (official installer; default INSTALL_DIR is /opt not on PATH)
 if ! command -v d8 &> /dev/null; then
   log "Installing d8"
-  arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
-  os=$(uname -s | tr '[:upper:]' '[:lower:]')
-  d8_ver=$(basename "$(curl -fsSLo /dev/null -w '%{url_effective}' https://github.com/deckhouse/deckhouse-cli/releases/latest)")
-  tmp=$(mktemp -d)
-  curl -fsSL "https://github.com/deckhouse/deckhouse-cli/releases/download/${d8_ver}/d8-${d8_ver}-${os}-${arch}.tar.gz" | tar -xzf - -C "$tmp"
-  sudo install "$(find "$tmp" -type f -name d8)" /usr/local/bin/d8
+  INSTALL_DIR=/usr/local/bin UNATTENDED=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/deckhouse/deckhouse-cli/main/tools/install.sh)"
 fi
 
 # ***REMOVED***
