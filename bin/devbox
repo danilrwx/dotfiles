@@ -103,7 +103,9 @@ setup_forwarding() {
     log "ssh-agent unreachable (SSH_AUTH_SOCK=${SSH_AUTH_SOCK:-unset}) — skipping ssh-agent forwarding"
     unset SSH_AUTH_SOCK
   fi
-  FWD=(--gpg-agent-forwarding)
+  # DEVBOX_NO_GPG=1 skips gpg-agent forwarding (DevPod's gpg import can deadlock
+  # keyboxd on some gpg version mismatches, aborting the connection).
+  if [ -n "${DEVBOX_NO_GPG:-}" ]; then FWD=(); else FWD=(--gpg-agent-forwarding); fi
 }
 
 # DevPod discovers .devcontainer/devcontainer.json in the source root. docker
