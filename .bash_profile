@@ -32,7 +32,9 @@ export PATH="$KREW_ROOT/bin:$PATH"
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export K9S_CONFIG_DIR=$HOME/.config/k9s
-export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':')
+kubeconfigs=$(find $HOME/.kubeconfigs -name kubeconfig 2>/dev/null | tr '\n' ':')
+[ -n "$kubeconfigs" ] && export KUBECONFIG=$HOME/.kubeconfigs/cluster-merge:$kubeconfigs
+unset kubeconfigs
 export KUBECOLOR_PRESET="protanopia-dark"
 
 export HISTSIZE=-1
