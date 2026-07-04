@@ -8,6 +8,8 @@
     "DEVCONTAINER": "1"
   },
   "remoteEnv": {
-    "PATH": "${containerEnv:PATH}:/home/v12n/go/bin:/home/v12n/.krew/bin"
-  }
+    "PATH": "${containerEnv:PATH}:/home/v12n/go/bin:/home/v12n/.krew/bin",
+    "KUBECONFIG": "/opt/devbox/config"
+  },
+  "postCreateCommand": "bash .devcontainer/bootstrap.sh"
 }

@@ -25,11 +25,16 @@ WS="$HOME/w"
 PROVIDER=docker
 CONFIG="$DOT/devcontainer.json"
 NAME=w
+SRC="$WS"
 case "${1:-}" in
   -k|--k8s|kube|kubernetes)
     PROVIDER=kubernetes
     CONFIG="$DOT/devcontainer.k8s.json"
     NAME=w-k8s
+    # k8s does not bind ~/w (8 GB) — upload a tiny source that only carries the
+    # config and a bootstrap that clones the work repos into the PVC.
+    SRC="$HOME/.config/devbox/k8s-src"
+    KCFG="$HOME/.config/devbox/kubeconfig"
     shift
     ;;
 esac
@@ -46,18 +51,22 @@ setup_forwarding() {
   FWD=(--gpg-agent-forwarding)
 }
 
-# DevPod discovers .devcontainer/devcontainer.json in the source root; expose the
-# provider-appropriate config via a symlink.
+# DevPod discovers .devcontainer/devcontainer.json in the source root. docker
+# binds ~/w and reads the config via a symlink; k8s uploads a tiny source, so the
+# config and bootstrap are copied into it (uploads do not follow symlinks).
 link_config() {
-  mkdir -p "$WS/.devcontainer"
-  ln -sf "$CONFIG" "$WS/.devcontainer/devcontainer.json"
+  mkdir -p "$SRC/.devcontainer"
+  if [ "$PROVIDER" = kubernetes ]; then
+    cp "$CONFIG" "$SRC/.devcontainer/devcontainer.json"
+    cp "$DOT/bootstrap.sh" "$SRC/.devcontainer/bootstrap.sh"
+  else
+    ln -sf "$CONFIG" "$SRC/.devcontainer/devcontainer.json"
+  fi
 }
 
 up() {
   link_config
-  # ponytail: k8s uploads the whole ~/w source to the PVC; if the work repos get
-  # too big to upload, switch the source to a git URL + a bootstrap clone.
-  devpod up "$WS" --id "$NAME" --provider "$PROVIDER" --ide none "${FWD[@]}" "$@"
+  devpod up "$SRC" --id "$NAME" --provider "$PROVIDER" --ide none "${FWD[@]}" "$@"
 }
 
 # Register (or reconfigure) the DevPod provider for the selected mode.
@@ -70,16 +79,25 @@ provider_add() {
   local ns="${DEVBOX_K8S_NS:-devbox}"
   local disk="${DEVBOX_K8S_DISK:-50Gi}"
   local tmpl="$HOME/.config/devbox/pod-template.yaml"
+  local kcfg="$HOME/.config/devbox/kubeconfig"
+  mkdir -p "$(dirname "$kcfg")"
 
-  log "Creating namespace/secret '$ns/devbox-kube' from host kubeconfigs (uses current kubectl context)"
+  # Pin DevPod to a self-contained kubeconfig of the current context; the ambient
+  # KUBECONFIG may be a colon-merged list the provider cannot stat. The same file
+  # is mounted into the pod so in-cluster kubectl targets this cluster.
+  log "Flattening current kube context -> $kcfg"
+  kubectl config view --minify --flatten > "$kcfg"
+  chmod 600 "$kcfg"
+
+  log "Creating namespace/secret '$ns/devbox-kube'"
   kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f -
-  local from=(--from-file="config=$HOME/.kube/config")
-  [ -d "$HOME/.kubeconfigs" ] && from+=(--from-file="$HOME/.kubeconfigs")
-  kubectl -n "$ns" create secret generic devbox-kube "${from[@]}" \
+  kubectl -n "$ns" create secret generic devbox-kube --from-file="config=$kcfg" \
     --dry-run=client -o yaml | kubectl apply -f -
 
-  # ponytail: DevPod merges this onto its generated pod; the volumeMount attaches
-  # to its dev container (default name "devpod"). Verify the name on first run.
+  # DevPod merges this onto its generated pod; the volumeMount attaches to its dev
+  # container (name "devpod"). Mount the kubeconfig at a side path (not
+  # ~/.kube/config) so ~/.kube stays writable for the oidc-login token cache;
+  # devcontainer.k8s.json points KUBECONFIG at it.
   mkdir -p "$(dirname "$tmpl")"
   cat > "$tmpl" <<'YAML'
 spec:
@@ -87,8 +105,7 @@ spec:
     - name: devpod
       volumeMounts:
         - name: kube
-          mountPath: /home/v12n/.kube/config
-          subPath: config
+          mountPath: /opt/devbox
           readOnly: true
   volumes:
     - name: kube
@@ -96,13 +113,26 @@ spec:
         secretName: devbox-kube
 YAML
 
-  local opts=(-o "KUBERNETES_NAMESPACE=$ns" -o "DISK_SIZE=$disk" -o "POD_MANIFEST_TEMPLATE=$tmpl")
+  # Mount the PVC only on the work dir; the home dir must keep the image's baked
+  # go/krew/dotfiles (a PVC over /home/v12n would start empty, unlike a docker
+  # named volume which seeds from the image).
+  local opts=(-o "KUBERNETES_CONFIG=$kcfg" -o "KUBERNETES_NAMESPACE=$ns"
+    -o "DISK_SIZE=$disk" -o "WORKSPACE_VOLUME_MOUNT=/home/v12n/w"
+    -o "POD_MANIFEST_TEMPLATE=$tmpl")
   [ -n "${DEVBOX_K8S_SC:-}" ] && opts+=(-o "STORAGE_CLASS=$DEVBOX_K8S_SC")
   devpod provider add kubernetes --use "${opts[@]}" "$@" 2>/dev/null \
     || devpod provider set-options kubernetes "${opts[@]}" "$@"
 }
 
 cmd="${1:-shell}"; shift || true
+
+# DevPod reads KUBECONFIG from the env and cannot handle a colon-merged list, so
+# pin it to the flattened per-cluster config written by `devbox -k provider`.
+if [ "$PROVIDER" = kubernetes ] && [ "$cmd" != provider ]; then
+  [ -f "$KCFG" ] || { log "run 'devbox -k provider' first"; exit 1; }
+  export KUBECONFIG="$KCFG"
+fi
+
 case "$cmd" in
   provider)
     provider_add "$@"
