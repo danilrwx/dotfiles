@@ -5,11 +5,11 @@
   "containerUser": "v12n",
   "remoteUser": "v12n",
   "containerEnv": {
-    "DEVCONTAINER": "1"
+    "DEVCONTAINER": "1",
+    "KUBECONFIG": "/opt/devbox/config"
   },
   "remoteEnv": {
-    "PATH": "${containerEnv:PATH}:/home/v12n/go/bin:/home/v12n/.krew/bin",
-    "KUBECONFIG": "/opt/devbox/config"
+    "PATH": "${containerEnv:PATH}:/home/v12n/go/bin:/home/v12n/.krew/bin"
   },
   "postCreateCommand": "bash .devcontainer/bootstrap.sh"
 }
