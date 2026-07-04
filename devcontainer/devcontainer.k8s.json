@@ -1,9 +1,9 @@
 {
   "name": "devbox-k8s",
   "image": "ghcr.io/danilrwx/devbox:latest",
-  "workspaceFolder": "/home/v12n/w",
-  "containerUser": "v12n",
-  "remoteUser": "v12n",
+  "workspaceFolder": "/home/dev/w",
+  "containerUser": "dev",
+  "remoteUser": "dev",
   "containerEnv": {
     "DEVCONTAINER": "1",
     "KUBECONFIG": "/opt/devbox/config"

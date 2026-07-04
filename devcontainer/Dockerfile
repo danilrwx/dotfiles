@@ -7,7 +7,7 @@ FROM debian:trixie
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
-ARG USERNAME=v12n
+ARG USERNAME=dev
 ARG UID=1000
 ARG GID=1000
 

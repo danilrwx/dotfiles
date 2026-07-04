@@ -1,20 +1,20 @@
 {
   "name": "devbox",
   "image": "ghcr.io/danilrwx/devbox:latest",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/home/v12n/w,type=bind,consistency=cached",
-  "workspaceFolder": "/home/v12n/w",
-  "containerUser": "v12n",
-  "remoteUser": "v12n",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/dev/w,type=bind,consistency=cached",
+  "workspaceFolder": "/home/dev/w",
+  "containerUser": "dev",
+  "remoteUser": "dev",
   "containerEnv": {
     "DEVCONTAINER": "1"
   },
   "mounts": [
-    "source=devbox-home,target=/home/v12n,type=volume",
+    "source=devbox-home,target=/home/dev,type=volume",
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
-    "source=${localEnv:HOME}/.ssh,target=/home/v12n/.ssh,type=bind,readonly",
-    "source=${localEnv:HOME}/.claude,target=/home/v12n/.claude,type=bind",
-    "source=${localEnv:HOME}/.claude.json,target=/home/v12n/.claude.json,type=bind",
-    "source=${localEnv:HOME}/.kube,target=/home/v12n/.kube,type=bind",
-    "source=${localEnv:HOME}/.kubeconfigs,target=/home/v12n/.kubeconfigs,type=bind"
+    "source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude,target=/home/dev/.claude,type=bind",
+    "source=${localEnv:HOME}/.claude.json,target=/home/dev/.claude.json,type=bind",
+    "source=${localEnv:HOME}/.kube,target=/home/dev/.kube,type=bind",
+    "source=${localEnv:HOME}/.kubeconfigs,target=/home/dev/.kubeconfigs,type=bind"
   ]
 }

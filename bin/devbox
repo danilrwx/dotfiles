@@ -182,10 +182,10 @@ spec:
 YAML
 
   # Mount the PVC only on the work dir; the home dir must keep the image's baked
-  # go/krew/dotfiles (a PVC over /home/v12n would start empty, unlike a docker
-  # named volume which seeds from the image).
+  # go tools and dotfiles (a PVC over /home/dev would start empty, unlike a
+  # docker named volume which seeds from the image).
   local opts=(-o "KUBERNETES_CONFIG=$kcfg" -o "KUBERNETES_NAMESPACE=$ns"
-    -o "DISK_SIZE=$disk" -o "WORKSPACE_VOLUME_MOUNT=/home/v12n/w"
+    -o "DISK_SIZE=$disk" -o "WORKSPACE_VOLUME_MOUNT=/home/dev/w"
     -o "POD_MANIFEST_TEMPLATE=$tmpl")
   [ -n "${DEVBOX_K8S_SC:-}" ] && opts+=(-o "STORAGE_CLASS=$DEVBOX_K8S_SC")
   devpod provider add kubernetes --use "${opts[@]}" "$@" 2>/dev/null \
