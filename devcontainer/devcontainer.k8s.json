@@ -1,0 +1,13 @@
+{
+  "name": "devbox-k8s",
+  "image": "ghcr.io/danilrwx/devbox:latest",
+  "workspaceFolder": "/home/v12n/w",
+  "containerUser": "v12n",
+  "remoteUser": "v12n",
+  "containerEnv": {
+    "DEVCONTAINER": "1"
+  },
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/home/v12n/go/bin:/home/v12n/.krew/bin"
+  }
+}
