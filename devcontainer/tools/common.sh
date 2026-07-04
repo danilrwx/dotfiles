@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# Shared settings for the tool install scripts (sourced, not run directly).
-# Bump versions here — the single source for host (dotfiles/install) and the
-# devbox container (Dockerfile).
+# Shared settings for the container tool-install scripts (sourced, not run
+# directly). Bump versions here.
 set -euo pipefail
 
+GO_VERSION="1.25.11"
 GINKGO_VERSION="v2.14.0"
 WERF_CHANNEL="2/stable"
 

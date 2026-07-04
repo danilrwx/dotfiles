@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-# Dev tools from Homebrew — the same list on the macOS host and the linuxbrew
-# container. Requires brew to be installed already.
+# Base CLI packages from apt (container image only). Runs as root in the build.
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
-brew install \
-  go go-task yq helm golangci-lint k9s gh delve jq fzf tmux vim \
-  gnupg pinentry kubectl krew node gopls gofumpt bash-completion@2 \
-  htop lazygit xq difftastic kubecolor ncdu ugrep \
-  golangci-lint-langserver bash-language-server lua-language-server \
-  helm-ls typescript-language-server
+[ "$OS" = Linux ] || exit 0
+
+$SUDO apt-get update
+$SUDO apt-get install -y --no-install-recommends \
+  git tmux vim jq fzf ripgrep less bash-completion htop \
+  gnupg2 pinentry-curses openssh-client \
+  build-essential file procps ca-certificates curl
+$SUDO rm -rf /var/lib/apt/lists/*

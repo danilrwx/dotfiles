@@ -129,11 +129,26 @@ if ! command -v devpod &> /dev/null; then
 fi
 
 
-# Install dev tools shared with the devbox container ────────────────────────────────────────────────────────────────────
-log "Installing dev tools"
-for phase in repo binaries go krew; do
-  bash "$HOME/dotfiles/devcontainer/tools/${phase}.sh"
-done
+# Host tooling: launcher + ops CLIs only. The dev/build toolchain (go, LSPs,
+# ginkgo, helm, k9s, …) lives in the devbox container, not on the host ────────────────────────────────────────────────────
+log "Installing host tools"
+brew install kubectl gh tmux fzf ripgrep jq yq gnupg node bash-completion@2
+
+# claude-code via the brew node
+npm install -g @anthropic-ai/claude-code
+
+# d8 / deckhouse-cli (no brew formula)
+if ! command -v d8 &> /dev/null; then
+  log "Installing d8"
+  arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+  os=$(uname -s | tr '[:upper:]' '[:lower:]')
+  d8_ver=$(basename "$(curl -fsSLo /dev/null -w '%{url_effective}' https://github.com/deckhouse/deckhouse-cli/releases/latest)")
+  tmp=$(mktemp -d)
+  curl -fsSL "https://github.com/deckhouse/deckhouse-cli/releases/download/${d8_ver}/d8-${d8_ver}-${os}-${arch}.tar.gz" | tar -xzf - -C "$tmp"
+  sudo install "$(find "$tmp" -type f -name d8)" /usr/local/bin/d8
+fi
+
+# ***REMOVED***
 
 
 # Set bash shell for macOS ──────────────────────────────────────────────────────────────────────────────────────────────

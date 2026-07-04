@@ -1,16 +1,47 @@
 #!/usr/bin/env bash
 
-# Binaries not available (or not current) in brew: werf and d8/deckhouse-cli.
-# Installed into /usr/local/bin. Linux only (the container); needs root/sudo.
+# Go toolchain and static ops binaries into /usr/local (container image only).
+# Runs as root in the build.
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 [ "$OS" = Linux ] || exit 0
 
+latest_tag() { basename "$(curl -fsSLo /dev/null -w '%{url_effective}' "https://github.com/$1/releases/latest")"; }
+tmp="$(mktemp -d)"
+
+# go (exact version so it matches go.mod without a toolchain download)
+curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${ARCH}.tar.gz" | $SUDO tar -C /usr/local -xzf -
+
+# kubectl
+kube_ver="$(curl -fsSL https://dl.k8s.io/release/stable.txt)"
+curl -fsSL "https://dl.k8s.io/release/${kube_ver}/bin/linux/${ARCH}/kubectl" | $SUDO tee /usr/local/bin/kubectl >/dev/null
+$SUDO chmod +x /usr/local/bin/kubectl
+
+# helm
+helm_ver="$(latest_tag helm/helm)"
+curl -fsSL "https://get.helm.sh/helm-${helm_ver}-linux-${ARCH}.tar.gz" | tar -xzf - -C "$tmp"
+$SUDO install "$tmp/linux-${ARCH}/helm" /usr/local/bin/helm
+
+# k9s
+curl -fsSL "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_${ARCH}.tar.gz" | tar -xzf - -C "$tmp"
+$SUDO install "$tmp/k9s" /usr/local/bin/k9s
+
+# yq
+curl -fsSL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${ARCH}" -o "$tmp/yq"
+$SUDO install "$tmp/yq" /usr/local/bin/yq
+
+# lazygit (asset arch is x86_64/arm64)
+larch="x86_64"; [ "$ARCH" = arm64 ] && larch="arm64"
+lg_ver="$(latest_tag jesseduffield/lazygit)"
+curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/${lg_ver}/lazygit_${lg_ver#v}_Linux_${larch}.tar.gz" | tar -xzf - -C "$tmp"
+$SUDO install "$tmp/lazygit" /usr/local/bin/lazygit
+
+# werf
 werf_ver="$(curl -fsSL "https://tuf.werf.io/targets/channels/${WERF_CHANNEL}")"
 curl -fsSL "https://tuf.werf.io/targets/releases/${werf_ver}/linux-${ARCH}/bin/werf" | $SUDO tee /usr/local/bin/werf >/dev/null
 $SUDO chmod +x /usr/local/bin/werf
 
-d8_ver="$(basename "$(curl -fsSLo /dev/null -w '%{url_effective}' https://github.com/deckhouse/deckhouse-cli/releases/latest)")"
-tmp="$(mktemp -d)"
+# d8 / deckhouse-cli
+d8_ver="$(latest_tag deckhouse/deckhouse-cli)"
 curl -fsSL "https://github.com/deckhouse/deckhouse-cli/releases/download/${d8_ver}/d8-${d8_ver}-linux-${ARCH}.tar.gz" | tar -xzf - -C "$tmp"
 $SUDO install "$(find "$tmp" -type f -name d8)" /usr/local/bin/d8

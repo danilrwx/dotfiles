@@ -8,9 +8,6 @@
   "containerEnv": {
     "DEVCONTAINER": "1"
   },
-  "remoteEnv": {
-    "PATH": "${containerEnv:PATH}:/home/v12n/go/bin:/home/v12n/.krew/bin"
-  },
   "mounts": [
     "source=devbox-home,target=/home/v12n,type=volume",
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
