@@ -6,4 +6,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 brew install \
   go go-task yq helm golangci-lint k9s gh delve jq fzf tmux vim \
-  gnupg pinentry kubectl krew node gopls gofumpt bash-completion@2
+  gnupg pinentry kubectl krew node gopls gofumpt bash-completion@2 \
+  htop lazygit xq difftastic kubecolor ncdu ugrep \
+  golangci-lint-langserver bash-language-server lua-language-server \
+  helm-ls typescript-language-server

@@ -106,13 +106,13 @@ elif [[ "$OS" == "Darwin" ]]; then
 fi
 
 
-# Install brew applications (host-only extras; shared dev tools come from
-# tools/repo.sh, so are not repeated here) ──────────────────────────────────────────────────────────────────────────────
-log "Installing brew apps"
-brew install htop lazygit xq difftastic kubecolor \
-  golangci-lint-langserver \
-  bash-language-server lua-language-server helm-ls typescript-language-server \
-  awk grep gnu-sed coreutils binutils findutils diffutils ncdu ugrep bash
+# Shared dev tools/CLI extras come from tools/repo.sh (host + container). The
+# only host-only brew apps are the GNU userland that replaces macOS BSD tools —
+# redundant on Linux, so macOS-only ────────────────────────────────────────────────────────────────────────────────────
+if [[ "$OS" == "Darwin" ]]; then
+  log "Installing GNU userland (brew)"
+  brew install awk grep gnu-sed coreutils binutils findutils diffutils bash
+fi
 
 
 # Install DevPod CLI (runs the devbox dev container: docker locally, kubernetes
