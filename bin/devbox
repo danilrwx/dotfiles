@@ -114,12 +114,11 @@ link_config() {
   if [ "$PROVIDER" = kubernetes ]; then
     cp "$CONFIG" "$SRC/.devcontainer/devcontainer.json"
     cp "$DOT/bootstrap.sh" "$SRC/.devcontainer/bootstrap.sh"
-    # Work-repo list (kept in the private dotfiles submodule, out of the public
-    # repo) and public keys for the pod's gpg keyring — DevPod's own public-key
-    # import (localhost:12049) is unreliable on the k8s provider. Keys not secret.
+    # Work-repo list, kept in the private dotfiles submodule (out of the public
+    # repo). Public keys are imported by DevPod's own gpg-agent forwarding — doing
+    # it here too raced on keyboxd and broke the import.
     [ -f "$HOME/dotfiles/private/devbox-repos" ] \
       && cp "$HOME/dotfiles/private/devbox-repos" "$SRC/.devcontainer/repos"
-    gpg --export --armor > "$SRC/.devcontainer/pubkeys.asc" 2>/dev/null || true
   else
     ln -sf "$CONFIG" "$SRC/.devcontainer/devcontainer.json"
   fi

@@ -27,8 +27,3 @@ if [ -f "$list" ]; then
     fi
   done < "$list"
 fi
-
-# Import public keys so gpg knows what to sign with; the secret operations come
-# from the forwarded gpg-agent. DevPod's own public-key import is unreliable here.
-pubkeys="$(dirname "$0")/pubkeys.asc"
-[ -s "$pubkeys" ] && gpg --import "$pubkeys" 2>/dev/null && echo "imported gpg public keys"
