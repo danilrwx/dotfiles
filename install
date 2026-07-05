@@ -108,8 +108,8 @@ fi
 log "Installing host tools"
 brew install kubectl gh tmux fzf jq yq gnupg node watch
 
-# claude-code via the brew node
-npm install -g @anthropic-ai/claude-code
+# claude-code via the native installer (self-updating, no node needed)
+curl -fsSL https://claude.ai/install.sh | bash
 
 # d8 / deckhouse-cli (official installer; default INSTALL_DIR is /opt not on PATH)
 if ! command -v d8 &> /dev/null; then
