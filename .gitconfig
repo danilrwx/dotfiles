@@ -1,7 +1,7 @@
 [core]
   editor = nvim
-  attributesfile = /Users/danil/.gitattributes
-  excludesfile = /Users/danil/.gitignore_global
+  attributesfile = ~/.gitattributes
+  excludesfile = ~/.gitignore_global
 
 [user]
   name = Daniil Antoshin
