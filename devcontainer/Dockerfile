@@ -31,6 +31,8 @@ COPY tools/repo.sh ${LIB}/repo.sh
 RUN bash ${LIB}/repo.sh
 COPY tools/binaries.sh ${LIB}/binaries.sh
 RUN bash ${LIB}/binaries.sh
+COPY tools/docker.sh ${LIB}/docker.sh
+RUN bash ${LIB}/docker.sh
 
 # claude-code + npm-based language servers (node/npm come from apt in repo.sh).
 RUN npm install -g @anthropic-ai/claude-code bash-language-server typescript-language-server

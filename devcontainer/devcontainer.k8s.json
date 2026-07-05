@@ -6,7 +6,8 @@
   "remoteUser": "dev",
   "containerEnv": {
     "DEVCONTAINER": "k8s",
-    "KUBECONFIG": "/opt/devbox/config"
+    "KUBECONFIG": "/opt/devbox/config",
+    "DOCKER_HOST": "tcp://localhost:2375"
   },
   "postCreateCommand": "bash .devcontainer/bootstrap.sh"
 }

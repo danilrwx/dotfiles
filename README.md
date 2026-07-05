@@ -64,6 +64,11 @@ private dotfiles submodule (`private/devbox-repos`, one git URL per line) so the
 stay out of this public repo. Knobs (env): `DEVBOX_K8S_NS` (default `devbox`),
 `DEVBOX_K8S_DISK` (`50Gi`), `DEVBOX_K8S_SC` (storage class).
 
+The container has the `docker` CLI (client only, no daemon in the image).
+Locally it uses the host's Docker Desktop via the mounted `/var/run/docker.sock`;
+in k8s a privileged `docker:dind` sidecar provides the daemon and `DOCKER_HOST`
+points at it — so the cluster must allow privileged pods.
+
 ## Layout
 
 | Path | What |
@@ -71,7 +76,7 @@ stay out of this public repo. Knobs (env): `DEVBOX_K8S_NS` (default `devbox`),
 | `install` | host setup (symlinks, host tools, devpod) |
 | `bin/devbox` | the DevPod wrapper |
 | `devcontainer/Dockerfile` | the container image (built in CI) |
-| `devcontainer/tools/*.sh` | container tool install phases (apt / binaries / go) |
+| `devcontainer/tools/*.sh` | container tool install phases (apt / binaries / docker / go) |
 | `devcontainer/devcontainer*.json` | Docker and Kubernetes devcontainer configs |
 | `devcontainer/{links,shell-setup,bootstrap}.sh` | config symlinks, completions, repo clone |
 

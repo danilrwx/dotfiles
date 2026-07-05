@@ -170,7 +170,9 @@ provider_add() {
   # DevPod merges this onto its generated pod; the volumeMount attaches to its dev
   # container (name "devpod"). Mount the kubeconfig at a side path (not
   # ~/.kube/config) so ~/.kube stays writable for the oidc-login token cache;
-  # devcontainer.k8s.json points KUBECONFIG at it.
+  # devcontainer.k8s.json points KUBECONFIG at it. A privileged docker:dind
+  # sidecar gives the pod a real docker daemon on tcp://localhost:2375 (there is
+  # no host socket to mount in k8s); devcontainer.k8s.json sets DOCKER_HOST.
   mkdir -p "$(dirname "$tmpl")"
   cat > "$tmpl" <<'YAML'
 spec:
@@ -180,10 +182,23 @@ spec:
         - name: kube
           mountPath: /opt/devbox
           readOnly: true
+    - name: dind
+      image: docker:dind
+      args: ["--host=tcp://0.0.0.0:2375"]
+      securityContext:
+        privileged: true
+      env:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+      volumeMounts:
+        - name: dind-storage
+          mountPath: /var/lib/docker
   volumes:
     - name: kube
       secret:
         secretName: devbox-kube
+    - name: dind-storage
+      emptyDir: {}
 YAML
 
   # Mount the PVC only on the work dir; the home dir must keep the image's baked
