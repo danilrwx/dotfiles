@@ -81,19 +81,11 @@ elif [ "$ID" == "ubuntu" ]; then
 fi
 
 
-# Install Homebrew for different OSes ───────────────────────────────────────────────────────────────────────────────────
-if [[ "$OS" == "Linux" ]]; then
-  if [ ! -d /home/linuxbrew/.linuxbrew ]; then
-    log "Installing linuxbrew"
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  fi
-elif [[ "$OS" == "Darwin" ]]; then
-  if [ ! -d /opt/homebrew ]; then
-    log "Installing homebrew"
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  fi
+# Install Homebrew (macOS only) ─────────────────────────────────────────────────────────────────────────────────────────
+if [[ "$OS" == "Darwin" ]] && [ ! -d /opt/homebrew ]; then
+  log "Installing homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
 
