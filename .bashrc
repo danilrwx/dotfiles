@@ -13,25 +13,6 @@ if [ -d "$HOME/.local/share/completions" ]; then
   done
 fi
 
-# if [[ $- == *i* ]] && [ -e "$HOME/.ssh/id_rsa" ]; then
-#   fp=$(ssh-keygen -lf "$HOME/.ssh/id_rsa.pub" 2>/dev/null | awk '{print $2}')
-#   if ! { [ -n "$fp" ] && ssh-add -l 2>/dev/null | grep -q "$fp"; }; then
-#     case "$(uname -s)" in
-#       Darwin)
-#         ssh-add -c --apple-use-keychain "$HOME/.ssh/id_rsa" 2>/dev/null
-#         ;;
-#       Linux)
-#         [ -S "${SSH_AUTH_SOCK:-}" ] || eval "$(ssh-agent -s)" >/dev/null
-#         if [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && [ -n "${SSH_ASKPASS:-}" ]; then
-#           ssh-add -c "$HOME/.ssh/id_rsa"
-#         else
-#           ssh-add "$HOME/.ssh/id_rsa"
-#         fi
-#         ;;
-#     esac
-#   fi
-# fi
-
 if [ -f $HOME/dotfiles/private/.bashrc ]; then
   source $HOME/dotfiles/private/.bashrc
 fi
@@ -43,11 +24,6 @@ PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
 alias k=kubectl
 complete -o default -F __start_kubectl k
 
-
-if [ -x "$(command -v eza)" ]; then
-  alias ls='eza'
-  alias ll='eza -lah'
-fi
 
 alias so='source ~/.bashrc'
 alias sp='source ~/.bash_profile'
