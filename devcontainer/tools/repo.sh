@@ -7,7 +7,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 $SUDO apt-get update
 $SUDO apt-get install -y --no-install-recommends \
-  git tmux vim jq fzf ripgrep less zsh htop lazygit tree \
+  git tmux vim jq fzf ripgrep ugrep less zsh htop lazygit tree \
   gnupg2 openssh-client nodejs npm \
   build-essential file procps ca-certificates curl uuid-runtime \
   wget unzip zip xz-utils openssl \
