@@ -222,7 +222,12 @@ case "$cmd" in
       log "Pulling $IMAGE"
       docker pull "$IMAGE"
       devpod delete "$NAME" --force >/dev/null 2>&1 || true
-      docker volume ls -q 2>/dev/null | grep -- 'devbox-home' | xargs -r docker volume rm >/dev/null 2>&1 || true
+      # Drop the home volume(s) so home re-seeds from the image. Force-remove any
+      # container still holding a volume first, else `volume rm` fails silently.
+      for v in $(docker volume ls -q 2>/dev/null | grep -- 'devbox-home'); do
+        docker ps -aq --filter "volume=$v" 2>/dev/null | xargs -r docker rm -f >/dev/null 2>&1 || true
+        docker volume rm "$v" >/dev/null 2>&1 || true
+      done
       up "$@"
     else
       # k8s home is ephemeral (from the image), so a recreate refreshes it and
