@@ -49,13 +49,6 @@ if [ -f $HOME/dotfiles/private/install ]; then
   fi
 fi
 
-if [ -e /usr/bin/i3 ]; then
-  ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
-  ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
-  ln -sf $HOME/dotfiles/.Xresources $HOME/
-fi
-
-
 # Install packages for different OSes ───────────────────────────────────────────────────────────────────────────────────
 if [ "$ID" == "fedora" ]; then
   log "Installing fedora packages"
@@ -65,10 +58,6 @@ if [ "$ID" == "fedora" ]; then
   sudo dnf update -y
 
   sudo dnf group install c-development
-
-  if [ -e /usr/bin/i3 ]; then
-    sudo dnf install -y hsetroot xcompmgr xclip xsel libX11-devel libXft-devel libXinerama-devel
-  fi
 
   sudo dnf install -y lame\* --exclude=lame-devel
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
@@ -84,12 +73,6 @@ elif [ "$ID" == "ubuntu" ]; then
   # dev tools (tmux, gpg, …) come from brew via tools/repo.sh; keep only the
   # system/GUI packages and brew prerequisites (build-essential, git) here.
   sudo apt install -y build-essential git wget zip unzip curl virt-manager xclip xsel flatpak
-
-  if [ -e /usr/bin/i3 ]; then
-    sudo apt install -y libx11-dev libxinerama-dev libxft2-dev \
-      xcompmgr hsetroot	brightnessctl acpi maim xclip xsel lxappearance gtk-chtheme \
-      libnotify-bin ncal lxpolkit pavucontrol pulseaudio-utils
-  fi
 fi
 
 
