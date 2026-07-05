@@ -36,6 +36,11 @@ lg_ver="$(latest_tag jesseduffield/lazygit)"
 curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/${lg_ver}/lazygit_${lg_ver#v}_Linux_${larch}.tar.gz" | tar -xzf - -C "$tmp"
 $SUDO install "$tmp/lazygit" /usr/local/bin/lazygit
 
+# gh (github release; asset unpacks into gh_<ver>_linux_<arch>/bin/gh)
+gh_ver="$(latest_tag cli/cli)"
+curl -fsSL "https://github.com/cli/cli/releases/download/${gh_ver}/gh_${gh_ver#v}_linux_${ARCH}.tar.gz" | tar -xzf - -C "$tmp"
+$SUDO install "$tmp/gh_${gh_ver#v}_linux_${ARCH}/bin/gh" /usr/local/bin/gh
+
 # werf
 werf_ver="$(curl -fsSL "https://tuf.werf.io/targets/channels/${WERF_CHANNEL}")"
 curl -fsSL "https://tuf.werf.io/targets/releases/${werf_ver}/linux-${ARCH}/bin/werf" | $SUDO tee /usr/local/bin/werf >/dev/null
