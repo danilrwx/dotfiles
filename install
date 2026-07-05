@@ -43,11 +43,8 @@ ln -snf $HOME/dotfiles/config/kitty $HOME/.config/
 ln -snf $HOME/dotfiles/config/alacritty $HOME/.config/
 ln -snf $HOME/dotfiles/config/ghostty $HOME/.config/
 
-# Private configs (claude, pi, CLAUDE.md) live in the private submodule
-ln -snf $HOME/dotfiles/private/config/pi $HOME/.pi
-ln -snf $HOME/dotfiles/private/config/claude $HOME/.claude
-ln -sf $HOME/dotfiles/private/CLAUDE.md $HOME/CLAUDE.md
-
+# Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
+# which also keeps those paths out of this public repo.
 if [ -f $HOME/dotfiles/private/install ]; then
   if ! "$HOME/dotfiles/private/install"; then
     log "Failed to run private install. Continue installation."
