@@ -41,3 +41,7 @@ if [ -f "$list" ]; then
     fi
   done < "$list"
 fi
+
+if [ -x "$HOME/dotfiles/private/bootstrap" ]; then
+  "$HOME/dotfiles/private/bootstrap" || true
+fi
