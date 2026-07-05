@@ -36,6 +36,7 @@ Commands:
                    from the image: dotfiles, tools, gnupg; ~/w work is kept)
   down             stop the workspace (data is kept)
   delete           remove the workspace
+  check            check the registry for a newer image (notifies on up/shell)
   provider         register/configure the DevPod provider (one-time setup)
   help             show this help
 
@@ -244,6 +245,54 @@ YAML
     || devpod provider set-options kubernetes "${opts[@]}" "$@"
 }
 
+# --- Image update check -----------------------------------------------------
+# Compare the digest of :latest in the registry against the one applied on the
+# last `devbox update` (recorded per workspace). Everything here is best-effort
+# and must never block or fail a shell: all network calls have a short timeout
+# and swallow errors.
+DIGEST_FILE="$HOME/.config/devbox/$NAME.digest"
+CHECK_STAMP="$HOME/.config/devbox/$NAME.last-check"
+
+# Docker-Content-Digest of :latest from GHCR via an anonymous pull token. Prints
+# nothing on any failure (offline, rate limit, missing jq).
+remote_digest() {
+  local repo token
+  repo="${IMAGE#ghcr.io/}"; repo="${repo%:*}"
+  token=$(curl -fsS --max-time 5 "https://ghcr.io/token?scope=repository:${repo}:pull" 2>/dev/null \
+    | jq -r '.token // empty' 2>/dev/null) || return 0
+  [ -n "$token" ] || return 0
+  curl -fsSI --max-time 5 -H "Authorization: Bearer $token" \
+    -H "Accept: application/vnd.oci.image.index.v1+json" \
+    -H "Accept: application/vnd.docker.distribution.manifest.list.v2+json" \
+    "https://ghcr.io/v2/${repo}/manifests/latest" 2>/dev/null \
+    | awk 'tolower($1)=="docker-content-digest:"{print $2}' | tr -d '\r'
+}
+
+# Record the current registry digest as the applied version (called by update).
+record_digest() {
+  local d; d=$(remote_digest)
+  [ -n "$d" ] && { mkdir -p "$(dirname "$DIGEST_FILE")"; printf '%s\n' "$d" > "$DIGEST_FILE"; }
+}
+
+# Notify if the registry digest differs from the applied one. Throttled to once
+# per 12h unless called as `check_update force`.
+check_update() {
+  mkdir -p "$(dirname "$CHECK_STAMP")"
+  if [ "${1:-}" != force ] && [ -n "$(find "$CHECK_STAMP" -mmin -720 2>/dev/null)" ]; then
+    return 0
+  fi
+  local remote; remote=$(remote_digest)
+  [ -n "$remote" ] || return 0
+  touch "$CHECK_STAMP"
+  local stored=""; [ -f "$DIGEST_FILE" ] && stored=$(cat "$DIGEST_FILE")
+  local flag=""; [ "$PROVIDER" = kubernetes ] && flag=" -k"
+  if [ -z "$stored" ]; then
+    printf '%s\n' "$remote" > "$DIGEST_FILE"
+  elif [ "$remote" != "$stored" ]; then
+    log "A new devbox image is available — run 'devbox${flag} update' to update."
+  fi
+}
+
 cmd="${1:-shell}"; shift || true
 
 case "$cmd" in -h|--help|help) usage; exit 0 ;; esac
@@ -281,14 +330,20 @@ case "$cmd" in
       # the image; the PVC (work repos) is kept.
       up --recreate "$@"
     fi
+    record_digest
+    ;;
+  check)
+    check_update force
     ;;
   up|start)
     setup_forwarding
     up "$@"
+    check_update
     ;;
   shell|sh|"")
     setup_forwarding
     up >/dev/null
+    check_update
     devpod ssh "$NAME" "${FWD[@]}" "$@"
     ;;
   down|stop)

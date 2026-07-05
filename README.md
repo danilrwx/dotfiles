@@ -42,11 +42,16 @@ devbox up         # start it without attaching
 devbox update     # pull the latest image and recreate
 devbox down       # stop (data is kept)
 devbox delete     # remove the workspace
+devbox check      # check the registry for a newer image
 devbox help       # full usage
 ```
 
 Locally `~/w` is bind-mounted into the container. Run `devbox help` for the
 full command list.
+
+`up` and `shell` check the registry (throttled to once every 12h) and print a
+notice when a newer `:latest` image is published, so you know to run `devbox
+update`. `devbox check` forces the check immediately.
 
 ### On a remote Kubernetes cluster
 
