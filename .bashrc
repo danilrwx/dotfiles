@@ -25,6 +25,8 @@ alias k=kubectl
 complete -o default -F __start_kubectl k
 
 
+alias ll='ls -lah'
+
 alias so='source ~/.bashrc'
 alias sp='source ~/.bash_profile'
 
