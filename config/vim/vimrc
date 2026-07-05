@@ -15,8 +15,6 @@ endif
 if filereadable(expand("~/.config/vim/autoload/plug.vim"))
 	plug#begin('~/.local/share/vim/plugins')
 
-	Plug 'tpope/vim-surround'
-
 	Plug 'markonm/traces.vim'
 
 	Plug 'tpope/vim-fugitive'
@@ -26,8 +24,6 @@ if filereadable(expand("~/.config/vim/autoload/plug.vim"))
 	Plug 'yegappan/lsp'
 
 	Plug 'vim-test/vim-test'
-
-	Plug 'sebdah/vim-delve'
 
 	Plug 'habamax/vim-dir'
 
@@ -140,10 +136,6 @@ nnoremap <c-l> :nohl<cr>
 
 nnoremap <silent> <leader>tr :TestNearest<cr>
 nnoremap <silent> <leader>tt :TestFile<cr>
-nnoremap <silent> <leader>td :DlvTestCurrent<cr>
-
-nnoremap <silent> <leader>db :DlvToggleBreakpoint<cr>
-nnoremap <silent> <leader>dc :DlvConnect :2345<cr>
 
 nnoremap <silent> <leader>gl :tab Git log --follow -p %<cr>
 nnoremap <silent> <leader>gL :tab Git log<cr>
