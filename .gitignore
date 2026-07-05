@@ -1,11 +1,6 @@
 *.swp
 *.swo
-.vagrant
-*.retry
 *.log
-TAGS
-
-fixtures/_build
 
 config/vim/files/undo/*
 config/vim/files/swap/*
@@ -19,16 +14,3 @@ config/vim/files/sessions/*
 config/vim/.netrwhist
 
 config/k9s/clusters
-
-
-
-.gitignore
-*.orig
-*.rej
-*.o
-dwm/dwm
-dwm/config.h
-st/st
-st/config.h
-dmenu/dmenu
-dmenu/config.h

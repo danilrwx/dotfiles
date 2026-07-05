@@ -13,10 +13,6 @@ export XDG_CONFIG_HOME="$HOME/.config"
 
 export PI_OFFLINE=1
 
-if [ -e "$HOME/bin/trdl" ]; then
-  source $("$HOME/bin/trdl" use flint "2")
-fi
-
 if [ -f $HOME/dotfiles/private/.zprofile ]; then
   source $HOME/dotfiles/private/.zprofile
 fi
