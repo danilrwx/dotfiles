@@ -118,16 +118,9 @@ link_config() {
   if [ "$PROVIDER" = kubernetes ]; then
     cp "$CONFIG" "$SRC/.devcontainer/devcontainer.json"
     cp "$DOT/bootstrap.sh" "$SRC/.devcontainer/bootstrap.sh"
-    # Work-repo list, kept in the private dotfiles submodule (out of the public
-    # repo). Public keys are imported by DevPod's own gpg-agent forwarding — doing
-    # it here too raced on keyboxd and broke the import.
-    [ -f "$HOME/dotfiles/private/devbox-repos" ] \
-      && cp "$HOME/dotfiles/private/devbox-repos" "$SRC/.devcontainer/repos"
-    # Work git identity for ~/w commits; the public image lacks the private
-    # submodule the .gitconfig includeIf points at, so ship it and let
-    # bootstrap.sh drop it into place.
-    [ -f "$HOME/dotfiles/private/work.gitconfig" ] \
-      && cp "$HOME/dotfiles/private/work.gitconfig" "$SRC/.devcontainer/work.gitconfig"
+    # The repo list and work git identity come from the private submodule, which
+    # bootstrap.sh pulls in the pod over the forwarded ssh-agent — nothing to
+    # ship here.
   else
     ln -sf "$CONFIG" "$SRC/.devcontainer/devcontainer.json"
   fi
