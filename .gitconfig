@@ -1,5 +1,5 @@
 [core]
-  editor = nvim
+  editor = vim
   attributesfile = ~/.gitattributes
   excludesfile = ~/.gitignore_global
 
@@ -28,18 +28,16 @@
 	signOff = yes
 
 [diff]
-    tool = nvimdiff
+    tool = vimdiff
 [difftool]
     prompt = false
-[difftool "nvimdiff"]
-    cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
 
 [merge]
-	tool = nvimdiff
+	tool = vimdiff
 [mergetool]
     prompt = true
-[mergetool "nvimdiff"]
-    cmd = "nvim -d \"$LOCAL\" \"$REMOTE\" \"$MERGED\" -c 'wincmd w' -c 'wincmd J'"
+[mergetool "vimdiff"]
+    cmd = "vim -d \"$LOCAL\" \"$REMOTE\" \"$MERGED\" -c 'wincmd w' -c 'wincmd J'"
 
 [includeIf "gitdir:~/w/"]
     path = ~/dotfiles/private/flant.gitconfig
