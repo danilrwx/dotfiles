@@ -30,7 +30,6 @@ set shiftround             # >> indents to next multiple of 'shiftwidth'.
 
 set backspace=indent,eol,start # Make backspace work as you would expect.
 set hidden                 # Switch between buffers without having to save first.
-set laststatus=2           # Always show statusline.
 set display=lastline       # Show as much as possible of the last line.
 
 set showcmd                # Show already typed keys when more are expected.
@@ -40,8 +39,6 @@ set hlsearch               # Keep matches highlighted.
 
 set ttyfast                # Faster redrawing.
 set lazyredraw             # Only redraw when necessary.
-
-set laststatus=1           # Set minimal bottom statusline
 
 set number                 # Set line numbers
 set relativenumber         # Set relative linenumbers
@@ -99,10 +96,6 @@ endif
 if has('patch-9.1.1230')
   packadd! hlyank
 endif
-
-# if has('patch-9.0.1799')
-#   packadd! editorconfig
-# endif
 
 g:mapleader = " "
 
@@ -195,13 +188,6 @@ def On_lsp_buffer_enabled()
   autocmd! BufWritePre *.go call execute('LspFormat')
 enddef
 autocmd User LspAttached call On_lsp_buffer_enabled()
-
-# def g:TrimWhitespace()
-#   var save = winsaveview()
-#   keeppatterns :%s/\s\+$//e
-#   winrestview(save)
-# enddef
-# autocmd BufWritePre * call TrimWhitespace()
 
 def g:ToggleQuickFix()
   if empty(filter(getwininfo(), 'v:val.quickfix'))
