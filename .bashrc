@@ -68,7 +68,7 @@ fi
 alias lg='lazygit'
 
 if [ -n "${DEVCONTAINER:-}" ]; then
-  export PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[91m\][dev]\[\e[0m\] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
+  export PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[91m\]['"$DEVCONTAINER"']\[\e[0m\] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
 else
   export PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[32m\]\w\[\e[0m\] \[\e[94m\]󰅂\[\e[0m\] '
 fi

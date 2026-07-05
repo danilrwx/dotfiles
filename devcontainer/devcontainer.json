@@ -6,7 +6,7 @@
   "containerUser": "dev",
   "remoteUser": "dev",
   "containerEnv": {
-    "DEVCONTAINER": "1"
+    "DEVCONTAINER": "docker"
   },
   "mounts": [
     "source=devbox-home,target=/home/dev,type=volume",

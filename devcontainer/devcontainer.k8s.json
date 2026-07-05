@@ -5,7 +5,7 @@
   "containerUser": "dev",
   "remoteUser": "dev",
   "containerEnv": {
-    "DEVCONTAINER": "1",
+    "DEVCONTAINER": "k8s",
     "KUBECONFIG": "/opt/devbox/config"
   },
   "postCreateCommand": "bash .devcontainer/bootstrap.sh"
