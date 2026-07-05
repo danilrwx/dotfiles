@@ -10,7 +10,7 @@ The split is deliberate:
   fonts) and a few ops CLIs (`kubectl`, `d8`, `gh`, `claude`, `flint`) plus shell
   basics (`git`, `tmux`, `fzf`, …).
 - **Lean container** — the whole dev/build toolchain: Go, `kubectl`/`helm`/`k9s`/
-  `werf`/`d8`, linters and language servers, `claude`, etc. Built from Debian in
+  `werf`/`d8`, linters and language servers, `claude`, etc. Built from Ubuntu in
   CI (no Homebrew) and published to `ghcr.io/danilrwx/devbox`.
 
 Development happens **inside the container**; the host just starts it. The host

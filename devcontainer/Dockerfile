@@ -1,21 +1,24 @@
-# Global dev container image (Debian base; tools from apt + static binaries + go
+# Global dev container image (Ubuntu base; tools from apt + static binaries + go
 # install — no Homebrew, so the image stays small). Built for linux/amd64 in CI
 # and pushed to ghcr.io/danilrwx/devbox. Tool installs are split into tools/*.sh;
 # each phase is COPYed right before its RUN so editing one only rebuilds its
 # layer. This image is the dev/build environment — the host stays thin.
-FROM debian:trixie
+FROM ubuntu:24.04
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 ARG USERNAME=dev
 ARG UID=1000
 ARG GID=1000
+ARG NODE_MAJOR=22
 
 ENV LIB=/usr/local/lib/devbox
 ENV PATH=/usr/local/go/bin:/home/${USERNAME}/go/bin:${PATH}
 
-# Bootstrap: enough to run the tool scripts and set the locale.
-RUN apt-get update \
+# Ubuntu strips man pages via a dpkg exclude; drop it so installed tools keep
+# their manuals. Then bootstrap enough to run the tool scripts and set the locale.
+RUN rm -f /etc/dpkg/dpkg.cfg.d/excludes \
+ && apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl sudo locales \
  && sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen && locale-gen \
  && rm -rf /var/lib/apt/lists/*
@@ -30,9 +33,9 @@ RUN bash ${LIB}/repo.sh
 COPY tools/binaries.sh ${LIB}/binaries.sh
 RUN bash ${LIB}/binaries.sh
 
-# node (apt) + claude-code + npm-based language servers.
-RUN apt-get update \
- && apt-get install -y --no-install-recommends nodejs npm \
+# node (nodesource) + claude-code + npm-based language servers.
+RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
+ && apt-get install -y nodejs \
  && rm -rf /var/lib/apt/lists/* \
  && npm install -g @anthropic-ai/claude-code bash-language-server typescript-language-server
 

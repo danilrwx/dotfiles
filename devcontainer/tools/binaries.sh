@@ -30,6 +30,12 @@ $SUDO install "$tmp/k9s" /usr/local/bin/k9s
 curl -fsSL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${ARCH}" -o "$tmp/yq"
 $SUDO install "$tmp/yq" /usr/local/bin/yq
 
+# lazygit (not in Ubuntu 24.04 apt; asset arch is x86_64/arm64)
+larch="x86_64"; [ "$ARCH" = arm64 ] && larch="arm64"
+lg_ver="$(latest_tag jesseduffield/lazygit)"
+curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/${lg_ver}/lazygit_${lg_ver#v}_Linux_${larch}.tar.gz" | tar -xzf - -C "$tmp"
+$SUDO install "$tmp/lazygit" /usr/local/bin/lazygit
+
 # werf
 werf_ver="$(curl -fsSL "https://tuf.werf.io/targets/channels/${WERF_CHANNEL}")"
 curl -fsSL "https://tuf.werf.io/targets/releases/${werf_ver}/linux-${ARCH}/bin/werf" | $SUDO tee /usr/local/bin/werf >/dev/null
