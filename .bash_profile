@@ -7,10 +7,6 @@ export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/dotfiles/bin:$PATH"
 export PATH="$HOME/dotfiles/private/bin:$PATH"
 
-export GOPATH=$HOME/go
-export GOBIN=$GOPATH/bin
-export PATH=$HOME/go/bin:$PATH
-
 export XDG_CONFIG_HOME="$HOME/.config"
 
 export HISTSIZE=-1
