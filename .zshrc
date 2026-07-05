@@ -15,8 +15,8 @@ if [ -d "$HOME/.local/share/completions" ]; then
   done
 fi
 
-if [ -f $HOME/dotfiles/private/.bashrc ]; then
-  source $HOME/dotfiles/private/.bashrc
+if [ -f $HOME/dotfiles/private/.zshrc ]; then
+  source $HOME/dotfiles/private/.zshrc
 fi
 
 HISTFILE=$HOME/.zsh_history

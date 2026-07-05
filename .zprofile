@@ -34,6 +34,6 @@ if [ -e "$HOME/bin/trdl" ]; then
   source $("$HOME/bin/trdl" use flint "2")
 fi
 
-if [ -f $HOME/dotfiles/private/.bash_profile ]; then
-  source $HOME/dotfiles/private/.bash_profile
+if [ -f $HOME/dotfiles/private/.zprofile ]; then
+  source $HOME/dotfiles/private/.zprofile
 fi
