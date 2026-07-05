@@ -44,7 +44,7 @@ RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
 # 'ubuntu' user at uid/gid 1000 — drop it so our uid/gid are free.
 RUN userdel -r ubuntu 2>/dev/null || true \
  && groupadd -g "${GID}" "${USERNAME}" \
- && useradd -m -u "${UID}" -g "${GID}" -s /bin/bash "${USERNAME}" \
+ && useradd -m -u "${UID}" -g "${GID}" -s /bin/zsh "${USERNAME}" \
  && usermod -aG root "${USERNAME}" \
  && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/"${USERNAME}" \
  && chmod 0440 /etc/sudoers.d/"${USERNAME}"

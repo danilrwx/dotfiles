@@ -16,6 +16,8 @@ ln -sf "$D/.tmux.conf" "$HOME/.tmux.conf"
 ln -sf "$D/.profile" "$HOME/"
 ln -sf "$D/.bash_profile" "$HOME/"
 ln -sf "$D/.bashrc" "$HOME/"
+ln -sf "$D/.zprofile" "$HOME/"
+ln -sf "$D/.zshrc" "$HOME/"
 
 for c in k9s htop lazygit vim nvim; do
   ln -snf "$D/config/$c" "$HOME/.config/"

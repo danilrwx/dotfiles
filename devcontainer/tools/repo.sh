@@ -7,7 +7,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 $SUDO apt-get update
 $SUDO apt-get install -y --no-install-recommends \
-  git tmux vim jq fzf ripgrep less bash-completion htop \
+  git tmux vim jq fzf ripgrep less zsh bash-completion htop \
   gnupg2 pinentry-curses openssh-client \
   build-essential file procps ca-certificates curl \
   man-db manpages manpages-dev
