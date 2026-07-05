@@ -14,11 +14,8 @@ set softtabstop=2
 set shiftwidth=2
 set shiftround             # >> indents to next multiple of 'shiftwidth'.
 
-set backspace=indent,eol,start
 set hidden                 # Switch between buffers without having to save first.
 set display=lastline
-
-set showcmd
 
 set incsearch
 set hlsearch
@@ -29,7 +26,6 @@ set relativenumber
 set updatetime=100
 set signcolumn=yes
 set shortmess=aoOtTI       # Avoid most of the 'Hit Enter ...' messages
-set wildmenu
 set mouse=a
 set laststatus=0           # Disable status bar
 
