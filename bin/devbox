@@ -32,7 +32,8 @@ Provider (default: docker):
 Commands:
   shell            open a shell in the container (default; creates it if needed)
   up               create/start the workspace
-  update           pull the latest image and recreate the workspace
+  update           pull the latest image and rebuild from scratch (fresh home
+                   from the image: dotfiles, tools, gnupg; ~/w work is kept)
   down             stop the workspace (data is kept)
   delete           remove the workspace
   provider         register/configure the DevPod provider (one-time setup)
@@ -212,9 +213,22 @@ case "$cmd" in
     provider_add "$@"
     ;;
   update)
-    [ "$PROVIDER" = docker ] && { log "Pulling $IMAGE"; docker pull "$IMAGE"; }
     setup_forwarding
-    up --recreate "$@"
+    if [ "$PROVIDER" = docker ]; then
+      # Full refresh: pull the latest image and drop the workspace + its home
+      # volume so it re-seeds from the image (baked dotfiles, tools, ~/.gnupg).
+      # A --recreate alone keeps the named volume, so stale home state persists.
+      # Work lives in the ~/w bind mount, so it is untouched.
+      log "Pulling $IMAGE"
+      docker pull "$IMAGE"
+      devpod delete "$NAME" --force >/dev/null 2>&1 || true
+      docker volume ls -q 2>/dev/null | grep -- 'devbox-home' | xargs -r docker volume rm >/dev/null 2>&1 || true
+      up "$@"
+    else
+      # k8s home is ephemeral (from the image), so a recreate refreshes it and
+      # the image; the PVC (work repos) is kept.
+      up --recreate "$@"
+    fi
     ;;
   up|start)
     setup_forwarding
