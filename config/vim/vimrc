@@ -35,13 +35,6 @@ set wildmenu               # Better command-line completion
 set mouse=a                # Enable mouse support
 set laststatus=0           # Disable status bar
 
-# The fish shell is not very compatible to other shells and unexpectedly
-# breaks things that use 'shell'.
-if &shell =~# 'fish$'
-	set shell=exepath('bash')
-endif
-
-# Made grep great again
 if executable('ugrep')
   set grepprg=ugrep\ -RInk\ --tabs=1\ --ignore-files\ --exclude='zz_generated*'\ --exclude-dir='generated'
   set grepformat=%f:%l:%c:%m,%f+%l+%c+%m,%-G%f\\\|%l\\\|%c\\\|%m
@@ -70,17 +63,9 @@ highlight DiffAdd ctermfg=16
 highlight DiffChange ctermfg=16
 highlight DiffDelete ctermfg=16
 
-if has('patch-8.1.0311')
-  packadd! cfilter
-endif
-
-if has('patch-9.1.0375')
-  packadd! comment
-endif
-
-if has('patch-9.1.1230')
-  packadd! hlyank
-endif
+silent! packadd! cfilter
+silent! packadd! comment
+silent! packadd! hlyank
 
 g:mapleader = " "
 
