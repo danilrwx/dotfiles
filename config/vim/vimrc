@@ -1,38 +1,36 @@
 vim9script
 
-set nocompatible
-
 # Load plugins from ~/.vim/pack/*/start (cloned by shell-setup.sh). The XDG
 # config dir is a symlink into this repo, so keep plugins out of it.
 execute "set packpath^=" .. expand("~/.vim")
 
-filetype plugin indent on # Load plugins according to detected filetype.
-syntax on                  # Enable syntax highlighting.
+filetype plugin indent on
+syntax on
 
-set autoindent             # Indent according to previous line.
-set expandtab              # Use spaces instead of tabs.
-set tabstop=2              # Use 2 spaces for indenting.
-set softtabstop=2          # Tab key indents by 2 spaces.
-set shiftwidth=2           # >> indents by 2 spaces.
+set autoindent
+set expandtab
+set tabstop=2
+set softtabstop=2
+set shiftwidth=2
 set shiftround             # >> indents to next multiple of 'shiftwidth'.
 
-set backspace=indent,eol,start # Make backspace work as you would expect.
+set backspace=indent,eol,start
 set hidden                 # Switch between buffers without having to save first.
-set display=lastline       # Show as much as possible of the last line.
+set display=lastline
 
-set showcmd                # Show already typed keys when more are expected.
+set showcmd
 
-set incsearch              # Highlight while searching with / or ?.
-set hlsearch               # Keep matches highlighted.
+set incsearch
+set hlsearch
 
-set number                 # Set line numbers
-set relativenumber         # Set relative linenumbers
+set number
+set relativenumber
 
-set updatetime=100         # Fast redraw
-set signcolumn=yes         # Always render signcolumn
+set updatetime=100
+set signcolumn=yes
 set shortmess=aoOtTI       # Avoid most of the 'Hit Enter ...' messages
-set wildmenu               # Better command-line completion
-set mouse=a                # Enable mouse support
+set wildmenu
+set mouse=a
 set laststatus=0           # Disable status bar
 
 if executable('ugrep')
