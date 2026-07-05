@@ -19,8 +19,16 @@ host keys with no key material copied into the container.
 
 ## Requirements
 
-- Linux or macOS, `git`
-- Docker (Docker Desktop on macOS)
+- **macOS**, or **Linux** (Ubuntu / Fedora — `install` exits on other distros)
+- `git`, `curl`, and `sudo` on Linux
+- **Docker** running — Docker Desktop on macOS; on Linux `install` sets it up
+- **Homebrew** — the host CLIs come from `brew`. macOS: `install` bootstraps it if
+  missing. Linux: install it first (<https://brew.sh>)
+- An SSH key added to GitHub — the repo remote and the container's git auth use
+  SSH, with the host ssh-agent forwarded in
+
+The remote Kubernetes flow (`devbox -k`) also needs `kubectl` and a configured
+kube context.
 
 ## Setup
 
