@@ -249,7 +249,6 @@ YAML
 # Compare the digest of :latest in the registry against the image the workspace
 # actually runs. Everything here is best-effort and must never block or fail a
 # shell: all network calls have a short timeout and swallow errors.
-DIGEST_FILE="$HOME/.config/devbox/$NAME.digest"
 CHECK_STAMP="$HOME/.config/devbox/$NAME.last-check"
 
 # Docker-Content-Digest of :latest from GHCR via an anonymous pull token. Prints
@@ -267,22 +266,18 @@ remote_digest() {
     | awk 'tolower($1)=="docker-content-digest:"{print $2}' | tr -d '\r'
 }
 
-# Digest of the image the workspace actually runs. docker: the locally pulled
-# :latest; k8s: recorded at the last `devbox -k update` (the host cannot inspect
-# the pod's image reliably). Empty if unknown (never pulled / never updated).
+# Digest of the image the workspace actually runs (:latest is single-arch, so
+# the pod/local digest equals the registry content digest). docker: the locally
+# pulled image; k8s: the running pod's devpod container (assumes one devbox pod
+# in the namespace). Empty if it can't be determined (not pulled / not running).
 current_digest() {
   if [ "$PROVIDER" = docker ]; then
     docker image inspect "$IMAGE" --format '{{index .RepoDigests 0}}' 2>/dev/null | sed -n 's/.*@//p'
   else
-    [ -f "$DIGEST_FILE" ] && cat "$DIGEST_FILE"
+    kubectl -n "${DEVBOX_K8S_NS:-devbox}" get pods -l devpod.sh/created=true \
+      -o jsonpath='{.items[-1:].status.containerStatuses[?(@.name=="devpod")].imageID}' 2>/dev/null \
+      | sed -n 's/.*@//p'
   fi
-}
-
-# k8s only: remember the digest update just applied (docker reads it live).
-record_digest() {
-  [ "$PROVIDER" = docker ] && return 0
-  local d; d=$(remote_digest)
-  [ -n "$d" ] && { mkdir -p "$(dirname "$DIGEST_FILE")"; printf '%s\n' "$d" > "$DIGEST_FILE"; }
 }
 
 # Notify if the registry :latest differs from the running image. Throttled to
@@ -301,7 +296,7 @@ check_update() {
   touch "$CHECK_STAMP"
   local cur flag=""; cur=$(current_digest) || true; [ "$PROVIDER" = kubernetes ] && flag=" -k"
   if [ -z "$cur" ]; then
-    [ -n "$force" ] && log "No image applied yet — run 'devbox${flag} update'."
+    [ -n "$force" ] && log "Could not determine the running image (is the workspace up?)."
   elif [ "$remote" != "$cur" ]; then
     log "A new devbox image is available — run 'devbox${flag} update' to update."
   else
@@ -346,7 +341,6 @@ case "$cmd" in
       # the image; the PVC (work repos) is kept.
       up --recreate "$@"
     fi
-    record_digest
     ;;
   check)
     check_update force
