@@ -1,16 +1,4 @@
-if (v:version < 802 || (v:version == 802 && !has('patch3434')))
-  if (v:version < 801 || (v:version == 801 && !has('patch1705')))
-    echo "No Vim9 script: Use -u & _vimrc8"
-  else
-    call popup_notification("No Vim9 script: Use -u & _vimrc8", #{time: 8000})
-  endif
-  finish
-endif
 vim9script
-
-if has("eval")
-  g:skip_defaults_vim = 1
-endif
 
 set nocompatible
 
@@ -36,9 +24,6 @@ set showcmd                # Show already typed keys when more are expected.
 
 set incsearch              # Highlight while searching with / or ?.
 set hlsearch               # Keep matches highlighted.
-
-set ttyfast                # Faster redrawing.
-set lazyredraw             # Only redraw when necessary.
 
 set number                 # Set line numbers
 set relativenumber         # Set relative linenumbers
