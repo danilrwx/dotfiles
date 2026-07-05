@@ -3,7 +3,7 @@
 # and pushed to ghcr.io/danilrwx/devbox. Tool installs are split into tools/*.sh;
 # each phase is COPYed right before its RUN so editing one only rebuilds its
 # layer. This image is the dev/build environment — the host stays thin.
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
@@ -40,7 +40,7 @@ RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
  && npm install -g @anthropic-ai/claude-code bash-language-server typescript-language-server
 
 # Unprivileged user; gid 0 for the Docker Desktop docker.sock and ssh-agent
-# socket (both root:root 0660). Passwordless sudo. Ubuntu 24.04 ships a default
+# socket (both root:root 0660). Passwordless sudo. Ubuntu ships a default
 # 'ubuntu' user at uid/gid 1000 — drop it so our uid/gid are free.
 RUN userdel -r ubuntu 2>/dev/null || true \
  && groupadd -g "${GID}" "${USERNAME}" \
