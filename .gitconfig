@@ -40,5 +40,5 @@
     cmd = "vim -d \"$LOCAL\" \"$REMOTE\" \"$MERGED\" -c 'wincmd w' -c 'wincmd J'"
 
 [includeIf "gitdir:~/w/"]
-    path = ~/dotfiles/private/flant.gitconfig
+    path = ~/dotfiles/private/work.gitconfig
 

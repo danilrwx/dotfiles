@@ -122,11 +122,11 @@ link_config() {
     # it here too raced on keyboxd and broke the import.
     [ -f "$HOME/dotfiles/private/devbox-repos" ] \
       && cp "$HOME/dotfiles/private/devbox-repos" "$SRC/.devcontainer/repos"
-    # Flant git identity for ~/w commits; the public image lacks the private
+    # Work git identity for ~/w commits; the public image lacks the private
     # submodule the .gitconfig includeIf points at, so ship it and let
     # bootstrap.sh drop it into place.
-    [ -f "$HOME/dotfiles/private/flant.gitconfig" ] \
-      && cp "$HOME/dotfiles/private/flant.gitconfig" "$SRC/.devcontainer/flant.gitconfig"
+    [ -f "$HOME/dotfiles/private/work.gitconfig" ] \
+      && cp "$HOME/dotfiles/private/work.gitconfig" "$SRC/.devcontainer/work.gitconfig"
   else
     ln -sf "$CONFIG" "$SRC/.devcontainer/devcontainer.json"
   fi

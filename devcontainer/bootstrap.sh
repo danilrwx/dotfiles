@@ -19,12 +19,12 @@ if [ -d "$HOME/gocache" ]; then
 fi
 
 # The public image clones dotfiles without the private submodule, so the
-# includeIf in .gitconfig (flant email for ~/w commits) has no target. The
-# helper copies flant.gitconfig next to this script; put it where includeIf
+# includeIf in .gitconfig (work email for ~/w commits) has no target. The
+# helper copies work.gitconfig next to this script; put it where includeIf
 # expects it.
-if [ -f "$here/flant.gitconfig" ]; then
+if [ -f "$here/work.gitconfig" ]; then
   mkdir -p "$HOME/dotfiles/private"
-  cp "$here/flant.gitconfig" "$HOME/dotfiles/private/flant.gitconfig"
+  cp "$here/work.gitconfig" "$HOME/dotfiles/private/work.gitconfig"
 fi
 
 W="$HOME/w"
