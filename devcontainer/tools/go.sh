@@ -11,3 +11,4 @@ go install golang.org/x/tools/cmd/goimports@latest
 go install github.com/go-delve/delve/cmd/dlv@latest
 go install github.com/matryer/moq@latest
 go install github.com/google/go-containerregistry/cmd/crane@latest
+go install github.com/go-task/task/v3/cmd/task@latest
