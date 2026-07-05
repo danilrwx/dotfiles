@@ -10,7 +10,6 @@ SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 ARG USERNAME=dev
 ARG UID=1000
 ARG GID=1000
-ARG NODE_MAJOR=22
 
 ENV LIB=/usr/local/lib/devbox
 ENV PATH=/usr/local/go/bin:/home/${USERNAME}/go/bin:${PATH}
@@ -33,11 +32,8 @@ RUN bash ${LIB}/repo.sh
 COPY tools/binaries.sh ${LIB}/binaries.sh
 RUN bash ${LIB}/binaries.sh
 
-# node (nodesource) + claude-code + npm-based language servers.
-RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
- && apt-get install -y nodejs \
- && rm -rf /var/lib/apt/lists/* \
- && npm install -g @anthropic-ai/claude-code bash-language-server typescript-language-server
+# claude-code + npm-based language servers (node/npm come from apt in repo.sh).
+RUN npm install -g @anthropic-ai/claude-code bash-language-server typescript-language-server
 
 # Unprivileged user; gid 0 for the Docker Desktop docker.sock and ssh-agent
 # socket (both root:root 0660). Passwordless sudo. Ubuntu ships a default
