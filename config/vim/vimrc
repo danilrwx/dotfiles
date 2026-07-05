@@ -1,7 +1,5 @@
 vim9script
 
-# Load plugins from ~/.vim/pack/*/start (cloned by shell-setup.sh). The XDG
-# config dir is a symlink into this repo, so keep plugins out of it.
 execute "set packpath^=" .. expand("~/.vim")
 
 filetype plugin indent on
@@ -11,18 +9,14 @@ set autoindent
 set expandtab
 set tabstop=2
 set shiftwidth=2
-
-set hidden                 # Switch between buffers without having to save first.
-
+set hidden
 set incsearch
 set hlsearch
-
 set number
-
 set updatetime=100
 set signcolumn=yes
-set shortmess=aoOtTI       # Avoid most of the 'Hit Enter ...' messages
-set laststatus=0           # Disable status bar
+set shortmess=aoOtTI
+set laststatus=0
 
 if executable('ugrep')
   set grepprg=ugrep\ -RInk\ --tabs=1\ --ignore-files\ --exclude='zz_generated*'\ --exclude-dir='generated'
@@ -31,8 +25,6 @@ else
   set grepprg=grep\ --exclude='*zz_generated*'\ --exclude-dir='generated'
 endif
 
-# Put all temporary files under the same directory.
-# https://github.com/mhinz/vim-galore#temporary-files
 set backup
 set backupdir=$XDG_CONFIG_HOME/vim/files/backup/
 set backupext=-vimbackup
@@ -42,25 +34,16 @@ set updatecount=100
 set undofile
 set undodir=$XDG_CONFIG_HOME/vim/files/undo/
 
-# mark trailing spaces as errors
 match errorMsg '\s\+$'
 
-colorscheme torte
 highlight Normal ctermbg=none
 highlight SignColumn ctermbg=none
-highlight DiffAdd ctermfg=16
-highlight DiffChange ctermfg=16
-highlight DiffDelete ctermfg=16
 
 silent! packadd! cfilter
 silent! packadd! comment
 silent! packadd! hlyank
 
 g:mapleader = " "
-
-nnoremap <silent> <leader>q :call ToggleQuickFix()<cr>
-nnoremap <c-j> :cnext<cr>
-nnoremap <c-k> :cprev<cr>
 
 nnoremap <c-d> <c-d>zz<cr>
 nnoremap <c-u> <c-u>zz<cr>
@@ -147,12 +130,4 @@ def On_lsp_buffer_enabled()
   autocmd! BufWritePre *.go call execute('LspFormat')
 enddef
 autocmd User LspAttached call On_lsp_buffer_enabled()
-
-def g:ToggleQuickFix()
-  if empty(filter(getwininfo(), 'v:val.quickfix'))
-    copen
-  else
-    cclose
-  endif
-enddef
 
