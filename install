@@ -106,7 +106,7 @@ fi
 # Host tooling: launcher + ops CLIs only. The dev/build toolchain (go, LSPs,
 # ginkgo, helm, k9s, …) lives in the devbox container, not on the host ────────────────────────────────────────────────────
 log "Installing host tools"
-brew install kubectl gh tmux fzf jq yq gnupg node watch
+brew install kubectl gh tmux fzf jq yq gnupg watch
 
 # claude-code via the native installer (self-updating, no node needed)
 curl -fsSL https://claude.ai/install.sh | bash
