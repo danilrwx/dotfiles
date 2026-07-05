@@ -164,6 +164,9 @@ provider_add() {
 
   log "Creating namespace/secret '$ns/devbox-kube'"
   kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f -
+  # Allow the privileged docker:dind sidecar. Deckhouse (admission-policy-engine)
+  # gates Pod Security by this namespace label; harmless on non-Deckhouse clusters.
+  kubectl label namespace "$ns" security.deckhouse.io/pod-policy=privileged --overwrite
   kubectl -n "$ns" create secret generic devbox-kube --from-file="config=$kcfg" \
     --dry-run=client -o yaml | kubectl apply -f -
 
