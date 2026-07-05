@@ -12,15 +12,6 @@ export GOBIN=$GOPATH/bin
 export PATH=$HOME/go/bin:$PATH
 
 export XDG_CONFIG_HOME="$HOME/.config"
-export K9S_CONFIG_DIR=$HOME/.config/k9s
-kube_merge=$HOME/.kubeconfigs/cluster-merge
-if find $HOME/.kubeconfigs -name kubeconfig 2>/dev/null | grep -q .; then
-  if [ ! -f "$kube_merge" ] || find $HOME/.kubeconfigs -name kubeconfig -newer "$kube_merge" 2>/dev/null | grep -q .; then
-    KUBECONFIG=$(find $HOME/.kubeconfigs -name kubeconfig | tr '\n' ':') kubectl config view --flatten > "$kube_merge" 2>/dev/null
-  fi
-  export KUBECONFIG=$kube_merge
-fi
-unset kube_merge
 
 export HISTSIZE=-1
 export HISTFILESIZE=-1
