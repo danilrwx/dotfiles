@@ -10,10 +10,27 @@
 # allowed) and copied next to this script by the devbox helper.
 set -euo pipefail
 
+here="$(dirname "$0")"
+
+# Freshly provisioned PVCs mount root-owned; take the go cache so the dev user
+# (GOMODCACHE/GOCACHE point here) can write it.
+if [ -d "$HOME/gocache" ]; then
+  sudo chown "$(id -u):$(id -g)" "$HOME/gocache" 2>/dev/null || true
+fi
+
+# The public image clones dotfiles without the private submodule, so the
+# includeIf in .gitconfig (flant email for ~/w commits) has no target. The
+# helper copies flant.gitconfig next to this script; put it where includeIf
+# expects it.
+if [ -f "$here/flant.gitconfig" ]; then
+  mkdir -p "$HOME/dotfiles/private"
+  cp "$here/flant.gitconfig" "$HOME/dotfiles/private/flant.gitconfig"
+fi
+
 W="$HOME/w"
 export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
 
-list="$(dirname "$0")/repos"
+list="$here/repos"
 if [ -f "$list" ]; then
   while read -r url; do
     [ -n "$url" ] || continue

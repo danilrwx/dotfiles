@@ -14,6 +14,7 @@
     "source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,readonly",
     "source=${localEnv:HOME}/.claude,target=/home/dev/.claude,type=bind",
     "source=${localEnv:HOME}/.claude.json,target=/home/dev/.claude.json,type=bind",
-    "source=${localEnv:HOME}/.kube,target=/home/dev/.kube,type=bind"
+    "source=${localEnv:HOME}/.kube,target=/home/dev/.kube,type=bind",
+    "source=${localEnv:HOME}/dotfiles/private/flant.gitconfig,target=/home/dev/dotfiles/private/flant.gitconfig,type=bind,readonly"
   ]
 }

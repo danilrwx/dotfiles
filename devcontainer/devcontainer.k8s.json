@@ -7,7 +7,9 @@
   "containerEnv": {
     "DEVCONTAINER": "k8s",
     "KUBECONFIG": "/opt/devbox/config",
-    "DOCKER_HOST": "tcp://localhost:2375"
+    "DOCKER_HOST": "tcp://localhost:2375",
+    "GOMODCACHE": "/home/dev/gocache/mod",
+    "GOCACHE": "/home/dev/gocache/build"
   },
   "postCreateCommand": "bash .devcontainer/bootstrap.sh"
 }

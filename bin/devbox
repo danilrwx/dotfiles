@@ -122,6 +122,11 @@ link_config() {
     # it here too raced on keyboxd and broke the import.
     [ -f "$HOME/dotfiles/private/devbox-repos" ] \
       && cp "$HOME/dotfiles/private/devbox-repos" "$SRC/.devcontainer/repos"
+    # Flant git identity for ~/w commits; the public image lacks the private
+    # submodule the .gitconfig includeIf points at, so ship it and let
+    # bootstrap.sh drop it into place.
+    [ -f "$HOME/dotfiles/private/flant.gitconfig" ] \
+      && cp "$HOME/dotfiles/private/flant.gitconfig" "$SRC/.devcontainer/flant.gitconfig"
   else
     ln -sf "$CONFIG" "$SRC/.devcontainer/devcontainer.json"
   fi
@@ -151,6 +156,7 @@ provider_add() {
 
   local ns="${DEVBOX_K8S_NS:-devbox}"
   local disk="${DEVBOX_K8S_DISK:-50Gi}"
+  local gocache="${DEVBOX_K8S_GOCACHE:-20Gi}"
   local tmpl="$HOME/.config/devbox/pod-template.yaml"
   local kcfg="$HOME/.config/devbox/kubeconfig"
   mkdir -p "$(dirname "$kcfg")"
@@ -170,6 +176,24 @@ provider_add() {
   kubectl -n "$ns" create secret generic devbox-kube --from-file="config=$kcfg" \
     --dry-run=client -o yaml | kubectl apply -f -
 
+  # Persistent go module + build cache, kept across pod recreates (the home dir is
+  # ephemeral in k8s, so without this every recreate re-downloads all modules).
+  # Not mounted over ~/go — that holds the image's baked go tools; the pod points
+  # GOMODCACHE/GOCACHE at this mount instead. Survives `devbox -k delete`.
+  log "Ensuring go-cache PVC '$ns/devbox-gocache' ($gocache)"
+  kubectl -n "$ns" apply -f - <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: devbox-gocache
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: $gocache
+$([ -n "${DEVBOX_K8S_SC:-}" ] && echo "  storageClassName: $DEVBOX_K8S_SC")
+EOF
+
   # DevPod merges this onto its generated pod; the volumeMount attaches to its dev
   # container (name "devpod"). Mount the kubeconfig at a side path (not
   # ~/.kube/config) so ~/.kube stays writable for the oidc-login token cache;
@@ -185,6 +209,8 @@ spec:
         - name: kube
           mountPath: /opt/devbox
           readOnly: true
+        - name: gocache
+          mountPath: /home/dev/gocache
     - name: dind
       image: docker:dind
       args: ["--host=tcp://0.0.0.0:2375"]
@@ -202,6 +228,9 @@ spec:
         secretName: devbox-kube
     - name: dind-storage
       emptyDir: {}
+    - name: gocache
+      persistentVolumeClaim:
+        claimName: devbox-gocache
 YAML
 
   # Mount the PVC only on the work dir; the home dir must keep the image's baked
