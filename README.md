@@ -8,7 +8,7 @@ The split is deliberate:
 - **Thin host** — a launcher and GUI shell. It has only what must live on the
   host: `docker` + `devpod`, the ssh/gpg agents, GUI apps (terminal, browser,
   fonts) and a few ops CLIs (`kubectl`, `d8`, `gh`, `claude`, `flint`) plus shell
-  basics (`git`, `tmux`, `fzf`, …).
+  basics (`zsh`, `git`, `tmux`, `fzf`, …).
 - **Lean container** — the whole dev/build toolchain: Go, `kubectl`/`helm`/`k9s`/
   `werf`/`d8`, linters and language servers, `claude`, etc. Built from Ubuntu in
   CI (no Homebrew) and published to `ghcr.io/danilrwx/devbox`.
@@ -30,7 +30,9 @@ cd ~/dotfiles && ./install
 ```
 
 `./install` symlinks the configs, installs the host tools listed above and the
-`devpod` CLI, and registers the Docker provider.
+`devpod` CLI, registers the Docker provider, and sets `zsh` as the login shell
+(the container uses `zsh` too). The shell config (`.zshrc`/`.zprofile`) is shared
+by the host and the container.
 
 ## Using the dev container
 
