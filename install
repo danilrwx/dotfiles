@@ -26,6 +26,11 @@ if ! git submodule update --init --recursive; then
   log "Failed to update submodules. Continue installation."
 fi
 
+# Update vim plugins (native packages cloned by shell-setup.sh) ──────────────────────────────────────────────────────────
+for d in "$HOME"/.vim/pack/plugins/start/*/; do
+  [ -d "$d/.git" ] && git -C "$d" pull --ff-only || true
+done
+
 # Create directories and synlinks to config files ───────────────────────────────────────────────────────────────────────
 mkdir -p $HOME/.config
 mkdir -p $HOME/.local/share

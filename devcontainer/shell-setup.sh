@@ -12,3 +12,19 @@ command -v flint   >/dev/null && flint completion --shell=zsh > "$COMP/flint.zsh
 
 TPM="$HOME/.tmux/plugins/tpm"
 [ -d "$TPM" ] || git clone --depth 1 https://github.com/tmux-plugins/tpm "$TPM"
+
+# vim plugins via native packages (~/.vim/pack/*/start auto-loads, no plugin manager)
+VIM_PACK="$HOME/.vim/pack/plugins/start"
+mkdir -p "$VIM_PACK"
+for repo in \
+  markonm/traces.vim \
+  tpope/vim-fugitive \
+  airblade/vim-gitgutter \
+  yegappan/lsp \
+  vim-test/vim-test \
+  habamax/vim-dir \
+  laktak/tome \
+  vim-fuzzbox/fuzzbox.vim; do
+  dst="$VIM_PACK/${repo##*/}"
+  [ -d "$dst" ] || git clone --depth 1 "https://github.com/$repo" "$dst"
+done

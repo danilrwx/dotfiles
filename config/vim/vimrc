@@ -12,29 +12,11 @@ if has("eval")
   g:skip_defaults_vim = 1
 endif
 
-if filereadable(expand("~/.config/vim/autoload/plug.vim"))
-	plug#begin('~/.local/share/vim/plugins')
-
-	Plug 'markonm/traces.vim'
-
-	Plug 'tpope/vim-fugitive'
-
-	Plug 'airblade/vim-gitgutter'
-
-	Plug 'yegappan/lsp'
-
-	Plug 'vim-test/vim-test'
-
-	Plug 'habamax/vim-dir'
-
-	Plug 'laktak/tome'
-
-	Plug 'vim-fuzzbox/fuzzbox.vim'
-
-	plug#end()
-endif
-
 set nocompatible
+
+# Load plugins from ~/.vim/pack/*/start (cloned by shell-setup.sh). The XDG
+# config dir is a symlink into this repo, so keep plugins out of it.
+execute "set packpath^=" .. expand("~/.vim")
 
 filetype plugin indent on # Load plugins according to detected filetype.
 syntax on                  # Enable syntax highlighting.
@@ -45,7 +27,6 @@ set tabstop=2              # Use 2 spaces for indenting.
 set softtabstop=2          # Tab key indents by 2 spaces.
 set shiftwidth=2           # >> indents by 2 spaces.
 set shiftround             # >> indents to next multiple of 'shiftwidth'.
-set paste                  # fix indenting when pasting.
 
 set backspace=indent,eol,start # Make backspace work as you would expect.
 set hidden                 # Switch between buffers without having to save first.
