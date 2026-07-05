@@ -16,7 +16,6 @@ ln -sf "$D/.tmux.conf" "$HOME/.tmux.conf"
 ln -sf "$D/.zprofile" "$HOME/"
 ln -sf "$D/.zshrc" "$HOME/"
 
-for c in k9s htop lazygit vim nvim; do
+for c in k9s htop lazygit vim; do
   ln -snf "$D/config/$c" "$HOME/.config/"
 done
-ln -snf "$D/config/nvim" "$HOME/.config/nvimpager"
