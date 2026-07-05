@@ -40,8 +40,10 @@ RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
  && npm install -g @anthropic-ai/claude-code bash-language-server typescript-language-server
 
 # Unprivileged user; gid 0 for the Docker Desktop docker.sock and ssh-agent
-# socket (both root:root 0660). Passwordless sudo.
-RUN groupadd -g "${GID}" "${USERNAME}" \
+# socket (both root:root 0660). Passwordless sudo. Ubuntu 24.04 ships a default
+# 'ubuntu' user at uid/gid 1000 — drop it so our uid/gid are free.
+RUN userdel -r ubuntu 2>/dev/null || true \
+ && groupadd -g "${GID}" "${USERNAME}" \
  && useradd -m -u "${UID}" -g "${GID}" -s /bin/bash "${USERNAME}" \
  && usermod -aG root "${USERNAME}" \
  && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/"${USERNAME}" \
