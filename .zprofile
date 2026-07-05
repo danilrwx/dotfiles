@@ -2,12 +2,6 @@ if [ -e "/opt/homebrew/bin/brew" ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-if command -v brew >/dev/null; then
-  HOMEBREW_PREFIX=$(brew --prefix)
-  for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnubin(N); do export PATH=$d:$PATH; done
-  for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnuman(N); do export MANPATH=$d:$MANPATH; done
-fi
-
 typeset -U path PATH
 
 export PATH="$HOME/bin:$PATH"
