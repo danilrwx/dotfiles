@@ -9,9 +9,9 @@ highlight default GitSignAdd    ctermfg=green  guifg=#00af5f
 highlight default GitSignChange ctermfg=yellow guifg=#d7af00
 highlight default GitSignDelete ctermfg=red    guifg=#d70000
 
-sign_define('GitAdd',    {text: '▎', texthl: 'GitSignAdd',    numhl: 'GitSignAdd'})
-sign_define('GitChange', {text: '▎', texthl: 'GitSignChange', numhl: 'GitSignChange'})
-sign_define('GitDelete', {text: '▁', texthl: 'GitSignDelete', numhl: 'GitSignDelete'})
+sign_define('GitAdd',    {numhl: 'GitSignAdd'})
+sign_define('GitChange', {numhl: 'GitSignChange'})
+sign_define('GitDelete', {numhl: 'GitSignDelete'})
 
 const GROUP = 'gitsigns'
 # only diff tracked files: outside a repo (or for an untracked file) git show is

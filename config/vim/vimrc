@@ -12,7 +12,7 @@ set incsearch
 set hlsearch
 set number
 set updatetime=100
-set signcolumn=yes
+set signcolumn=number
 set shortmess=aoOtTI
 set laststatus=0
 
