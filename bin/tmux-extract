@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
 # fzf-based replacement for the extrakto tmux plugin: no python, no TPM, works
-# anywhere fzf+tmux exist (incl. devbox containers). Fuzzy-pick a token
-# (word/path/url) from the visible pane. Arg is the mode: insert (prefix+Tab)
-# types it into the pane, copy (prefix+y) puts it into the tmux buffer.
+# anywhere fzf+tmux exist (incl. devbox containers). Opens on prefix+Tab; inside
+# fzf, Tab types the picked token (word/path/url) into the pane, Enter copies it
+# to the clipboard (via OSC52, so it also works over SSH/devbox).
 #
 # The pane is resolved via display-message rather than passed in: display-popup
-# does NOT expand #{pane_id} in its command, so we ask tmux for the active pane
-# from inside the popup instead.
+# does NOT expand #{pane_id} in its command, so we ask tmux from the popup.
 set -euo pipefail
 
 extract() {
@@ -21,13 +20,15 @@ if [ "${1:-}" = "--selftest" ]; then
   echo ok; exit 0
 fi
 
-mode="${1:-insert}"
 pane=$(tmux display-message -p '#{pane_id}')
 
-sel=$(tmux capture-pane -pJ -t "$pane" -S -200 | extract | fzf --no-sort --tac) || exit 0
+out=$(tmux capture-pane -pJ -t "$pane" -S -200 | extract \
+  | fzf --no-sort --tac --height=100% --expect=tab,enter) || exit 0
+key=$(printf '%s\n' "$out" | sed -n 1p)
+sel=$(printf '%s\n' "$out" | sed -n 2p)
 [ -n "$sel" ] || exit 0
 
-case "$mode" in
-  copy) printf '%s' "$sel" | tmux load-buffer - ;;
-  *)    tmux send-keys -t "$pane" -l -- "$sel" ;;
+case "$key" in
+  tab) tmux send-keys -t "$pane" -l -- "$sel" ;;      # insert into the pane
+  *)   printf '%s' "$sel" | tmux load-buffer -w - ;;  # enter: copy to clipboard
 esac
