@@ -85,10 +85,12 @@ VIMRC
 inject "$HOME/.tmux.conf" '#' 'server config' <<'TMUX'
 # Clipboard (OSC 52) + mouse.
 set -g set-clipboard on
-set -as terminal-features ',*:clipboard'
 set -g mouse on
-# tmux < 3.2: replace the terminal-features line with:
-# set -ag terminal-overrides ',*:Ms=\E]52;%p1%s;%p2%s\007'
+# Forward OSC 52 to the outer terminal: terminal-features on tmux >= 3.2, else
+# the Ms terminal-override on older tmux — picked from the running version.
+if-shell -b '[ "$(tmux -V | sed -E "s/^tmux[^0-9]*([0-9]+)\.([0-9]+).*/\1\2/")" -ge 32 ]' \
+  "set -as terminal-features ',*:clipboard'" \
+  "set -ag terminal-overrides ',*:Ms=\\E]52;%p1%s;%p2%s\\007'"
 
 # Defaults.
 set -sg escape-time 0

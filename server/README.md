@@ -6,11 +6,14 @@ including clipboard over SSH (OSC 52) — copy from a remote vim/tmux to your
 
 ## Install on a server
 
-`install.sh` is self-contained — no scp needed. Either:
+`install.sh` is self-contained — no scp needed. Any of:
 
 ```sh
-# paste into the server shell
-clip < server/install.sh          # copies it to your clipboard, then paste on the server
+# fetch and run in one shot (on the server)
+curl -fsSL https://raw.githubusercontent.com/danilrwx/dotfiles/master/server/install.sh | bash
+
+# or copy it to your clipboard and paste into the server shell
+clip < server/install.sh
 
 # or pipe it over ssh
 ssh server 'bash -s' < server/install.sh
@@ -58,7 +61,8 @@ BIN=/usr/local/bin bash install.sh     # needs write access there
 - Your local terminal must allow OSC 52 writes (alacritty/kitty/iTerm2/WezTerm/
   ghostty do, mostly by default).
 - GNU or BSD `base64`.
-- tmux < 3.2: see the note in the `server config` block written to `~/.tmux.conf`.
+- Any tmux version: the config detects the running version and uses
+  `terminal-features` on 3.2+ or the `Ms` terminal-override on older tmux.
 
 Paste from local into the server is plain Cmd+V (terminal paste); OSC 52 read is
 normally disabled, so the clipboard cannot be read back.
