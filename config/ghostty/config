@@ -6,7 +6,7 @@ keybind = alt+right=unbind
 font-family = Iosevka NF
 font-thicken = true
 font-thicken-strength = 200
- 
+
 maximize = true
 
 window-padding-x = 8
