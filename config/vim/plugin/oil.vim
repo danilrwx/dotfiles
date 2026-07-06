@@ -31,7 +31,7 @@ def Mkparent(p: string)
   endif
 enddef
 
-def Apply()
+def Apply(): bool
   var dir = b:oil_dir
   var reg = b:oil_reg
   var seen: dict<bool> = {}
@@ -54,8 +54,21 @@ def Apply()
       deletes->add(name)
     endif
   endfor
-  if !empty(deletes) && confirm("Delete:\n" .. join(deletes, "\n"), "&Yes\n&No") != 1
-    deletes = []
+  if empty(renames) && empty(creates) && empty(deletes)
+    return true
+  endif
+  var summary: list<string> = []
+  for [old, new] in renames
+    summary->add($'rename  {old} → {new}')
+  endfor
+  for name in creates
+    summary->add($'create  {name}')
+  endfor
+  for name in deletes
+    summary->add($'delete  {name}')
+  endfor
+  if confirm("Apply changes?\n" .. join(summary, "\n"), "&Yes\n&No", 2) != 1
+    return false
   endif
 
   for [old, new] in renames
@@ -86,6 +99,7 @@ def Apply()
   for name in deletes
     delete(simplify(dir .. trim(name, '/', 2)), name =~ '/$' ? 'rf' : '')
   endfor
+  return true
 enddef
 
 def Enter()
@@ -105,8 +119,9 @@ def Up()
 enddef
 
 def OnWrite()
-  Apply()
-  Render()
+  if Apply()
+    Render()
+  endif
 enddef
 
 export def Open(path = '')
