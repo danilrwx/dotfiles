@@ -124,20 +124,21 @@ def GrepSink(lines: list<string>)
   endif
 enddef
 
+# live grep (fzf-lua style): --disabled hands the query to grep instead of
+# filtering, and change:reload re-runs grep on every keystroke. {q} is the
+# grep pattern (a regex); an empty query is guarded so the list starts blank.
 def Grep(query: string = '')
-  var q = empty(query) ? expand('<cword>') : query
-  if empty(q)
-    return
-  endif
-  Remember(() => Grep(q))
-  # -F: search the text literally, so regex-special chars don't need escaping
-  var cmd = executable('ugrep') ? 'ugrep -RInk -F -I --ignore-files --color=never -- '
-    : 'grep -rIn -F -- '
+  var tool = executable('ugrep') ? 'ugrep -RInk --ignore-files --color=never'
+    : 'grep -rIn'
+  var reload = $'[ -n {{q}} ] && {tool} -- {{q}} . 2>/dev/null || true'
+  Remember(() => Grep(query))
   fzf#run(fzf#wrap({
-    source: cmd .. shellescape(q),
     'sink*': GrepSink,
-    options: ['--multi', '--header', 'Enter: open   Tab: select → quickfix',
-      '--prompt', $'Grep({q})> ', '--delimiter', ':'],
+    options: ['--disabled', '--multi', '--delimiter', ':', '--query', query,
+      '--prompt', 'Grep> ',
+      '--header', 'type to search   Enter: open   Tab: select → quickfix',
+      '--bind', 'start:reload:' .. reload,
+      '--bind', 'change:reload:' .. reload],
   }))
 enddef
 def GrepVisual()
@@ -145,7 +146,7 @@ def GrepVisual()
 enddef
 
 command! -nargs=* Grep Grep(<q-args>)
-nnoremap <silent> <leader>/ <scriptcmd>Grep()<cr>
+nnoremap <silent> <leader>g <scriptcmd>Grep()<cr>
 # "zy yanks the selection AND leaves visual mode, so fzf opens in normal mode
 # (a <Cmd> map would stay in visual and swallow keys until you type)
-xnoremap <silent> <leader>/ "zy<scriptcmd>GrepVisual()<cr>
+xnoremap <silent> <leader>g "zy<scriptcmd>GrepVisual()<cr>
