@@ -4,7 +4,7 @@
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 go install "github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}"
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 go install golang.org/x/tools/gopls@latest
 go install mvdan.cc/gofumpt@latest
 go install golang.org/x/tools/cmd/goimports@latest
