@@ -56,6 +56,7 @@ var lspOpts = {
   useQuickfixForLocations: true,
   semanticHighlight: true,
   showInlayHints: false,
+  ignoreMissingServer: true,
 }
 autocmd User LspSetup call LspOptionsSet(lspOpts)
 
