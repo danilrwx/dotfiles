@@ -1,32 +1,45 @@
 # osc52 — clipboard over SSH
 
-Copy from a remote vim/tmux to the local (host) clipboard using OSC 52 escape
+Copy from a remote vim/tmux to your **local** clipboard using OSC 52 escape
 sequences — no xclip/pbcopy, no X server. Works through tmux and SSH.
 
 ## Install on a server
 
+`setup.sh` is self-contained — no scp needed. Either:
+
 ```sh
-scp -r osc52 server:~/           # copy the bundle
-ssh server 'bash ~/osc52/install.sh'
+# paste into the server shell
+clip < osc52/setup.sh          # copies it to your clipboard, then paste on the server
+
+# or pipe it over ssh
+ssh server 'bash -s' < osc52/setup.sh
 ```
 
-`install.sh` drops the files into `~/.osc52` and adds one `source` line to
-`~/.vimrc` and `~/.tmux.conf`. Then on the server: `tmux kill-server` and restart
-vim.
+It installs the `clip` command into `~/.local/bin` (adding that dir to `PATH` if
+missing), writes `~/.osc52/{vimrc,tmux.conf}`, and adds one `source` line to
+`~/.vimrc` and `~/.tmux.conf`. Idempotent. Then on the server: open a new shell
+(for `PATH`), `tmux kill-server`, and restart vim.
 
-## What it does
+Install `clip` elsewhere with `BIN` (e.g. a dir already on `PATH`, no `PATH`
+edit then):
 
-- `clip` — `some-command | clip` puts stdin on the host clipboard.
-- `vimrc` — mirrors every yank (`yy`, `yw`, visual `y`) to the host clipboard.
-- `tmux.conf` — makes tmux forward OSC 52 to the outer terminal.
+```sh
+BIN=/usr/local/bin bash setup.sh     # needs write access there
+```
+
+## What you get
+
+- `clip` — `some-command | clip` puts stdin on your clipboard.
+- vim — every yank (`yy`, `yw`, visual `y`) copies to your clipboard.
+- tmux — OSC 52 forwarded out; mouse drag-select copies on release.
 
 ## Requirements
 
 - Vim 8+ (needs `TextYankPost`).
-- The local terminal must allow OSC 52 writes (alacritty/kitty/iTerm2/WezTerm/
+- Your local terminal must allow OSC 52 writes (alacritty/kitty/iTerm2/WezTerm/
   ghostty do, mostly by default).
-- GNU or BSD `base64` (both fine).
-- tmux < 3.2: see the note in `tmux.conf`.
+- GNU or BSD `base64`.
+- tmux < 3.2: see the note in the generated `~/.osc52/tmux.conf`.
 
-Paste from the host into the server is plain Cmd+V (terminal paste); OSC 52 read
-is normally disabled, so the clipboard cannot be read back.
+Paste from local into the server is plain Cmd+V (terminal paste); OSC 52 read is
+normally disabled, so the clipboard cannot be read back.
