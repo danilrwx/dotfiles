@@ -42,3 +42,15 @@ command! -nargs=+ -bar Grepq {
   setqflist([], 'a', {title: cmd})
   belowright cwindow
 }
+
+# toggle the quickfix window (<leader>q): open sized to content, skip when empty
+def ToggleQf()
+  if !empty(filter(getwininfo(), (_, w) => w.quickfix && !w.loclist))
+    cclose
+  elseif empty(getqflist())
+    echo 'quickfix is empty'
+  else
+    execute 'botright copen ' .. min([10, len(getqflist())])
+  endif
+enddef
+nnoremap <silent> <leader>q <scriptcmd>ToggleQf()<cr>
