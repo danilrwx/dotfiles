@@ -27,8 +27,17 @@ nnoremap <silent> <leader>f :FZF<cr>
 
 # --- extra commands built on fzf#run/fzf#wrap (no junegunn/fzf.vim needed) ---
 
-def BufSink(line: string)
-  execute 'buffer ' .. matchstr(line, '^\d\+')
+def BufSink(lines: list<string>)
+  # --expect puts the pressed key on line 1 ('' for Enter), selections follow
+  if len(lines) < 2
+    return
+  endif
+  var nums = lines[1 :]->mapnew((_, l) => str2nr(matchstr(l, '^\d\+')))
+  if lines[0] == 'ctrl-d'
+    execute 'bdelete ' .. join(nums)
+  else
+    execute 'buffer ' .. nums[0]
+  endif
 enddef
 
 def Buffers()
@@ -37,8 +46,10 @@ def Buffers()
     ->mapnew((_, b) => printf("%d\t%s", b.bufnr, fnamemodify(b.name, ':~:.')))
   fzf#run(fzf#wrap({
     source: bufs,
-    sink: BufSink,
-    options: ['--prompt', 'Buffers> ', '--with-nth', '2..', '-d', "\t"],
+    'sink*': BufSink,
+    options: ['--multi', '--expect', 'ctrl-d',
+      '--header', 'Enter: open   Ctrl-D: delete   Tab: select',
+      '--prompt', 'Buffers> ', '--with-nth', '2..', '-d', "\t"],
   }))
 enddef
 command! Buffers Buffers()
@@ -89,7 +100,8 @@ def Grep(query: string = '')
   fzf#run(fzf#wrap({
     source: cmd .. shellescape(q),
     'sink*': GrepSink,
-    options: ['--multi', '--prompt', $'Grep({q})> ', '--delimiter', ':'],
+    options: ['--multi', '--header', 'Enter: open   Tab: select → quickfix',
+      '--prompt', $'Grep({q})> ', '--delimiter', ':'],
   }))
 enddef
 def GrepVisual()
