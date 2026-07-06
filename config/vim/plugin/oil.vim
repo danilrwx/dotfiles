@@ -1,22 +1,21 @@
 vim9script
 
-# oil-mini: edit a directory as a buffer. :w applies renames/creates/deletes and
-# copies (duplicate a line -> copy), subpaths included (mkdir -p). <CR> opens the
-# entry, - goes up. A hidden 4-digit id prefix tracks each entry: same id twice
-# (copied line) with a new name is a copy of the original; a changed single line
-# is a rename; a line with no id is a new entry; a vanished id is a deletion.
-# Depends on git-less built-ins plus `cp` for copies.
+# oil-mini: edit a directory as a buffer. :w applies renames/creates/copies/
+# deletes, subpaths included (mkdir -p). <CR> opens the entry, - goes up.
+# Each line carries the entry's absolute path as a hidden (concealed) prefix, so
+# identity is global: editing the name renames; duplicating a line copies; a
+# line pasted from another oil dir moves the file here; a line with no prefix is
+# a new entry; a prefix that vanished from its dir is a deletion. All confirmed.
+# Depends on built-ins plus `cp` for copies.
 
 def Render()
   b:oil_reg = {}
   var lines: list<string> = []
-  var n = 0
   for name in readdir(b:oil_dir)->sort()
-    n += 1
-    var id = printf('%04d', n)
-    var disp = name .. (isdirectory(b:oil_dir .. name) ? '/' : '')
-    b:oil_reg[id] = disp
-    lines->add(id .. "\t" .. disp)
+    var full = simplify(b:oil_dir .. name)
+    var disp = name .. (isdirectory(full) ? '/' : '')
+    b:oil_reg[full] = disp
+    lines->add(full .. "\t" .. disp)
   endfor
   silent keepjumps deletebufline('%', 1, '$')
   if !empty(lines)
@@ -37,42 +36,50 @@ def CopyPath(src: string, dst: string): number
   return v:shell_error
 enddef
 
+def Rel(dir: string, p: string): string
+  return stridx(p, dir) == 0 ? strpart(p, len(dir)) : p
+enddef
+
 def Apply(): bool
   var dir = b:oil_dir
   var reg = b:oil_reg
-  var byid: dict<list<string>> = {}
+  var byfull: dict<list<string>> = {}
   var creates: list<string> = []
   for l in getline(1, '$')->filter((_, v) => v !~ '^\s*$')
-    var m = matchlist(l, '^\(\d\{4}\)\t\(.*\)$')
-    if !empty(m) && reg->has_key(m[1])
-      byid[m[1]] = add(get(byid, m[1], []), m[2])
+    var ti = stridx(l, "\t")
+    if ti < 0
+      creates->add(l)
     else
-      creates->add(empty(m) ? l : m[2])
+      var full = strpart(l, 0, ti)
+      byfull[full] = add(get(byfull, full, []), strpart(l, ti + 1))
     endif
   endfor
 
   var renames: list<list<string>> = []
   var copies: list<list<string>> = []
-  var deletes: list<string> = []
-  for [id, oldname] in items(reg)
-    if !byid->has_key(id)
-      deletes->add(oldname)
-      continue
-    endif
-    var names = byid[id]
-    if index(names, oldname) >= 0
-      # original kept; any other occurrence of this id is a copy of it
-      for nm in names
-        if nm != oldname
-          copies->add([oldname, nm])
+  for [full, names] in items(byfull)
+    var targets: list<string> = []
+    for nm in names
+      targets->add(simplify(dir .. trim(nm, '/', 2)))
+    endfor
+    if index(targets, full) >= 0
+      for t in targets
+        if t != full
+          copies->add([full, t])
         endif
       endfor
     else
-      # original name gone: first occurrence renames it, the rest copy from it
-      renames->add([oldname, names[0]])
-      for nm in names[1 : ]
-        copies->add([oldname, nm])
+      renames->add([full, targets[0]])
+      for t in targets[1 : ]
+        copies->add([full, t])
       endfor
+    endif
+  endfor
+
+  var deletes: list<string> = []
+  for [full, disp] in items(reg)
+    if !byfull->has_key(full)
+      deletes->add(full)
     endif
   endfor
 
@@ -81,17 +88,17 @@ def Apply(): bool
   endif
 
   var summary: list<string> = []
-  for [old, new] in renames
-    summary->add($'rename  {old} → {new}')
+  for [src, dst] in renames
+    summary->add($'rename  {Rel(dir, src)} → {Rel(dir, dst)}')
   endfor
   for [src, dst] in copies
-    summary->add($'copy    {src} → {dst}')
+    summary->add($'copy    {Rel(dir, src)} → {Rel(dir, dst)}')
   endfor
   for name in creates
     summary->add($'create  {name}')
   endfor
-  for name in deletes
-    summary->add($'delete  {name}')
+  for full in deletes
+    summary->add($'delete  {Rel(dir, full)}')
   endfor
   if confirm("Apply changes?\n" .. join(summary, "\n"), "&Yes\n&No", 2) != 1
     return false
@@ -99,77 +106,68 @@ def Apply(): bool
 
   var errors: list<string> = []
 
-  # every final target name; if one is claimed twice, skip those with an error
+  # a destination claimed more than once is skipped
   var tcount: dict<number> = {}
-  for [old, new] in renames
-    tcount[new] = get(tcount, new, 0) + 1
+  for [src, dst] in renames
+    tcount[dst] = get(tcount, dst, 0) + 1
   endfor
   for [src, dst] in copies
     tcount[dst] = get(tcount, dst, 0) + 1
   endfor
-  for name in creates
-    tcount[name] = get(tcount, name, 0) + 1
-  endfor
 
-  # copies first, while the originals are still in place
+  # copies first, while sources are still in place
   for [src, dst] in copies
     if tcount[dst] > 1
-      errors->add($'copy skipped, name used twice: {dst}')
+      errors->add($'copy skipped, name used twice: {Rel(dir, dst)}')
       continue
     endif
-    var d2 = simplify(dir .. trim(dst, '/', 2))
-    if filereadable(d2) || isdirectory(d2)
-      errors->add($'copy skipped, exists: {dst}')
+    if filereadable(dst) || isdirectory(dst)
+      errors->add($'copy skipped, exists: {Rel(dir, dst)}')
       continue
     endif
-    Mkparent(d2)
-    if CopyPath(simplify(dir .. trim(src, '/', 2)), d2) != 0
-      errors->add($'copy failed: {src} → {dst}')
+    Mkparent(dst)
+    if CopyPath(src, dst) != 0
+      errors->add($'copy failed: {Rel(dir, src)} → {Rel(dir, dst)}')
     endif
   endfor
 
-  # renames in two phases via temp names so swaps/cycles (a↔b) work: first move
-  # every source out to a temp, then temps into their final names.
+  # renames in two phases via temp names so swaps/cycles (a↔b) work: move every
+  # source to a temp, then temps into their finals. Handles cross-dir moves too.
   # ponytail: temp is .oil-tmp-N in dir; a real file of that name would clash.
   var vacated: dict<bool> = {}
-  for [old, new] in renames
-    vacated[trim(old, '/', 2)] = true
+  for [src, dst] in renames
+    vacated[src] = true
   endfor
-  for name in deletes
-    vacated[trim(name, '/', 2)] = true
+  for full in deletes
+    vacated[full] = true
   endfor
   var pending: list<list<string>> = []
   var ti = 0
-  for [old, new] in renames
-    if tcount[new] > 1
-      errors->add($'rename skipped, name used twice: {new}')
+  for [src, dst] in renames
+    if tcount[dst] > 1
+      errors->add($'rename skipped, name used twice: {Rel(dir, dst)}')
       continue
     endif
-    var dst = simplify(dir .. trim(new, '/', 2))
-    if (filereadable(dst) || isdirectory(dst)) && !vacated->has_key(trim(new, '/', 2))
-      errors->add($'rename skipped, exists: {new}')
+    if (filereadable(dst) || isdirectory(dst)) && !vacated->has_key(dst)
+      errors->add($'rename skipped, exists: {Rel(dir, dst)}')
       continue
     endif
     ti += 1
     var tmp = simplify(dir .. printf('.oil-tmp-%d', ti))
-    if rename(simplify(dir .. trim(old, '/', 2)), tmp) != 0
-      errors->add($'rename failed: {old} → {new}')
+    if rename(src, tmp) != 0
+      errors->add($'rename failed: {Rel(dir, src)} → {Rel(dir, dst)}')
       continue
     endif
-    pending->add([tmp, new])
+    pending->add([tmp, dst])
   endfor
-  for [tmp, new] in pending
-    var dst = simplify(dir .. trim(new, '/', 2))
+  for [tmp, dst] in pending
     Mkparent(dst)
     if rename(tmp, dst) != 0
-      errors->add($'rename failed → {new}')
+      errors->add($'rename failed → {Rel(dir, dst)}')
     endif
   endfor
 
   for name in creates
-    if tcount[name] > 1
-      continue
-    endif
     var dst = simplify(dir .. name)
     if filereadable(dst) || isdirectory(dst)
       continue
@@ -186,9 +184,9 @@ def Apply(): bool
     endtry
   endfor
 
-  for name in deletes
-    if delete(simplify(dir .. trim(name, '/', 2)), name =~ '/$' ? 'rf' : '') != 0
-      errors->add($'delete failed: {name}')
+  for full in deletes
+    if delete(full, reg[full] =~ '/$' ? 'rf' : '') != 0
+      errors->add($'delete failed: {Rel(dir, full)}')
     endif
   endfor
 
@@ -203,14 +201,16 @@ def Apply(): bool
 enddef
 
 def Enter()
-  var m = matchlist(getline('.'), '^\d\{4}\t\(.*\)$')
-  if empty(m) || !Leave()
+  var l = getline('.')
+  var ti = stridx(l, "\t")
+  if ti < 0 || !Leave()
     return
   endif
-  if m[1] =~ '/$'
-    Open(b:oil_dir .. m[1])
+  var full = strpart(l, 0, ti)
+  if isdirectory(full)
+    Open(full .. '/')
   else
-    execute 'edit ' .. fnameescape(b:oil_dir .. m[1])
+    execute 'edit ' .. fnameescape(full)
   endif
 enddef
 
@@ -226,19 +226,25 @@ def Focus(name: string)
     return
   endif
   for lnum in range(1, line('$'))
-    var m = matchlist(getline(lnum), '^\d\{4}\t\(.*\)$')
-    if !empty(m) && (m[1] == name || m[1] == name .. '/')
-      cursor(lnum, 6)
+    var l = getline(lnum)
+    var ti = stridx(l, "\t")
+    if ti < 0
+      continue
+    endif
+    var nm = strpart(l, ti + 1)
+    if nm == name || nm == name .. '/'
+      cursor(lnum, ti + 2)
       return
     endif
   endfor
 enddef
 
-# cc/S would wipe the hidden id (turning a rename into delete+create); keep the
-# id and clear only the name so the edit stays a rename.
+# cc/S would wipe the hidden path prefix (turning a rename into delete+create);
+# keep the prefix and clear only the name so the edit stays a rename.
 def RenameLine()
-  var m = matchlist(getline('.'), '^\(\d\{4}\t\)')
-  setline('.', empty(m) ? '' : m[1])
+  var l = getline('.')
+  var ti = stridx(l, "\t")
+  setline('.', ti < 0 ? '' : strpart(l, 0, ti + 1))
   startinsert!
 enddef
 
@@ -271,7 +277,7 @@ export def Open(path = '')
   setlocal buftype=acwrite noswapfile bufhidden=wipe
   setlocal conceallevel=3 concealcursor=nvic
   syntax clear
-  syntax match oilId '^\d\{4}\t' conceal
+  syntax match oilId '^[^\t]*\t' conceal
   nnoremap <buffer> <silent> <CR> <ScriptCmd>Enter()<CR>
   nnoremap <buffer> <silent> -    <ScriptCmd>Up()<CR>
   nnoremap <buffer> <silent> cc   <ScriptCmd>RenameLine()<CR>
