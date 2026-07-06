@@ -23,7 +23,12 @@ if !loaded
   endfor
 endif
 
+# remember the last picker so <leader>' can reopen it (grep keeps its query)
+var LastPicker: func = () => 0
+nnoremap <silent> <leader>' <scriptcmd>LastPicker()<cr>
+
 def Files()
+  LastPicker = Files
   fzf#run(fzf#wrap('files', {options: ['--multi', '--prompt', 'Files> ']}))
 enddef
 command! Files Files()
@@ -45,6 +50,7 @@ def BufSink(lines: list<string>)
 enddef
 
 def Buffers()
+  LastPicker = Buffers
   var bufs = getbufinfo({buflisted: 1})
     ->filter((_, b) => !empty(b.name))
     ->mapnew((_, b) => printf("%d\t%s", b.bufnr, fnamemodify(b.name, ':~:.')))
@@ -60,6 +66,7 @@ command! Buffers Buffers()
 nnoremap <silent> <leader>b <scriptcmd>Buffers()<cr>
 
 def GFiles()
+  LastPicker = GFiles
   fzf#run(fzf#wrap('gfiles', {
     source: 'git ls-files --cached --others --exclude-standard',
     options: ['--multi', '--prompt', 'GFiles> '],
@@ -98,6 +105,7 @@ def Grep(query: string = '')
   if empty(q)
     return
   endif
+  LastPicker = () => Grep(q)
   # -F: search the text literally, so regex-special chars don't need escaping
   var cmd = executable('ugrep') ? 'ugrep -RInk -F -I --ignore-files --color=never -- '
     : 'grep -rIn -F -- '

@@ -65,6 +65,7 @@ def DiagWs()
   })
 enddef
 command! LspDiagWs DiagWs()
+nnoremap <silent> <leader>D <cmd>LspDiagWs<cr>
 
 var lspOpts = {
   autoHighlightDiags: true,

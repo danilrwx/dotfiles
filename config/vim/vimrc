@@ -53,3 +53,10 @@ nnoremap <c-l> :nohl<cr>
 
 nnoremap <silent> - <cmd>Oil<cr>
 
+nnoremap <silent> <leader>gg <cmd>silent execute '!tmux neww lazygit'<bar>redraw!<cr>
+nnoremap <silent> <A-q> <cmd>bd<cr>
+
+nnoremap <leader>y "+y
+xnoremap <leader>y "+y
+nnoremap <leader>p "+p
+
