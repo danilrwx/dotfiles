@@ -2,8 +2,12 @@
 
 # fzf-based replacement for the extrakto tmux plugin: no python, no TPM, works
 # anywhere fzf+tmux exist (incl. devbox containers). Fuzzy-pick a token
-# (word/path/url) from the visible pane. mode=insert (prefix+Tab) types it into
-# the pane; mode=copy (prefix+y) puts it into the tmux buffer.
+# (word/path/url) from the visible pane. Arg is the mode: insert (prefix+Tab)
+# types it into the pane, copy (prefix+y) puts it into the tmux buffer.
+#
+# The pane is resolved via display-message rather than passed in: display-popup
+# does NOT expand #{pane_id} in its command, so we ask tmux for the active pane
+# from inside the popup instead.
 set -euo pipefail
 
 extract() {
@@ -17,8 +21,8 @@ if [ "${1:-}" = "--selftest" ]; then
   echo ok; exit 0
 fi
 
-pane="${1:?pane id required}"
-mode="${2:-insert}"
+mode="${1:-insert}"
+pane=$(tmux display-message -p '#{pane_id}')
 
 sel=$(tmux capture-pane -pJ -t "$pane" -S -200 | extract | fzf --no-sort --tac) || exit 0
 [ -n "$sel" ] || exit 0
