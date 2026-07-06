@@ -82,5 +82,12 @@ def Grep(query: string = '')
     options: ['--prompt', $'Grep({q})> ', '--delimiter', ':'],
   }))
 enddef
+def GrepVisual()
+  # getregion works from a <Cmd>/<ScriptCmd> map while still in visual mode
+  var sel = getregion(getpos('v'), getpos('.'), {type: mode()})->get(0, '')
+  Grep(sel)
+enddef
+
 command! -nargs=* Grep Grep(<q-args>)
 nnoremap <silent> <leader>g <scriptcmd>Grep()<cr>
+xnoremap <silent> <leader>g <scriptcmd>GrepVisual()<cr>
