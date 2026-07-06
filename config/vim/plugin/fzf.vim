@@ -181,10 +181,14 @@ def LaunchGrep(query: string)
   fzf#run({
     'sink*': (lines) => Finish('livegrep', lines, GrepAccept),
     options: BaseOpts('livegrep', 'LiveGrep> ', query, 'alt-o') + ['--disabled',
-      '--delimiter', ':',
-      '--header', 'type to search  Enter: open  Tab: → quickfix  Alt-O: prev',
+      '--delimiter', ':', '--nth', '1',
+      '--header', 'Alt-F: filter file  Alt-G: grep  Tab: → quickfix  Alt-O: prev',
       '--bind', 'start:reload:' .. reload,
-      '--bind', 'change:reload:' .. reload],
+      '--bind', 'change:reload:' .. reload,
+      # alt-f: stop grepping, let fzf fuzzy-filter the current results by the file
+      # path (field 1 via --nth); alt-g: back to grep mode.
+      '--bind', 'alt-f:unbind(change)+enable-search+change-prompt(File> )+clear-query',
+      '--bind', 'alt-g:rebind(change)+disable-search+change-prompt(LiveGrep> )+clear-query'],
   })
 enddef
 
