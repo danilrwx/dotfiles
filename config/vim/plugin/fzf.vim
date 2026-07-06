@@ -30,8 +30,8 @@ endif
 # History of picker names lets you cycle between them: <leader>'/<leader>" when
 # fzf is closed, ctrl-o (an --expect key) from inside fzf. fzf cursor position
 # and multi-selection are not restored — only the query.
-# per-picker query history file: ctrl-p/ctrl-n walk past queries (fzf remaps
-# them when --history is set; list nav stays on arrows/ctrl-j/ctrl-k).
+# per-picker query history file. --history makes fzf steal ctrl-n/ctrl-p for
+# history, so bind them back to list nav and move history to alt-n/alt-p.
 const HISTDIR = ($XDG_CONFIG_HOME ?? expand('~/.config')) .. '/vim/files/fzf-history'
 if !isdirectory(HISTDIR)
   mkdir(HISTDIR, 'p')
@@ -97,6 +97,7 @@ def BaseOpts(name: string, prompt: string, query: string, expectKeys: string): l
   # window instead of hugging the top (shell fzf keeps its 40%).
   return ['--height', '100%', '--print-query', '--multi', '--expect', expectKeys,
     '--history', HISTDIR .. '/' .. name,
+    '--bind', 'ctrl-n:down,ctrl-p:up,alt-n:next-history,alt-p:previous-history',
     '--query', query, '--prompt', prompt]
 enddef
 
