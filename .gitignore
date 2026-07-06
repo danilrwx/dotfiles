@@ -12,5 +12,6 @@ config/vim/files/sessions/*
 !config/vim/files/backup/.keep
 !config/vim/files/sessions/.keep
 config/vim/.netrwhist
+config/vim/pack/
 
 config/k9s/clusters

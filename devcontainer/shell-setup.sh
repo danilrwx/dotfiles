@@ -10,8 +10,8 @@ mkdir -p "$COMP"
 command -v fzf     >/dev/null && fzf --zsh                 > "$COMP/fzf.zsh"     2>/dev/null || true
 command -v kubectl >/dev/null && kubectl completion zsh    > "$COMP/kubectl.zsh" 2>/dev/null || true
 
-# vim plugins via native packages in XDG data (packpath adds it in vimrc, no plugin manager)
-VIM_PACK="$HOME/.local/share/vim/pack/plugins/start"
+# vim plugins via native packages (~/.config/vim is in packpath by default; gitignored)
+VIM_PACK="$HOME/.config/vim/pack/plugins/start"
 mkdir -p "$VIM_PACK"
 for repo in \
   markonm/traces.vim \
