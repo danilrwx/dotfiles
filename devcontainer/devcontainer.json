@@ -11,7 +11,7 @@
   "mounts": [
     "source=devbox-home,target=/home/dev,type=volume",
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
-    "source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,readonly",
+    "source=${localEnv:HOME}/.ssh/config,target=/home/dev/.ssh/config,type=bind,readonly",
     "source=${localEnv:HOME}/.claude,target=/home/dev/.claude,type=bind",
     "source=${localEnv:HOME}/.claude.json,target=/home/dev/.claude.json,type=bind",
     "source=${localEnv:HOME}/.kube,target=/home/dev/.kube,type=bind",
