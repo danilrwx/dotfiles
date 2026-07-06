@@ -62,9 +62,3 @@ nnoremap <silent> <A-q> <cmd>bd<cr>
 nnoremap <silent> <S-l> <cmd>bn<cr>
 nnoremap <silent> <S-h> <cmd>bp<cr>
 
-nnoremap <leader>y "+y
-xnoremap <leader>y "+y
-nnoremap <leader>p "+p
-
-nnoremap <silent> <leader>dd <cmd>let @+ = expand('%') .. ':' .. line('.')<cr>
-
