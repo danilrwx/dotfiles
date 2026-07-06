@@ -127,7 +127,7 @@ link_config() {
 }
 
 # k8s has no host bind mount, so push the current host ~/.ssh/config into the pod
-# on every up/shell (DevPod has no live sync). docker binds ~/.ssh/config already.
+# on every up/shell (DevPod has no live sync). docker binds ~/.ssh already.
 push_ssh_config() {
   [ "$PROVIDER" = kubernetes ] || return 0
   [ -f "$HOME/.ssh/config" ] || return 0
