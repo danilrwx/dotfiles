@@ -5,14 +5,14 @@ sequences — no xclip/pbcopy, no X server. Works through tmux and SSH.
 
 ## Install on a server
 
-`setup.sh` is self-contained — no scp needed. Either:
+`install.sh` is self-contained — no scp needed. Either:
 
 ```sh
 # paste into the server shell
-clip < osc52/setup.sh          # copies it to your clipboard, then paste on the server
+clip < server/install.sh          # copies it to your clipboard, then paste on the server
 
 # or pipe it over ssh
-ssh server 'bash -s' < osc52/setup.sh
+ssh server 'bash -s' < server/install.sh
 ```
 
 It installs the `clip` command into `~/.local/bin` (adding that dir to `PATH` if
@@ -24,7 +24,7 @@ Install `clip` elsewhere with `BIN` (e.g. a dir already on `PATH`, no `PATH`
 edit then):
 
 ```sh
-BIN=/usr/local/bin bash setup.sh     # needs write access there
+BIN=/usr/local/bin bash install.sh     # needs write access there
 ```
 
 ## What you get

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # OSC 52 clipboard over SSH — self-contained installer. Copy this whole file and
-# paste it into a server shell (or: clip < setup.sh, then paste; or
-# ssh host 'bash -s' < setup.sh). It installs the `clip` command and wires vim +
+# paste it into a server shell (or: clip < install.sh, then paste; or
+# ssh host 'bash -s' < install.sh). It installs the `clip` command and wires vim +
 # tmux so yanks and mouse selections land on your local clipboard. Idempotent.
 # Wrapped in a subshell so a failure won't drop an interactive shell.
 #
 # clip goes to ~/.local/bin by default; override with BIN, e.g.
-#   BIN=/usr/local/bin bash setup.sh   (needs write access there)
+#   BIN=/usr/local/bin bash install.sh   (needs write access there)
 ( set -eu
 
 bin="${BIN:-$HOME/.local/bin}"
