@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Copy stdin to the host clipboard via OSC 52, for use from the devbox over SSH
+# where pbcopy/xclip cannot reach the host. The terminal emulator turns the
+# escape sequence into a real clipboard write; inside tmux it is forwarded to the
+# outer terminal (needs set-clipboard on + the clipboard terminal-feature, see
+# .tmux.conf). Usage:  some-command | clip   |   clip < file
+set -euo pipefail
+
+b64=$(base64 | tr -d '\n')
+printf '\033]52;c;%s\a' "$b64" > /dev/tty
