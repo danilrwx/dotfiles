@@ -4,6 +4,33 @@ vim9script
 # code filetype. The plugin supports late packadd (enables immediately when
 # loaded after VimEnter), so servers register and attach on that first file.
 
+# the plugin drops diagnostics for files without a buffer (push model), so this
+# aggregates every loaded buffer's diagnostics into one quickfix list.
+import autoload 'lsp/diag.vim'
+const SEV = {1: 'E', 2: 'W', 3: 'I', 4: 'N'}
+def DiagAll()
+  var items = []
+  for b in getbufinfo({bufloaded: 1})
+    for d in diag.GetDiagsForBuf(b.bufnr)
+      items->add({
+        bufnr: b.bufnr,
+        lnum: d.range.start.line + 1,
+        col: d.range.start.character + 1,
+        text: substitute(d.message, "\n\\+", ' ', 'g'),
+        type: SEV->get(d->get('severity', 1), 'E'),
+      })
+    endfor
+  endfor
+  if empty(items)
+    echo 'no diagnostics'
+    return
+  endif
+  setqflist([], ' ', {items: items, title: 'LSP diagnostics'})
+  copen
+  cfirst
+enddef
+command! LspDiagAll DiagAll()
+
 var lspOpts = {
   autoHighlightDiags: true,
   useQuickfixForLocations: true,
@@ -57,6 +84,7 @@ def On_lsp_buffer_enabled()
   nnoremap grn :LspRename<cr>
   nnoremap grf :LspFormat<cr>
   nnoremap <c-w>d :LspDiag current<cr>
+  nnoremap grd :LspDiagAll<cr>
   nnoremap [d :LspDiag prev<cr>
   nnoremap ]d :LspDiag next<cr>
 
