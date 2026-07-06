@@ -2,7 +2,8 @@ vim9script
 
 # Native git signs, buffer-based & async (gitgutter-style): diff the live buffer
 # against the git index via `git diff --no-index` in a job, so signs stay correct
-# even before saving. ]c / [c jump between hunks. Depends on git + bash.
+# even before saving. ]c/[c jump between hunks, ghp previews, ghu reverts.
+# Depends on git + bash.
 
 highlight default GitSignAdd    ctermfg=green  guifg=#00af5f
 highlight default GitSignChange ctermfg=yellow guifg=#d7af00
@@ -16,7 +17,7 @@ const GROUP = 'gitsigns'
 const DIFF = 'git -C "$0" diff --no-color -U0 --no-index -- <(git -C "$0" show ":./$1" 2>/dev/null) "$2" 2>/dev/null || true'
 var jobs: dict<job> = {}
 var acc: dict<list<string>> = {}
-var hunks: dict<list<number>> = {}
+var hunks: dict<list<dict<any>>> = {}
 
 def Place(buf: number, tmp: string)
   delete(tmp)
@@ -24,28 +25,46 @@ def Place(buf: number, tmp: string)
     return
   endif
   sign_unplace(GROUP, {buffer: buf})
-  var starts: list<number> = []
+  var hs: list<dict<any>> = []
+  var cur: dict<any> = {}
   for line in get(acc, buf, [])
     var m = matchlist(line, '^@@ -\d\+,\=\(\d*\) +\(\d\+\),\=\(\d*\) @@')
-    if empty(m)
-      continue
-    endif
-    var old_cnt = m[1] == '' ? 1 : str2nr(m[1])
-    var new_start = str2nr(m[2])
-    var new_cnt = m[3] == '' ? 1 : str2nr(m[3])
-    if new_cnt == 0
-      var l = max([1, new_start])
-      sign_place(0, GROUP, 'GitDelete', buf, {lnum: l, priority: 10})
-      starts->add(l)
-    else
-      var name = old_cnt == 0 ? 'GitAdd' : 'GitChange'
-      for l in range(new_start, new_start + new_cnt - 1)
-        sign_place(0, GROUP, name, buf, {lnum: l, priority: 10})
-      endfor
-      starts->add(new_start)
+    if !empty(m)
+      if !empty(cur)
+        hs->add(cur)
+      endif
+      var new_start = str2nr(m[2])
+      var new_cnt = m[3] == '' ? 1 : str2nr(m[3])
+      cur = {
+        new_start: new_start,
+        new_cnt: new_cnt,
+        old_cnt: m[1] == '' ? 1 : str2nr(m[1]),
+        lnum: new_cnt == 0 ? max([1, new_start]) : new_start,
+        old_lines: [],
+        new_lines: [],
+      }
+    elseif !empty(cur)
+      if line[0] == '-'
+        cur.old_lines->add(strpart(line, 1))
+      elseif line[0] == '+'
+        cur.new_lines->add(strpart(line, 1))
+      endif
     endif
   endfor
-  hunks[buf] = starts->sort('n')
+  if !empty(cur)
+    hs->add(cur)
+  endif
+  for h in hs
+    if h.new_cnt == 0
+      sign_place(0, GROUP, 'GitDelete', buf, {lnum: h.lnum, priority: 10})
+    else
+      var name = h.old_cnt == 0 ? 'GitAdd' : 'GitChange'
+      for l in range(h.new_start, h.new_start + h.new_cnt - 1)
+        sign_place(0, GROUP, name, buf, {lnum: l, priority: 10})
+      endfor
+    endif
+  endfor
+  hunks[buf] = hs
 enddef
 
 def Refresh()
@@ -67,6 +86,15 @@ def Refresh()
   })
 enddef
 
+def HunkAt(cur: number): dict<any>
+  for h in get(hunks, bufnr('%'), [])
+    if h.new_cnt == 0 ? cur == h.lnum : (cur >= h.new_start && cur < h.new_start + h.new_cnt)
+      return h
+    endif
+  endfor
+  return {}
+enddef
+
 def NextHunk()
   if &diff
     normal! ]c
@@ -77,8 +105,13 @@ def NextHunk()
     return
   endif
   var cur = line('.')
-  var i = hs->indexof((_, v) => v > cur)
-  cursor(i >= 0 ? hs[i] : hs[0], 1)
+  for h in hs
+    if h.lnum > cur
+      cursor(h.lnum, 1)
+      return
+    endif
+  endfor
+  cursor(hs[0].lnum, 1)
 enddef
 
 def PrevHunk()
@@ -91,12 +124,47 @@ def PrevHunk()
     return
   endif
   var cur = line('.')
-  var prev = copy(hs)->filter((_, v) => v < cur)
-  cursor(empty(prev) ? hs[-1] : prev[-1], 1)
+  for h in reverse(copy(hs))
+    if h.lnum < cur
+      cursor(h.lnum, 1)
+      return
+    endif
+  endfor
+  cursor(hs[-1].lnum, 1)
 enddef
 
-nnoremap <silent> ]c <ScriptCmd>NextHunk()<CR>
-nnoremap <silent> [c <ScriptCmd>PrevHunk()<CR>
+def PreviewHunk()
+  var h = HunkAt(line('.'))
+  if empty(h)
+    return
+  endif
+  var lines = mapnew(h.old_lines, (_, l) => '-' .. l) + mapnew(h.new_lines, (_, l) => '+' .. l)
+  if empty(lines)
+    return
+  endif
+  var id = popup_atcursor(lines, {padding: [0, 1, 0, 1], border: [1, 1, 1, 1], moved: 'any'})
+  setbufvar(winbufnr(id), '&filetype', 'diff')
+enddef
+
+def UndoHunk()
+  var h = HunkAt(line('.'))
+  if empty(h)
+    return
+  endif
+  if h.new_cnt > 0
+    deletebufline('%', h.new_start, h.new_start + h.new_cnt - 1)
+  endif
+  if !empty(h.old_lines)
+    appendbufline('%', h.new_cnt > 0 ? h.new_start - 1 : h.new_start, h.old_lines)
+  endif
+  cursor(h.lnum, 1)
+  Refresh()
+enddef
+
+nnoremap <silent> ]c  <ScriptCmd>NextHunk()<CR>
+nnoremap <silent> [c  <ScriptCmd>PrevHunk()<CR>
+nnoremap <silent> ghp <ScriptCmd>PreviewHunk()<CR>
+nnoremap <silent> ghu <ScriptCmd>UndoHunk()<CR>
 
 augroup gitsigns
   autocmd!
