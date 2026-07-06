@@ -20,7 +20,6 @@ for repo in \
   yegappan/lsp \
   vim-test/vim-test \
   habamax/vim-dir \
-  laktak/tome \
   vim-fuzzbox/fuzzbox.vim; do
   dst="$VIM_PACK/${repo##*/}"
   [ -d "$dst" ] || git clone --depth 1 "https://github.com/$repo" "$dst"
