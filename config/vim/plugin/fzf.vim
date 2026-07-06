@@ -23,7 +23,11 @@ if !loaded
   endfor
 endif
 
-nnoremap <silent> <leader>f :FZF<cr>
+def Files()
+  fzf#run(fzf#wrap('files', {options: ['--multi', '--prompt', 'Files> ']}))
+enddef
+command! Files Files()
+nnoremap <silent> <leader>F <scriptcmd>Files()<cr>
 
 # --- extra commands built on fzf#run/fzf#wrap (no junegunn/fzf.vim needed) ---
 
@@ -56,13 +60,13 @@ command! Buffers Buffers()
 nnoremap <silent> <leader>b <scriptcmd>Buffers()<cr>
 
 def GFiles()
-  fzf#run(fzf#wrap({
+  fzf#run(fzf#wrap('gfiles', {
     source: 'git ls-files --cached --others --exclude-standard',
-    options: ['--prompt', 'GFiles> '],
+    options: ['--multi', '--prompt', 'GFiles> '],
   }))
 enddef
 command! GFiles GFiles()
-nnoremap <silent> <leader>G <scriptcmd>GFiles()<cr>
+nnoremap <silent> <leader>f <scriptcmd>GFiles()<cr>
 
 def GrepItem(line: string): dict<any>
   # ugrep gives file:line:col:text, grep gives file:line:text
