@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# Copy stdin to the host clipboard via OSC 52, for use over SSH where
+# xclip/pbcopy cannot reach the host. The terminal emulator turns the escape
+# sequence into a real clipboard write; inside tmux it is forwarded to the outer
+# terminal (needs the tmux.conf snippet). Usage:  some-command | clip
+set -euo pipefail
+
+printf '\033]52;c;%s\a' "$(base64 | tr -d '\n')" > /dev/tty
