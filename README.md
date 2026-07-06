@@ -82,12 +82,28 @@ Locally it uses the host's Docker Desktop via the mounted `/var/run/docker.sock`
 in k8s a privileged `docker:dind` sidecar provides the daemon and `DOCKER_HOST`
 points at it — so the cluster must allow privileged pods.
 
+## Clipboard on other servers
+
+Copying from vim/tmux over SSH to your local clipboard works in the devbox out of
+the box (OSC 52 — the terminal owns the clipboard, no X/`pbcopy`/`xclip`).
+`server/install.sh` brings the same to any plain server: vim yanks and tmux mouse
+selections land on your local clipboard, plus a `clip` command to pipe anything
+there (`cmd | clip`). It is self-contained — paste it into a server shell, or:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/danilrwx/dotfiles/master/server/install.sh | bash
+```
+
+See `server/README.md` for what it installs and the requirements.
+
 ## Layout
 
 | Path | What |
 |---|---|
 | `install` | host setup (symlinks, host tools, devpod) |
 | `bin/devbox` | the DevPod wrapper |
+| `bin/clip` | pipe stdin to the local clipboard over OSC 52 |
+| `server/install.sh` | clipboard-over-SSH (OSC 52) installer for any server |
 | `devcontainer/Dockerfile` | the container image (built in CI) |
 | `devcontainer/tools/*.sh` | container tool install phases (apt / binaries / docker / go) |
 | `devcontainer/devcontainer*.json` | Docker and Kubernetes devcontainer configs |
