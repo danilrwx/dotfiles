@@ -23,8 +23,9 @@ if !loaded
   endfor
 endif
 
-# remember recent pickers so <leader>' reopens the last; pressing it again walks
-# further back (so an accidental empty picker falls through to the previous one)
+# remember recent pickers and cycle between them: <leader>' steps to the older
+# one, <leader>" to the newer, both wrapping around. Reopening a picker moves it
+# to the front (dedup), so the ring holds each distinct picker once.
 var history: list<func> = []
 var ridx = -1
 var resuming = false
@@ -33,6 +34,10 @@ def Remember(Picker: func)
   if resuming
     return
   endif
+  var i = indexof(history, (_, F) => F == Picker)
+  if i >= 0
+    remove(history, i)
+  endif
   add(history, Picker)
   if len(history) > 10
     history = history[-10 : ]
@@ -40,16 +45,18 @@ def Remember(Picker: func)
   ridx = -1
 enddef
 
-def Resume()
+def Cycle(step: number)
   if empty(history)
     return
   endif
-  ridx = ridx < 0 ? len(history) - 1 : max([0, ridx - 1])
+  var n = len(history)
+  ridx = ridx < 0 ? n - 1 : (ridx + step % n + n) % n
   resuming = true
   history[ridx]()
   resuming = false
 enddef
-nnoremap <silent> <leader>' <scriptcmd>Resume()<cr>
+nnoremap <silent> <leader>' <scriptcmd>Cycle(-1)<cr>
+nnoremap <silent> <leader>" <scriptcmd>Cycle(1)<cr>
 
 def Files()
   Remember(Files)
