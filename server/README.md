@@ -17,9 +17,11 @@ ssh server 'bash -s' < server/install.sh
 ```
 
 It installs the `clip` command into `~/.local/bin` (adding that dir to `PATH` if
-missing), writes `~/.osc52/{vimrc,tmux.conf}`, and adds one `source` line to
-`~/.vimrc` and `~/.tmux.conf`. Idempotent. Then on the server: open a new shell
-(for `PATH`), `tmux kill-server`, and restart vim.
+missing) and writes the vim/tmux config directly into `~/.vimrc` and
+`~/.tmux.conf` inside a marked `server config` block — re-running replaces the
+block instead of duplicating it, and your existing config is left untouched.
+Then on the server: open a new shell (for `PATH`), `tmux kill-server`, and
+restart vim.
 
 Install `clip` elsewhere with `BIN` (e.g. a dir already on `PATH`, no `PATH`
 edit then):
@@ -56,7 +58,7 @@ BIN=/usr/local/bin bash install.sh     # needs write access there
 - Your local terminal must allow OSC 52 writes (alacritty/kitty/iTerm2/WezTerm/
   ghostty do, mostly by default).
 - GNU or BSD `base64`.
-- tmux < 3.2: see the note in the generated `~/.osc52/tmux.conf`.
+- tmux < 3.2: see the note in the `server config` block written to `~/.tmux.conf`.
 
 Paste from local into the server is plain Cmd+V (terminal paste); OSC 52 read is
 normally disabled, so the clipboard cannot be read back.
