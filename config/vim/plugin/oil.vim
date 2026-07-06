@@ -72,19 +72,44 @@ def Apply(): bool
   endif
 
   var errors: list<string> = []
+
+  # Renames run in two phases via temp names so swaps/cycles (a↔b) work: first
+  # move every source out to a temp, then temps into their final names.
+  # ponytail: temp is .oil-tmp-N in dir; a real file of that name would clash.
+  var newcount: dict<number> = {}
+  var vacated: dict<bool> = {}
   for [old, new] in renames
-    var src = simplify(dir .. trim(old, '/', 2))
-    var dst = simplify(dir .. trim(new, '/', 2))
-    if src ==# dst
+    newcount[new] = get(newcount, new, 0) + 1
+    vacated[trim(old, '/', 2)] = true
+  endfor
+  for name in deletes
+    vacated[trim(name, '/', 2)] = true
+  endfor
+  var pending: list<list<string>> = []
+  var ti = 0
+  for [old, new] in renames
+    if newcount[new] > 1
+      errors->add($'rename skipped, name used twice: {new}')
       continue
     endif
-    if filereadable(dst) || isdirectory(dst)
+    var dst = simplify(dir .. trim(new, '/', 2))
+    if (filereadable(dst) || isdirectory(dst)) && !vacated->has_key(trim(new, '/', 2))
       errors->add($'rename skipped, exists: {new}')
       continue
     endif
-    Mkparent(dst)
-    if rename(src, dst) != 0
+    ti += 1
+    var tmp = simplify(dir .. printf('.oil-tmp-%d', ti))
+    if rename(simplify(dir .. trim(old, '/', 2)), tmp) != 0
       errors->add($'rename failed: {old} → {new}')
+      continue
+    endif
+    pending->add([tmp, new])
+  endfor
+  for [tmp, new] in pending
+    var dst = simplify(dir .. trim(new, '/', 2))
+    Mkparent(dst)
+    if rename(tmp, dst) != 0
+      errors->add($'rename failed → {new}')
     endif
   endfor
   for name in creates
