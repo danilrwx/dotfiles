@@ -23,7 +23,8 @@ fi
 pane=$(tmux display-message -p '#{pane_id}')
 
 out=$(tmux capture-pane -pJ -t "$pane" -S -200 | extract \
-  | fzf --no-sort --tac --height=100% --expect=tab,enter) || exit 0
+  | fzf --no-sort --tac --height=100% --expect=tab,enter \
+        --header='Tab → insert into pane   Enter → copy to clipboard   Esc → cancel') || exit 0
 key=$(printf '%s\n' "$out" | sed -n 1p)
 sel=$(printf '%s\n' "$out" | sed -n 2p)
 [ -n "$sel" ] || exit 0
