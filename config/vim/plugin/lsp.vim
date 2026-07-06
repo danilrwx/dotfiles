@@ -5,29 +5,13 @@ vim9script
 # loaded after VimEnter), so servers register and attach on that first file.
 
 # the plugin drops diagnostics for files without a buffer (push model), so this
-# aggregates every loaded buffer's diagnostics into one quickfix list.
-import autoload 'lsp/diag.vim'
-const SEV = {1: 'E', 2: 'W', 3: 'I', 4: 'N'}
+# aggregates every loaded buffer's diagnostics into one quickfix list. The heavy
+# lifting lives in autoload/localdiag.vim, which imports lsp internals and so
+# must load after packadd — packadd here guarantees that when called directly.
+import autoload 'localdiag.vim'
 def DiagAll()
-  var items = []
-  for b in getbufinfo({bufloaded: 1})
-    for d in diag.GetDiagsForBuf(b.bufnr)
-      items->add({
-        bufnr: b.bufnr,
-        lnum: d.range.start.line + 1,
-        col: d.range.start.character + 1,
-        text: substitute(d.message, "\n\\+", ' ', 'g'),
-        type: SEV->get(d->get('severity', 1), 'E'),
-      })
-    endfor
-  endfor
-  if empty(items)
-    echo 'no diagnostics'
-    return
-  endif
-  setqflist([], ' ', {items: items, title: 'LSP diagnostics'})
-  copen
-  cfirst
+  silent! packadd lsp
+  localdiag.All()
 enddef
 command! LspDiagAll DiagAll()
 
