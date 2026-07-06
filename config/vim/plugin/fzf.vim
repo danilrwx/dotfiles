@@ -93,11 +93,11 @@ def Grep(query: string = '')
   }))
 enddef
 def GrepVisual()
-  # getregion works from a <Cmd>/<ScriptCmd> map while still in visual mode
-  var sel = getregion(getpos('v'), getpos('.'), {type: mode()})->get(0, '')
-  Grep(sel)
+  Grep(getreg('z')->split("\n")->get(0, ''))
 enddef
 
 command! -nargs=* Grep Grep(<q-args>)
 nnoremap <silent> <leader>g <scriptcmd>Grep()<cr>
-xnoremap <silent> <leader>g <scriptcmd>GrepVisual()<cr>
+# "zy yanks the selection AND leaves visual mode, so fzf opens in normal mode
+# (a <Cmd> map would stay in visual and swallow keys until you type)
+xnoremap <silent> <leader>g "zy<scriptcmd>GrepVisual()<cr>
