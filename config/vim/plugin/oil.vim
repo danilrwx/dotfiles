@@ -47,15 +47,22 @@ def Render()
   b:oil_reg = {}
   var lines: list<string> = []
   var metas: list<list<any>> = []   # [display byte-length, prop type ('' none), link target ('' none)]
-  for name in readdir(b:oil_dir)->sort()
+  # directories first, then by name (case-sensitive) — like oil.nvim's default
+  var names = readdir(b:oil_dir)
+  var isdir: dict<bool> = {}
+  for name in names
+    isdir[name] = isdirectory(b:oil_dir .. name)
+  endfor
+  sort(names, (a, b) => isdir[a] == isdir[b] ? (a <# b ? -1 : a >#  b ? 1 : 0) : (isdir[a] ? -1 : 1))
+  for name in names
     var full = simplify(b:oil_dir .. name)
     var id = IdFor(full)
-    var disp = name .. (isdirectory(full) ? '/' : '')
+    var disp = name .. (isdir[name] ? '/' : '')
     b:oil_reg[id] = disp
     lines->add(disp .. "\t" .. id)
     var link = getftype(full) == 'link'
     var pt = link ? 'oilLink'
-      : isdirectory(full) ? 'oilDir'
+      : isdir[name] ? 'oilDir'
       : executable(full) ? 'oilExec' : ''
     metas->add([len(disp), pt, link ? Rel(b:oil_dir, resolve(full)) : ''])
   endfor
