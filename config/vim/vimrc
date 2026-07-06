@@ -15,6 +15,7 @@ set updatetime=100
 set signcolumn=number
 set shortmess=aoOtTI
 set laststatus=0
+set completeopt=menuone,noselect,noinsert,fuzzy,popup
 
 if executable('ugrep')
   set grepprg=ugrep\ -RInk\ --tabs=1\ --ignore-files\ --exclude='zz_generated*'\ --exclude-dir='generated'

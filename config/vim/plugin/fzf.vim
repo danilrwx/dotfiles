@@ -145,7 +145,7 @@ def GrepVisual()
 enddef
 
 command! -nargs=* Grep Grep(<q-args>)
-nnoremap <silent> <leader>g <scriptcmd>Grep()<cr>
+nnoremap <silent> <leader>/ <scriptcmd>Grep()<cr>
 # "zy yanks the selection AND leaves visual mode, so fzf opens in normal mode
 # (a <Cmd> map would stay in visual and swallow keys until you type)
-xnoremap <silent> <leader>g "zy<scriptcmd>GrepVisual()<cr>
+xnoremap <silent> <leader>/ "zy<scriptcmd>GrepVisual()<cr>
