@@ -71,6 +71,7 @@ def Apply(): bool
     return false
   endif
 
+  var errors: list<string> = []
   for [old, new] in renames
     var src = simplify(dir .. trim(old, '/', 2))
     var dst = simplify(dir .. trim(new, '/', 2))
@@ -78,33 +79,48 @@ def Apply(): bool
       continue
     endif
     if filereadable(dst) || isdirectory(dst)
-      echohl WarningMsg | echom $'oil: {new} exists, skipped' | echohl None
+      errors->add($'rename skipped, exists: {new}')
       continue
     endif
     Mkparent(dst)
-    rename(src, dst)
+    if rename(src, dst) != 0
+      errors->add($'rename failed: {old} → {new}')
+    endif
   endfor
   for name in creates
     var dst = simplify(dir .. name)
     if filereadable(dst) || isdirectory(dst)
       continue
     endif
-    Mkparent(dst)
-    if name =~ '/$'
-      mkdir(dst, 'p')
-    else
-      writefile([], dst)
-    endif
+    try
+      Mkparent(dst)
+      if name =~ '/$'
+        mkdir(dst, 'p')
+      else
+        writefile([], dst)
+      endif
+    catch
+      errors->add($'create failed: {name}')
+    endtry
   endfor
   for name in deletes
-    delete(simplify(dir .. trim(name, '/', 2)), name =~ '/$' ? 'rf' : '')
+    if delete(simplify(dir .. trim(name, '/', 2)), name =~ '/$' ? 'rf' : '') != 0
+      errors->add($'delete failed: {name}')
+    endif
   endfor
+  if !empty(errors)
+    echohl WarningMsg
+    for e in errors
+      echom 'oil: ' .. e
+    endfor
+    echohl None
+  endif
   return true
 enddef
 
 def Enter()
   var m = matchlist(getline('.'), '^\d\{4}\t\(.*\)$')
-  if empty(m)
+  if empty(m) || !Leave()
     return
   endif
   if m[1] =~ '/$'
@@ -115,6 +131,9 @@ def Enter()
 enddef
 
 def Up()
+  if !Leave()
+    return
+  endif
   Open(fnamemodify(trim(b:oil_dir, '/', 2), ':h') .. '/')
 enddef
 
@@ -129,6 +148,25 @@ def Focus(name: string)
       return
     endif
   endfor
+enddef
+
+# cc/S would wipe the hidden id (turning a rename into delete+create); keep the
+# id and clear only the name so the edit stays a rename.
+def RenameLine()
+  var m = matchlist(getline('.'), '^\(\d\{4}\t\)')
+  setline('.', empty(m) ? '' : m[1])
+  startinsert!
+enddef
+
+def Leave(): bool
+  if !&modified
+    return true
+  endif
+  if confirm('Discard unsaved oil edits?', "&Yes\n&No", 2) == 1
+    setlocal nomodified
+    return true
+  endif
+  return false
 enddef
 
 def OnWrite()
@@ -152,6 +190,8 @@ export def Open(path = '')
   syntax match oilId '^\d\{4}\t' conceal
   nnoremap <buffer> <silent> <CR> <ScriptCmd>Enter()<CR>
   nnoremap <buffer> <silent> -    <ScriptCmd>Up()<CR>
+  nnoremap <buffer> <silent> cc   <ScriptCmd>RenameLine()<CR>
+  nnoremap <buffer> <silent> S    <ScriptCmd>RenameLine()<CR>
   autocmd! BufWriteCmd <buffer>
   autocmd BufWriteCmd <buffer> OnWrite()
   Render()
