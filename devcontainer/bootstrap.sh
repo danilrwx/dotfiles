@@ -21,9 +21,8 @@ fi
 
 # The image clones dotfiles without the private submodule (it needs auth). Pull
 # it now over the forwarded ssh-agent so ~/dotfiles/private is complete: work
-# git identity, the repo list, shell env. The submodule URL is https; rewrite
-# github to ssh so the agent is used.
-git config --global url."git@github.com:".insteadOf "https://github.com/"
+# git identity, the repo list, shell env. The submodule URL is git@, so the
+# agent is used directly.
 git -C "$HOME/dotfiles" submodule update --init --recursive
 
 W="$HOME/w"

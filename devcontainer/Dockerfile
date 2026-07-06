@@ -63,6 +63,7 @@ RUN bash ${LIB}/go.sh
 COPY links.sh /usr/local/lib/devbox-links.sh
 COPY shell-setup.sh /usr/local/lib/devbox-shell-setup.sh
 RUN git clone --depth 1 https://github.com/danilrwx/dotfiles.git "${HOME}/dotfiles" \
+ && git -C "${HOME}/dotfiles" remote set-url origin git@github.com:danilrwx/dotfiles.git \
  && bash /usr/local/lib/devbox-links.sh \
  && bash /usr/local/lib/devbox-shell-setup.sh
 
