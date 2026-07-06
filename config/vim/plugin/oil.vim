@@ -13,6 +13,20 @@ var registry: dict<string> = {}   # id -> absolute path
 var revreg: dict<string> = {}     # absolute path -> id (reused across renders)
 var seq = 0
 
+# entry-type colours in the buffer + change-preview colours in the confirm popup
+highlight default link OilDir Directory
+highlight default OilLink   ctermfg=6 guifg=#00afaf
+highlight default OilExec   ctermfg=2 guifg=#5faf5f
+highlight default OilCreate ctermfg=2 guifg=#5faf5f
+highlight default OilDelete ctermfg=1 guifg=#d75f5f
+highlight default OilCopy   ctermfg=6 guifg=#00afaf
+highlight default OilRename ctermfg=3 guifg=#d7af5f
+for oilpt in [['oilDir', 'OilDir'], ['oilLink', 'OilLink'], ['oilExec', 'OilExec']]
+  if empty(prop_type_get(oilpt[0]))
+    prop_type_add(oilpt[0], {highlight: oilpt[1]})
+  endif
+endfor
+
 def IdFor(full: string): string
   if !revreg->has_key(full)
     seq += 1
@@ -31,17 +45,27 @@ enddef
 def Render()
   b:oil_reg = {}
   var lines: list<string> = []
+  var metas: list<list<any>> = []   # [display byte-length, prop type ('' = none)]
   for name in readdir(b:oil_dir)->sort()
     var full = simplify(b:oil_dir .. name)
     var id = IdFor(full)
     var disp = name .. (isdirectory(full) ? '/' : '')
     b:oil_reg[id] = disp
     lines->add(disp .. "\t" .. id)
+    var pt = isdirectory(full) ? 'oilDir'
+      : getftype(full) == 'link' ? 'oilLink'
+      : executable(full) ? 'oilExec' : ''
+    metas->add([len(disp), pt])
   endfor
   silent keepjumps deletebufline('%', 1, '$')
   if !empty(lines)
     setline(1, lines)
   endif
+  for i in range(len(metas))
+    if metas[i][1] != ''
+      prop_add(i + 1, 1, {length: metas[i][0], type: metas[i][1]})
+    endif
+  endfor
   setlocal nomodified
 enddef
 
@@ -59,6 +83,23 @@ enddef
 
 def Rel(dir: string, p: string): string
   return stridx(p, dir) == 0 ? strpart(p, len(dir)) : p
+enddef
+
+def Confirm(summary: list<string>): bool
+  var id = popup_create(summary, {
+    title: ' Apply changes? ',
+    border: [1, 1, 1, 1],
+    padding: [0, 1, 0, 1],
+    pos: 'center',
+  })
+  win_execute(id, 'syntax match OilRename "^rename\>"')
+  win_execute(id, 'syntax match OilCopy   "^copy\>"')
+  win_execute(id, 'syntax match OilCreate "^create\>"')
+  win_execute(id, 'syntax match OilDelete "^delete\>"')
+  redraw
+  var ok = confirm('Apply these changes?', "&Yes\n&No", 2) == 1
+  popup_close(id)
+  return ok
 enddef
 
 def Apply(): bool
@@ -123,7 +164,7 @@ def Apply(): bool
   for full in deletes
     summary->add($'delete  {Rel(dir, full)}')
   endfor
-  if confirm("Apply changes?\n" .. join(summary, "\n"), "&Yes\n&No", 2) != 1
+  if !Confirm(summary)
     return false
   endif
 
