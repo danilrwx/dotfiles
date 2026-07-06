@@ -12,9 +12,8 @@
 #
 # k8s knobs (env): DEVBOX_K8S_NS (devbox), DEVBOX_K8S_DISK (50Gi),
 # DEVBOX_K8S_SC (storage class, default cluster default). The kubernetes
-# provider add provisions a cluster-admin ServiceAccount, builds a Secret from a
-# self-contained kubeconfig of its static token, and a pod template that mounts
-# it, since host bind mounts do not work in the k8s provider.
+# provider add builds a Secret from the host kubeconfigs and a pod template that
+# mounts it, since host bind mounts do not work in the k8s provider.
 set -euo pipefail
 
 log() { echo -e "\033[0;31m$1\033[0m"; }
@@ -156,69 +155,18 @@ provider_add() {
   local kcfg="$HOME/.config/devbox/kubeconfig"
   mkdir -p "$(dirname "$kcfg")"
 
-  log "Creating namespace '$ns'"
+  # Pin DevPod to a self-contained kubeconfig of the current context; the ambient
+  # KUBECONFIG may be a colon-merged list the provider cannot stat. The same file
+  # is mounted into the pod so in-cluster kubectl targets this cluster.
+  log "Flattening current kube context -> $kcfg"
+  kubectl config view --minify --flatten > "$kcfg"
+  chmod 600 "$kcfg"
+
+  log "Creating namespace/secret '$ns/devbox-kube'"
   kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f -
   # Allow the privileged docker:dind sidecar. Deckhouse (admission-policy-engine)
   # gates Pod Security by this namespace label; harmless on non-Deckhouse clusters.
   kubectl label namespace "$ns" security.deckhouse.io/pod-policy=privileged --overwrite
-
-  # In-pod kubectl cannot use the host's OIDC exec kubeconfig (no `d8`/browser in
-  # the pod), so provision a cluster-admin ServiceAccount and build a
-  # self-contained kubeconfig from its static (non-expiring) token. Needs the
-  # current host context to be able to create these — run under your OIDC admin.
-  log "Provisioning ServiceAccount '$ns/admin' (cluster-admin) for in-pod kubectl"
-  kubectl create serviceaccount admin -n "$ns" --dry-run=client -o yaml | kubectl apply -f -
-  kubectl create clusterrolebinding devbox-admin --clusterrole=cluster-admin \
-    --serviceaccount="$ns:admin" --dry-run=client -o yaml | kubectl apply -f -
-  kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: admin-token
-  namespace: $ns
-  annotations:
-    kubernetes.io/service-account.name: admin
-type: kubernetes.io/service-account-token
-EOF
-
-  local token=""
-  for _ in $(seq 1 10); do
-    token=$(kubectl -n "$ns" get secret admin-token -o jsonpath='{.data.token}' 2>/dev/null | base64 -d)
-    [ -n "$token" ] && break; sleep 1
-  done
-  [ -n "$token" ] || { log "timed out waiting for the admin-token secret"; exit 1; }
-
-  # Reuse the current cluster's endpoint and TLS trust; swap only the credential.
-  local server cadata insecure
-  server=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
-  cadata=$(kubectl config view --minify --flatten -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
-  insecure=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.insecure-skip-tls-verify}')
-
-  log "Writing SA kubeconfig -> $kcfg"
-  {
-    echo "apiVersion: v1"
-    echo "kind: Config"
-    echo "clusters:"
-    echo "- name: devbox"
-    echo "  cluster:"
-    echo "    server: $server"
-    [ -n "$cadata" ] && echo "    certificate-authority-data: $cadata"
-    [ "$insecure" = true ] && echo "    insecure-skip-tls-verify: true"
-    echo "users:"
-    echo "- name: admin"
-    echo "  user:"
-    echo "    token: $token"
-    echo "contexts:"
-    echo "- name: devbox"
-    echo "  context:"
-    echo "    cluster: devbox"
-    echo "    user: admin"
-    echo "    namespace: $ns"
-    echo "current-context: devbox"
-  } > "$kcfg"
-  chmod 600 "$kcfg"
-
-  log "Creating secret '$ns/devbox-kube'"
   kubectl -n "$ns" create secret generic devbox-kube --from-file="config=$kcfg" \
     --dry-run=client -o yaml | kubectl apply -f -
 
@@ -242,8 +190,8 @@ EOF
 
   # DevPod merges this onto its generated pod; the volumeMount attaches to its dev
   # container (name "devpod"). Mount the kubeconfig at a side path (not
-  # ~/.kube/config) so ~/.kube stays writable; devcontainer.k8s.json points
-  # KUBECONFIG at it. A privileged docker:dind
+  # ~/.kube/config) so ~/.kube stays writable for the oidc-login token cache;
+  # devcontainer.k8s.json points KUBECONFIG at it. A privileged docker:dind
   # sidecar gives the pod a real docker daemon on tcp://localhost:2375 (there is
   # no host socket to mount in k8s); devcontainer.k8s.json sets DOCKER_HOST.
   mkdir -p "$(dirname "$tmpl")"
