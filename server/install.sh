@@ -104,6 +104,12 @@ set-option -g focus-events on
 set -g default-terminal "xterm-256color"
 set-option -ga terminal-overrides ",xterm-256color:Tc"
 
+# Status bar: transparent background (the terminal shows through) with pink
+# accents — tmux has no real alpha, so the tint lives in the text colour.
+set -g status-style "bg=default,fg=#c97a96"
+set -g window-status-current-style "fg=#e6a8c0,bold"
+set -g window-status-style "fg=#7a5a68"
+
 # alt+1..9 -> select window.
 bind -n M-1 select-window -t 1
 bind -n M-2 select-window -t 2

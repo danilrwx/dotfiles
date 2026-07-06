@@ -54,6 +54,7 @@ BIN=/usr/local/bin bash install.sh     # needs write access there
 - `alt+1..9` select window; `prefix h/j/k/l` pane nav; `</>` swap pane.
 - defaults: `escape-time 0`, `base-index 1`, `renumber-windows`,
   `history-limit 100000`, `focus-events`; truecolor.
+- status bar: transparent background with pink accents.
 
 ## Requirements
 
