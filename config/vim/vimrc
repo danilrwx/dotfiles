@@ -43,6 +43,15 @@ silent! packadd! cfilter
 silent! packadd! comment
 silent! packadd! hlyank
 
+# fzf ships a base vim plugin (:FZF, fzf#run) — load it from the install, no clone
+if isdirectory('/opt/homebrew/opt/fzf')
+  set runtimepath+=/opt/homebrew/opt/fzf
+elseif isdirectory('/usr/local/opt/fzf')
+  set runtimepath+=/usr/local/opt/fzf
+elseif filereadable('/usr/share/doc/fzf/examples/fzf.vim')
+  source /usr/share/doc/fzf/examples/fzf.vim
+endif
+
 g:mapleader = " "
 
 nnoremap <c-d> <c-d>zz<cr>
@@ -50,18 +59,11 @@ nnoremap <c-u> <c-u>zz<cr>
 
 nnoremap <c-l> :nohl<cr>
 
-nnoremap <silent> <leader>tr :TestNearest<cr>
-nnoremap <silent> <leader>tt :TestFile<cr>
-
-nnoremap <silent> <leader>gl :tab Git log --follow -p %<cr>
-nnoremap <silent> <leader>gL :tab Git log<cr>
-nnoremap <silent> <leader>gb :tab Git blame<cr>
+nnoremap <silent> <leader>f :FZF<cr>
 
 nnoremap <silent> ghs <cmd>GitGutterStageHunk<cr>
 nnoremap <silent> ghu <cmd>GitGutterUndoHunk<cr>
 nnoremap <silent> ghp <cmd>GitGutterPreviewHunk<cr>
-
-nnoremap <silent> - <cmd>Dir<cr>
 
 execute "set <A-q>=\eq"
 nnoremap <a-q> :bd<cr>

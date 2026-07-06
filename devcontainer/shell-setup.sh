@@ -15,12 +15,8 @@ VIM_PACK="$HOME/.vim/pack/plugins/start"
 mkdir -p "$VIM_PACK"
 for repo in \
   markonm/traces.vim \
-  tpope/vim-fugitive \
   airblade/vim-gitgutter \
-  yegappan/lsp \
-  vim-test/vim-test \
-  habamax/vim-dir \
-  vim-fuzzbox/fuzzbox.vim; do
+  yegappan/lsp; do
   dst="$VIM_PACK/${repo##*/}"
   [ -d "$dst" ] || git clone --depth 1 "https://github.com/$repo" "$dst"
 done
