@@ -127,18 +127,38 @@ enddef
 # live grep (fzf-lua style): --disabled hands the query to grep instead of
 # filtering, and change:reload re-runs grep on every keystroke. {q} is the
 # grep pattern (a regex); an empty query is guarded so the list starts blank.
-def Grep(query: string = '')
+def LiveGrep(query: string = '')
   var tool = executable('ugrep') ? 'ugrep -RInk --ignore-files --color=never'
     : 'grep -rIn'
   var reload = $'[ -n {{q}} ] && {tool} -- {{q}} . 2>/dev/null || true'
-  Remember(() => Grep(query))
+  Remember(() => LiveGrep(query))
   fzf#run(fzf#wrap({
     'sink*': GrepSink,
     options: ['--disabled', '--multi', '--delimiter', ':', '--query', query,
-      '--prompt', 'Grep> ',
+      '--prompt', 'LiveGrep> ',
       '--header', 'type to search   Enter: open   Tab: select → quickfix',
       '--bind', 'start:reload:' .. reload,
       '--bind', 'change:reload:' .. reload],
+  }))
+enddef
+command! -nargs=* LiveGrep LiveGrep(<q-args>)
+nnoremap <silent> <leader>/ <scriptcmd>LiveGrep()<cr>
+
+# static grep: one search (literal, -F) of <cword> or the visual selection,
+# then fzf fuzzy-filters the results.
+def Grep(query: string = '')
+  var q = empty(query) ? expand('<cword>') : query
+  if empty(q)
+    return
+  endif
+  Remember(() => Grep(q))
+  var cmd = executable('ugrep') ? 'ugrep -RInk -F -I --ignore-files --color=never -- '
+    : 'grep -rIn -F -- '
+  fzf#run(fzf#wrap({
+    source: cmd .. shellescape(q),
+    'sink*': GrepSink,
+    options: ['--multi', '--header', 'Enter: open   Tab: select → quickfix',
+      '--prompt', $'Grep({q})> ', '--delimiter', ':'],
   }))
 enddef
 def GrepVisual()
