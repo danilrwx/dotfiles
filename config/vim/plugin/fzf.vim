@@ -141,32 +141,14 @@ def LiveGrep(query: string = '')
       '--bind', 'change:reload:' .. reload],
   }))
 enddef
+def LiveGrepVisual()
+  LiveGrep(getreg('z')->split("\n")->get(0, ''))
+enddef
+
 command! -nargs=* LiveGrep LiveGrep(<q-args>)
+# <leader>/ empty, <leader>? seeds the word under the cursor
 nnoremap <silent> <leader>/ <scriptcmd>LiveGrep()<cr>
-
-# static grep: one search (literal, -F) of <cword> or the visual selection,
-# then fzf fuzzy-filters the results.
-def Grep(query: string = '')
-  var q = empty(query) ? expand('<cword>') : query
-  if empty(q)
-    return
-  endif
-  Remember(() => Grep(q))
-  var cmd = executable('ugrep') ? 'ugrep -RInk -F -I --ignore-files --color=never -- '
-    : 'grep -rIn -F -- '
-  fzf#run(fzf#wrap({
-    source: cmd .. shellescape(q),
-    'sink*': GrepSink,
-    options: ['--multi', '--header', 'Enter: open   Tab: select → quickfix',
-      '--prompt', $'Grep({q})> ', '--delimiter', ':'],
-  }))
-enddef
-def GrepVisual()
-  Grep(getreg('z')->split("\n")->get(0, ''))
-enddef
-
-command! -nargs=* Grep Grep(<q-args>)
-nnoremap <silent> <leader>g <scriptcmd>Grep()<cr>
+nnoremap <silent> <leader>? <scriptcmd>LiveGrep(expand('<cword>'))<cr>
 # "zy yanks the selection AND leaves visual mode, so fzf opens in normal mode
 # (a <Cmd> map would stay in visual and swallow keys until you type)
-xnoremap <silent> <leader>g "zy<scriptcmd>GrepVisual()<cr>
+xnoremap <silent> <leader>/ "zy<scriptcmd>LiveGrepVisual()<cr>
