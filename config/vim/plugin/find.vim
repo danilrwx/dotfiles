@@ -35,7 +35,8 @@ set findfunc=Find
 
 nnoremap <leader>e :find<space>
 
-command! -nargs=+ -bar Grep {
+# quickfix grep via grepprg (interactive fzf grep is :Grep in plugin/fzf.vim)
+command! -nargs=+ -bar Grepq {
   var cmd = $'{&grepprg} {<q-args>}'
   cgetexpr system(cmd)
   setqflist([], 'a', {title: cmd})

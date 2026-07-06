@@ -53,23 +53,34 @@ enddef
 command! GFiles GFiles()
 nnoremap <silent> <leader>G <scriptcmd>GFiles()<cr>
 
-def RgSink(line: string)
+def GrepSink(line: string)
+  # ugrep gives file:line:col:text, grep gives file:line:text
   var m = matchlist(line, '^\(.\{-}\):\(\d\+\):\(\d\+\):')
+  var col = 1
+  if empty(m)
+    m = matchlist(line, '^\(.\{-}\):\(\d\+\):')
+  else
+    col = str2nr(m[3])
+  endif
   if empty(m)
     return
   endif
   execute 'edit ' .. fnameescape(m[1])
-  cursor(str2nr(m[2]), str2nr(m[3]))
+  cursor(str2nr(m[2]), col)
 enddef
 
-def Rg(query: string = '')
-  var base = 'rg --column --line-number --no-heading --color=always --smart-case -- '
+def Grep(query: string = '')
+  var q = empty(query) ? expand('<cword>') : query
+  if empty(q)
+    return
+  endif
+  var cmd = executable('ugrep') ? 'ugrep -RInk -I --ignore-files --color=never -- '
+    : 'grep -rIn -- '
   fzf#run(fzf#wrap({
-    source: base .. fzf#shellescape(query),
-    sink: RgSink,
-    options: ['--ansi', '--disabled', '--query', query, '--prompt', 'Rg> ',
-              '--delimiter', ':', '--bind', 'change:reload:' .. base .. '{q} || true'],
+    source: cmd .. shellescape(q),
+    sink: GrepSink,
+    options: ['--prompt', $'Grep({q})> ', '--delimiter', ':'],
   }))
 enddef
-command! -nargs=* Rg Rg(<q-args>)
-nnoremap <silent> <leader>g <scriptcmd>Rg()<cr>
+command! -nargs=* Grep Grep(<q-args>)
+nnoremap <silent> <leader>g <scriptcmd>Grep()<cr>
