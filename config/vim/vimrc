@@ -72,6 +72,8 @@ nnoremap <c-l> :nohl<cr>
 
 nnoremap <silent> <leader>f :FZF<cr>
 
+nnoremap <silent> - <cmd>Explore<cr>
+
 var lspOpts = {
 	autoHighlightDiags: true,
 	useQuickfixForLocations: true,

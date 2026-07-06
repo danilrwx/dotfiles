@@ -68,7 +68,7 @@ def Place(buf: number, tmp: string)
 enddef
 
 def Refresh()
-  if &buftype != '' || empty(expand('%'))
+  if &buftype != '' || !filereadable(expand('%:p'))
     return
   endif
   var buf = bufnr('%')
