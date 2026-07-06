@@ -1,6 +1,6 @@
 vim9script
 
-execute "set packpath^=" .. expand("~/.vim")
+execute "set packpath^=" .. expand("~/.local/share/vim")
 
 filetype plugin indent on
 syntax on
