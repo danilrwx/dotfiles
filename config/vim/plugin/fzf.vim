@@ -23,12 +23,36 @@ if !loaded
   endfor
 endif
 
-# remember the last picker so <leader>' can reopen it (grep keeps its query)
-var LastPicker: func = () => 0
-nnoremap <silent> <leader>' <scriptcmd>LastPicker()<cr>
+# remember recent pickers so <leader>' reopens the last; pressing it again walks
+# further back (so an accidental empty picker falls through to the previous one)
+var history: list<func> = []
+var ridx = -1
+var resuming = false
+
+def Remember(Picker: func)
+  if resuming
+    return
+  endif
+  add(history, Picker)
+  if len(history) > 10
+    history = history[-10 : ]
+  endif
+  ridx = -1
+enddef
+
+def Resume()
+  if empty(history)
+    return
+  endif
+  ridx = ridx < 0 ? len(history) - 1 : max([0, ridx - 1])
+  resuming = true
+  history[ridx]()
+  resuming = false
+enddef
+nnoremap <silent> <leader>' <scriptcmd>Resume()<cr>
 
 def Files()
-  LastPicker = Files
+  Remember(Files)
   fzf#run(fzf#wrap('files', {options: ['--multi', '--prompt', 'Files> ']}))
 enddef
 command! Files Files()
@@ -50,7 +74,7 @@ def BufSink(lines: list<string>)
 enddef
 
 def Buffers()
-  LastPicker = Buffers
+  Remember(Buffers)
   var bufs = getbufinfo({buflisted: 1})
     ->filter((_, b) => !empty(b.name))
     ->mapnew((_, b) => printf("%d\t%s", b.bufnr, fnamemodify(b.name, ':~:.')))
@@ -66,7 +90,7 @@ command! Buffers Buffers()
 nnoremap <silent> <leader>b <scriptcmd>Buffers()<cr>
 
 def GFiles()
-  LastPicker = GFiles
+  Remember(GFiles)
   fzf#run(fzf#wrap('gfiles', {
     source: 'git ls-files --cached --others --exclude-standard',
     options: ['--multi', '--prompt', 'GFiles> '],
@@ -105,7 +129,7 @@ def Grep(query: string = '')
   if empty(q)
     return
   endif
-  LastPicker = () => Grep(q)
+  Remember(() => Grep(q))
   # -F: search the text literally, so regex-special chars don't need escaping
   var cmd = executable('ugrep') ? 'ugrep -RInk -F -I --ignore-files --color=never -- '
     : 'grep -rIn -F -- '

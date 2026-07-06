@@ -54,7 +54,12 @@ nnoremap <c-l> :nohl<cr>
 nnoremap <silent> - <cmd>Oil<cr>
 
 nnoremap <silent> <leader>gg <cmd>silent execute '!tmux neww lazygit'<bar>redraw!<cr>
+
+# terminals send Alt-q as <Esc>q; teach vim the sequence so <A-q> actually fires
+execute "set <A-q>=\eq"
 nnoremap <silent> <A-q> <cmd>bd<cr>
+nnoremap <silent> <S-l> <cmd>bn<cr>
+nnoremap <silent> <S-h> <cmd>bp<cr>
 
 nnoremap <leader>y "+y
 xnoremap <leader>y "+y
