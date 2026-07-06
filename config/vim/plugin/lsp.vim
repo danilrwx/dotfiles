@@ -31,6 +31,41 @@ def DiagAll()
 enddef
 command! LspDiagAll DiagAll()
 
+# whole-workspace diagnostics: LSP can't (drops unopened files), so run the
+# project checker async and parse into quickfix. golangci-lint if present, else
+# `go vet` (which also type-checks, so compile errors surface too).
+var ws_out: list<string>
+def OnDiagWs(title: string)
+  var save = &errorformat
+  &errorformat = '%-G#%.%#,%f:%l:%c:\ %m,%f:%l:\ %m'
+  setqflist([], ' ', {title: title, lines: ws_out})
+  &errorformat = save
+  var items = getqflist()->filter((_, i) => i.valid)
+  if empty(items)
+    echo 'workspace: no diagnostics'
+    return
+  endif
+  setqflist([], 'r', {title: title, items: items})
+  copen
+  cfirst
+enddef
+def DiagWs()
+  var cmd = executable('golangci-lint') ? ['golangci-lint', 'run', './...']
+    : executable('go') ? ['go', 'vet', './...'] : []
+  if empty(cmd)
+    echo 'no golangci-lint / go'
+    return
+  endif
+  ws_out = []
+  echo $'running {cmd->join(" ")} ...'
+  job_start(cmd, {
+    out_cb: (_, l) => add(ws_out, l),
+    err_cb: (_, l) => add(ws_out, l),
+    exit_cb: (_, _) => OnDiagWs(cmd->join(' ')),
+  })
+enddef
+command! LspDiagWs DiagWs()
+
 var lspOpts = {
   autoHighlightDiags: true,
   useQuickfixForLocations: true,
@@ -85,6 +120,7 @@ def On_lsp_buffer_enabled()
   nnoremap grf :LspFormat<cr>
   nnoremap <c-w>d :LspDiag current<cr>
   nnoremap grd :LspDiagAll<cr>
+  nnoremap grD :LspDiagWs<cr>
   nnoremap [d :LspDiag prev<cr>
   nnoremap ]d :LspDiag next<cr>
 
