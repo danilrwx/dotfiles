@@ -118,6 +118,19 @@ def Up()
   Open(fnamemodify(trim(b:oil_dir, '/', 2), ':h') .. '/')
 enddef
 
+def Focus(name: string)
+  if empty(name)
+    return
+  endif
+  for lnum in range(1, line('$'))
+    var m = matchlist(getline(lnum), '^\d\{4}\t\(.*\)$')
+    if !empty(m) && (m[1] == name || m[1] == name .. '/')
+      cursor(lnum, 6)
+      return
+    endif
+  endfor
+enddef
+
 def OnWrite()
   if Apply()
     Render()
@@ -129,6 +142,7 @@ export def Open(path = '')
   if !isdirectory(d)
     return
   endif
+  var leaving = exists('b:oil_dir') ? fnamemodify(trim(b:oil_dir, '/', 2), ':t') : expand('%:t')
   # 'oil:' not 'oil://' — a :// name is hijacked by netrw's URL handler
   execute 'silent edit ' .. fnameescape('oil:' .. d)
   b:oil_dir = d
@@ -141,6 +155,7 @@ export def Open(path = '')
   autocmd! BufWriteCmd <buffer>
   autocmd BufWriteCmd <buffer> OnWrite()
   Render()
+  Focus(leaving)
 enddef
 
 command! -nargs=? -complete=dir Oil Open(<q-args>)
