@@ -30,6 +30,13 @@ endif
 # History of picker names lets you cycle between them: <leader>'/<leader>" when
 # fzf is closed, ctrl-o (an --expect key) from inside fzf. fzf cursor position
 # and multi-selection are not restored — only the query.
+# per-picker query history file: ctrl-p/ctrl-n walk past queries (fzf remaps
+# them when --history is set; list nav stays on arrows/ctrl-j/ctrl-k).
+const HISTDIR = ($XDG_CONFIG_HOME ?? expand('~/.config')) .. '/vim/files/fzf-history'
+if !isdirectory(HISTDIR)
+  mkdir(HISTDIR, 'p')
+endif
+
 var saved: dict<string> = {}
 var launchers: dict<func> = {}
 var history: list<string> = []
@@ -73,7 +80,10 @@ def Finish(name: string, lines: list<string>, OnAccept: func)
   if empty(lines)
     return
   endif
-  saved[name] = lines[0]
+  # keep the last non-empty query so an accidental blank input doesn't wipe it
+  if !empty(lines[0])
+    saved[name] = lines[0]
+  endif
   var key = get(lines, 1, '')
   if key == 'ctrl-o'
     Cycle(-1)
@@ -82,10 +92,11 @@ def Finish(name: string, lines: list<string>, OnAccept: func)
   OnAccept(key, lines[2 : ])
 enddef
 
-def BaseOpts(prompt: string, query: string, expectKeys: string): list<string>
+def BaseOpts(name: string, prompt: string, query: string, expectKeys: string): list<string>
   # --height 100% overrides the 40% in FZF_DEFAULT_OPTS so vim pickers fill the
   # window instead of hugging the top (shell fzf keeps its 40%).
   return ['--height', '100%', '--print-query', '--multi', '--expect', expectKeys,
+    '--history', HISTDIR .. '/' .. name,
     '--query', query, '--prompt', prompt]
 enddef
 
@@ -98,7 +109,7 @@ enddef
 def LaunchFiles(query: string)
   fzf#run({
     'sink*': (lines) => Finish('files', lines, OpenFiles),
-    options: BaseOpts('Files> ', query, 'ctrl-o') + ['--header', 'Ctrl-O: prev'],
+    options: BaseOpts('files', 'Files> ', query, 'ctrl-o') + ['--header', 'Ctrl-O: prev'],
   })
 enddef
 
@@ -106,7 +117,7 @@ def LaunchGFiles(query: string)
   fzf#run({
     source: 'git ls-files --cached --others --exclude-standard',
     'sink*': (lines) => Finish('gfiles', lines, OpenFiles),
-    options: BaseOpts('GFiles> ', query, 'ctrl-o') + ['--header', 'Ctrl-O: prev'],
+    options: BaseOpts('gfiles', 'GFiles> ', query, 'ctrl-o') + ['--header', 'Ctrl-O: prev'],
   })
 enddef
 
@@ -129,7 +140,7 @@ def LaunchBuffers(query: string)
   fzf#run({
     source: bufs,
     'sink*': (lines) => Finish('buffers', lines, BufAccept),
-    options: BaseOpts('Buffers> ', query, 'ctrl-d,ctrl-o') + ['--with-nth', '2..',
+    options: BaseOpts('buffers', 'Buffers> ', query, 'ctrl-d,ctrl-o') + ['--with-nth', '2..',
       '-d', "\t", '--header', 'Enter: open  Ctrl-D: delete  Tab: select  Ctrl-O: prev'],
   })
 enddef
@@ -168,7 +179,7 @@ def LaunchGrep(query: string)
   var reload = $'[ -n {{q}} ] && {tool} -- {{q}} . 2>/dev/null || true'
   fzf#run({
     'sink*': (lines) => Finish('livegrep', lines, GrepAccept),
-    options: BaseOpts('LiveGrep> ', query, 'ctrl-o') + ['--disabled',
+    options: BaseOpts('livegrep', 'LiveGrep> ', query, 'ctrl-o') + ['--disabled',
       '--delimiter', ':',
       '--header', 'type to search  Enter: open  Tab: → quickfix  Ctrl-O: prev',
       '--bind', 'start:reload:' .. reload,
