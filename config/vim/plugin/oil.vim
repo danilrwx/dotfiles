@@ -15,13 +15,14 @@ var seq = 0
 
 # entry-type colours in the buffer + change-preview colours in the confirm popup
 highlight default link OilDir Directory
+highlight default link OilLinkTarget Comment
 highlight default OilLink   ctermfg=6 guifg=#00afaf
 highlight default OilExec   ctermfg=2 guifg=#5faf5f
 highlight default OilCreate ctermfg=2 guifg=#5faf5f
 highlight default OilDelete ctermfg=1 guifg=#d75f5f
 highlight default OilCopy   ctermfg=6 guifg=#00afaf
 highlight default OilRename ctermfg=3 guifg=#d7af5f
-for oilpt in [['oilDir', 'OilDir'], ['oilLink', 'OilLink'], ['oilExec', 'OilExec']]
+for oilpt in [['oilDir', 'OilDir'], ['oilLink', 'OilLink'], ['oilExec', 'OilExec'], ['oilLinkTarget', 'OilLinkTarget']]
   if empty(prop_type_get(oilpt[0]))
     prop_type_add(oilpt[0], {highlight: oilpt[1]})
   endif
@@ -45,17 +46,18 @@ enddef
 def Render()
   b:oil_reg = {}
   var lines: list<string> = []
-  var metas: list<list<any>> = []   # [display byte-length, prop type ('' = none)]
+  var metas: list<list<any>> = []   # [display byte-length, prop type ('' none), link target ('' none)]
   for name in readdir(b:oil_dir)->sort()
     var full = simplify(b:oil_dir .. name)
     var id = IdFor(full)
     var disp = name .. (isdirectory(full) ? '/' : '')
     b:oil_reg[id] = disp
     lines->add(disp .. "\t" .. id)
-    var pt = isdirectory(full) ? 'oilDir'
-      : getftype(full) == 'link' ? 'oilLink'
+    var link = getftype(full) == 'link'
+    var pt = link ? 'oilLink'
+      : isdirectory(full) ? 'oilDir'
       : executable(full) ? 'oilExec' : ''
-    metas->add([len(disp), pt])
+    metas->add([len(disp), pt, link ? Rel(b:oil_dir, resolve(full)) : ''])
   endfor
   silent keepjumps deletebufline('%', 1, '$')
   if !empty(lines)
@@ -64,6 +66,9 @@ def Render()
   for i in range(len(metas))
     if metas[i][1] != ''
       prop_add(i + 1, 1, {length: metas[i][0], type: metas[i][1]})
+    endif
+    if metas[i][2] != ''
+      prop_add(i + 1, metas[i][0] + 1, {type: 'oilLinkTarget', text: ' → ' .. metas[i][2]})
     endif
   endfor
   setlocal nomodified
