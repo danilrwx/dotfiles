@@ -1,10 +1,11 @@
 vim9script
 
-# oil-mini: edit a directory as a buffer. :w applies renames/creates/deletes,
-# subpaths included (mkdir -p). <CR> opens the entry, - goes up a directory.
-# A hidden 4-digit id prefix tracks each entry, so renames survive reordering
-# and copy-paste; a line with no known id is a new entry, a vanished id is a
-# deletion (confirmed). Depends on nothing but built-ins.
+# oil-mini: edit a directory as a buffer. :w applies renames/creates/deletes and
+# copies (duplicate a line -> copy), subpaths included (mkdir -p). <CR> opens the
+# entry, - goes up. A hidden 4-digit id prefix tracks each entry: same id twice
+# (copied line) with a new name is a copy of the original; a changed single line
+# is a rename; a line with no id is a new entry; a vanished id is a deletion.
+# Depends on git-less built-ins plus `cp` for copies.
 
 def Render()
   b:oil_reg = {}
@@ -31,35 +32,60 @@ def Mkparent(p: string)
   endif
 enddef
 
+def CopyPath(src: string, dst: string): number
+  system('cp -Rp -- ' .. shellescape(src) .. ' ' .. shellescape(dst))
+  return v:shell_error
+enddef
+
 def Apply(): bool
   var dir = b:oil_dir
   var reg = b:oil_reg
-  var seen: dict<bool> = {}
-  var renames: list<list<string>> = []
+  var byid: dict<list<string>> = {}
   var creates: list<string> = []
   for l in getline(1, '$')->filter((_, v) => v !~ '^\s*$')
     var m = matchlist(l, '^\(\d\{4}\)\t\(.*\)$')
     if !empty(m) && reg->has_key(m[1])
-      seen[m[1]] = true
-      if m[2] != reg[m[1]]
-        renames->add([reg[m[1]], m[2]])
-      endif
+      byid[m[1]] = add(get(byid, m[1], []), m[2])
     else
       creates->add(empty(m) ? l : m[2])
     endif
   endfor
+
+  var renames: list<list<string>> = []
+  var copies: list<list<string>> = []
   var deletes: list<string> = []
-  for [id, name] in items(reg)
-    if !seen->has_key(id)
-      deletes->add(name)
+  for [id, oldname] in items(reg)
+    if !byid->has_key(id)
+      deletes->add(oldname)
+      continue
+    endif
+    var names = byid[id]
+    if index(names, oldname) >= 0
+      # original kept; any other occurrence of this id is a copy of it
+      for nm in names
+        if nm != oldname
+          copies->add([oldname, nm])
+        endif
+      endfor
+    else
+      # original name gone: first occurrence renames it, the rest copy from it
+      renames->add([oldname, names[0]])
+      for nm in names[1 : ]
+        copies->add([oldname, nm])
+      endfor
     endif
   endfor
-  if empty(renames) && empty(creates) && empty(deletes)
+
+  if empty(renames) && empty(copies) && empty(creates) && empty(deletes)
     return true
   endif
+
   var summary: list<string> = []
   for [old, new] in renames
     summary->add($'rename  {old} → {new}')
+  endfor
+  for [src, dst] in copies
+    summary->add($'copy    {src} → {dst}')
   endfor
   for name in creates
     summary->add($'create  {name}')
@@ -73,13 +99,40 @@ def Apply(): bool
 
   var errors: list<string> = []
 
-  # Renames run in two phases via temp names so swaps/cycles (a↔b) work: first
-  # move every source out to a temp, then temps into their final names.
+  # every final target name; if one is claimed twice, skip those with an error
+  var tcount: dict<number> = {}
+  for [old, new] in renames
+    tcount[new] = get(tcount, new, 0) + 1
+  endfor
+  for [src, dst] in copies
+    tcount[dst] = get(tcount, dst, 0) + 1
+  endfor
+  for name in creates
+    tcount[name] = get(tcount, name, 0) + 1
+  endfor
+
+  # copies first, while the originals are still in place
+  for [src, dst] in copies
+    if tcount[dst] > 1
+      errors->add($'copy skipped, name used twice: {dst}')
+      continue
+    endif
+    var d2 = simplify(dir .. trim(dst, '/', 2))
+    if filereadable(d2) || isdirectory(d2)
+      errors->add($'copy skipped, exists: {dst}')
+      continue
+    endif
+    Mkparent(d2)
+    if CopyPath(simplify(dir .. trim(src, '/', 2)), d2) != 0
+      errors->add($'copy failed: {src} → {dst}')
+    endif
+  endfor
+
+  # renames in two phases via temp names so swaps/cycles (a↔b) work: first move
+  # every source out to a temp, then temps into their final names.
   # ponytail: temp is .oil-tmp-N in dir; a real file of that name would clash.
-  var newcount: dict<number> = {}
   var vacated: dict<bool> = {}
   for [old, new] in renames
-    newcount[new] = get(newcount, new, 0) + 1
     vacated[trim(old, '/', 2)] = true
   endfor
   for name in deletes
@@ -88,7 +141,7 @@ def Apply(): bool
   var pending: list<list<string>> = []
   var ti = 0
   for [old, new] in renames
-    if newcount[new] > 1
+    if tcount[new] > 1
       errors->add($'rename skipped, name used twice: {new}')
       continue
     endif
@@ -112,7 +165,11 @@ def Apply(): bool
       errors->add($'rename failed → {new}')
     endif
   endfor
+
   for name in creates
+    if tcount[name] > 1
+      continue
+    endif
     var dst = simplify(dir .. name)
     if filereadable(dst) || isdirectory(dst)
       continue
@@ -128,11 +185,13 @@ def Apply(): bool
       errors->add($'create failed: {name}')
     endtry
   endfor
+
   for name in deletes
     if delete(simplify(dir .. trim(name, '/', 2)), name =~ '/$' ? 'rf' : '') != 0
       errors->add($'delete failed: {name}')
     endif
   endfor
+
   if !empty(errors)
     echohl WarningMsg
     for e in errors
