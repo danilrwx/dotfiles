@@ -9,12 +9,14 @@ highlight default GitSignAdd    ctermfg=green  guifg=#00af5f
 highlight default GitSignChange ctermfg=yellow guifg=#d7af00
 highlight default GitSignDelete ctermfg=red    guifg=#d70000
 
-sign_define('GitAdd',    {text: '▎', texthl: 'GitSignAdd'})
-sign_define('GitChange', {text: '▎', texthl: 'GitSignChange'})
-sign_define('GitDelete', {text: '▁', texthl: 'GitSignDelete'})
+sign_define('GitAdd',    {text: '▎', texthl: 'GitSignAdd',    numhl: 'GitSignAdd'})
+sign_define('GitChange', {text: '▎', texthl: 'GitSignChange', numhl: 'GitSignChange'})
+sign_define('GitDelete', {text: '▁', texthl: 'GitSignDelete', numhl: 'GitSignDelete'})
 
 const GROUP = 'gitsigns'
-const DIFF = 'git -C "$0" diff --no-color -U0 --no-index -- <(git -C "$0" show ":./$1" 2>/dev/null) "$2" 2>/dev/null || true'
+# only diff tracked files: outside a repo (or for an untracked file) git show is
+# empty and --no-index would mark every line added — so bail unless tracked.
+const DIFF = 'git -C "$0" ls-files --error-unmatch -- "$1" >/dev/null 2>&1 || exit 0; git -C "$0" diff --no-color -U0 --no-index -- <(git -C "$0" show ":./$1" 2>/dev/null) "$2" 2>/dev/null || true'
 var jobs: dict<job> = {}
 var acc: dict<list<string>> = {}
 var hunks: dict<list<dict<any>>> = {}
