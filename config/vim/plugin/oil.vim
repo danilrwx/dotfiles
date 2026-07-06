@@ -68,7 +68,7 @@ def Render()
       prop_add(i + 1, 1, {length: metas[i][0], type: metas[i][1]})
     endif
     if metas[i][2] != ''
-      prop_add(i + 1, metas[i][0] + 1, {type: 'oilLinkTarget', text: ' → ' .. metas[i][2]})
+      prop_add(i + 1, metas[i][0] + 1, {type: 'oilLinkTarget', text: ' →  ' .. metas[i][2]})
     endif
   endfor
   setlocal nomodified
