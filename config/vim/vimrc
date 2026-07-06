@@ -65,3 +65,5 @@ nnoremap <leader>y "+y
 xnoremap <leader>y "+y
 nnoremap <leader>p "+p
 
+nnoremap <silent> <leader>dd <cmd>let @+ = expand('%') .. ':' .. line('.')<cr>
+
