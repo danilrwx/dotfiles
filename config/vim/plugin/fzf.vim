@@ -83,7 +83,9 @@ def Finish(name: string, lines: list<string>, OnAccept: func)
 enddef
 
 def BaseOpts(prompt: string, query: string, expectKeys: string): list<string>
-  return ['--print-query', '--multi', '--expect', expectKeys,
+  # --height 100% overrides the 40% in FZF_DEFAULT_OPTS so vim pickers fill the
+  # window instead of hugging the top (shell fzf keeps its 40%).
+  return ['--height', '100%', '--print-query', '--multi', '--expect', expectKeys,
     '--query', query, '--prompt', prompt]
 enddef
 
