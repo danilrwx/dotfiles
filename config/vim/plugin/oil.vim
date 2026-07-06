@@ -2,14 +2,21 @@ vim9script
 
 # oil-mini: edit a directory as a buffer. :w applies renames/creates/copies/
 # deletes, subpaths included (mkdir -p). <CR> opens the entry, - goes up.
-# Each line has a hidden (concealed) short id; a session-global registry maps the
-# id to the entry's absolute path, so identity survives across directories:
-# editing a name renames; duplicating a line copies; a line pasted from another
-# oil dir moves the file here; a line with no id is a new entry; an id gone from
-# its dir is a deletion. All confirmed. Built-ins only, plus `cp` for copies.
+# Each line is `name<TAB><id>` with the <TAB><id> concealed at the end, so the
+# name sits at column 1 and edits normally. A session-global registry maps id to
+# absolute path. Rules: an entry of THIS dir with a changed name is a rename
+# (a name like ../x or sub/x moves it); a duplicated line is a copy; a line whose
+# id belongs to ANOTHER dir (pasted in) is a copy in; a line with no id is a new
+# file; an id gone from its dir is a deletion. All confirmed. `cp` for copies.
 
 var registry: dict<string> = {}   # id -> absolute path
 var seq = 0
+
+def Parse(l: string): list<string>
+  # -> [name, id] for an entry line, [] for a create line
+  var m = matchlist(l, '^\(.*\)\t\(\d\+\)$')
+  return (!empty(m) && registry->has_key(m[2])) ? [m[1], m[2]] : []
+enddef
 
 def Render()
   b:oil_reg = {}
@@ -21,7 +28,7 @@ def Render()
     registry[id] = full
     var disp = name .. (isdirectory(full) ? '/' : '')
     b:oil_reg[id] = disp
-    lines->add(id .. "\t" .. disp)
+    lines->add(disp .. "\t" .. id)
   endfor
   silent keepjumps deletebufline('%', 1, '$')
   if !empty(lines)
@@ -48,14 +55,15 @@ enddef
 
 def Apply(): bool
   var dir = b:oil_dir
+  var reg = b:oil_reg
   var byid: dict<list<string>> = {}
   var creates: list<string> = []
   for l in getline(1, '$')->filter((_, v) => v !~ '^\s*$')
-    var m = matchlist(l, '^\(\d\+\)\t\(.*\)$')
-    if !empty(m) && registry->has_key(m[1])
-      byid[m[1]] = add(get(byid, m[1], []), m[2])
+    var p = Parse(l)
+    if empty(p)
+      creates->add(matchstr(l, '^\%(.*\ze\t\d\+$\|.*\)'))
     else
-      creates->add(empty(m) ? l : m[2])
+      byid[p[1]] = add(get(byid, p[1], []), p[0])
     endif
   endfor
 
@@ -64,7 +72,12 @@ def Apply(): bool
   for [id, names] in items(byid)
     var src = registry[id]
     var targets = names->mapnew((_, nm) => simplify(dir .. trim(nm, '/', 2)))
-    if index(targets, src) >= 0
+    if !reg->has_key(id)
+      # pasted from another dir -> copy in, never touch the foreign source
+      for t in targets
+        copies->add([src, t])
+      endfor
+    elseif index(targets, src) >= 0
       for t in targets
         if t != src
           copies->add([src, t])
@@ -79,7 +92,7 @@ def Apply(): bool
   endfor
 
   var deletes: list<string> = []
-  for [id, disp] in items(b:oil_reg)
+  for [id, disp] in items(reg)
     if !byid->has_key(id)
       deletes->add(registry[id])
     endif
@@ -108,7 +121,6 @@ def Apply(): bool
 
   var errors: list<string> = []
 
-  # a destination claimed more than once is skipped
   var tcount: dict<number> = {}
   for [src, dst] in renames
     tcount[dst] = get(tcount, dst, 0) + 1
@@ -117,7 +129,6 @@ def Apply(): bool
     tcount[dst] = get(tcount, dst, 0) + 1
   endfor
 
-  # copies first, while sources are still in place
   for [src, dst] in copies
     if tcount[dst] > 1
       errors->add($'copy skipped, name used twice: {Rel(dir, dst)}')
@@ -133,8 +144,7 @@ def Apply(): bool
     endif
   endfor
 
-  # renames in two phases via temp names so swaps/cycles (a↔b) and cross-dir
-  # moves work: move every source to a temp, then temps into their finals.
+  # renames in two phases via temp names so swaps/cycles and cross-dir moves work
   # ponytail: temp is .oil-tmp-N in dir; a real file of that name would clash.
   var vacated: dict<bool> = {}
   for [src, dst] in renames
@@ -203,11 +213,12 @@ def Apply(): bool
 enddef
 
 def Enter()
-  var m = matchlist(getline('.'), '^\(\d\+\)\t\(.*\)$')
-  if empty(m) || !registry->has_key(m[1]) || !Leave()
+  var p = Parse(getline('.'))
+  if empty(p)
     return
   endif
-  var full = registry[m[1]]
+  setlocal nomodified
+  var full = registry[p[1]]
   if isdirectory(full)
     Open(full .. '/')
   else
@@ -216,9 +227,7 @@ def Enter()
 enddef
 
 def Up()
-  if !Leave()
-    return
-  endif
+  setlocal nomodified
   Open(fnamemodify(trim(b:oil_dir, '/', 2), ':h') .. '/')
 enddef
 
@@ -227,31 +236,21 @@ def Focus(name: string)
     return
   endif
   for lnum in range(1, line('$'))
-    var m = matchlist(getline(lnum), '^\d\+\t\(.*\)$')
-    if !empty(m) && (m[1] == name || m[1] == name .. '/')
-      cursor(lnum, len(matchstr(getline(lnum), '^\d\+\t')) + 1)
+    var p = Parse(getline(lnum))
+    if !empty(p) && (p[0] == name || p[0] == name .. '/')
+      cursor(lnum, 1)
       return
     endif
   endfor
 enddef
 
-# cc/S would wipe the hidden id (turning a rename into delete+create); keep the
-# id and clear only the name so the edit stays a rename.
+# cc/S would wipe the hidden id suffix (turning a rename into delete+create);
+# keep the suffix and clear only the name so the edit stays a rename.
 def RenameLine()
-  var m = matchlist(getline('.'), '^\(\d\+\t\)')
-  setline('.', empty(m) ? '' : m[1])
-  startinsert!
-enddef
-
-def Leave(): bool
-  if !&modified
-    return true
-  endif
-  if confirm('Discard unsaved oil edits?', "&Yes\n&No", 2) == 1
-    setlocal nomodified
-    return true
-  endif
-  return false
+  var m = matchlist(getline('.'), '\t\(\d\+\)$')
+  setline('.', empty(m) ? '' : "\t" .. m[1])
+  cursor(line('.'), 1)
+  startinsert
 enddef
 
 def OnWrite()
@@ -272,7 +271,7 @@ export def Open(path = '')
   setlocal buftype=acwrite noswapfile bufhidden=wipe
   setlocal conceallevel=3 concealcursor=nvic
   syntax clear
-  syntax match oilId '^\d\+\t' conceal
+  syntax match oilId '\t\d\+$' conceal
   nnoremap <buffer> <silent> <CR> <ScriptCmd>Enter()<CR>
   nnoremap <buffer> <silent> -    <ScriptCmd>Up()<CR>
   nnoremap <buffer> <silent> cc   <ScriptCmd>RenameLine()<CR>
