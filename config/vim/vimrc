@@ -43,13 +43,26 @@ silent! packadd! cfilter
 silent! packadd! comment
 silent! packadd! hlyank
 
-# fzf ships a base vim plugin (:FZF, fzf#run) — load it from the install, no clone
-if isdirectory('/opt/homebrew/opt/fzf')
-  set runtimepath+=/opt/homebrew/opt/fzf
-elseif isdirectory('/usr/local/opt/fzf')
-  set runtimepath+=/usr/local/opt/fzf
-elseif filereadable('/usr/share/doc/fzf/examples/fzf.vim')
-  source /usr/share/doc/fzf/examples/fzf.vim
+# fzf ships a base vim plugin (:FZF, fzf#run) — load it from the install, no clone.
+# brew keeps it under <prefix>/plugin (add to rtp); apt ships it as a standalone
+# file (source directly). /usr/share/vim/vimfiles is already in rtp, so skip it.
+var fzf_loaded = false
+for d in ['/opt/homebrew/opt/fzf', '/usr/local/opt/fzf', '/home/linuxbrew/.linuxbrew/opt/fzf', expand('~/.fzf')]
+  if isdirectory(d)
+    execute 'set runtimepath+=' .. d
+    fzf_loaded = true
+    break
+  endif
+endfor
+if !fzf_loaded
+  for f in ['/usr/share/vim/vimfiles/plugin/fzf.vim', '/usr/share/doc/fzf/examples/fzf.vim']
+    if filereadable(f)
+      if f !~ '/vimfiles/'
+        execute 'source ' .. f
+      endif
+      break
+    endif
+  endfor
 endif
 
 g:mapleader = " "
