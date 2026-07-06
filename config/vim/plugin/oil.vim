@@ -10,7 +10,17 @@ vim9script
 # file; an id gone from its dir is a deletion. All confirmed. `cp` for copies.
 
 var registry: dict<string> = {}   # id -> absolute path
+var revreg: dict<string> = {}     # absolute path -> id (reused across renders)
 var seq = 0
+
+def IdFor(full: string): string
+  if !revreg->has_key(full)
+    seq += 1
+    revreg[full] = printf('%d', seq)
+    registry[revreg[full]] = full
+  endif
+  return revreg[full]
+enddef
 
 def Parse(l: string): list<string>
   # -> [name, id] for an entry line, [] for a create line
@@ -23,9 +33,7 @@ def Render()
   var lines: list<string> = []
   for name in readdir(b:oil_dir)->sort()
     var full = simplify(b:oil_dir .. name)
-    seq += 1
-    var id = printf('%d', seq)
-    registry[id] = full
+    var id = IdFor(full)
     var disp = name .. (isdirectory(full) ? '/' : '')
     b:oil_reg[id] = disp
     lines->add(disp .. "\t" .. id)
@@ -61,7 +69,7 @@ def Apply(): bool
   for l in getline(1, '$')->filter((_, v) => v !~ '^\s*$')
     var p = Parse(l)
     if empty(p)
-      creates->add(matchstr(l, '^\%(.*\ze\t\d\+$\|.*\)'))
+      creates->add(substitute(l, '\t\d\+$', '', ''))
     else
       byid[p[1]] = add(get(byid, p[1], []), p[0])
     endif
