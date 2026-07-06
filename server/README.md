@@ -1,7 +1,8 @@
-# osc52 — clipboard over SSH
+# server — base vim/tmux config for a fresh box
 
-Copy from a remote vim/tmux to your **local** clipboard using OSC 52 escape
-sequences — no xclip/pbcopy, no X server. Works through tmux and SSH.
+A minimal, plugin-free vim + tmux config to make a bare server feel like home,
+including clipboard over SSH (OSC 52) — copy from a remote vim/tmux to your
+**local** clipboard, no xclip/pbcopy, no X server.
 
 ## Install on a server
 
@@ -29,9 +30,25 @@ BIN=/usr/local/bin bash install.sh     # needs write access there
 
 ## What you get
 
+**clipboard**
+
 - `clip` — `some-command | clip` puts stdin on your clipboard.
 - vim — every yank (`yy`, `yw`, visual `y`) copies to your clipboard.
 - tmux — OSC 52 forwarded out; mouse drag-select copies on release.
+
+**vim** (legacy vimscript, no plugins)
+
+- editing defaults: `expandtab` ts/sw=2, `hidden`, `incsearch`, `hlsearch`,
+  `number`; trailing-whitespace highlight; transparent background.
+- keymaps: `-` netrw, `<A-q>` close buffer, `S-l`/`S-h` next/prev buffer,
+  `<C-l>` clear search, `<C-d>`/`<C-u>` half-page + recenter, `leader`=space.
+- built-in packages if present: `comment` (gc), `cfilter`, `hlyank`.
+
+**tmux**
+
+- `alt+1..9` select window; `prefix h/j/k/l` pane nav; `</>` swap pane.
+- defaults: `escape-time 0`, `base-index 1`, `renumber-windows`,
+  `history-limit 100000`, `focus-events`; truecolor.
 
 ## Requirements
 
