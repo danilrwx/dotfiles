@@ -53,20 +53,29 @@ enddef
 command! GFiles GFiles()
 nnoremap <silent> <leader>G <scriptcmd>GFiles()<cr>
 
-def GrepSink(line: string)
+def GrepItem(line: string): dict<any>
   # ugrep gives file:line:col:text, grep gives file:line:text
-  var m = matchlist(line, '^\(.\{-}\):\(\d\+\):\(\d\+\):')
-  var col = 1
-  if empty(m)
-    m = matchlist(line, '^\(.\{-}\):\(\d\+\):')
-  else
-    col = str2nr(m[3])
+  var m = matchlist(line, '^\(.\{-}\):\(\d\+\):\(\d\+\):\(.*\)$')
+  if !empty(m)
+    return {filename: m[1], lnum: str2nr(m[2]), col: str2nr(m[3]), text: m[4]}
   endif
-  if empty(m)
+  m = matchlist(line, '^\(.\{-}\):\(\d\+\):\(.*\)$')
+  return empty(m) ? {} : {filename: m[1], lnum: str2nr(m[2]), col: 1, text: m[3]}
+enddef
+
+def GrepSink(lines: list<string>)
+  var items = lines->mapnew((_, l) => GrepItem(l))->filter((_, i) => !empty(i))
+  if empty(items)
     return
   endif
-  execute 'edit ' .. fnameescape(m[1])
-  cursor(str2nr(m[2]), col)
+  if len(items) == 1
+    execute 'edit ' .. fnameescape(items[0].filename)
+    cursor(items[0].lnum, items[0].col)
+  else
+    setqflist([], ' ', {items: items, title: 'Grep'})
+    copen
+    cfirst
+  endif
 enddef
 
 def Grep(query: string = '')
@@ -74,12 +83,13 @@ def Grep(query: string = '')
   if empty(q)
     return
   endif
-  var cmd = executable('ugrep') ? 'ugrep -RInk -I --ignore-files --color=never -- '
-    : 'grep -rIn -- '
+  # -F: search the text literally, so regex-special chars don't need escaping
+  var cmd = executable('ugrep') ? 'ugrep -RInk -F -I --ignore-files --color=never -- '
+    : 'grep -rIn -F -- '
   fzf#run(fzf#wrap({
     source: cmd .. shellescape(q),
-    sink: GrepSink,
-    options: ['--prompt', $'Grep({q})> ', '--delimiter', ':'],
+    'sink*': GrepSink,
+    options: ['--multi', '--prompt', $'Grep({q})> ', '--delimiter', ':'],
   }))
 enddef
 def GrepVisual()
