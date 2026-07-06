@@ -76,6 +76,8 @@ nnoremap <silent> ghs <cmd>GitGutterStageHunk<cr>
 nnoremap <silent> ghu <cmd>GitGutterUndoHunk<cr>
 nnoremap <silent> ghp <cmd>GitGutterPreviewHunk<cr>
 
+# test: native git signs (plugin/gitsigns.vim) instead of gitgutter
+g:gitgutter_enabled = 0
 g:gitgutter_sign_priority = 0
 g:gitgutter_preview_win_floating = 1
 
