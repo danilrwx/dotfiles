@@ -42,7 +42,8 @@ def Remember(Picker: func)
   if len(history) > 10
     history = history[-10 : ]
   endif
-  ridx = -1
+  # point at the just-opened picker so the first Cycle steps to a neighbour
+  ridx = len(history) - 1
 enddef
 
 def Cycle(step: number)
@@ -50,13 +51,26 @@ def Cycle(step: number)
     return
   endif
   var n = len(history)
-  ridx = ridx < 0 ? n - 1 : (ridx + step % n + n) % n
+  ridx = ((ridx < 0 ? n - 1 : ridx) + step % n + n) % n
   resuming = true
   history[ridx]()
   resuming = false
 enddef
 nnoremap <silent> <leader>' <scriptcmd>Cycle(-1)<cr>
 nnoremap <silent> <leader>" <scriptcmd>Cycle(1)<cr>
+
+# ctrl-o jumps to the previous picker from *inside* fzf. Pickers that let fzf#wrap
+# supply the sink (Files/GFiles/:FZF) dispatch it through g:fzf_action; pickers
+# with their own sink handle it via --expect (see BufSink/GrepAccept below).
+def PrevPicker(_: any = 0)
+  Cycle(-1)
+enddef
+g:fzf_action = {
+  'ctrl-t': 'tab split',
+  'ctrl-x': 'split',
+  'ctrl-v': 'vsplit',
+  'ctrl-o': PrevPicker,
+}
 
 def Files()
   Remember(Files)
@@ -69,6 +83,13 @@ nnoremap <silent> <leader>F <scriptcmd>Files()<cr>
 
 def BufSink(lines: list<string>)
   # --expect puts the pressed key on line 1 ('' for Enter), selections follow
+  if empty(lines)
+    return
+  endif
+  if lines[0] == 'ctrl-o'
+    Cycle(-1)
+    return
+  endif
   if len(lines) < 2
     return
   endif
@@ -88,8 +109,8 @@ def Buffers()
   fzf#run(fzf#wrap({
     source: bufs,
     'sink*': BufSink,
-    options: ['--multi', '--expect', 'ctrl-d',
-      '--header', 'Enter: open   Ctrl-D: delete   Tab: select',
+    options: ['--multi', '--expect', 'ctrl-d,ctrl-o',
+      '--header', 'Enter: open   Ctrl-D: delete   Tab: select   Ctrl-O: prev',
       '--prompt', 'Buffers> ', '--with-nth', '2..', '-d', "\t"],
   }))
 enddef
@@ -116,6 +137,18 @@ def GrepItem(line: string): dict<any>
   return empty(m) ? {} : {filename: m[1], lnum: str2nr(m[2]), col: 1, text: m[3]}
 enddef
 
+def GrepAccept(lines: list<string>)
+  # --expect prepends the pressed key ('' for Enter); ctrl-o cycles pickers
+  if empty(lines)
+    return
+  endif
+  if lines[0] == 'ctrl-o'
+    Cycle(-1)
+    return
+  endif
+  GrepSink(lines[1 :])
+enddef
+
 def GrepSink(lines: list<string>)
   var items = lines->mapnew((_, l) => GrepItem(l))->filter((_, i) => !empty(i))
   if empty(items)
@@ -140,10 +173,11 @@ def LiveGrep(query: string = '')
   var reload = $'[ -n {{q}} ] && {tool} -- {{q}} . 2>/dev/null || true'
   Remember(() => LiveGrep(query))
   fzf#run(fzf#wrap({
-    'sink*': GrepSink,
+    'sink*': GrepAccept,
     options: ['--disabled', '--multi', '--delimiter', ':', '--query', query,
+      '--expect', 'ctrl-o',
       '--prompt', 'LiveGrep> ',
-      '--header', 'type to search   Enter: open   Tab: select → quickfix',
+      '--header', 'type to search   Enter: open   Tab: → quickfix   Ctrl-O: prev',
       '--bind', 'start:reload:' .. reload,
       '--bind', 'change:reload:' .. reload],
   }))
