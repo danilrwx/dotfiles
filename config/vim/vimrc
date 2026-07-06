@@ -76,9 +76,6 @@ nnoremap <silent> ghs <cmd>GitGutterStageHunk<cr>
 nnoremap <silent> ghu <cmd>GitGutterUndoHunk<cr>
 nnoremap <silent> ghp <cmd>GitGutterPreviewHunk<cr>
 
-execute "set <A-q>=\eq"
-nnoremap <a-q> :bd<cr>
-
 g:gitgutter_sign_priority = 0
 g:gitgutter_preview_win_floating = 1
 
