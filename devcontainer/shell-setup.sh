@@ -15,7 +15,6 @@ VIM_PACK="$HOME/.config/vim/pack/plugins/start"
 mkdir -p "$VIM_PACK"
 for repo in \
   markonm/traces.vim \
-  airblade/vim-gitgutter \
   yegappan/lsp; do
   dst="$VIM_PACK/${repo##*/}"
   [ -d "$dst" ] || git clone --depth 1 "https://github.com/$repo" "$dst"
