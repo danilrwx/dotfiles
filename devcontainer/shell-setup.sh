@@ -11,11 +11,9 @@ command -v fzf     >/dev/null && fzf --zsh                 > "$COMP/fzf.zsh"    
 command -v kubectl >/dev/null && kubectl completion zsh    > "$COMP/kubectl.zsh" 2>/dev/null || true
 
 # vim plugins via native packages (~/.config/vim is in packpath by default; gitignored)
-VIM_PACK="$HOME/.config/vim/pack/plugins/start"
-mkdir -p "$VIM_PACK"
-for repo in \
-  markonm/traces.vim \
-  yegappan/lsp; do
-  dst="$VIM_PACK/${repo##*/}"
-  [ -d "$dst" ] || git clone --depth 1 "https://github.com/$repo" "$dst"
-done
+# start/ auto-loads; opt/ is packadd'd on demand (lsp is lazy — see plugin/lsp.vim)
+VIM_START="$HOME/.config/vim/pack/plugins/start"
+VIM_OPT="$HOME/.config/vim/pack/plugins/opt"
+mkdir -p "$VIM_START" "$VIM_OPT"
+[ -d "$VIM_START/traces.vim" ] || git clone --depth 1 https://github.com/markonm/traces.vim "$VIM_START/traces.vim"
+[ -d "$VIM_OPT/lsp" ]         || git clone --depth 1 https://github.com/yegappan/lsp "$VIM_OPT/lsp"

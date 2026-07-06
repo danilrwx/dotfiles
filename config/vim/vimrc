@@ -44,28 +44,6 @@ silent! packadd! cfilter
 silent! packadd! comment
 silent! packadd! hlyank
 
-# fzf ships a base vim plugin (:FZF, fzf#run) — load it from the install, no clone.
-# brew keeps it under <prefix>/plugin (add to rtp); apt ships it as a standalone
-# file (source directly). /usr/share/vim/vimfiles is already in rtp, so skip it.
-var fzf_loaded = false
-for d in ['/opt/homebrew/opt/fzf', '/usr/local/opt/fzf', '/home/linuxbrew/.linuxbrew/opt/fzf', expand('~/.fzf')]
-  if isdirectory(d)
-    execute 'set runtimepath+=' .. d
-    fzf_loaded = true
-    break
-  endif
-endfor
-if !fzf_loaded
-  for f in ['/usr/share/vim/vimfiles/plugin/fzf.vim', '/usr/share/doc/fzf/examples/fzf.vim']
-    if filereadable(f)
-      if f !~ '/vimfiles/'
-        execute 'source ' .. f
-      endif
-      break
-    endif
-  endfor
-endif
-
 g:mapleader = " "
 
 nnoremap <c-d> <c-d>zz<cr>
@@ -73,69 +51,5 @@ nnoremap <c-u> <c-u>zz<cr>
 
 nnoremap <c-l> :nohl<cr>
 
-nnoremap <silent> <leader>f :FZF<cr>
-
 nnoremap <silent> - <cmd>Oil<cr>
-
-var lspOpts = {
-	autoHighlightDiags: true,
-	useQuickfixForLocations: true,
-	semanticHighlight: true,
-	showInlayHints: false,
-}
-
-autocmd User LspSetup call LspOptionsSet(lspOpts)
-
-var lspServers = [{
-	name: 'golang',
-	filetype: ['go', 'gomod'],
-	path: exepath('gopls'),
-	args: ['serve'],
-	syncInit: false,
-	workspaceConfig: {
-		gopls: {
-			hints: {
-				assignVariableTypes: true,
-				compositeLiteralFields: true,
-				compositeLiteralTypes: true,
-				constantValues: true,
-				functionTypeParameters: true,
-				parameterNames: true,
-				rangeVariableTypes: true,
-				semanticTokens: false
-			}
-		}
-	}
-},
-{
-  name: 'clangd',
-  filetype: ['c', 'cpp'],
-  path: exepath('clangd'),
-  args: ['--background-index']
-},
-]
-
-autocmd User LspSetup call LspAddServer(lspServers)
-
-def On_lsp_buffer_enabled()
-  setlocal omnifunc=g:LspOmniFunc
-  setlocal tagfunc=lsp#lsp#TagFunc
-  setlocal formatexpr=lsp#lsp#FormatExpr()
-
-  nnoremap grr :LspShowReferences<cr>
-  nnoremap gri :LspPeekImpl<cr>
-  nnoremap K   :LspHover<cr>
-  nnoremap grs :LspDocumentSymbol<cr>
-  nnoremap grS :LspSymbolSearch<cr>
-  nnoremap gra :LspCodeAction<cr>
-  nnoremap grc :LspCodeLens<cr>
-  nnoremap grn :LspRename<cr>
-  nnoremap grf :LspFormat<cr>
-  nnoremap <c-w>d :LspDiag current<cr>
-  nnoremap [d :LspDiag prev<cr>
-  nnoremap ]d :LspDiag next<cr>
-
-  autocmd! BufWritePre *.go call execute('LspFormat')
-enddef
-autocmd User LspAttached call On_lsp_buffer_enabled()
 
