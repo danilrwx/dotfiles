@@ -11,7 +11,7 @@ export PATH="$HOME/dotfiles/private/bin:$PATH"
 
 export XDG_CONFIG_HOME="$HOME/.config"
 
-export FZF_DEFAULT_OPTS="--height 40% --input-border=sharp --list-border=sharp --preview-border=sharp --prompt='> ' --pointer='>' --marker='>' --info=inline-right --color=fg:-1,bg:-1,hl:12,fg+:10,bg+:-1,hl+:10,info:12,border:8,label:7,prompt:7,pointer:10,marker:10,gutter:-1,spinner:12"
+export FZF_DEFAULT_OPTS="--height 40% --input-border=sharp --list-border=sharp --preview-border=sharp --prompt='> ' --pointer='>' --marker='>' --gutter=' ' --info=inline-right --color=fg:-1,bg:-1,hl:12,fg+:10,bg+:-1,hl+:10,info:12,border:8,label:7,prompt:7,pointer:10,marker:10,gutter:-1,spinner:12"
 
 export PI_OFFLINE=1
 
