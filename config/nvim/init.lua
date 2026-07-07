@@ -34,11 +34,3 @@ vim.keymap.set("n", "<leader>gg", "<cmd>silent execute '!tmux neww lazygit'<bar>
 vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>", { silent = true })
 vim.keymap.set("n", "<S-l>", "<cmd>bn<cr>", { silent = true })
 vim.keymap.set("n", "<S-h>", "<cmd>bp<cr>", { silent = true })
-
--- nvim ships an OSC 52 clipboard provider, so "+ reaches the host over ssh/tmux
--- without the clip-helper wiring the vim config needs.
-vim.keymap.set({ "n", "x" }, "<leader>y", '"+y')
-vim.keymap.set("n", "<leader>p", '"+p')
-vim.keymap.set("n", "<leader>dd", function()
-  vim.fn.setreg("+", vim.fn.expand("%") .. ":" .. vim.fn.line("."))
-end, { silent = true })

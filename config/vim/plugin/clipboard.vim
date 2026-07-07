@@ -1,18 +1,13 @@
 " Clipboard integration for the devbox (vim over SSH, no X server).
 "
-" Maps: on +clipboard vim (the host, incl. GUI) use the + register directly; in
-" the devbox vim (no +clipboard over SSH) leader-y is a plain yank — the hook
-" below mirrors it to the host clipboard — and leader-dd pushes the path through
-" the clip helper. Paste from the host is Cmd+V (terminal paste); OSC 52 read is
-" not available, so there is no paste map without the + register.
+" There is no <leader>y: every plain yank is mirrored to the host clipboard by
+" the hook below (OSC 52 straight to /dev/tty via clip). leader-dd pushes the
+" path the same way. Paste from the host is Cmd+V (terminal paste); OSC 52 read
+" is not available, so there is a paste map only where the + register works.
 if has('clipboard')
-  nnoremap <leader>y "+y
-  xnoremap <leader>y "+y
   nnoremap <leader>p "+p
   nnoremap <silent> <leader>dd <cmd>let @+ = expand('%') .. ':' .. line('.')<cr>
 else
-  nnoremap <leader>y y
-  xnoremap <leader>y y
   nnoremap <silent> <leader>dd <cmd>call system('clip', expand('%') .. ':' .. line('.'))<cr>
 endif
 
