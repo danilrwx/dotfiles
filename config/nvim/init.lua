@@ -140,8 +140,13 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- only normal file windows: terminal/oil/qf buffers have padded lines that
+-- would otherwise flash red as "trailing whitespace" (e.g. the fzf header).
 vim.api.nvim_create_autocmd("BufWinEnter", {
   callback = function()
+    if vim.bo.buftype ~= "" then
+      return
+    end
     vim.fn.clearmatches()
     vim.fn.matchadd("ErrorMsg", [[\s\+$]])
   end,
