@@ -33,6 +33,11 @@ enddef
 
 set findfunc=Find
 
+# fuzzy matches share no common prefix, so `longest` inserts nothing and the
+# typed query survives -- no full path auto-filled into the cmdline on <Tab>.
+set wildmode=longest:full
+set wildoptions=pum
+
 nnoremap <leader>e :find<space>
 
 # quickfix grep via grepprg (interactive fzf grep is :Grep in plugin/fzf.vim)
