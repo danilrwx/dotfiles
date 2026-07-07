@@ -2,10 +2,8 @@
 "
 " There is no <leader>y: every plain yank is mirrored to the host clipboard by
 " the hook below (OSC 52 straight to /dev/tty via clip). leader-dd pushes the
-" path the same way. Paste from the host is Cmd+V (terminal paste); OSC 52 read
-" is not available, so there is a paste map only where the + register works.
+" path the same way. Paste from the host is Cmd+V (terminal paste).
 if has('clipboard')
-  nnoremap <leader>p "+p
   nnoremap <silent> <leader>dd <cmd>let @+ = expand('%') .. ':' .. line('.')<cr>
 else
   nnoremap <silent> <leader>dd <cmd>call system('clip', expand('%') .. ':' .. line('.'))<cr>

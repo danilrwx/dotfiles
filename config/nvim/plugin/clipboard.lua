@@ -26,7 +26,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
-vim.keymap.set("n", "<leader>p", '"+p')
 vim.keymap.set("n", "<leader>dd", function()
   osc52(vim.fn.expand("%") .. ":" .. vim.fn.line("."))
 end, { silent = true })
