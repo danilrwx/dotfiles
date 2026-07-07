@@ -45,8 +45,9 @@ silent! packadd! cfilter
 silent! packadd! comment
 silent! packadd! hlyank
 
-" Colors: transparent background, dim line numbers, dark popup menu, and a
-" trailing-whitespace highlight.
+" Colors: torte scheme, then transparent background, dim line numbers, dark
+" popup menu, and a trailing-whitespace highlight.
+silent! colorscheme torte
 highlight Normal ctermbg=none
 highlight SignColumn ctermbg=none
 highlight LineNr ctermfg=244 guifg=#808080

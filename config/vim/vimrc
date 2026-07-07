@@ -35,6 +35,8 @@ set undodir=$XDG_CONFIG_HOME/vim/files/undo/
 
 match errorMsg '\s\+$'
 
+silent! colorscheme torte
+
 highlight Normal ctermbg=none
 highlight SignColumn ctermbg=none
 highlight LineNr ctermfg=244 guifg=#808080
