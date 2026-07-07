@@ -41,6 +41,11 @@ function _G.__find(cmdarg, _)
 end
 vim.o.findfunc = "v:lua.__find"
 
+-- fuzzy matches share no common prefix, so `longest` inserts nothing and the
+-- typed query survives -- no full path auto-filled into the cmdline on <Tab>.
+vim.o.wildmode = "longest:full"
+vim.o.wildoptions = "pum"
+
 vim.api.nvim_create_user_command("Grepq", function(o)
   local cmd = vim.o.grepprg .. " " .. o.args
   vim.fn.setqflist({}, " ", { title = cmd, lines = vim.fn.systemlist(cmd), efm = vim.o.grepformat })
@@ -61,24 +66,6 @@ local function toggle_qf()
   end
 end
 
+-- files/buffers/grep pickers live in fzf.lua; :find keeps the native fuzzy find
 vim.keymap.set("n", "<leader>e", ":find ", {})
-vim.keymap.set("n", "<leader>/", ":Grepq ", {})
-vim.keymap.set("n", "<leader>?", function()
-  return ":Grepq " .. vim.fn.expand("<cword>")
-end, { expr = true })
 vim.keymap.set("n", "<leader>q", toggle_qf, { silent = true })
-vim.keymap.set("n", "<leader>b", function()
-  local bufs = vim.tbl_filter(function(b)
-    return b.name ~= ""
-  end, vim.fn.getbufinfo({ buflisted = 1 }))
-  vim.ui.select(bufs, {
-    prompt = "Buffers",
-    format_item = function(b)
-      return vim.fn.fnamemodify(b.name, ":~:.")
-    end,
-  }, function(choice)
-    if choice then
-      vim.cmd("buffer " .. choice.bufnr)
-    end
-  end)
-end)
