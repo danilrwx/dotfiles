@@ -140,17 +140,16 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- only normal file windows: terminal/oil/qf buffers have padded lines that
--- would otherwise flash red as "trailing whitespace" (e.g. the fzf header).
-vim.api.nvim_create_autocmd("BufWinEnter", {
-  callback = function()
-    if vim.bo.buftype ~= "" then
-      return
-    end
-    vim.fn.clearmatches()
+-- trailing-whitespace highlight. matchadd is window-local, and fzf reuses the
+-- window for its terminal, so always clear first (else the padded fzf header
+-- stays highlighted red) and re-add only for normal file buffers.
+local function ws_match()
+  vim.fn.clearmatches()
+  if vim.bo.buftype == "" then
     vim.fn.matchadd("ErrorMsg", [[\s\+$]])
-  end,
-})
+  end
+end
+vim.api.nvim_create_autocmd({ "BufWinEnter", "TermOpen" }, { callback = ws_match })
 
 vim.api.nvim_create_autocmd("ColorScheme", {
   callback = function()
