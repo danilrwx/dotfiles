@@ -32,7 +32,7 @@ endif
 # and multi-selection are not restored — only the query.
 # per-picker query history file. --history makes fzf steal ctrl-n/ctrl-p for
 # history, so bind them back to list nav and move history to alt-n/alt-p.
-const HISTDIR = ($XDG_CONFIG_HOME ?? expand('~/.config')) .. '/vim/files/fzf-history'
+const HISTDIR = ($XDG_STATE_HOME ?? expand('~/.local/state')) .. '/vim/fzf-history'
 if !isdirectory(HISTDIR)
   mkdir(HISTDIR, 'p')
 endif

@@ -24,14 +24,22 @@ else
   set grepprg=grep\ --exclude='*zz_generated*'\ --exclude-dir='generated'
 endif
 
+const state = ($XDG_STATE_HOME ?? expand('~/.local/state')) .. '/vim'
+for sub in ['backup', 'swap', 'undo']
+  if !isdirectory($'{state}/{sub}')
+    mkdir($'{state}/{sub}', 'p')
+  endif
+endfor
+
 set backup
-set backupdir=$XDG_CONFIG_HOME/vim/files/backup/
+&backupdir = $'{state}/backup//'
 set backupext=-vimbackup
 set backupskip=
-set directory=$XDG_CONFIG_HOME/vim/files/swap/
+&directory = $'{state}/swap//'
 set updatecount=100
 set undofile
-set undodir=$XDG_CONFIG_HOME/vim/files/undo/
+&undodir = $'{state}/undo//'
+&viminfofile = $'{state}/viminfo'
 
 match errorMsg '\s\+$'
 
