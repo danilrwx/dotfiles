@@ -45,12 +45,11 @@ silent! packadd! cfilter
 silent! packadd! comment
 silent! packadd! hlyank
 
-" Colors: torte scheme, then transparent background, dim line numbers, dark
-" popup menu, and a trailing-whitespace highlight.
+" Colors: torte scheme, then transparent background, dark popup menu, and a
+" trailing-whitespace highlight.
 silent! colorscheme torte
 highlight Normal ctermbg=none
 highlight SignColumn ctermbg=none
-highlight LineNr ctermfg=244 guifg=#808080
 highlight Pmenu ctermbg=black ctermfg=252 guibg=#000000 guifg=#d0d0d0
 highlight PmenuSel ctermbg=252 ctermfg=black guibg=#d0d0d0 guifg=#000000
 match errorMsg '\s\+$'
