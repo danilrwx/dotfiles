@@ -8,7 +8,7 @@ M.launchers = {} -- name -> function(opts); filled by the sources layer
 local last_query = {}
 local ring, ridx = {}, 0
 
-local HINT = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^f/^b page   ^/ preview   ^o prev"
+local HINT = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^f/^b page   A-f/b scroll   ^/ preview   ^o prev"
 
 -- opts: name, prompt, parse(line)->{file,lnum}, live(q)->lines, on_pick(line,cmd),
 -- hint_extra, actions, query, resuming
@@ -182,6 +182,8 @@ function M.open(cands, opts)
   end)
   map("<C-f>", function() page_move(v.page) end)
   map("<C-b>", function() page_move(-v.page) end)
+  map("<A-f>", function() v:scroll_preview(true) end) -- scroll preview down
+  map("<A-b>", function() v:scroll_preview(false) end) -- scroll preview up
   -- C-o: previous picker (MRU). Also shadows i_CTRL-O so it can't drop out of
   -- insert. Alt was unusable — terminals send it as Esc+key, tripping <Esc>=close.
   map("<C-o>", function() cycle(-1) end)
