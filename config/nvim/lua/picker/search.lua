@@ -52,13 +52,13 @@ function M.find_all(s, sub)
   return cols
 end
 
--- Grep hit -> {file, lnum} (ugrep: f:l:c:txt, grep: f:l:txt).
+-- Grep hit -> {file, lnum, col} (ugrep: f:l:c:txt, grep: f:l:txt).
 function M.grep_parse(line)
-  local f, l = line:match("^(.-):(%d+):%d+:")
+  local f, l, c = line:match("^(.-):(%d+):(%d+):")
   if not f then
     f, l = line:match("^(.-):(%d+):")
   end
-  return { file = f, lnum = l and tonumber(l) }
+  return { file = f, lnum = l and tonumber(l), col = c and tonumber(c) }
 end
 
 return M
