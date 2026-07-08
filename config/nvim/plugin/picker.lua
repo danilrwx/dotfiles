@@ -77,6 +77,7 @@ local function open(cands, opts)
   end
   local filtered, sel, marked = cands, 1, {}
   local prev_visible = true
+  local ftimer
 
   local W, H = vim.o.columns, vim.o.lines
   local width = W - 2
@@ -222,6 +223,9 @@ local function open(cands, opts)
       return
     end
     closing = true
+    if ftimer then
+      ftimer:stop()
+    end
     pcall(vim.cmd, "stopinsert")
     for _, w in ipairs(wins) do
       pcall(vim.api.nvim_win_close, w, true)
@@ -281,7 +285,17 @@ local function open(cands, opts)
     end
   end
 
-  vim.api.nvim_create_autocmd({ "TextChangedI", "TextChanged" }, { buffer = prompt_buf, callback = refilter })
+  -- debounce: coalesce fast typing into one refilter, so a big source (thousands
+  -- of files) doesn't queue a render per keystroke and appear to freeze.
+  vim.api.nvim_create_autocmd({ "TextChangedI", "TextChanged" }, {
+    buffer = prompt_buf,
+    callback = function()
+      if ftimer then
+        ftimer:stop()
+      end
+      ftimer = vim.defer_fn(refilter, 30)
+    end,
+  })
 
   local k = { buffer = prompt_buf, silent = true }
   local map = function(lhs, fn)
