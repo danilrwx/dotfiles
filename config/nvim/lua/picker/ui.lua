@@ -11,6 +11,7 @@ local function setup_hl()
   local set = vim.api.nvim_set_hl
   set(0, "PickerBorder", { fg = "#6b7089", default = true })
   set(0, "PickerMatch", { fg = "#5fafff", bold = true, default = true })
+  set(0, "PickerMatchFile", { fg = "#e0af68", bold = true, default = true })
   set(0, "PickerCurrent", { fg = "#00cd00", default = true })
   set(0, "PickerPointer", { fg = "#00cd00", bold = true, default = true })
   set(0, "PickerMarker", { fg = "#00cd00", default = true })
@@ -83,8 +84,8 @@ end
 
 -- Full rebuild: list buffer + mark/match highlights (bounded to 500 rows; the
 -- buffer still holds every row so navigation stays in sync with the preview).
--- positions[i] = 0-based byte columns matched in filtered[i] (from the matcher),
--- or nil when there's no active query.
+-- positions[i] = list of { col = 0-based byte, hl = group } for filtered[i], or
+-- nil when there's no active query.
 function View:render_list(filtered, marked, positions)
   vim.bo[self.list_buf].modifiable = true
   vim.api.nvim_buf_set_lines(self.list_buf, 0, -1, false, filtered)
@@ -96,9 +97,9 @@ function View:render_list(filtered, marked, positions)
         { sign_text = "+", sign_hl_group = "PickerMarker" })
     end
     if positions and positions[i] then
-      for _, p in ipairs(positions[i]) do
-        vim.api.nvim_buf_set_extmark(self.list_buf, ns, i - 1, p,
-          { end_col = p + 1, hl_group = "PickerMatch" })
+      for _, h in ipairs(positions[i]) do
+        vim.api.nvim_buf_set_extmark(self.list_buf, ns, i - 1, h.col,
+          { end_col = h.col + 1, hl_group = h.hl })
       end
     end
   end

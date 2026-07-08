@@ -95,14 +95,19 @@ picker.launchers.livegrep = function(o)
     parse = search.grep_parse,
     resuming = o and o.resuming,
     hint_extra = "   A-g grep/file",
-    -- highlight the query you're editing: grep pattern in the hit text (literal),
-    -- or the file filter fuzzily in the path.
+    -- highlight both queries at once, in distinct colours: the grep pattern in
+    -- the hit text (blue, literal) and the file filter fuzzily in the path
+    -- (orange). The path is the line prefix, so its columns need no offset.
     line_positions = function(line)
-      if mode == "grep" then
-        return search.find_all(line, gq)
+      local out = {}
+      for _, c in ipairs(search.find_all(line, gq)) do
+        out[#out + 1] = { col = c, hl = "PickerMatch" }
       end
       local it = search.grep_parse(line)
-      return (it.file and search.subseq_pos(it.file, fq)) or {}
+      for _, c in ipairs((it.file and search.subseq_pos(it.file, fq)) or {}) do
+        out[#out + 1] = { col = c, hl = "PickerMatchFile" }
+      end
+      return out
     end,
     live = function(q)
       if mode == "grep" then
