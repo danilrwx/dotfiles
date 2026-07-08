@@ -129,9 +129,21 @@ local function open(cands, opts)
     end
     vim.api.nvim_win_set_config(prev_win, { title = " " .. vim.fn.fnamemodify(it.file, ":t") .. " " })
     local lines = vim.fn.readfile(it.file, "", 500)
+    -- readfile turns NUL bytes into \n; a line containing \n means binary content,
+    -- which nvim_buf_set_lines rejects — show a placeholder instead.
+    local binary = false
+    for _, l in ipairs(lines) do
+      if l:find("\n") then
+        binary = true
+        break
+      end
+    end
+    if binary then
+      lines = { "[binary file]" }
+    end
     vim.api.nvim_buf_set_lines(prev_buf, 0, -1, false, lines)
     vim.bo[prev_buf].modifiable = false
-    local ft = vim.filetype.match({ filename = it.file, contents = lines }) or ""
+    local ft = not binary and (vim.filetype.match({ filename = it.file, contents = lines }) or "") or ""
     vim.bo[prev_buf].filetype = ft
     if ft ~= "" then
       pcall(vim.treesitter.start, prev_buf)
