@@ -321,17 +321,23 @@ local function open(cands, opts)
     end
   end
 
+  -- MRU history (Alt-Tab): unique pickers ordered by recency, most recent last.
+  -- A fresh open moves its type to the end; A-n/A-p walk it without wrapping, so
+  -- A-p from the current picker lands on the previously used one, not itself.
   if not opts.resuming then
     for i, n in ipairs(ring) do
       if n == opts.name then
         table.remove(ring, i)
+        break
       end
     end
     ring[#ring + 1] = opts.name
     ridx = #ring
   end
 
-  local seed = opts.query or last_query[opts.name] or ""
+  -- fresh open starts empty; only an explicit query (e.g. grep <cword>) or a
+  -- history revisit (resuming) reseeds the previous query.
+  local seed = opts.query or (opts.resuming and last_query[opts.name]) or ""
   if seed ~= "" then
     vim.api.nvim_buf_set_lines(prompt_buf, 0, 1, false, { seed })
   end
@@ -341,10 +347,11 @@ local function open(cands, opts)
 end
 
 function _G.PickerCycle(step)
-  if #ring == 0 then
-    return
+  local n = ridx + step
+  if n < 1 or n > #ring then
+    return -- stop at history ends, don't wrap
   end
-  ridx = (ridx - 1 + step) % #ring + 1
+  ridx = n
   launchers[ring[ridx]]({ resuming = true })
 end
 
@@ -368,7 +375,11 @@ local function grep_parse(line)
 end
 
 local function edit_file(f, cmd)
-  vim.cmd((OPEN[cmd] or "edit") .. " " .. vim.fn.fnameescape(f))
+  local verb = OPEN[cmd] or "edit"
+  if verb == "edit" and vim.bo.modified then
+    verb = "hide edit" -- current buffer has unsaved changes; keep it hidden (no E37)
+  end
+  vim.cmd(verb .. " " .. vim.fn.fnameescape(f))
 end
 
 local function files_source()
@@ -455,5 +466,14 @@ vim.keymap.set("x", "<leader>/", function()
   vim.cmd('normal! "zy')
   launchers.livegrep({ query = (vim.fn.getreg("z"):gsub("\n.*", "")) })
 end, { silent = true })
-vim.keymap.set("n", "<leader>'", function() _G.PickerCycle(-1) end, { silent = true })
-vim.keymap.set("n", '<leader>"', function() _G.PickerCycle(1) end, { silent = true })
+-- <leader>' reopens the most recently used picker; <leader>" the one before it.
+-- From there A-n/A-p walk the history inside the picker.
+local function resume(offset)
+  local i = #ring - offset
+  if i >= 1 and ring[i] then
+    ridx = i
+    launchers[ring[i]]({ resuming = true })
+  end
+end
+vim.keymap.set("n", "<leader>'", function() resume(0) end, { silent = true })
+vim.keymap.set("n", '<leader>"', function() resume(1) end, { silent = true })
