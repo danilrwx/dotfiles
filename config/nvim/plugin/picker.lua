@@ -179,7 +179,7 @@ local function open(cands, opts)
   -- files — the preview is debounced separately.
   local function paint_current()
     vim.api.nvim_buf_clear_namespace(list_buf, ns_cur, 0, -1)
-    local n = math.min(#filtered, 500)
+    local n = #filtered
     if n > 0 and sel <= n then
       vim.api.nvim_buf_set_extmark(list_buf, ns_cur, sel - 1, 0,
         { line_hl_group = "PickerCurrent", sign_text = ">", sign_hl_group = "PickerPointer" })
@@ -198,15 +198,16 @@ local function open(cands, opts)
   -- or mark toggle, never on plain navigation.
   local function render_list()
     local q = (vim.api.nvim_buf_get_lines(prompt_buf, 0, 1, false)[1] or ""):lower()
-    local shown = {}
-    for i = 1, math.min(#filtered, 500) do
-      shown[i] = filtered[i]
-    end
     vim.bo[list_buf].modifiable = true
-    vim.api.nvim_buf_set_lines(list_buf, 0, -1, false, shown)
+    vim.api.nvim_buf_set_lines(list_buf, 0, -1, false, filtered)
     vim.bo[list_buf].modifiable = false
     vim.api.nvim_buf_clear_namespace(list_buf, ns, 0, -1)
-    for i, line in ipairs(shown) do
+    -- mark/match highlights only for the first 500 rows (rarely scrolled past;
+    -- keeps the highlight pass bounded while the buffer still holds every row so
+    -- navigation and the pointer stay in sync with the preview).
+    local lim = math.min(#filtered, 500)
+    for i = 1, lim do
+      local line = filtered[i]
       local row = i - 1
       if marked[line] then
         vim.api.nvim_buf_set_extmark(list_buf, ns, row, 0,
