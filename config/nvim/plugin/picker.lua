@@ -200,12 +200,27 @@ local function open(cands, opts)
   end
 
   local wins = { prev_win, list_win, prompt_win }
+  local closing = false
   local function close()
+    if closing then
+      return
+    end
+    closing = true
     pcall(vim.cmd, "stopinsert")
     for _, w in ipairs(wins) do
       pcall(vim.api.nvim_win_close, w, true)
     end
   end
+
+  -- tear the whole picker down if the prompt is left or closed by any means
+  -- (:q, <C-w>, focus change) — not just via the mapped keys
+  vim.api.nvim_create_autocmd({ "WinLeave", "WinClosed" }, {
+    buffer = prompt_buf,
+    once = true,
+    callback = function()
+      vim.schedule(close)
+    end,
+  })
 
   local function move(step)
     if #filtered == 0 then
