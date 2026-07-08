@@ -12,14 +12,28 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- :TSBuild — install parsers + queries without the nvim-treesitter plugin.
--- It sparse-clones nvim-treesitter as a data source only (pinned url/revision/
--- location per grammar, plus the maintained queries), compiles each parser with
--- cc, and vendors queries into config/queries/. The plugin never loads at
--- runtime and is not kept on disk. Requires: git, cc.
-local LANGS = {
-  "go", "gomod", "gosum", "gowork", "yaml", "json", "toml", "bash",
-  "python", "rust", "dockerfile", "hcl", "terraform", "proto", "helm",
+-- :TSBuild — compile parsers into site/parser without any plugin or git clone.
+-- Each grammar's parser.c is fetched as a GitHub tarball (curl) at a pinned
+-- revision and compiled with cc. Queries are vendored in config/queries/ (see
+-- the repo), so they are not touched here. Pins came once from nvim-treesitter's
+-- parsers.lua; bump a revision here to update a parser. Requires: curl, tar, cc.
+-- { lang, owner/repo, revision-or-tag, subdir? }
+local GRAMMARS = {
+  { "go", "tree-sitter/tree-sitter-go", "2346a3ab1bb3857b48b29d779a1ef9799a248cd7" },
+  { "gomod", "camdencheek/tree-sitter-go-mod", "2e886870578eeba1927a2dc4bd2e2b3f598c5f9a" },
+  { "gosum", "tree-sitter-grammars/tree-sitter-go-sum", "27816eb6b7315746ae9fcf711e4e1396dc1cf237" },
+  { "gowork", "omertuc/tree-sitter-go-work", "949a8a470559543857a62102c84700d291fc984c" },
+  { "yaml", "tree-sitter-grammars/tree-sitter-yaml", "4463985dfccc640f3d6991e3396a2047610cf5f8" },
+  { "json", "tree-sitter/tree-sitter-json", "001c28d7a29832b06b0e831ec77845553c89b56d" },
+  { "toml", "tree-sitter-grammars/tree-sitter-toml", "64b56832c2cffe41758f28e05c756a3a98d16f41" },
+  { "bash", "tree-sitter/tree-sitter-bash", "a06c2e4415e9bc0346c6b86d401879ffb44058f7" },
+  { "python", "tree-sitter/tree-sitter-python", "v0.25.0" },
+  { "rust", "tree-sitter/tree-sitter-rust", "77a3747266f4d621d0757825e6b11edcbf991ca5" },
+  { "dockerfile", "camdencheek/tree-sitter-dockerfile", "971acdd908568b4531b0ba28a445bf0bb720aba5" },
+  { "hcl", "tree-sitter-grammars/tree-sitter-hcl", "64ad62785d442eb4d45df3a1764962dafd5bc98b" },
+  { "terraform", "MichaHoffmann/tree-sitter-hcl", "64ad62785d442eb4d45df3a1764962dafd5bc98b", "dialects/terraform" },
+  { "proto", "coder3101/tree-sitter-proto", "d65a18ce7c2242801f702770114ad08056c7f8c9" },
+  { "helm", "ngalaiko/tree-sitter-go-template", "aa71f63de226c5592dfbfc1f29949522d7c95fac", "dialects/helm" },
 }
 
 local function run(cmd, cwd)
@@ -32,63 +46,41 @@ end
 
 local function build()
   local parser_dir = vim.fs.joinpath(vim.fn.stdpath("data"), "site", "parser")
-  local query_dir = vim.fs.joinpath(vim.fn.stdpath("config"), "queries")
   local cxxlib = vim.uv.os_uname().sysname == "Darwin" and "-lc++" or "-lstdc++"
   vim.fn.mkdir(parser_dir, "p")
-  vim.fn.mkdir(query_dir, "p")
-
   local tmp = vim.fn.tempname()
   vim.fn.mkdir(tmp, "p")
-  local nts = vim.fs.joinpath(tmp, "nts")
 
-  vim.notify("cloning nvim-treesitter (data source)…")
-  run({ "git", "clone", "-q", "--depth", "1", "--filter=blob:none", "--sparse",
-    "https://github.com/nvim-treesitter/nvim-treesitter", nts })
-  run({ "git", "-C", nts, "sparse-checkout", "set", "lua/nvim-treesitter", "runtime/queries" })
+  for _, g in ipairs(GRAMMARS) do
+    local lang, repo, rev, subdir = g[1], g[2], g[3], g[4]
+    vim.notify("==> " .. lang)
+    local dir = vim.fs.joinpath(tmp, lang)
+    vim.fn.mkdir(dir, "p")
+    local tgz = dir .. ".tar.gz"
+    run({ "curl", "-sfL", "-o", tgz, ("https://github.com/%s/archive/%s.tar.gz"):format(repo, rev) })
+    run({ "tar", "xzf", tgz, "-C", dir, "--strip-components=1" })
 
-  vim.opt.runtimepath:append(nts)
-  local P = require("nvim-treesitter.parsers")
-
-  for _, lang in ipairs(LANGS) do
-    local info = P[lang] and P[lang].install_info
-    if not info then
-      vim.notify("no install_info: " .. lang, vim.log.levels.WARN)
+    local src = vim.fs.joinpath(dir, subdir or "", "src")
+    if vim.fn.filereadable(vim.fs.joinpath(src, "parser.c")) == 0 then
+      -- ponytail: grammars without a committed parser.c need `tree-sitter
+      -- generate` + the CLI. None in GRAMMARS today; add the step if one appears.
+      vim.notify("  skip: no parser.c (" .. lang .. ")", vim.log.levels.WARN)
     else
-      vim.notify("==> " .. lang)
-      local dir = vim.fs.joinpath(tmp, lang)
-      run({ "git", "clone", "-q", "--filter=blob:none", "--no-checkout", info.url, dir })
-      run({ "git", "-C", dir, "checkout", "-q", info.revision or "HEAD" })
-
-      local src = vim.fs.joinpath(dir, info.location or "", "src")
-      if vim.fn.filereadable(vim.fs.joinpath(src, "parser.c")) == 0 then
-        -- ponytail: grammars without a committed parser.c need `tree-sitter
-        -- generate` + the CLI. None in LANGS today; add the step if one appears.
-        vim.notify("  skip: no parser.c (" .. lang .. ")", vim.log.levels.WARN)
-      else
-        local args = { "cc", "-O2", "-fPIC", "-shared", "-I", src, vim.fs.joinpath(src, "parser.c") }
-        if vim.fn.filereadable(vim.fs.joinpath(src, "scanner.c")) == 1 then
-          table.insert(args, vim.fs.joinpath(src, "scanner.c"))
-        end
-        if vim.fn.filereadable(vim.fs.joinpath(src, "scanner.cc")) == 1 then
-          table.insert(args, vim.fs.joinpath(src, "scanner.cc"))
-          table.insert(args, cxxlib)
-        end
-        vim.list_extend(args, { "-o", vim.fs.joinpath(parser_dir, lang .. ".so") })
-        run(args)
-
-        local srcq = vim.fs.joinpath(nts, "runtime", "queries", lang)
-        if vim.fn.isdirectory(srcq) == 1 then
-          vim.fn.delete(vim.fs.joinpath(query_dir, lang), "rf")
-          run({ "cp", "-R", srcq, vim.fs.joinpath(query_dir, lang) })
-        else
-          vim.notify("  no queries: " .. lang, vim.log.levels.WARN)
-        end
+      local args = { "cc", "-O2", "-fPIC", "-shared", "-I", src, vim.fs.joinpath(src, "parser.c") }
+      if vim.fn.filereadable(vim.fs.joinpath(src, "scanner.c")) == 1 then
+        table.insert(args, vim.fs.joinpath(src, "scanner.c"))
       end
+      if vim.fn.filereadable(vim.fs.joinpath(src, "scanner.cc")) == 1 then
+        table.insert(args, vim.fs.joinpath(src, "scanner.cc"))
+        table.insert(args, cxxlib)
+      end
+      vim.list_extend(args, { "-o", vim.fs.joinpath(parser_dir, lang .. ".so") })
+      run(args)
     end
   end
 
   vim.fn.delete(tmp, "rf")
-  vim.notify(("done — parsers: %s  queries: %s"):format(parser_dir, query_dir))
+  vim.notify("done — parsers: " .. parser_dir)
 end
 
 vim.api.nvim_create_user_command("TSBuild", build, { desc = "Build treesitter parsers + queries" })
