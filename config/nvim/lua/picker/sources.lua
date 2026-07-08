@@ -80,8 +80,20 @@ picker.launchers.livegrep = function(o)
     query = o and o.query,
     parse = search.grep_parse,
     resuming = o and o.resuming,
+    hint_extra = "   pat>file filter",
+    -- "pattern > filefilter": grep pattern, then keep hits whose path fuzzily
+    -- matches filefilter.
     live = function(q)
-      return lines_of(vim.list_extend(vim.deepcopy(tool), { "--", q }))
+      local pat, file = q:match("^(.-)%s+>%s+(.+)$")
+      pat = pat or q
+      local hits = lines_of(vim.list_extend(vim.deepcopy(tool), { "--", pat }))
+      if file and file ~= "" then
+        hits = vim.tbl_filter(function(line)
+          local it = search.grep_parse(line)
+          return it.file ~= nil and search.subseq(it.file, file)
+        end, hits)
+      end
+      return hits
     end,
     on_pick = function(line, cmd)
       local it = search.grep_parse(line)

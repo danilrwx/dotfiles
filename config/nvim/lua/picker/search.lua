@@ -12,6 +12,20 @@ function M.fuzzy(cands, q)
   return m[1], m[2]
 end
 
+-- Case-insensitive subsequence test (for filtering grep hits by file path).
+function M.subseq(s, pat)
+  s, pat = s:lower(), pat:lower()
+  local si = 1
+  for i = 1, #pat do
+    local f = s:find(pat:sub(i, i), si, true)
+    if not f then
+      return false
+    end
+    si = f + 1
+  end
+  return true
+end
+
 -- Grep hit -> {file, lnum} (ugrep: f:l:c:txt, grep: f:l:txt).
 function M.grep_parse(line)
   local f, l = line:match("^(.-):(%d+):%d+:")
