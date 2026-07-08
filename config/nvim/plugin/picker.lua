@@ -17,7 +17,7 @@ vim.api.nvim_create_user_command("Diagnostics", function(o) L.diagnostics({ buf 
 vim.keymap.set("n", "<leader>F", function() L.files() end, { silent = true })
 vim.keymap.set("n", "<leader>f", function() L.gfiles() end, { silent = true })
 vim.keymap.set("n", "<leader>b", function() L.buffers() end, { silent = true })
-vim.keymap.set("n", "<leader>d", function() L.diagnostics() end, { silent = true })
+vim.keymap.set("n", "<leader>D", function() L.diagnostics() end, { silent = true })
 vim.keymap.set("n", "<leader>/", function() L.livegrep() end, { silent = true })
 vim.keymap.set("n", "<leader>?", function() L.livegrep({ query = vim.fn.expand("<cword>") }) end, { silent = true })
 vim.keymap.set("x", "<leader>/", function()
