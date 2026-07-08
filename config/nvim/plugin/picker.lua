@@ -63,6 +63,7 @@ local function fuzzy(cands, q)
 end
 
 local ns = vim.api.nvim_create_namespace("picker")
+local ns_cur = vim.api.nvim_create_namespace("picker_cur")
 local hlns = vim.api.nvim_create_namespace("picker_hl")
 local last_query = {}
 local launchers = {}
@@ -160,6 +161,29 @@ local function open(cands, opts)
     end
   end
 
+  -- light: only the current-line highlight (own namespace), cursor, preview and
+  -- counter. Runs on every navigation keystroke, so it must not rebuild the list.
+  local function paint_current()
+    vim.api.nvim_buf_clear_namespace(list_buf, ns_cur, 0, -1)
+    local n = math.min(#filtered, 500)
+    if n > 0 and sel <= n then
+      vim.api.nvim_buf_set_extmark(list_buf, ns_cur, sel - 1, 0,
+        { line_hl_group = "PickerCurrent", sign_text = ">", sign_hl_group = "PickerPointer" })
+      pcall(vim.api.nvim_win_set_cursor, list_win, { sel, 0 })
+      vim.api.nvim_win_call(list_win, function()
+        vim.cmd("normal! zz") -- keep the selection centered while scrolling
+      end)
+    end
+    local nmark = vim.tbl_count(marked)
+    local counter = string.format(" %d/%d%s ", #filtered, #cands, nmark > 0 and (" " .. nmark .. "*") or "")
+    pcall(vim.api.nvim_win_set_config, prompt_win, { footer = { { counter, "PickerCounter" } }, footer_pos = "right" })
+    if prev_visible then
+      render_preview()
+    end
+  end
+
+  -- full: rebuild the list buffer + match/mark highlights. Only on query change
+  -- or mark toggle, never on plain navigation.
   local function render_list()
     local q = (vim.api.nvim_buf_get_lines(prompt_buf, 0, 1, false)[1] or ""):lower()
     local shown = {}
@@ -172,14 +196,10 @@ local function open(cands, opts)
     vim.api.nvim_buf_clear_namespace(list_buf, ns, 0, -1)
     for i, line in ipairs(shown) do
       local row = i - 1
-      if line == filtered[sel] and i == sel then
-        vim.api.nvim_buf_set_extmark(list_buf, ns, row, 0,
-          { line_hl_group = "PickerCurrent", sign_text = ">", sign_hl_group = "PickerPointer" })
-      elseif marked[line] then
+      if marked[line] then
         vim.api.nvim_buf_set_extmark(list_buf, ns, row, 0,
           { sign_text = "+", sign_hl_group = "PickerMarker" })
       end
-      -- highlight the matched characters (fzf hl)
       if q ~= "" then
         local pos = match_pos(line:lower(), q)
         for _, p in ipairs(pos or {}) do
@@ -188,19 +208,7 @@ local function open(cands, opts)
         end
       end
     end
-    if #shown > 0 then
-      pcall(vim.api.nvim_win_set_cursor, list_win, { sel, 0 })
-      vim.api.nvim_win_call(list_win, function()
-        vim.cmd("normal! zz") -- keep the selection centered while scrolling
-      end)
-    end
-    -- counter, inline-right in the prompt border footer
-    local nmark = vim.tbl_count(marked)
-    local counter = string.format(" %d/%d%s ", #filtered, #cands, nmark > 0 and (" " .. nmark .. "*") or "")
-    pcall(vim.api.nvim_win_set_config, prompt_win, { footer = { { counter, "PickerCounter" } }, footer_pos = "right" })
-    if prev_visible then
-      render_preview()
-    end
+    paint_current()
   end
 
   local function refilter()
@@ -247,7 +255,7 @@ local function open(cands, opts)
       return
     end
     sel = (sel - 1 + step) % #filtered + 1 -- wrap around
-    render_list()
+    paint_current()
   end
 
   local function choose(cmd)
@@ -307,7 +315,7 @@ local function open(cands, opts)
   map("<Up>", function() move(-1) end)
   map("<C-g>", function()
     sel = 1
-    render_list()
+    paint_current()
   end)
   map("<CR>", function() choose("edit") end)
   map("<C-s>", function() choose("split") end)
@@ -318,7 +326,8 @@ local function open(cands, opts)
     local line = filtered[sel]
     if line then
       marked[line] = not marked[line] or nil
-      move(1)
+      sel = (sel % #filtered) + 1
+      render_list() -- full: the mark sign changed
     end
   end)
   map("<C-/>", toggle_preview)
@@ -328,7 +337,7 @@ local function open(cands, opts)
       return
     end
     sel = math.max(1, math.min(#filtered, sel + step)) -- clamp, no wrap
-    render_list()
+    paint_current()
   end
   map("<C-f>", function() page_move(page) end) -- page down, stops at end
   map("<C-b>", function() page_move(-page) end) -- page up, stops at start
