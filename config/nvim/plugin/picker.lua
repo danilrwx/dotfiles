@@ -114,7 +114,7 @@ local function open(cands, opts)
   vim.api.nvim_set_current_win(prompt_win)
 
   -- keymap hints in the list's bottom border (like the old fzf --header)
-  local hint = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^/ preview   A-n/A-p picker"
+  local hint = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^f/^b page   ^/ preview   ^o prev"
     .. (opts.hint_extra or "")
   pcall(vim.api.nvim_win_set_config, list_win,
     { footer = { { " " .. hint .. " ", "PickerBorder" } }, footer_pos = "center" })
@@ -265,14 +265,6 @@ local function open(cands, opts)
     end
   end
 
-  local function scroll(keys)
-    if prev_visible then
-      vim.api.nvim_win_call(prev_win, function()
-        vim.cmd("normal! " .. keys)
-      end)
-    end
-  end
-
   vim.api.nvim_create_autocmd({ "TextChangedI", "TextChanged" }, { buffer = prompt_buf, callback = refilter })
 
   local k = { buffer = prompt_buf, silent = true }
@@ -300,17 +292,18 @@ local function open(cands, opts)
     end
   end)
   map("<C-/>", toggle_preview)
-  map("<A-f>", function() scroll("\4") end) -- <C-d>
-  map("<A-b>", function() scroll("\21") end) -- <C-u>
+  local page = math.max(1, ls_h - 1)
+  map("<C-f>", function() move(page) end) -- page down the results
+  map("<C-b>", function() move(-page) end) -- page up
   local function cycle(step)
     close()
     vim.schedule(function()
       _G.PickerCycle(step)
     end)
   end
-  map("<A-p>", function() cycle(-1) end)
-  map("<A-n>", function() cycle(1) end)
-  map("<C-o>", function() end) -- disable i_CTRL-O; it would drop out of insert
+  -- C-o: previous picker (MRU). Also shadows i_CTRL-O so it can't drop out of
+  -- insert. Alt was unusable — terminals send it as Esc+key, tripping <Esc>=close.
+  map("<C-o>", function() cycle(-1) end)
   map("<Esc>", close)
   map("<C-c>", close)
   if opts.actions then
@@ -322,8 +315,8 @@ local function open(cands, opts)
   end
 
   -- MRU history (Alt-Tab): unique pickers ordered by recency, most recent last.
-  -- A fresh open moves its type to the end; A-n/A-p walk it without wrapping, so
-  -- A-p from the current picker lands on the previously used one, not itself.
+  -- A fresh open moves its type to the end; C-o steps back through it, so it
+  -- lands on the previously used picker, not itself.
   if not opts.resuming then
     for i, n in ipairs(ring) do
       if n == opts.name then
