@@ -1,14 +1,42 @@
 -- Self-contained fuzzy picker: own matcher, own UI (prompt + list + treesitter
 -- preview), no fzf and no plugin. Pickers: Files, GFiles, Buffers, LiveGrep.
--- Layout is preview (top) / results (middle) / prompt (bottom). Ideas borrowed
--- from mini.pick: width-then-start match ranking, marking + send-to-quickfix,
--- choose in split/tab.
+-- Floating windows stacked preview (top) / results (middle) / prompt (bottom),
+-- styled after the shell fzf config: sharp borders, "> " prompt, ">" pointer,
+-- matched chars highlighted, counter inline-right. Ideas from mini.pick:
+-- width-then-start ranking, marking + send-to-quickfix, choose in split/tab.
+
+-- fzf-like palette (colours mirror FZF_DEFAULT_OPTS: match=blue, accents=green,
+-- border=grey). default=true so a colorscheme can override.
+local function setup_hl()
+  local set = vim.api.nvim_set_hl
+  set(0, "PickerBorder", { fg = "#6b7089", default = true })
+  set(0, "PickerMatch", { fg = "#5fafff", bold = true, default = true })
+  set(0, "PickerCurrent", { fg = "#00cd00", default = true })
+  set(0, "PickerPointer", { fg = "#00cd00", bold = true, default = true })
+  set(0, "PickerMarker", { fg = "#00cd00", default = true })
+  set(0, "PickerCounter", { fg = "#5fafff", default = true })
+  set(0, "PickerPrompt", { fg = "#dcdccc", bold = true, default = true })
+end
+setup_hl()
+vim.api.nvim_create_autocmd("ColorScheme", { callback = setup_hl })
 
 -- Fuzzy subsequence match. Score is two-tier like mini.pick: minimise the match
--- width (span from first to last matched char), then the start column — compact,
--- early matches rank first. Greedy leftmost positions (near-optimal for paths).
+-- width (span from first to last matched char), then the start column.
 -- ponytail: plain-lua, synchronous; fine for a repo's file list. For a huge
 -- source (10k+) cap candidates or shell out to fzf — no async/caching here.
+local function match_pos(sl, ql)
+  local pos, si = {}, 1
+  for qi = 1, #ql do
+    local f = sl:find(ql:sub(qi, qi), si, true)
+    if not f then
+      return nil
+    end
+    pos[#pos + 1] = f
+    si = f + 1
+  end
+  return pos
+end
+
 local function fuzzy(cands, q)
   if q == "" then
     return cands
@@ -16,19 +44,9 @@ local function fuzzy(cands, q)
   local ql = q:lower()
   local scored = {}
   for _, s in ipairs(cands) do
-    local sl = s:lower()
-    local si, first, last, ok = 1, nil, nil, true
-    for qi = 1, #ql do
-      local f = sl:find(ql:sub(qi, qi), si, true)
-      if not f then
-        ok = false
-        break
-      end
-      first = first or f
-      si, last = f + 1, f
-    end
-    if ok then
-      scored[#scored + 1] = { s = s, score = (last - first) * 100000 + first }
+    local pos = match_pos(s:lower(), ql)
+    if pos then
+      scored[#scored + 1] = { s = s, score = (pos[#pos] - pos[1]) * 100000 + pos[1] }
     end
   end
   table.sort(scored, function(a, b)
@@ -60,25 +78,40 @@ local function open(cands, opts)
   local filtered, sel, marked = cands, 1, {}
   local prev_visible = true
 
-  vim.cmd("tabnew")
-  local prompt_win = vim.api.nvim_get_current_win()
-  local prompt_buf = vim.api.nvim_get_current_buf()
-  vim.cmd("aboveleft split")
-  local list_win = vim.api.nvim_get_current_win()
-  local list_buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_win_set_buf(list_win, list_buf)
-  vim.cmd("aboveleft split")
-  local prev_win = vim.api.nvim_get_current_win()
-  local prev_buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_win_set_buf(prev_win, prev_buf)
+  local W, H = vim.o.columns, vim.o.lines
+  local width = W - 2
+  local col = 0
+  local pv_h = math.floor(H * 0.5)
+  local pr_h = 1
+  local ls_h = math.max(3, H - pv_h - pr_h - 8)
 
-  local prev_h = math.floor(vim.o.lines * 0.55)
-  vim.api.nvim_win_set_height(prev_win, prev_h)
-  vim.api.nvim_win_set_height(prompt_win, 1)
-  vim.bo[prompt_buf].buftype = "nofile"
+  local function float(row, h, cfg)
+    local buf = vim.api.nvim_create_buf(false, true)
+    local c = vim.tbl_extend("force", {
+      relative = "editor",
+      row = row,
+      col = col,
+      width = width,
+      height = h,
+      border = "single",
+      style = "minimal",
+      zindex = 50,
+    }, cfg or {})
+    local win = vim.api.nvim_open_win(buf, false, c)
+    vim.wo[win].winhighlight = "FloatBorder:PickerBorder,FloatTitle:PickerPrompt,Normal:Normal"
+    return win, buf
+  end
+
+  local prev_win, prev_buf = float(0, pv_h, { title = " preview " })
+  local list_win, list_buf = float(pv_h + 2, ls_h, {})
+  local prompt_win, prompt_buf = float(pv_h + 2 + ls_h + 2, pr_h,
+    { title = " " .. (opts.prompt or "") .. " ", title_pos = "left" })
+
   vim.wo[prev_win].number = false
-  vim.wo[prev_win].cursorline = false
-  vim.wo[list_win].number = false
+  vim.wo[list_win].signcolumn = "yes:1"
+  vim.wo[prompt_win].statuscolumn = "%#PickerPrompt#> "
+  vim.bo[prompt_buf].buftype = "nofile"
+  vim.api.nvim_set_current_win(prompt_win)
 
   local function render_preview()
     local it = filtered[sel] and parse(filtered[sel]) or {}
@@ -88,6 +121,7 @@ local function open(cands, opts)
       vim.bo[prev_buf].modifiable = false
       return
     end
+    vim.api.nvim_win_set_config(prev_win, { title = " " .. vim.fn.fnamemodify(it.file, ":t") .. " " })
     local lines = vim.fn.readfile(it.file, "", 500)
     vim.api.nvim_buf_set_lines(prev_buf, 0, -1, false, lines)
     vim.bo[prev_buf].modifiable = false
@@ -107,6 +141,7 @@ local function open(cands, opts)
   end
 
   local function render_list()
+    local q = (vim.api.nvim_buf_get_lines(prompt_buf, 0, 1, false)[1] or ""):lower()
     local shown = {}
     for i = 1, math.min(#filtered, 500) do
       shown[i] = filtered[i]
@@ -116,18 +151,30 @@ local function open(cands, opts)
     vim.bo[list_buf].modifiable = false
     vim.api.nvim_buf_clear_namespace(list_buf, ns, 0, -1)
     for i, line in ipairs(shown) do
-      if marked[line] then
-        vim.api.nvim_buf_set_extmark(list_buf, ns, i - 1, 0,
-          { sign_text = "▍", sign_hl_group = "Special" })
+      local row = i - 1
+      if line == filtered[sel] and i == sel then
+        vim.api.nvim_buf_set_extmark(list_buf, ns, row, 0,
+          { line_hl_group = "PickerCurrent", sign_text = ">", sign_hl_group = "PickerPointer" })
+      elseif marked[line] then
+        vim.api.nvim_buf_set_extmark(list_buf, ns, row, 0,
+          { sign_text = "+", sign_hl_group = "PickerMarker" })
+      end
+      -- highlight the matched characters (fzf hl)
+      if q ~= "" then
+        local pos = match_pos(line:lower(), q)
+        for _, p in ipairs(pos or {}) do
+          vim.api.nvim_buf_set_extmark(list_buf, ns, row, p - 1,
+            { end_col = p, hl_group = "PickerMatch" })
+        end
       end
     end
     if #shown > 0 then
-      vim.api.nvim_buf_set_extmark(list_buf, ns, sel - 1, 0, { line_hl_group = "Visual" })
       pcall(vim.api.nvim_win_set_cursor, list_win, { sel, 0 })
     end
+    -- counter, inline-right in the prompt border footer
     local nmark = vim.tbl_count(marked)
-    vim.wo[prompt_win].winbar = string.format("%s  %d/%d%s", opts.prompt or "", #filtered, #cands,
-      nmark > 0 and ("  [" .. nmark .. " marked]") or "")
+    local counter = string.format(" %d/%d%s ", #filtered, #cands, nmark > 0 and (" " .. nmark .. "*") or "")
+    pcall(vim.api.nvim_win_set_config, prompt_win, { footer = { { counter, "PickerCounter" } }, footer_pos = "right" })
     if prev_visible then
       render_preview()
     end
@@ -146,10 +193,12 @@ local function open(cands, opts)
     render_list()
   end
 
+  local wins = { prev_win, list_win, prompt_win }
   local function close()
     pcall(vim.cmd, "stopinsert")
-    pcall(vim.api.nvim_win_close, prompt_win, true)
-    pcall(vim.cmd, "tabclose")
+    for _, w in ipairs(wins) do
+      pcall(vim.api.nvim_win_close, w, true)
+    end
   end
 
   local function move(step)
@@ -189,7 +238,7 @@ local function open(cands, opts)
 
   local function toggle_preview()
     prev_visible = not prev_visible
-    vim.api.nvim_win_set_height(prev_win, prev_visible and prev_h or 0)
+    pcall(vim.api.nvim_win_set_config, prev_win, { hide = not prev_visible })
     if prev_visible then
       render_preview()
     end
@@ -248,7 +297,6 @@ local function open(cands, opts)
     end
   end
 
-  -- track picker in the ring for <leader>'/<leader>" cycling
   if not opts.resuming then
     for i, n in ipairs(ring) do
       if n == opts.name then
@@ -263,7 +311,6 @@ local function open(cands, opts)
   if seed ~= "" then
     vim.api.nvim_buf_set_lines(prompt_buf, 0, 1, false, { seed })
   end
-  vim.api.nvim_set_current_win(prompt_win)
   refilter()
   vim.cmd("startinsert")
   vim.api.nvim_win_set_cursor(prompt_win, { 1, #seed })
@@ -330,7 +377,6 @@ launchers = {
       prompt = "Buffers",
       on_pick = edit_file,
       resuming = o and o.resuming,
-      -- Ctrl-D: delete the buffer under the cursor, then refresh the list
       actions = {
         ["<C-d>"] = function(ctx)
           if ctx.sel then
