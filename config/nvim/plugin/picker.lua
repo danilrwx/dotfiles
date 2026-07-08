@@ -358,6 +358,9 @@ local function open(cands, opts)
   map("<C-f>", function() page_move(page) end) -- page down, stops at end
   map("<C-b>", function() page_move(-page) end) -- page up, stops at start
   local function cycle(step)
+    if ridx + step < 1 or ridx + step > #ring then
+      return -- nowhere to cycle to; keep the picker open instead of closing
+    end
     close()
     vim.schedule(function()
       _G.PickerCycle(step)
