@@ -1,7 +1,5 @@
 -- UI: highlight groups, floating windows, rendering. Knows nothing about
 -- matching strategy, history or keymaps — it only draws what it is handed.
-local search = require("picker.search")
-
 local M = {}
 local ns = vim.api.nvim_create_namespace("picker")
 local ns_cur = vim.api.nvim_create_namespace("picker_cur")
@@ -82,22 +80,22 @@ end
 
 -- Full rebuild: list buffer + mark/match highlights (bounded to 500 rows; the
 -- buffer still holds every row so navigation stays in sync with the preview).
-function View:render_list(filtered, marked, query)
+-- positions[i] = 0-based byte columns matched in filtered[i] (from the matcher),
+-- or nil when there's no active query.
+function View:render_list(filtered, marked, positions)
   vim.bo[self.list_buf].modifiable = true
   vim.api.nvim_buf_set_lines(self.list_buf, 0, -1, false, filtered)
   vim.bo[self.list_buf].modifiable = false
   vim.api.nvim_buf_clear_namespace(self.list_buf, ns, 0, -1)
-  local q = query:lower()
   for i = 1, math.min(#filtered, 500) do
-    local line = filtered[i]
-    if marked[line] then
+    if marked[filtered[i]] then
       vim.api.nvim_buf_set_extmark(self.list_buf, ns, i - 1, 0,
         { sign_text = "+", sign_hl_group = "PickerMarker" })
     end
-    if q ~= "" then
-      for _, p in ipairs(search.match_pos(line:lower(), q) or {}) do
-        vim.api.nvim_buf_set_extmark(self.list_buf, ns, i - 1, p - 1,
-          { end_col = p, hl_group = "PickerMatch" })
+    if positions and positions[i] then
+      for _, p in ipairs(positions[i]) do
+        vim.api.nvim_buf_set_extmark(self.list_buf, ns, i - 1, p,
+          { end_col = p + 1, hl_group = "PickerMatch" })
       end
     end
   end

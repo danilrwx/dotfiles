@@ -17,6 +17,7 @@ function M.open(cands, opts)
     return { file = l }
   end
   local filtered, sel, marked = cands, 1, {}
+  local positions -- per-row matched byte columns from the matcher (or nil)
   local ftimer, ptimer
 
   local v = ui.new(opts.prompt or "", HINT .. (opts.hint_extra or ""))
@@ -45,7 +46,7 @@ function M.open(cands, opts)
   end
 
   local function render()
-    v:render_list(filtered, marked, v:query())
+    v:render_list(filtered, marked, positions)
     paint()
   end
 
@@ -53,10 +54,10 @@ function M.open(cands, opts)
     local q = v:query()
     last_query[opts.name] = q
     if opts.live then
-      filtered = q ~= "" and opts.live(q) or {}
+      filtered, positions = (q ~= "" and opts.live(q) or {}), nil
       cands = filtered
     else
-      filtered = search.fuzzy(cands, q)
+      filtered, positions = search.fuzzy(cands, q)
     end
     sel = 1
     render()
