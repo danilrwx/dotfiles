@@ -2,6 +2,7 @@
 -- helpers, and how a chosen item is opened. Registers launchers on the engine.
 local picker = require("picker")
 local search = require("picker.search")
+local session = require("session")
 
 local OPEN = { edit = "edit", split = "split", vsplit = "vsplit", tab = "tabedit" }
 local GIT_LS = { "git", "ls-files", "--cached", "--others", "--exclude-standard" }
@@ -142,6 +143,30 @@ picker.launchers.livegrep = function(o)
     on_pick = function(line, cmd)
       edit_at(search.grep_parse(line), cmd)
     end,
+  })
+end
+
+-- Sessions: pick a saved per-cwd session to restore; C-d deletes one.
+picker.launchers.sessions = function(o)
+  picker.open(session.list(), {
+    name = "sessions",
+    prompt = "Sessions",
+    resuming = o and o.resuming,
+    hint_extra = "   ^d del",
+    on_pick = function(cwd)
+      session.restore(cwd)
+    end,
+    actions = {
+      ["<C-d>"] = function(ctx)
+        if ctx.sel then
+          session.delete(ctx.sel)
+        end
+        ctx.close()
+        vim.schedule(function()
+          picker.launchers.sessions({ resuming = true })
+        end)
+      end,
+    },
   })
 end
 
