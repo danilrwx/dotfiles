@@ -305,8 +305,15 @@ local function open(cands, opts)
   end)
   map("<C-/>", toggle_preview)
   local page = math.max(1, ls_h - 1)
-  map("<C-f>", function() move(page) end) -- page down the results
-  map("<C-b>", function() move(-page) end) -- page up
+  local function page_move(step)
+    if #filtered == 0 then
+      return
+    end
+    sel = math.max(1, math.min(#filtered, sel + step)) -- clamp, no wrap
+    render_list()
+  end
+  map("<C-f>", function() page_move(page) end) -- page down, stops at end
+  map("<C-b>", function() page_move(-page) end) -- page up, stops at start
   local function cycle(step)
     close()
     vim.schedule(function()
