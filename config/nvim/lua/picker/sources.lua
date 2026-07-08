@@ -145,6 +145,8 @@ picker.launchers.livegrep = function(o)
   })
 end
 
+local BOAR = "🐗 " -- diagnostics line prefix; stripped before parsing the path
+
 -- Diagnostics: one grep-shaped line per diagnostic (file:line:col: [SEV] msg),
 -- sorted most-severe first, jumped to via the same parser. Static source, so
 -- the query fuzzy-filters it. o.buf = current buffer only.
@@ -158,8 +160,8 @@ picker.launchers.diagnostics = function(o)
   for _, d in ipairs(ds) do
     local file = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(d.bufnr), ":~:.")
     local msg = (d.message or ""):gsub("%s*\n%s*", " ")
-    items[#items + 1] = string.format("%s:%d:%d: [%s] %s",
-      file, d.lnum + 1, d.col + 1, sev[d.severity] or "?", msg)
+    items[#items + 1] = string.format("%s%s:%d:%d: [%s] %s",
+      BOAR, file, d.lnum + 1, d.col + 1, sev[d.severity] or "?", msg)
   end
   local sev_hl = { E = "DiagnosticError", W = "DiagnosticWarn", I = "DiagnosticInfo", H = "DiagnosticHint" }
   picker.open(items, {
@@ -181,7 +183,7 @@ picker.launchers.diagnostics = function(o)
       return out
     end,
     on_pick = function(line, cmd)
-      edit_at(search.grep_parse(line), cmd)
+      edit_at(search.grep_parse((line:gsub("^" .. BOAR, ""))), cmd)
     end,
   })
 end
