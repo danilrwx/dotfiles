@@ -87,6 +87,7 @@ local function open(cands, opts)
 
   local function float(row, h, cfg)
     local buf = vim.api.nvim_create_buf(false, true)
+    vim.bo[buf].bufhidden = "wipe" -- delete the scratch buffer when its window closes
     local c = vim.tbl_extend("force", {
       relative = "editor",
       row = row,
@@ -188,6 +189,9 @@ local function open(cands, opts)
     end
     if #shown > 0 then
       pcall(vim.api.nvim_win_set_cursor, list_win, { sel, 0 })
+      vim.api.nvim_win_call(list_win, function()
+        vim.cmd("normal! zz") -- keep the selection centered while scrolling
+      end)
     end
     -- counter, inline-right in the prompt border footer
     local nmark = vim.tbl_count(marked)
