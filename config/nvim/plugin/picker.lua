@@ -114,7 +114,7 @@ local function open(cands, opts)
   vim.api.nvim_set_current_win(prompt_win)
 
   -- keymap hints in the list's bottom border (like the old fzf --header)
-  local hint = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^/ preview   ^o prev"
+  local hint = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^/ preview   ^←/^→ picker"
     .. (opts.hint_extra or "")
   pcall(vim.api.nvim_win_set_config, list_win,
     { footer = { { " " .. hint .. " ", "PickerBorder" } }, footer_pos = "center" })
@@ -302,12 +302,14 @@ local function open(cands, opts)
   map("<C-/>", toggle_preview)
   map("<A-f>", function() scroll("\4") end) -- <C-d>
   map("<A-b>", function() scroll("\21") end) -- <C-u>
-  map("<A-o>", function()
+  local function cycle(step)
     close()
     vim.schedule(function()
-      _G.PickerCycle(-1)
+      _G.PickerCycle(step)
     end)
-  end)
+  end
+  map("<C-Left>", function() cycle(-1) end)
+  map("<C-Right>", function() cycle(1) end)
   map("<Esc>", close)
   map("<C-c>", close)
   if opts.actions then
