@@ -41,7 +41,7 @@ local bat = vim.fn.executable("bat") == 1 and "bat"
 local function preview_file(target)
   local cmd = bat and (bat .. " --style=numbers --color=always --line-range :500 " .. target)
     or ("cat -- " .. target)
-  return { "--preview", cmd, "--preview-window", "right:60%:border-left" }
+  return { "--preview", cmd, "--preview-window", "up:60%:border-bottom" }
 end
 
 -- preview opts for grep hits (file:line:col:text); highlight and scroll to the
@@ -49,7 +49,7 @@ end
 local function preview_grep()
   local cmd = bat and (bat .. " --style=numbers --color=always --highlight-line {2} -- {1}")
     or "cat -- {1}"
-  return { "--preview", cmd, "--preview-window", "right:55%:border-left:+{2}-/2" }
+  return { "--preview", cmd, "--preview-window", "up:60%:border-bottom:+{2}-/2" }
 end
 
 -- Unified picker framework with resumable state. Each picker has a name and a
@@ -141,6 +141,8 @@ local function base_opts(name, prompt, query, expect_keys)
   return {
     "--height",
     "100%",
+    "--layout",
+    "reverse",
     "--print-query",
     "--multi",
     "--expect",
