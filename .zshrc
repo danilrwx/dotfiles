@@ -39,8 +39,10 @@ alias kad="kubectl delete -f"
 kctx() { kubectl config use-context "$(kubectl config get-contexts -o name | fzf)" }
 kns()  { kubectl config set-context --current --namespace "$(kubectl get ns -o name | cut -d/ -f2 | fzf)" }
 
-export EDITOR='vim'
-export VISUAL='vim'
+export EDITOR='nvim'
+export VISUAL='nvim'
+alias vi=nvim
+alias vim=nvim
 
 alias lg='lazygit'
 

@@ -26,6 +26,12 @@ $SUDO install "$tmp/linux-${ARCH}/helm" /usr/local/bin/helm
 curl -fsSL "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_${ARCH}.tar.gz" | tar -xzf - -C "$tmp"
 $SUDO install "$tmp/k9s" /usr/local/bin/k9s
 
+# neovim (github release; unpacks into nvim-linux-<arch>/{bin,lib,share} — apt's
+# is too old for vim.system/treesitter foldexpr). Asset uses x86_64, not amd64.
+nvim_arch="$ARCH"; [ "$ARCH" = amd64 ] && nvim_arch="x86_64"
+curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${nvim_arch}.tar.gz" \
+  | $SUDO tar -xzf - -C /usr/local --strip-components=1
+
 # yq
 curl -fsSL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${ARCH}" -o "$tmp/yq"
 $SUDO install "$tmp/yq" /usr/local/bin/yq
