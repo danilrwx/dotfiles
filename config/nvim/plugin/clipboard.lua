@@ -1,14 +1,10 @@
 -- Clipboard for the devbox (nvim over SSH, no X server). There is no <leader>y:
--- every plain yank is mirrored to the host clipboard by sending an OSC 52 escape
--- straight to /dev/tty (same path as the `clip` helper; tmux forwards it out via
--- set-clipboard + the clipboard terminal-feature). No + register involved.
+-- every plain yank is mirrored to the host clipboard by the `clip` helper (a
+-- subprocess that writes the OSC 52 sequence to /dev/tty). Writing the escape
+-- from inside nvim itself does not reach tmux/the terminal — same reason the
+-- vim config used clip rather than echoraw. No + register involved.
 local function osc52(text)
-  local tty = io.open("/dev/tty", "w")
-  if not tty then
-    return
-  end
-  tty:write("\27]52;c;" .. vim.base64.encode(text) .. "\7")
-  tty:close()
+  vim.system({ "clip" }, { stdin = text })
 end
 
 -- only real yanks (not deletes) to the unnamed or clipboard registers
