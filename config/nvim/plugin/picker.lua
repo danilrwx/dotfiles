@@ -114,7 +114,7 @@ local function open(cands, opts)
   vim.api.nvim_set_current_win(prompt_win)
 
   -- keymap hints in the list's bottom border (like the old fzf --header)
-  local hint = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^/ preview   ^←/^→ picker"
+  local hint = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^/ preview   A-n/A-p picker"
     .. (opts.hint_extra or "")
   pcall(vim.api.nvim_win_set_config, list_win,
     { footer = { { " " .. hint .. " ", "PickerBorder" } }, footer_pos = "center" })
@@ -308,8 +308,9 @@ local function open(cands, opts)
       _G.PickerCycle(step)
     end)
   end
-  map("<C-Left>", function() cycle(-1) end)
-  map("<C-Right>", function() cycle(1) end)
+  map("<A-p>", function() cycle(-1) end)
+  map("<A-n>", function() cycle(1) end)
+  map("<C-o>", function() end) -- disable i_CTRL-O; it would drop out of insert
   map("<Esc>", close)
   map("<C-c>", close)
   if opts.actions then
