@@ -197,7 +197,10 @@ function M.open(cands, opts)
           sel = filtered[sel],
           refilter = refilter,
           close = close,
-          set_query = function(t) v:set_query(t) end,
+          set_query = function(t)
+            v:set_query(t)
+            v:focus(#t)
+          end,
           set_title = function(t) v:set_title(t) end,
         })
       end)

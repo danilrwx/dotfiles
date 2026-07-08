@@ -74,10 +74,20 @@ picker.launchers.livegrep = function(o)
   local tool = vim.fn.executable("ugrep") == 1
       and { "ugrep", "-RInk", "--ignore-files", "--color=never" }
     or { "rg", "--column", "--line-number", "--no-heading", "--color=never" }
-  -- A-g toggles the prompt between grep mode (query drives ripgrep) and file
-  -- mode (query fuzzily filters the last grep hits by path). `last` caches the
-  -- hits so file mode filters without re-grepping.
-  local mode, last = "grep", {}
+  -- Two persistent queries applied together: the grep pattern (drives ripgrep)
+  -- and the file filter (fuzzy on path). A-g only switches which one the prompt
+  -- edits, so you can narrow files then refine the grep, or vice versa. `cache`
+  -- holds the last grep hits so editing the file filter doesn't re-grep.
+  local mode, gq, fq, cache = "grep", "", "", {}
+  local function recompute()
+    if fq == "" then
+      return cache
+    end
+    return vim.tbl_filter(function(line)
+      local it = search.grep_parse(line)
+      return it.file ~= nil and search.subseq(it.file, fq)
+    end, cache)
+  end
   picker.open({}, {
     name = "livegrep",
     prompt = "LiveGrep",
@@ -86,26 +96,20 @@ picker.launchers.livegrep = function(o)
     resuming = o and o.resuming,
     hint_extra = "   A-g grep/file",
     live = function(q)
-      if mode == "file" then
-        if q == "" then
-          return last
+      if mode == "grep" then
+        if q ~= gq then
+          gq = q
+          cache = q ~= "" and lines_of(vim.list_extend(vim.deepcopy(tool), { "--", q })) or {}
         end
-        return vim.tbl_filter(function(line)
-          local it = search.grep_parse(line)
-          return it.file ~= nil and search.subseq(it.file, q)
-        end, last)
+      else
+        fq = q
       end
-      if q == "" then
-        last = {}
-        return last
-      end
-      last = lines_of(vim.list_extend(vim.deepcopy(tool), { "--", q }))
-      return last
+      return recompute()
     end,
     actions = {
       ["<A-g>"] = function(ctx)
         mode = mode == "grep" and "file" or "grep"
-        ctx.set_query("")
+        ctx.set_query(mode == "grep" and gq or fq)
         ctx.set_title(mode == "file" and "Filter file" or "LiveGrep")
         ctx.refilter()
       end,
