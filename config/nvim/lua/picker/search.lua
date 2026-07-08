@@ -12,18 +12,44 @@ function M.fuzzy(cands, q)
   return m[1], m[2]
 end
 
--- Case-insensitive subsequence test (for filtering grep hits by file path).
-function M.subseq(s, pat)
+-- Case-insensitive subsequence match: 0-based byte columns, or nil if no match.
+function M.subseq_pos(s, pat)
   s, pat = s:lower(), pat:lower()
-  local si = 1
+  local cols, si = {}, 1
   for i = 1, #pat do
     local f = s:find(pat:sub(i, i), si, true)
     if not f then
-      return false
+      return nil
     end
+    cols[#cols + 1] = f - 1
     si = f + 1
   end
-  return true
+  return cols
+end
+
+function M.subseq(s, pat)
+  return M.subseq_pos(s, pat) ~= nil
+end
+
+-- 0-based byte columns of every literal occurrence of sub in s (each matched
+-- byte), case-insensitive. Empty sub -> no columns.
+function M.find_all(s, sub)
+  if sub == "" then
+    return {}
+  end
+  s, sub = s:lower(), sub:lower()
+  local cols, si = {}, 1
+  while true do
+    local a, b = s:find(sub, si, true)
+    if not a then
+      break
+    end
+    for c = a, b do
+      cols[#cols + 1] = c - 1
+    end
+    si = b + 1
+  end
+  return cols
 end
 
 -- Grep hit -> {file, lnum} (ugrep: f:l:c:txt, grep: f:l:txt).

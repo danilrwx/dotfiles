@@ -95,6 +95,15 @@ picker.launchers.livegrep = function(o)
     parse = search.grep_parse,
     resuming = o and o.resuming,
     hint_extra = "   A-g grep/file",
+    -- highlight the query you're editing: grep pattern in the hit text (literal),
+    -- or the file filter fuzzily in the path.
+    line_positions = function(line)
+      if mode == "grep" then
+        return search.find_all(line, gq)
+      end
+      local it = search.grep_parse(line)
+      return (it.file and search.subseq_pos(it.file, fq)) or {}
+    end,
     live = function(q)
       if mode == "grep" then
         if q ~= gq then

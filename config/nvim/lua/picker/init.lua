@@ -46,7 +46,15 @@ function M.open(cands, opts)
   end
 
   local function render()
-    v:render_list(filtered, marked, positions)
+    local pos = positions
+    -- a live source (e.g. grep) supplies its own per-row highlight positions
+    if opts.line_positions then
+      pos = {}
+      for i = 1, math.min(#filtered, 500) do
+        pos[i] = opts.line_positions(filtered[i])
+      end
+    end
+    v:render_list(filtered, marked, pos)
     paint()
   end
 
