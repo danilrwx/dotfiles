@@ -358,8 +358,8 @@ local function open(cands, opts)
   map("<C-f>", function() page_move(page) end) -- page down, stops at end
   map("<C-b>", function() page_move(-page) end) -- page up, stops at start
   local function cycle(step)
-    if ridx + step < 1 or ridx + step > #ring then
-      return -- nowhere to cycle to; keep the picker open instead of closing
+    if #ring <= 1 then
+      return -- only this picker in history; nothing to switch to (don't close)
     end
     close()
     vim.schedule(function()
@@ -405,11 +405,10 @@ local function open(cands, opts)
 end
 
 function _G.PickerCycle(step)
-  local n = ridx + step
-  if n < 1 or n > #ring then
-    return -- stop at history ends, don't wrap
+  if #ring <= 1 then
+    return
   end
-  ridx = n
+  ridx = (ridx - 1 + step) % #ring + 1 -- wrap around the history
   launchers[ring[ridx]]({ resuming = true })
 end
 
