@@ -78,7 +78,7 @@ local function open(cands, opts)
   end
   local filtered, sel, marked = cands, 1, {}
   local prev_visible = true
-  local ftimer
+  local ftimer, ptimer
 
   local W, H = vim.o.columns, vim.o.lines
   local width = W - 2
@@ -161,8 +161,22 @@ local function open(cands, opts)
     end
   end
 
-  -- light: only the current-line highlight (own namespace), cursor, preview and
-  -- counter. Runs on every navigation keystroke, so it must not rebuild the list.
+  -- preview reads the file and starts treesitter — too costly per keystroke, so
+  -- debounce it: fast navigation repaints instantly, the preview catches up on a
+  -- brief pause.
+  local function schedule_preview()
+    if not prev_visible then
+      return
+    end
+    if ptimer then
+      ptimer:stop()
+    end
+    ptimer = vim.defer_fn(render_preview, 60)
+  end
+
+  -- light: only the current-line highlight (own namespace), cursor and counter.
+  -- Runs on every navigation keystroke, so it must not rebuild the list or read
+  -- files — the preview is debounced separately.
   local function paint_current()
     vim.api.nvim_buf_clear_namespace(list_buf, ns_cur, 0, -1)
     local n = math.min(#filtered, 500)
@@ -177,9 +191,7 @@ local function open(cands, opts)
     local nmark = vim.tbl_count(marked)
     local counter = string.format(" %d/%d%s ", #filtered, #cands, nmark > 0 and (" " .. nmark .. "*") or "")
     pcall(vim.api.nvim_win_set_config, prompt_win, { footer = { { counter, "PickerCounter" } }, footer_pos = "right" })
-    if prev_visible then
-      render_preview()
-    end
+    schedule_preview()
   end
 
   -- full: rebuild the list buffer + match/mark highlights. Only on query change
@@ -233,6 +245,9 @@ local function open(cands, opts)
     closing = true
     if ftimer then
       ftimer:stop()
+    end
+    if ptimer then
+      ptimer:stop()
     end
     pcall(vim.cmd, "stopinsert")
     for _, w in ipairs(wins) do
