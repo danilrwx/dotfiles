@@ -113,6 +113,12 @@ local function open(cands, opts)
   vim.bo[prompt_buf].buftype = "nofile"
   vim.api.nvim_set_current_win(prompt_win)
 
+  -- keymap hints in the list's bottom border (like the old fzf --header)
+  local hint = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^/ preview   ^o prev"
+    .. (opts.hint_extra or "")
+  pcall(vim.api.nvim_win_set_config, list_win,
+    { footer = { { " " .. hint .. " ", "PickerBorder" } }, footer_pos = "center" })
+
   local function render_preview()
     local it = filtered[sel] and parse(filtered[sel]) or {}
     vim.bo[prev_buf].modifiable = true
@@ -377,6 +383,7 @@ launchers = {
       prompt = "Buffers",
       on_pick = edit_file,
       resuming = o and o.resuming,
+      hint_extra = "   ^d del",
       actions = {
         ["<C-d>"] = function(ctx)
           if ctx.sel then
