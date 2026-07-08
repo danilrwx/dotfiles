@@ -70,6 +70,7 @@ local launchers = {}
 local ring, ridx = {}, 0
 
 local OPEN = { edit = "edit", split = "split", vsplit = "vsplit", tab = "tabedit" }
+local GIT_LS = { "git", "ls-files", "--cached", "--others", "--exclude-standard" }
 
 -- opts: name, prompt, parse(line)->{file,lnum}, live(q)->lines, on_pick(line,cmd)
 local function open(cands, opts)
@@ -123,6 +124,9 @@ local function open(cands, opts)
     { footer = { { " " .. hint .. " ", "PickerBorder" } }, footer_pos = "center" })
 
   local function render_preview()
+    if not vim.api.nvim_win_is_valid(prev_win) then
+      return -- a debounced tick can fire after the picker closed
+    end
     local it = filtered[sel] and parse(filtered[sel]) or {}
     vim.bo[prev_buf].modifiable = true
     if not it.file or vim.fn.filereadable(it.file) == 0 then
@@ -445,7 +449,7 @@ local function files_source()
   elseif vim.fn.executable("fd") == 1 then
     return { "fd", "--type", "f" }
   end
-  return { "git", "ls-files", "--cached", "--others", "--exclude-standard" }
+  return GIT_LS
 end
 
 launchers = {
@@ -454,7 +458,7 @@ launchers = {
       { name = "files", prompt = "Files", on_pick = edit_file, resuming = o and o.resuming })
   end,
   gfiles = function(o)
-    open(lines_of({ "git", "ls-files", "--cached", "--others", "--exclude-standard" }),
+    open(lines_of(GIT_LS),
       { name = "gfiles", prompt = "GFiles", on_pick = edit_file, resuming = o and o.resuming })
   end,
   buffers = function(o)
