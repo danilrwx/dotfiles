@@ -33,6 +33,25 @@ if vim.fn.exists("*fzf#run") == 0 then
 end
 local run = vim.fn["fzf#run"]
 
+-- preview: bat (batcat on apt) gives syntax highlighting; plain cat otherwise.
+local bat = vim.fn.executable("bat") == 1 and "bat"
+  or (vim.fn.executable("batcat") == 1 and "batcat" or nil)
+
+-- preview opts for a file target ({} for files, {2} for the buffers picker)
+local function preview_file(target)
+  local cmd = bat and (bat .. " --style=numbers --color=always --line-range :500 " .. target)
+    or ("cat -- " .. target)
+  return { "--preview", cmd, "--preview-window", "right:60%:border-left" }
+end
+
+-- preview opts for grep hits (file:line:col:text); highlight and scroll to the
+-- matched line ({1}=file, {2}=line via the picker's ':' delimiter)
+local function preview_grep()
+  local cmd = bat and (bat .. " --style=numbers --color=always --highlight-line {2} -- {1}")
+    or "cat -- {1}"
+  return { "--preview", cmd, "--preview-window", "right:55%:border-left:+{2}-/2" }
+end
+
 -- Unified picker framework with resumable state. Each picker has a name and a
 -- launcher(query). Every fzf runs with --print-query so the typed query comes
 -- back on the first output line; we stash it in `saved` and re-seed --query when
@@ -129,7 +148,7 @@ local function base_opts(name, prompt, query, expect_keys)
     "--history",
     HISTDIR .. "/" .. name,
     "--bind",
-    "ctrl-n:down,ctrl-p:up,alt-n:next-history,alt-p:previous-history",
+    "ctrl-n:down,ctrl-p:up,alt-n:next-history,alt-p:previous-history,ctrl-/:toggle-preview",
     "--query",
     query,
     "--prompt",
@@ -155,7 +174,8 @@ local function launch_files(query)
     ["sink*"] = function(lines)
       finish("files", lines, open_files)
     end,
-    options = extend(base_opts("files", "Files> ", query, "alt-o"), { "--header", "Alt-O: prev" }),
+    options = extend(extend(base_opts("files", "Files> ", query, "alt-o"), preview_file("{}")),
+      { "--header", "Alt-O: prev  Ctrl-/: preview" }),
   })
 end
 
@@ -165,7 +185,8 @@ local function launch_gfiles(query)
     ["sink*"] = function(lines)
       finish("gfiles", lines, open_files)
     end,
-    options = extend(base_opts("gfiles", "GFiles> ", query, "alt-o"), { "--header", "Alt-O: prev" }),
+    options = extend(extend(base_opts("gfiles", "GFiles> ", query, "alt-o"), preview_file("{}")),
+      { "--header", "Alt-O: prev  Ctrl-/: preview" }),
   })
 end
 
@@ -196,13 +217,13 @@ local function launch_buffers(query)
     ["sink*"] = function(lines)
       finish("buffers", lines, buf_accept)
     end,
-    options = extend(base_opts("buffers", "Buffers> ", query, "ctrl-d,alt-o"), {
+    options = extend(extend(base_opts("buffers", "Buffers> ", query, "ctrl-d,alt-o"), preview_file("{2}")), {
       "--with-nth",
       "2..",
       "-d",
       "\t",
       "--header",
-      "Enter: open  Ctrl-D: delete  Tab: select  Alt-O: prev",
+      "Enter: open  Ctrl-D: delete  Tab: select  Alt-O: prev  Ctrl-/: preview",
     }),
   })
 end
@@ -251,14 +272,14 @@ local function launch_grep(query)
     ["sink*"] = function(lines)
       finish("livegrep", lines, grep_accept)
     end,
-    options = extend(base_opts("livegrep", "LiveGrep> ", query, "alt-o"), {
+    options = extend(extend(base_opts("livegrep", "LiveGrep> ", query, "alt-o"), preview_grep()), {
       "--disabled",
       "--delimiter",
       ":",
       "--nth",
       "1",
       "--header",
-      "Alt-F: filter file  Alt-G: grep  Tab: → quickfix  Alt-O: prev",
+      "Alt-F: filter file  Alt-G: grep  Tab: → quickfix  Alt-O: prev  Ctrl-/: preview",
       "--bind",
       "start:reload:" .. reload,
       "--bind",
