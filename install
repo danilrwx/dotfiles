@@ -43,6 +43,12 @@ ln -snf $HOME/dotfiles/config/kitty $HOME/.config/
 ln -snf $HOME/dotfiles/config/alacritty $HOME/.config/
 ln -snf $HOME/dotfiles/config/ghostty $HOME/.config/
 
+# Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
+# plugin. Queries are vendored in the repo; parsers are compiled here.
+if command -v cc >/dev/null 2>&1; then
+  nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
+fi
+
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
 # which also keeps those paths out of this public repo.
 if [ -f $HOME/dotfiles/private/install ]; then
