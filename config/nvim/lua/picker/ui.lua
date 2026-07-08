@@ -68,9 +68,12 @@ function View:query()
 end
 
 function View:set_query(text)
-  if text and text ~= "" then
-    vim.api.nvim_buf_set_lines(self.prompt_buf, 0, 1, false, { text })
-  end
+  vim.api.nvim_buf_set_lines(self.prompt_buf, 0, 1, false, { text or "" })
+end
+
+function View:set_title(text)
+  pcall(vim.api.nvim_win_set_config, self.prompt_win,
+    { title = " " .. text .. " ", title_pos = "left" })
 end
 
 function View:focus(col)

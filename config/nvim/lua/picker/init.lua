@@ -54,7 +54,7 @@ function M.open(cands, opts)
     local q = v:query()
     last_query[opts.name] = q
     if opts.live then
-      filtered, positions = (q ~= "" and opts.live(q) or {}), nil
+      filtered, positions = opts.live(q), nil -- live() decides what an empty q means
       cands = filtered
     else
       filtered, positions = search.fuzzy(cands, q)
@@ -193,7 +193,13 @@ function M.open(cands, opts)
   if opts.actions then
     for lhs, fn in pairs(opts.actions) do
       map(lhs, function()
-        fn({ sel = filtered[sel], refilter = refilter, close = close })
+        fn({
+          sel = filtered[sel],
+          refilter = refilter,
+          close = close,
+          set_query = function(t) v:set_query(t) end,
+          set_title = function(t) v:set_title(t) end,
+        })
       end)
     end
   end

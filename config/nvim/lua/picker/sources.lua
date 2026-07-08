@@ -74,27 +74,42 @@ picker.launchers.livegrep = function(o)
   local tool = vim.fn.executable("ugrep") == 1
       and { "ugrep", "-RInk", "--ignore-files", "--color=never" }
     or { "rg", "--column", "--line-number", "--no-heading", "--color=never" }
+  -- A-g toggles the prompt between grep mode (query drives ripgrep) and file
+  -- mode (query fuzzily filters the last grep hits by path). `last` caches the
+  -- hits so file mode filters without re-grepping.
+  local mode, last = "grep", {}
   picker.open({}, {
     name = "livegrep",
     prompt = "LiveGrep",
     query = o and o.query,
     parse = search.grep_parse,
     resuming = o and o.resuming,
-    hint_extra = "   pat>file filter",
-    -- "pattern > filefilter": grep pattern, then keep hits whose path fuzzily
-    -- matches filefilter.
+    hint_extra = "   A-g grep/file",
     live = function(q)
-      local pat, file = q:match("^(.-)%s+>%s+(.+)$")
-      pat = pat or q
-      local hits = lines_of(vim.list_extend(vim.deepcopy(tool), { "--", pat }))
-      if file and file ~= "" then
-        hits = vim.tbl_filter(function(line)
+      if mode == "file" then
+        if q == "" then
+          return last
+        end
+        return vim.tbl_filter(function(line)
           local it = search.grep_parse(line)
-          return it.file ~= nil and search.subseq(it.file, file)
-        end, hits)
+          return it.file ~= nil and search.subseq(it.file, q)
+        end, last)
       end
-      return hits
+      if q == "" then
+        last = {}
+        return last
+      end
+      last = lines_of(vim.list_extend(vim.deepcopy(tool), { "--", q }))
+      return last
     end,
+    actions = {
+      ["<A-g>"] = function(ctx)
+        mode = mode == "grep" and "file" or "grep"
+        ctx.set_query("")
+        ctx.set_title(mode == "file" and "Filter file" or "LiveGrep")
+        ctx.refilter()
+      end,
+    },
     on_pick = function(line, cmd)
       local it = search.grep_parse(line)
       if it.file then
