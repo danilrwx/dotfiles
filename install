@@ -101,10 +101,21 @@ if ! command -v devpod &> /dev/null; then
 fi
 
 
-# Host tooling: launcher + ops CLIs only. The dev/build toolchain (go, LSPs,
-# ginkgo, helm, k9s, …) lives in the devbox container, not on the host ────────────────────────────────────────────────────
+# Host tooling: launcher + ops CLIs + the Go dev toolchain ──────────────────────────────────────────────────────────────
 log "Installing host tools"
-brew install kubectl gh glab tmux fzf jq yq gnupg pinentry-mac watch htop lazygit ugrep node neovim
+brew install go kubectl gh glab tmux fzf jq yq gnupg pinentry-mac watch htop lazygit ugrep node neovim
+
+# Go dev tools into ~/go/bin (same set as the devbox image, devcontainer/tools/go.sh)
+log "Installing go tools"
+go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+go install golang.org/x/tools/gopls@latest
+go install mvdan.cc/gofumpt@latest
+go install golang.org/x/tools/cmd/goimports@latest
+go install github.com/go-delve/delve/cmd/dlv@latest
+go install github.com/matryer/moq@latest
+go install github.com/google/go-containerregistry/cmd/crane@latest
+go install github.com/go-task/task/v3/cmd/task@latest
 
 # claude-code via the native installer (self-updating, no node needed)
 curl -fsSL https://claude.ai/install.sh | bash

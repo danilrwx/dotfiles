@@ -7,8 +7,9 @@ The split is deliberate:
 
 - **Thin host** — a launcher and GUI shell. It has only what must live on the
   host: `docker` + `devpod`, the ssh/gpg agents, GUI apps (terminal, browser,
-  fonts) and a few ops CLIs (`kubectl`, `d8`, `gh`, `claude`) plus shell
-  basics (`zsh`, `git`, `tmux`, `fzf`, …).
+  fonts), a few ops CLIs (`kubectl`, `d8`, `gh`, `claude`), the Go toolchain +
+  dev tools (`gopls`, `golangci-lint`, `dlv`, …) and shell basics (`zsh`,
+  `git`, `tmux`, `fzf`, …).
 - **Lean container** — the whole dev/build toolchain: Go, `kubectl`/`helm`/`k9s`/
   `werf`/`d8`, linters and language servers, `claude`, etc. Built from Ubuntu in
   CI (no Homebrew) and published to `ghcr.io/danilrwx/devbox`.
