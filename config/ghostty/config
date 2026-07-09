@@ -20,4 +20,8 @@ theme = base
 
 # Honour OSC 52 clipboard writes from the devbox (vim/tmux) without a prompt.
 clipboard-write = allow
+# Allow OSC 52 reads too, so the devbox `imgpaste` can pull an image the host
+# put on the clipboard. Note: this lets any app read the clipboard without a
+# prompt; set to "ask" if you'd rather confirm each read.
+clipboard-read = allow
 
