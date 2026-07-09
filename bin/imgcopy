@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Put an image on the host clipboard as base64 text, so a devbox `imgpaste` can
+# pull it over OSC 52 (works even for the remote k8s devbox with no bind mount).
+# With no argument, uses the most recent screenshot on the Desktop. macOS host.
+#
+#   imgcopy shot.png     |     imgcopy      (latest ~/Desktop/Screen*.png)
+set -euo pipefail
+
+f="${1:-}"
+if [ -z "$f" ]; then
+  f=$(ls -t "$HOME/Desktop/"Screen*.png "$HOME/Desktop/"Screen*.jpg 2>/dev/null | head -1 || true)
+fi
+[ -n "$f" ] && [ -f "$f" ] || {
+  echo "imgcopy: no image — pass a file or take a screenshot first" >&2
+  exit 1
+}
+
+base64 -i "$f" | tr -d '\n' | pbcopy
+echo "imgcopy: $f ($(wc -c <"$f" | tr -d ' ') bytes) -> clipboard as base64"

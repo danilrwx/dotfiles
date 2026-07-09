@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# Pull a base64 image the host put on the clipboard (via `imgcopy`) into a file,
+# using an OSC 52 read (paste) query — the only pure-terminal channel from the
+# devbox back to the host clipboard. Decodes to the given path (default below).
+#
+#   imgpaste            ->  ~/clip.png
+#   imgpaste shot.png   ->  shot.png
+#
+# ponytail: OSC 52 *read* must be enabled in the terminal (ghostty
+# clipboard-read=allow, kitty clipboard_control read-clipboard) and, under tmux,
+# `set -g allow-passthrough on`. If it hangs/empty, that's why — the docker
+# devbox can instead just read the file straight from the ~/w bind mount.
+set -euo pipefail
+
+out="${1:-$HOME/clip.png}"
+tty=/dev/tty
+[ -e "$tty" ] || { echo "imgpaste: no controlling terminal" >&2; exit 1; }
+
+saved=$(stty -g <"$tty")
+trap 'stty "$saved" <"$tty" 2>/dev/null || true' EXIT
+stty raw -echo <"$tty"
+
+# request the clipboard; wrap in a tmux passthrough sequence when inside tmux
+if [ -n "${TMUX:-}" ]; then
+  printf '\033Ptmux;\033\033]52;c;?\007\033\\' >"$tty"
+else
+  printf '\033]52;c;?\007' >"$tty"
+fi
+
+# read the reply: ESC ] 52 ; c ; <base64> terminated by BEL or ESC-backslash
+reply=""
+while IFS= read -rN1 -t 2 ch <"$tty"; do
+  reply+=$ch
+  case $reply in
+    *$'\007') break ;;
+    *$'\033\\') break ;;
+  esac
+done
+stty "$saved" <"$tty"
+
+b64=${reply#*;c;}
+b64=${b64%$'\007'}
+b64=${b64%$'\033\\'}
+[ -n "$b64" ] || { echo "imgpaste: empty clipboard (is OSC 52 read enabled?)" >&2; exit 1; }
+
+printf '%s' "$b64" | base64 -d >"$out"
+echo "imgpaste: $out ($(wc -c <"$out" | tr -d ' ') bytes)"
