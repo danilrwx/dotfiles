@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
 
-# Attach read-only to a tmux session an agent spawned via the `tmux` skill, so
-# you can watch what it's doing without disturbing it. Sessions live on isolated
-# sockets under CLAUDE_TMUX_SOCKET_DIR (default $TMPDIR/agentic-tmux-sockets).
-# One match: attach straight away. Several: pick with fzf. Detach with Ctrl-b d.
+# Watch a tmux session an agent spawned via the `tmux` skill. Sessions live on
+# isolated sockets under CLAUDE_TMUX_SOCKET_DIR (default $TMPDIR/agentic-tmux-sockets).
+# One match: use it; several: pick with fzf.
+#
+#   agent-watch       attach read-only (Detach with Ctrl-b d). Note: attaching
+#                     resizes the agent's window to your terminal, which sends
+#                     SIGWINCH to whatever it's running.
+#   agent-watch -f    follow via capture-pane polling — zero effect on the
+#                     session's geometry or process. Ctrl-C to stop.
 set -euo pipefail
+
+follow=0
+case "${1:-}" in
+  -f|--follow) follow=1 ;;
+  '') ;;
+  *) echo "usage: agent-watch [-f|--follow]" >&2; exit 2 ;;
+esac
 
 dir="${CLAUDE_TMUX_SOCKET_DIR:-${TMPDIR:-/tmp}/agentic-tmux-sockets}"
 
@@ -31,4 +43,15 @@ else
 fi
 
 IFS=$'\t' read -r sock session <<<"$pick"
-exec tmux -S "$sock" attach -r -t "$session"
+
+if [ "$follow" -eq 0 ]; then
+  exec tmux -S "$sock" attach -r -t "$session"
+fi
+
+trap 'exit 0' INT
+while tmux -S "$sock" has-session -t "$session" 2>/dev/null; do
+  printf '\033[H\033[2J== %s (Ctrl-C to stop) ==\n\n' "$session"
+  tmux -S "$sock" capture-pane -p -J -t "$session"
+  sleep 0.5
+done
+echo "session '$session' ended"
