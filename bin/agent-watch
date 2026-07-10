@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# Attach read-only to a tmux session an agent spawned via the `tmux` skill, so
+# you can watch what it's doing without disturbing it. Sessions live on isolated
+# sockets under CLAUDE_TMUX_SOCKET_DIR (default $TMPDIR/agentic-tmux-sockets).
+# One match: attach straight away. Several: pick with fzf. Detach with Ctrl-b d.
+set -euo pipefail
+
+dir="${CLAUDE_TMUX_SOCKET_DIR:-${TMPDIR:-/tmp}/agentic-tmux-sockets}"
+
+rows=()
+for sock in "$dir"/*.sock; do
+  [ -S "$sock" ] || continue
+  while IFS= read -r name; do
+    [ -n "$name" ] && rows+=("$sock"$'\t'"$name")
+  done < <(tmux -S "$sock" list-sessions -F '#{session_name}' 2>/dev/null)
+done
+
+if [ "${#rows[@]}" -eq 0 ]; then
+  echo "no agent tmux sessions in $dir" >&2
+  exit 1
+fi
+
+if [ "${#rows[@]}" -eq 1 ]; then
+  pick="${rows[0]}"
+else
+  pick=$(printf '%s\n' "${rows[@]}" \
+    | fzf --no-sort --height=100% --delimiter='\t' --with-nth=2 \
+          --header='Watch agent session (read-only)')
+  [ -n "$pick" ] || exit 0
+fi
+
+IFS=$'\t' read -r sock session <<<"$pick"
+exec tmux -S "$sock" attach -r -t "$session"
