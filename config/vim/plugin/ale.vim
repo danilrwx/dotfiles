@@ -68,16 +68,18 @@ enddef
 command! LspDiagWs DiagWs()
 nnoremap <silent> <leader>D <cmd>LspDiagWs<cr>
 
+# mirror Neovim 0.11 built-in LSP defaults (grr/gri/grt/gra/grn/K/<c-]>/
+# <c-w>d/[d/]d). grf (format) is this config's own convention, not an nvim
+# default. No gO: ALE has no document-symbol command (only workspace search).
 def OnFileType()
+  nnoremap <buffer> K   <cmd>ALEHover<cr>
   nnoremap <buffer> grr <cmd>ALEFindReferences<cr>
   nnoremap <buffer> gri <cmd>ALEGoToImplementation<cr>
-  nnoremap <buffer> gd  <cmd>ALEGoToDefinition<cr>
-  nnoremap <buffer> K   <cmd>ALEHover<cr>
-  nnoremap <buffer> grS :ALESymbolSearch<space>
+  nnoremap <buffer> grt <cmd>ALEGoToTypeDefinition<cr>
   nnoremap <buffer> gra <cmd>ALECodeAction<cr>
   nnoremap <buffer> grn <cmd>ALERename<cr>
   nnoremap <buffer> grf <cmd>ALEFix<cr>
-  nnoremap <buffer> grI <cmd>ALEOrganizeImports<cr>
+  nnoremap <buffer> <c-]> <cmd>ALEGoToDefinition<cr>
   nnoremap <buffer> <c-w>d <cmd>ALEDetail<cr>
   nnoremap <buffer> [d <cmd>ALEPreviousWrap<cr>
   nnoremap <buffer> ]d <cmd>ALENextWrap<cr>
