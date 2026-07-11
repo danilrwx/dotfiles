@@ -33,6 +33,9 @@ g:ale_completion_enabled = 1
 g:ale_virtualtext_cursor = 'current'
 g:ale_echo_cursor = 0
 
+# K hover in a popup by the cursor, not a half-screen preview window.
+g:ale_hover_to_floating_preview = 1
+
 # whole-workspace diagnostics: LSP/linters skip unopened files, so run the project
 # checker async and parse into quickfix. golangci-lint if present, else `go vet`.
 var ws_out: list<string>
