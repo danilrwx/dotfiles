@@ -1,5 +1,11 @@
 vim9script
 
+# POC: ale.vim (loaded first, alphabetically) sets this to take over LSP+lint.
+# Bail so two clients don't attach to gopls. Remove both to revert to yegappan/lsp.
+if get(g:, 'loaded_ale_poc', 0)
+  finish
+endif
+
 # yegappan/lsp lives in pack/plugins/opt and is packadd'd lazily on the first
 # code filetype. The plugin supports late packadd (enables immediately when
 # loaded after VimEnter), so servers register and attach on that first file.
