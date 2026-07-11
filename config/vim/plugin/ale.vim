@@ -27,14 +27,22 @@ g:ale_fix_on_save = 1
 g:ale_go_golangci_lint_package = 1
 
 # omnifunc-driven completion, same popup UX as the native completeopt already set.
+# autoimport mirrors native LSP completion pulling in missing imports as you accept.
 g:ale_completion_enabled = 1
+g:ale_completion_autoimport = 1
 
-# inline diagnostic on the cursor line only; full text via <c-w>d (ALEDetail).
-g:ale_virtualtext_cursor = 'current'
+# diagnostics like the nvim config: virtualtext on every offending line with the
+# 🐗 prefix, no signs (signcolumn=number stays for line numbers only). Cursor echo
+# off; full text via <c-w>d (ALEDetail).
+g:ale_virtualtext_cursor = 'all'
+g:ale_virtualtext_prefix = '🐗 '
+g:ale_set_signs = 0
 g:ale_echo_cursor = 0
 
-# K hover in a popup by the cursor, not a half-screen preview window.
+# K hover in a popup by the cursor, not a half-screen preview window; close it and
+# the diagnostic detail popup as soon as you start typing.
 g:ale_hover_to_floating_preview = 1
+g:ale_close_preview_on_insert = 1
 
 # whole-workspace diagnostics: LSP/linters skip unopened files, so run the project
 # checker async and parse into quickfix. golangci-lint if present, else `go vet`.
