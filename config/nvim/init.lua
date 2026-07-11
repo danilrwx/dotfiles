@@ -26,6 +26,12 @@ end
 
 vim.filetype.add({ extension = { yaml = "helm", tpl = "helm" } })
 
+-- source plugins from the private submodule (not tracked in this repo)
+local private = vim.fn.expand("~/dotfiles/private/config/nvim")
+if vim.fn.isdirectory(private) == 1 then
+  vim.opt.runtimepath:append(private)
+end
+
 vim.keymap.set("n", "<c-d>", "<c-d>zz")
 vim.keymap.set("n", "<c-u>", "<c-u>zz")
 vim.keymap.set("n", "<c-l>", "<cmd>nohlsearch<cr>")
