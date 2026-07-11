@@ -2,7 +2,4 @@
 *.swo
 *.log
 
-config/vim/.netrwhist
-config/vim/pack/
-
 config/k9s/clusters
