@@ -5,8 +5,12 @@ local search = require("picker.search")
 
 local M = {}
 M.launchers = {} -- name -> function(opts); filled by the sources layer
-local last_query = {}
-local ring, ridx = {}, 0
+-- History of recent pickers, most-recent last, deduped by name, capped at
+-- HISTORY_MAX. Each entry keeps everything needed to reopen it where you left
+-- off: { name, query, sel }. C-o steps through it; <leader>'/" resume by offset.
+local HISTORY_MAX = 10
+local history = {}
+local ridx = 0
 
 local HINT = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^f/^b page   A-f/b scroll   ^/ preview   ^o prev"
 
@@ -20,6 +24,7 @@ function M.open(cands, opts)
   local positions -- per-row matched byte columns from the matcher (or nil)
   local ftimer, ptimer
   local live_seq = 0 -- bumped per query; async live results tagged stale if behind
+  local entry -- this picker's history record (set below), kept live as query/sel change
 
   local v = ui.new(opts.prompt or "", HINT .. (opts.hint_extra or ""))
 
@@ -95,7 +100,9 @@ function M.open(cands, opts)
 
   local function refilter()
     local q = v:query()
-    last_query[opts.name] = q
+    if entry then
+      entry.query = q
+    end
     if opts.live then
       live_seq = live_seq + 1
       local seq = live_seq
@@ -118,6 +125,9 @@ function M.open(cands, opts)
       return
     end
     closing = true
+    if entry then
+      entry.sel = sel -- remember list position for a later resume
+    end
     if ftimer then
       ftimer:stop()
     end
@@ -179,7 +189,7 @@ function M.open(cands, opts)
   end
 
   local function cycle(step)
-    if #ring <= 1 then
+    if #history <= 1 then
       return -- only this picker in history; nothing to switch to (don't close)
     end
     close()
@@ -260,40 +270,49 @@ function M.open(cands, opts)
     end
   end
 
-  -- MRU history (Alt-Tab): unique pickers by recency, most recent last. A fresh
-  -- open moves its type to the end; C-o steps back through it (wrapping).
-  if not opts.resuming then
-    for i, n in ipairs(ring) do
-      if n == opts.name then
-        table.remove(ring, i)
-        break
-      end
+  -- history entry: reuse this picker's record (dedup by name, move to most-recent)
+  -- so a resume reopens with its saved query+sel; a fresh open resets them.
+  for i = #history, 1, -1 do
+    if history[i].name == opts.name then
+      entry = table.remove(history, i)
+      break
     end
-    ring[#ring + 1] = opts.name
-    ridx = #ring
   end
+  entry = entry or { name = opts.name, query = "", sel = 1 }
+  if not opts.resuming then
+    entry.query = opts.query or ""
+    entry.sel = 1
+  end
+  history[#history + 1] = entry
+  while #history > HISTORY_MAX do
+    table.remove(history, 1)
+  end
+  ridx = #history
 
-  -- fresh open starts empty; only an explicit query or a history revisit reseeds
-  local seed = opts.query or (opts.resuming and last_query[opts.name]) or ""
-  v:set_query(seed)
+  v:set_query(entry.query)
   refilter()
-  v:focus(#seed)
+  -- restore the list position too (fuzzy sources; live sources repopulate async)
+  if entry.sel and #filtered > 0 then
+    sel = math.max(1, math.min(entry.sel, #filtered))
+    paint()
+  end
+  v:focus(#entry.query)
 end
 
 -- History navigation, shared by C-o (advance, relative) and <leader>'/" (resume).
 function M.advance(step)
-  if #ring <= 1 then
+  if #history <= 1 then
     return
   end
-  ridx = (ridx - 1 + step) % #ring + 1 -- wrap
-  M.launchers[ring[ridx]]({ resuming = true })
+  ridx = (ridx - 1 + step) % #history + 1 -- wrap
+  M.launchers[history[ridx].name]({ resuming = true })
 end
 
 function M.resume(offset)
-  local i = #ring - offset
-  if i >= 1 and ring[i] then
+  local i = #history - offset
+  if i >= 1 and history[i] then
     ridx = i
-    M.launchers[ring[i]]({ resuming = true })
+    M.launchers[history[i].name]({ resuming = true })
   end
 end
 
