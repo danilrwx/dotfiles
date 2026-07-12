@@ -2,6 +2,7 @@
 -- vim/vimdoc/markdown*/query are compiled into neovim; the rest come from
 -- :TSBuild below. Filetypes without a parser fall back to regex syntax.
 vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("treesitter_start", { clear = true }),
   callback = function()
     if vim.treesitter.get_parser(nil, nil, { error = false }) then
       vim.treesitter.start()

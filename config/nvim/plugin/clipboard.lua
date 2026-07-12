@@ -8,6 +8,7 @@ local copy = require("vim.ui.clipboard.osc52").copy("+")
 
 -- only real yanks (not deletes) to the unnamed or clipboard registers
 vim.api.nvim_create_autocmd("TextYankPost", {
+  group = vim.api.nvim_create_augroup("osc52_copy", { clear = true }),
   callback = function()
     local e = vim.v.event
     if e.operator == "y" and (e.regname == "" or e.regname == "+" or e.regname == "*") then

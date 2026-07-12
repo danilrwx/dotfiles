@@ -19,6 +19,7 @@ local function send(lines)
 end
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = vim.api.nvim_create_augroup("playbook", { clear = true }),
   pattern = "playbook.sh",
   callback = function(ev)
     vim.keymap.set("n", "<CR>", function()

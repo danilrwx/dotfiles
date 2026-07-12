@@ -7,13 +7,16 @@ local s = require("session")
 -- from init.lua, not a stale session (else restoring re-applies old values).
 vim.o.sessionoptions = "buffers,curdir,folds,tabpages,winsize,winpos,terminal"
 
+local grp = vim.api.nvim_create_augroup("session", { clear = true })
 vim.api.nvim_create_autocmd("VimLeavePre", {
+  group = grp,
   callback = function()
     s.save()
   end,
 })
 
 vim.api.nvim_create_autocmd("VimEnter", {
+  group = grp,
   nested = true, -- let the sourced session's own autocmds fire
   callback = function()
     if vim.fn.argc() == 0 then
