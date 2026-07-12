@@ -79,10 +79,12 @@ picker.launchers.gfiles = function(o)
 end
 
 picker.launchers.buffers = function(o)
-  local names = {}
+  local names, bufof = {}, {} -- display name -> bufnr, so ^d deletes by number
   for _, b in ipairs(vim.fn.getbufinfo({ buflisted = 1 })) do
     if b.name ~= "" then
-      names[#names + 1] = vim.fn.fnamemodify(b.name, ":~:.")
+      local nm = vim.fn.fnamemodify(b.name, ":~:.")
+      names[#names + 1] = nm
+      bufof[nm] = b.bufnr
     end
   end
   picker.open(names, {
@@ -94,8 +96,12 @@ picker.launchers.buffers = function(o)
     query = o and o.query,
     hint_extra = "   ^d del",
     actions = {
+      -- delete by bufnr: a relative display name doesn't reliably resolve to a
+      -- buffer for :bdelete (the current file in particular failed to match).
       ["<C-d>"] = delete_and_relaunch(picker.launchers.buffers, function(sel)
-        pcall(vim.cmd, "bdelete " .. vim.fn.fnameescape(sel))
+        if bufof[sel] then
+          pcall(vim.cmd, "bdelete " .. bufof[sel])
+        end
       end),
     },
   })
