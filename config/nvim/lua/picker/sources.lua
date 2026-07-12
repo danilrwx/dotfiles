@@ -40,9 +40,25 @@ end
 local function whole_path(line)
   return 0, #line
 end
-local function grep_path(line)
-  local c = line:find(":")
-  return 0, c and c - 1 or #line
+-- path up to the first ":" after offset (0 for grep rows, #prefix for prefixed ones)
+local function grep_path(line, offset)
+  offset = offset or 0
+  local c = line:find(":", offset + 1)
+  return offset, c and c - 1 or #line
+end
+
+-- an action that deletes the selected row then reopens the picker with the same
+-- query so the list refreshes in place (used by the ^d delete bindings).
+local function delete_and_relaunch(launcher, del)
+  return function(ctx)
+    if ctx.sel then
+      del(ctx.sel)
+    end
+    ctx.close()
+    vim.schedule(function()
+      launcher({ query = ctx.query })
+    end)
+  end
 end
 
 local function files_source()
@@ -78,15 +94,9 @@ picker.launchers.buffers = function(o)
     query = o and o.query,
     hint_extra = "   ^d del",
     actions = {
-      ["<C-d>"] = function(ctx)
-        if ctx.sel then
-          pcall(vim.cmd, "bdelete " .. vim.fn.fnameescape(ctx.sel))
-        end
-        ctx.close()
-        vim.schedule(function()
-          picker.launchers.buffers({ query = ctx.query })
-        end)
-      end,
+      ["<C-d>"] = delete_and_relaunch(picker.launchers.buffers, function(sel)
+        pcall(vim.cmd, "bdelete " .. vim.fn.fnameescape(sel))
+      end),
     },
   })
 end
@@ -110,8 +120,12 @@ picker.launchers.livegrep = function(o)
   -- (gq), file filter (fq), prompt mode, regex/fixed flag and last hits (cache,
   -- reused so a resume renders without re-grepping). Restored from o.state on a
   -- resume, fresh otherwise, and handed back via get_state.
+  -- ponytail: cache (grep hits) is kept in the persisted state so a resume
+  -- renders instantly and file-filter mode still has rows to narrow. Ceiling is
+  -- MAX hits × HISTORY_MAX entries; if that memory ever bites, drop cache here
+  -- and re-grep on resume instead.
   local lg = (o and o.state) or { mode = "grep", gq = "", fq = "", fixed = false, cache = {} }
-  local job -- running search handle, killed when the pattern changes
+  local job -- running search handle, killed when the pattern changes or on close
   local MAX = 10000 -- cap hits fed to the picker; the tool can flood on short patterns
   local function recompute()
     if lg.fq == "" then
@@ -130,6 +144,13 @@ picker.launchers.livegrep = function(o)
     resuming = o and o.resuming,
     get_state = function()
       return lg
+    end,
+    on_close = function()
+      if job then
+        pcall(function()
+          job:kill(9)
+        end)
+      end
     end,
     hint_extra = "   A-g grep/file   A-r regex/fixed",
     -- highlight both queries at once, in distinct colours: the grep pattern in
@@ -219,6 +240,7 @@ picker.launchers.sessions = function(o)
   picker.open(session.list(), {
     name = "sessions",
     prompt = "Sessions",
+    path_hl = whole_path,
     resuming = o and o.resuming,
     query = o and o.query,
     hint_extra = "   ^d del",
@@ -226,15 +248,7 @@ picker.launchers.sessions = function(o)
       session.restore(cwd)
     end,
     actions = {
-      ["<C-d>"] = function(ctx)
-        if ctx.sel then
-          session.delete(ctx.sel)
-        end
-        ctx.close()
-        vim.schedule(function()
-          picker.launchers.sessions({ query = ctx.query })
-        end)
-      end,
+      ["<C-d>"] = delete_and_relaunch(picker.launchers.sessions, session.delete),
     },
   })
 end
@@ -243,12 +257,8 @@ end
 -- file:line row, so you can fuzzy-search and jump to a change. Text is the @@
 -- context (enclosing function git prints), which fuzzy-matches nicely.
 picker.launchers.git_hunks = function(o)
-  local dir = vim.fn.expand("%:p:h")
-  if dir == "" then
-    dir = vim.fn.getcwd()
-  end
-  local root = vim.trim((vim.system({ "git", "-C", dir, "rev-parse", "--show-toplevel" }, { text = true }):wait().stdout or ""))
-  if root == "" then
+  local root = require("git").root()
+  if not root then
     vim.notify("not a git repo")
     return
   end
@@ -260,7 +270,8 @@ picker.launchers.git_hunks = function(o)
     elseif file then
       local ln, tail = l:match("^@@ %-%S+ %+(%d+),?%d* @@ ?(.*)")
       if ln then
-        items[#items + 1] = string.format("%s/%s:%s:1: %s", root, file, ln, tail)
+        -- pure deletions report +0; clamp so the row points at a real line
+        items[#items + 1] = string.format("%s/%s:%d:1: %s", root, file, math.max(1, tonumber(ln)), tail)
       end
     end
   end
@@ -268,34 +279,17 @@ picker.launchers.git_hunks = function(o)
     vim.notify("git: no hunks")
     return
   end
-  local dcache = {} -- file -> its `git diff -U3` lines, for the preview pane
   picker.open(items, {
     name = "git_hunks",
     prompt = "Hunks",
     parse = search.grep_parse,
     path_hl = grep_path,
     resuming = o and o.resuming,
-    preview = function(v, line)
-      local it = search.grep_parse(line or "")
-      if not it.file then
-        v:show_text({}, "", "")
-        return
-      end
-      if dcache[it.file] then
-        v:show_text(dcache[it.file], "diff", vim.fn.fnamemodify(it.file, ":t"))
-        return
-      end
-      vim.system({ "git", "-C", root, "diff", "--no-color", "-U3", "HEAD", "--", it.file },
-        { text = true }, function(r)
-          local dl = vim.split(r.stdout or "", "\n")
-          dcache[it.file] = dl
-          vim.schedule(function()
-            pcall(function()
-              v:show_text(dl, "diff", vim.fn.fnamemodify(it.file, ":t"))
-            end)
-          end)
-        end)
-    end,
+    preview = require("git").cached_preview(
+      function(line) return search.grep_parse(line or "").file end,
+      function(f) return { "git", "-C", root, "diff", "--no-color", "-U3", "HEAD", "--", f } end,
+      "diff",
+      function(f) return vim.fn.fnamemodify(f, ":t") end),
     on_pick = function(line, cmd)
       edit_at(search.grep_parse(line), cmd)
     end,
@@ -326,9 +320,7 @@ picker.launchers.diagnostics = function(o)
     prompt = "Diagnostics",
     parse = search.grep_parse,
     path_hl = function(line)
-      local s = #BOAR
-      local c = line:find(":", s + 1)
-      return s, c and c - 1
+      return grep_path(line, #BOAR)
     end,
     resuming = o and o.resuming,
     -- colour the [SEV] marker by severity (builtin Diagnostic* groups)
