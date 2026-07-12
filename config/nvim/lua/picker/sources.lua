@@ -47,6 +47,25 @@ local function grep_path(line, offset)
   return offset, c and c - 1 or #line
 end
 
+-- unload a buffer, first moving any window that shows it to another listed
+-- buffer: :bdelete/nvim_buf_delete silently leave a *displayed* buffer loaded,
+-- which is why the currently-viewed (first) entry wouldn't delete. No force, so
+-- a modified buffer is kept (the pcall swallows E37/E89).
+local function close_buffer(nr)
+  if not nr or not vim.api.nvim_buf_is_valid(nr) then
+    return
+  end
+  local others = vim.tbl_filter(function(b)
+    return b ~= nr and vim.fn.buflisted(b) == 1
+  end, vim.api.nvim_list_bufs())
+  for _, w in ipairs(vim.fn.win_findbuf(nr)) do
+    vim.api.nvim_win_call(w, function()
+      vim.cmd(#others > 0 and ("buffer " .. others[1]) or "enew")
+    end)
+  end
+  pcall(vim.api.nvim_buf_delete, nr, {})
+end
+
 -- an action that deletes the selected row then reopens the picker with the same
 -- query so the list refreshes in place (used by the ^d delete bindings).
 local function delete_and_relaunch(launcher, del)
@@ -96,12 +115,8 @@ picker.launchers.buffers = function(o)
     query = o and o.query,
     hint_extra = "   ^d del",
     actions = {
-      -- delete by bufnr: a relative display name doesn't reliably resolve to a
-      -- buffer for :bdelete (the current file in particular failed to match).
       ["<C-d>"] = delete_and_relaunch(picker.launchers.buffers, function(sel)
-        if bufof[sel] then
-          pcall(vim.cmd, "bdelete " .. bufof[sel])
-        end
+        close_buffer(bufof[sel])
       end),
     },
   })
