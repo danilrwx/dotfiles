@@ -250,6 +250,7 @@ local function status_path(line)
 end
 
 function M.status(o)
+  o = o or {}
   local r = root()
   if not r then
     vim.notify("git: not a repo")
@@ -264,7 +265,8 @@ function M.status(o)
   require("picker").open(items, {
     name = "git_status",
     prompt = "Status",
-    resuming = o and o.resuming,
+    resuming = o.resuming,
+    query = o.query,
     hint_extra = "   ^s stage  ^u unstage",
     path_hl = function(line)
       return 3, #line
@@ -290,14 +292,18 @@ function M.status(o)
           vim.system({ "git", "-C", r, "add", "--", status_path(ctx.sel) }):wait()
         end
         ctx.close()
-        vim.schedule(M.status)
+        vim.schedule(function()
+          M.status({ query = ctx.query })
+        end)
       end,
       ["<C-u>"] = function(ctx)
         if ctx.sel then
           vim.system({ "git", "-C", r, "restore", "--staged", "--", status_path(ctx.sel) }):wait()
         end
         ctx.close()
-        vim.schedule(M.status)
+        vim.schedule(function()
+          M.status({ query = ctx.query })
+        end)
       end,
     },
     on_pick = function(line)

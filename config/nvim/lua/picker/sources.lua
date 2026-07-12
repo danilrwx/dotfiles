@@ -75,6 +75,7 @@ picker.launchers.buffers = function(o)
     on_pick = edit_file,
     path_hl = whole_path,
     resuming = o and o.resuming,
+    query = o and o.query,
     hint_extra = "   ^d del",
     actions = {
       ["<C-d>"] = function(ctx)
@@ -83,20 +84,14 @@ picker.launchers.buffers = function(o)
         end
         ctx.close()
         vim.schedule(function()
-          picker.launchers.buffers({ resuming = true })
+          picker.launchers.buffers({ query = ctx.query })
         end)
       end,
     },
   })
 end
 
--- LiveGrep's own state, kept at module scope so a resume (<leader>') reopens it
--- exactly as left: the grep pattern (gq) and file filter (fq), which one the
--- prompt edits (mode), the regex/fixed flag, and the last hits (cache — reused
--- so a resume shows results without re-grepping). A fresh open resets it.
-local lg = { mode = "grep", gq = "", fq = "", fixed = false, cache = {} }
-
-local function lg_title()
+local function lg_title(lg)
   if lg.mode == "file" then
     return "Filter file"
   end
@@ -111,10 +106,11 @@ picker.launchers.livegrep = function(o)
   local tool = vim.fn.executable("ugrep") == 1
       and { "ugrep", "-RInk", "--ignore-files", "--color=never" }
     or { "grep", "-RInH", "--exclude-dir=.git" }
-  local resuming = o and o.resuming
-  if not resuming then
-    lg.mode, lg.gq, lg.fq, lg.fixed, lg.cache = "grep", "", "", false, {}
-  end
+  -- per-history-entry state, so each resumed LiveGrep keeps its own grep pattern
+  -- (gq), file filter (fq), prompt mode, regex/fixed flag and last hits (cache,
+  -- reused so a resume renders without re-grepping). Restored from o.state on a
+  -- resume, fresh otherwise, and handed back via get_state.
+  local lg = (o and o.state) or { mode = "grep", gq = "", fq = "", fixed = false, cache = {} }
   local job -- running search handle, killed when the pattern changes
   local MAX = 10000 -- cap hits fed to the picker; the tool can flood on short patterns
   local function recompute()
@@ -128,10 +124,13 @@ picker.launchers.livegrep = function(o)
   end
   picker.open({}, {
     name = "livegrep",
-    prompt = lg_title(),
+    prompt = lg_title(lg),
     query = o and o.query,
     parse = search.grep_parse,
-    resuming = resuming,
+    resuming = o and o.resuming,
+    get_state = function()
+      return lg
+    end,
     hint_extra = "   A-g grep/file   A-r regex/fixed",
     -- highlight both queries at once, in distinct colours: the grep pattern in
     -- the hit text (blue, literal) and the file filter fuzzily in the path
@@ -198,14 +197,14 @@ picker.launchers.livegrep = function(o)
       ["<A-g>"] = function(ctx)
         lg.mode = lg.mode == "grep" and "file" or "grep"
         ctx.set_query(lg.mode == "grep" and lg.gq or lg.fq)
-        ctx.set_title(lg_title())
+        ctx.set_title(lg_title(lg))
         ctx.keep_pos() -- switching mode keeps the same hits; don't jump to the top
         ctx.refilter()
       end,
       ["<A-r>"] = function(ctx)
         lg.fixed = not lg.fixed
         lg.gq = "\1" -- invalidate cache so the next grep re-runs in the new mode
-        ctx.set_title(lg_title())
+        ctx.set_title(lg_title(lg))
         ctx.refilter()
       end,
     },
@@ -221,6 +220,7 @@ picker.launchers.sessions = function(o)
     name = "sessions",
     prompt = "Sessions",
     resuming = o and o.resuming,
+    query = o and o.query,
     hint_extra = "   ^d del",
     on_pick = function(cwd)
       session.restore(cwd)
@@ -232,7 +232,7 @@ picker.launchers.sessions = function(o)
         end
         ctx.close()
         vim.schedule(function()
-          picker.launchers.sessions({ resuming = true })
+          picker.launchers.sessions({ query = ctx.query })
         end)
       end,
     },

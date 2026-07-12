@@ -5,17 +5,20 @@ local search = require("picker.search")
 
 local M = {}
 M.launchers = {} -- name -> function(opts); filled by the sources layer
--- History of recent pickers, most-recent last, deduped by name, capped at
--- HISTORY_MAX. Each entry keeps everything needed to reopen it where you left
--- off: { name, query, sel }. C-o steps through it; <leader>'/" resume by offset.
+-- Chronological log of opened pickers, most-recent last, NOT deduped (so
+-- LiveGrep→LiveGrep→Commits→LiveGrep→Files→Files is kept as-is), capped at
+-- HISTORY_MAX. Each entry reopens where you left off: { name, query, sel,
+-- state }, where state is optional source-owned data (e.g. live grep's mode /
+-- filter / cache). C-o steps through it; <leader>'/" resume by offset.
 local HISTORY_MAX = 10
 local history = {}
 local ridx = 0
+local pending_resume -- the entry being resumed, handed to M.open by launch()
 
 local HINT = "<cr> open   ^s/^v/^t split   ^x mark   <tab> qf   ^f/^b page   A-f/b scroll   ^/ preview   ^o prev"
 
 -- opts: name, prompt, parse(line)->{file,lnum}, live(q)->lines, on_pick(line,cmd),
--- hint_extra, actions, query, resuming
+-- hint_extra, actions, query, resuming, get_state()->tbl (persisted in history)
 function M.open(cands, opts)
   local parse = opts.parse or function(l)
     return { file = l }
@@ -136,6 +139,18 @@ function M.open(cands, opts)
     closing = true
     if entry then
       entry.sel = sel -- remember list position for a later resume
+      if opts.get_state then
+        entry.state = opts.get_state()
+      end
+      -- an empty search is noise in the history; drop the entry on close
+      if vim.trim(entry.query) == "" then
+        for i = #history, 1, -1 do
+          if history[i] == entry then
+            table.remove(history, i)
+            break
+          end
+        end
+      end
     end
     if ftimer then
       ftimer:stop()
@@ -273,6 +288,7 @@ function M.open(cands, opts)
       map(lhs, function()
         fn({
           sel = filtered[sel],
+          query = v:query(),
           refilter = refilter,
           close = close,
           keep_pos = function()
@@ -288,24 +304,18 @@ function M.open(cands, opts)
     end
   end
 
-  -- history entry: reuse this picker's record (dedup by name, move to most-recent)
-  -- so a resume reopens with its saved query+sel; a fresh open resets them.
-  for i = #history, 1, -1 do
-    if history[i].name == opts.name then
-      entry = table.remove(history, i)
-      break
+  -- history entry: a resume rebinds the exact entry it reopened (so its saved
+  -- query+sel persist); any other open appends a fresh entry, keeping repeats.
+  if opts.resuming and pending_resume then
+    entry = pending_resume
+  else
+    entry = { name = opts.name, query = opts.query or "", sel = 1 }
+    history[#history + 1] = entry
+    while #history > HISTORY_MAX do
+      table.remove(history, 1)
     end
+    ridx = #history
   end
-  entry = entry or { name = opts.name, query = "", sel = 1 }
-  if not opts.resuming then
-    entry.query = opts.query or ""
-    entry.sel = 1
-  end
-  history[#history + 1] = entry
-  while #history > HISTORY_MAX do
-    table.remove(history, 1)
-  end
-  ridx = #history
 
   restore_sel = opts.resuming and entry.sel or nil
   v:set_query(entry.query)
@@ -318,7 +328,9 @@ local function launch(i)
   local l = history[i] and M.launchers[history[i].name]
   if l then
     ridx = i
-    l({ resuming = true })
+    pending_resume = history[i]
+    l({ resuming = true, state = history[i].state })
+    pending_resume = nil
   end
 end
 
