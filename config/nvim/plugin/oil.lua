@@ -396,9 +396,11 @@ vim.api.nvim_create_user_command("Oil", function(o)
   M.open(o.args)
 end, { nargs = "?", complete = "dir" })
 
--- open a directory (startup `nvim dir`, `:edit dir`, `-`) in Oil, not netrw
+-- register Oil as the file explorer: claim netrw's "FileExplorer" augroup (so we
+-- win even if netrw ever loads) and open any directory buffer — startup
+-- `nvim dir`, `:edit dir`, a directory in a split, `-` — in Oil.
 vim.api.nvim_create_autocmd("BufEnter", {
-  group = vim.api.nvim_create_augroup("oil_hijack", { clear = true }),
+  group = vim.api.nvim_create_augroup("FileExplorer", { clear = true }),
   nested = true,
   callback = function(ev)
     local path = vim.api.nvim_buf_get_name(ev.buf)
