@@ -282,17 +282,19 @@ function M.open(cands, opts)
   map("<Tab>", to_quickfix)
   map("<C-x>", function()
     local line = filtered[sel]
-    if line then
-      marked[line] = not marked[line] or nil
-      sel = (sel % #filtered) + 1
-      render() -- full: the mark sign changed
+    if not line then
+      return
     end
+    marked[line] = not marked[line] or nil
+    sel = (sel % #filtered) + 1
+    render() -- full: the mark sign changed
   end)
   map("<C-/>", function()
     v:toggle_preview()
-    if v.prev_visible then
-      do_preview()
+    if not v.prev_visible then
+      return
     end
+    do_preview()
   end)
   map("<C-f>", function() page_move(v.page) end)
   map("<C-b>", function() page_move(-v.page) end)
@@ -346,12 +348,13 @@ end
 -- History navigation, shared by C-o (advance, relative) and <leader>'/" (resume).
 local function launch(i)
   local l = history[i] and M.launchers[history[i].name]
-  if l then
-    ridx = i
-    pending_resume = history[i]
-    l({ resuming = true, state = history[i].state })
-    pending_resume = nil
+  if not l then
+    return
   end
+  ridx = i
+  pending_resume = history[i]
+  l({ resuming = true, state = history[i].state })
+  pending_resume = nil
 end
 
 function M.advance(step)

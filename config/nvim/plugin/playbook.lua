@@ -24,9 +24,10 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   callback = function(ev)
     vim.keymap.set("n", "<CR>", function()
       send({ vim.api.nvim_get_current_line() })
-      if vim.fn.line(".") < vim.fn.line("$") then
-        vim.cmd("normal! j")
+      if vim.fn.line(".") >= vim.fn.line("$") then
+        return
       end
+      vim.cmd("normal! j")
     end, { buffer = ev.buf, silent = true })
 
     vim.keymap.set("x", "<CR>", function()

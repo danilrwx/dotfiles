@@ -174,13 +174,14 @@ function View:preview(item)
   end
 
   vim.api.nvim_buf_clear_namespace(self.prev_buf, hlns, 0, -1)
-  if item.lnum and item.lnum >= 1 and item.lnum <= #lines then
-    vim.api.nvim_buf_set_extmark(self.prev_buf, hlns, item.lnum - 1, 0, { line_hl_group = "PickerPreviewLine" })
-    pcall(vim.api.nvim_win_set_cursor, self.prev_win, { item.lnum, 0 })
-    vim.api.nvim_win_call(self.prev_win, function()
-      vim.cmd("normal! zz")
-    end)
+  if not (item.lnum and item.lnum >= 1 and item.lnum <= #lines) then
+    return
   end
+  vim.api.nvim_buf_set_extmark(self.prev_buf, hlns, item.lnum - 1, 0, { line_hl_group = "PickerPreviewLine" })
+  pcall(vim.api.nvim_win_set_cursor, self.prev_win, { item.lnum, 0 })
+  vim.api.nvim_win_call(self.prev_win, function()
+    vim.cmd("normal! zz")
+  end)
 end
 
 -- Render arbitrary text (not a file) in the preview pane, e.g. a diff/commit.
@@ -209,11 +210,12 @@ function View:toggle_preview()
 end
 
 function View:scroll_preview(down)
-  if self.prev_visible then
-    vim.api.nvim_win_call(self.prev_win, function()
-      vim.cmd("normal! " .. (down and "\4" or "\21")) -- <C-d>/<C-u>
-    end)
+  if not self.prev_visible then
+    return
   end
+  vim.api.nvim_win_call(self.prev_win, function()
+    vim.cmd("normal! " .. (down and "\4" or "\21")) -- <C-d>/<C-u>
+  end)
 end
 
 function View:close()

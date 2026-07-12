@@ -19,9 +19,10 @@ vim.api.nvim_create_autocmd("VimEnter", {
   group = grp,
   nested = true, -- let the sourced session's own autocmds fire
   callback = function()
-    if vim.fn.argc() == 0 then
-      s.restore()
+    if vim.fn.argc() ~= 0 then
+      return
     end
+    s.restore()
   end,
 })
 

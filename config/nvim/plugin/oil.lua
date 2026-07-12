@@ -46,9 +46,10 @@ end
 
 local function mkparent(p)
   local d = vim.fn.fnamemodify(p, ":h")
-  if vim.fn.isdirectory(d) == 0 then
-    vim.fn.mkdir(d, "p")
+  if vim.fn.isdirectory(d) ~= 0 then
+    return
   end
+  vim.fn.mkdir(d, "p")
 end
 
 local function copy_path(src, dst)

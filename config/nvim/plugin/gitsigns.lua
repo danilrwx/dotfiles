@@ -249,9 +249,10 @@ end
 
 local function stage_hunk()
   local h = hunk_at(vim.fn.line("."))
-  if h then
-    stage({ h }, "hunk")
+  if not h then
+    return
   end
+  stage({ h }, "hunk")
 end
 
 local function stage_buffer()

@@ -445,16 +445,17 @@ function M.blame_line()
       end
       vim.keymap.set("n", "q", close, { buffer = buf })
       vim.keymap.set("n", "<Esc>", close, { buffer = buf })
-      if committed then
-        vim.keymap.set("n", "<CR>", function()
-          close()
-          M.show(e.hash, { dir = c.dir })
-        end, { buffer = buf })
-        vim.keymap.set("n", "o", function()
-          close()
-          M.open_pr(e.hash, c.dir)
-        end, { buffer = buf })
+      if not committed then
+        return
       end
+      vim.keymap.set("n", "<CR>", function()
+        close()
+        M.show(e.hash, { dir = c.dir })
+      end, { buffer = buf })
+      vim.keymap.set("n", "o", function()
+        close()
+        M.open_pr(e.hash, c.dir)
+      end, { buffer = buf })
     end)
 end
 
