@@ -51,21 +51,25 @@ local function build()
   local tmp = vim.fn.tempname()
   vim.fn.mkdir(tmp, "p")
 
+  -- each grammar is isolated in pcall: one failure (404, tar, cc) is reported and
+  -- skipped, not fatal to the rest, and the tmp dir is always cleaned up below.
+  local failed = {}
   for _, g in ipairs(GRAMMARS) do
     local lang, repo, rev, subdir = g[1], g[2], g[3], g[4]
     vim.notify("==> " .. lang)
-    local dir = vim.fs.joinpath(tmp, lang)
-    vim.fn.mkdir(dir, "p")
-    local tgz = dir .. ".tar.gz"
-    run({ "curl", "-sfL", "-o", tgz, ("https://github.com/%s/archive/%s.tar.gz"):format(repo, rev) })
-    run({ "tar", "xzf", tgz, "-C", dir, "--strip-components=1" })
+    local ok, err = pcall(function()
+      local dir = vim.fs.joinpath(tmp, lang)
+      vim.fn.mkdir(dir, "p")
+      local tgz = dir .. ".tar.gz"
+      run({ "curl", "-sfL", "-o", tgz, ("https://github.com/%s/archive/%s.tar.gz"):format(repo, rev) })
+      run({ "tar", "xzf", tgz, "-C", dir, "--strip-components=1" })
 
-    local src = vim.fs.joinpath(dir, subdir or "", "src")
-    if vim.fn.filereadable(vim.fs.joinpath(src, "parser.c")) == 0 then
-      -- ponytail: grammars without a committed parser.c need `tree-sitter
-      -- generate` + the CLI. None in GRAMMARS today; add the step if one appears.
-      vim.notify("  skip: no parser.c (" .. lang .. ")", vim.log.levels.WARN)
-    else
+      local src = vim.fs.joinpath(dir, subdir or "", "src")
+      if vim.fn.filereadable(vim.fs.joinpath(src, "parser.c")) == 0 then
+        -- ponytail: grammars without a committed parser.c need `tree-sitter
+        -- generate` + the CLI. None in GRAMMARS today; add the step if one appears.
+        error("no parser.c")
+      end
       local args = { "cc", "-O2", "-fPIC", "-shared", "-I", src, vim.fs.joinpath(src, "parser.c") }
       if vim.fn.filereadable(vim.fs.joinpath(src, "scanner.c")) == 1 then
         table.insert(args, vim.fs.joinpath(src, "scanner.c"))
@@ -76,11 +80,20 @@ local function build()
       end
       vim.list_extend(args, { "-o", vim.fs.joinpath(parser_dir, lang .. ".so") })
       run(args)
+    end)
+    if not ok then
+      failed[#failed + 1] = lang
+      vim.notify(("  %s failed: %s"):format(lang, err), vim.log.levels.WARN)
     end
   end
 
   vim.fn.delete(tmp, "rf")
-  vim.notify("done — parsers: " .. parser_dir)
+  if #failed > 0 then
+    vim.notify(("done with errors — failed: %s\nparsers: %s"):format(table.concat(failed, ", "), parser_dir),
+      vim.log.levels.WARN)
+  else
+    vim.notify("done — parsers: " .. parser_dir)
+  end
 end
 
 vim.api.nvim_create_user_command("TSBuild", build, { desc = "Build treesitter parsers + queries" })
