@@ -13,8 +13,6 @@ vim.api.nvim_create_autocmd("CmdlineEnter", {
 local function find_cmd()
   if vim.fn.executable("fd") == 1 then
     return "fd . --path-separator / --type f --hidden --follow --exclude .git"
-  elseif vim.fn.executable("rg") == 1 then
-    return "rg --path-separator / --files --hidden --glob !.git"
   elseif vim.fn.executable("find") == 1 then
     return 'find . -type f -not -path "*/.git/*"'
   end
