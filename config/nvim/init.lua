@@ -6,12 +6,14 @@ vim.o.tabstop = 2
 vim.o.shiftwidth = 2
 vim.o.softtabstop = 2
 vim.o.smartindent = true
+
 vim.o.number = true
 vim.o.updatetime = 100
 vim.o.signcolumn = "yes:1"
 -- number then the git sign glyph tight against it (%s), no separate sign column
 vim.o.statuscolumn = "%=%l%s"
 vim.o.laststatus = 0
+
 vim.o.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
 vim.o.winborder = "rounded"
 
@@ -37,7 +39,9 @@ end
 vim.keymap.set("n", "<c-d>", "<c-d>zz")
 vim.keymap.set("n", "<c-u>", "<c-u>zz")
 vim.keymap.set("n", "<c-l>", "<cmd>nohlsearch<cr>")
+
 vim.keymap.set("n", "-", "<cmd>Oil<cr>", { silent = true })
+
 vim.keymap.set("n", "<leader>gg", function()
   if not vim.env.TMUX or vim.env.TMUX == "" then
     vim.notify("lazygit: not inside tmux", vim.log.levels.WARN)
@@ -46,6 +50,7 @@ vim.keymap.set("n", "<leader>gg", function()
   vim.cmd("silent !tmux neww lazygit")
   vim.cmd("redraw!")
 end, { silent = true })
+
 vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>", { silent = true })
 vim.keymap.set("n", "<S-l>", "<cmd>bn<cr>", { silent = true })
 vim.keymap.set("n", "<S-h>", "<cmd>bp<cr>", { silent = true })

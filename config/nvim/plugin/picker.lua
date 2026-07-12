@@ -45,12 +45,14 @@ vim.keymap.set("n", "<leader>f", function() L.gfiles() end, { silent = true })
 vim.keymap.set("n", "<leader>b", function() L.buffers() end, { silent = true })
 vim.keymap.set("n", "<leader>s", function() L.sessions() end, { silent = true })
 vim.keymap.set("n", "<leader>gh", function() L.git_hunks() end, { silent = true })
+
 vim.keymap.set("n", "<leader>/", function() L.livegrep() end, { silent = true })
 vim.keymap.set("n", "<leader>?", function() L.livegrep({ query = vim.fn.expand("<cword>") }) end, { silent = true })
 vim.keymap.set("x", "<leader>/", function()
   vim.cmd('normal! "zy')
   L.livegrep({ query = (vim.fn.getreg("z"):gsub("\n.*", "")) })
 end, { silent = true })
+
 -- <leader>' reopens the most recent picker; <leader>" the one before it.
 vim.keymap.set("n", "<leader>'", function() picker.resume(0) end, { silent = true })
 vim.keymap.set("n", '<leader>"', function() picker.resume(1) end, { silent = true })

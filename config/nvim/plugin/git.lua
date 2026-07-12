@@ -16,6 +16,7 @@ vim.keymap.set("n", "<leader>gc", git.commits, { silent = true }) -- picker: rep
 vim.keymap.set("n", "<leader>gs", git.status, { silent = true }) -- picker: git status
 vim.keymap.set("n", "<leader>gf", git.file_history, { silent = true }) -- picker: file commits
 vim.keymap.set("n", "<leader>gl", git.file_log, { silent = true }) -- fugitive-style file log (patches)
+
 vim.keymap.set("n", "ghb", git.blame_line, { silent = true }) -- detailed blame float for the line
 vim.keymap.set("n", "ghB", git.blame_toggle, { silent = true }) -- toggle full-file blame
 vim.keymap.set("n", "gho", git.open_pr_at, { silent = true }) -- open the line's/commit's PR/MR

@@ -325,6 +325,7 @@ end
 
 vim.keymap.set("n", "]c", next_hunk, { silent = true })
 vim.keymap.set("n", "[c", prev_hunk, { silent = true })
+
 vim.keymap.set("n", "ghp", preview_hunk, { silent = true })
 vim.keymap.set("n", "ghs", stage_hunk, { silent = true })
 vim.keymap.set("n", "ghS", stage_buffer, { silent = true })
@@ -332,6 +333,7 @@ vim.keymap.set("n", "ghu", undo_hunk, { silent = true })
 vim.keymap.set("n", "ghU", reset_buffer, { silent = true })
 vim.keymap.set("n", "ghd", function() diff_against("", "index") end, { silent = true })
 vim.keymap.set("n", "ghD", function() diff_against("HEAD", "HEAD") end, { silent = true })
+
 vim.keymap.set({ "o", "x" }, "ih", select_hunk, { silent = true })
 
 local grp = vim.api.nvim_create_augroup("gitsigns", { clear = true })
