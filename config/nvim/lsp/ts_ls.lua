@@ -145,7 +145,6 @@ return {
           ['end'] = position --[[@as lsp.Position]],
         },
       }, client.offset_encoding)
-      ---@diagnostic enable: assign-type-mismatch
 
       vim.cmd('botright copen')
     end,

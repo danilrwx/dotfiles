@@ -22,10 +22,10 @@ return {
     if vim.fn.executable 'go' == 1 then
       local exe = vim.fn.exepath 'golangci-lint'
       local version = vim.system({ 'go', 'version', '-m', exe }):wait()
-      v1 = string.match(version.stdout, '\tmod\tgithub.com/golangci/golangci%-lint\t')
+      v1 = string.match(version.stdout or '', '\tmod\tgithub.com/golangci/golangci%-lint\t')
     else
       local version = vim.system({ 'golangci-lint', 'version' }):wait()
-      v1 = string.match(version.stdout, 'version v?1%.')
+      v1 = string.match(version.stdout or '', 'version v?1%.')
     end
     if v1 then
       config.init_options.command = { 'golangci-lint', 'run', '--out-format', 'json' }
