@@ -31,5 +31,6 @@ local function diag_ws()
     end)
   end)
 end
+-- no keymap: <leader>D is the diagnostics picker (open buffers); this whole-repo
+-- lint is heavier and lives under the command.
 vim.api.nvim_create_user_command("LspDiagWs", diag_ws, {})
-vim.keymap.set("n", "<leader>D", diag_ws, { silent = true })

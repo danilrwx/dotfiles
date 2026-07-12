@@ -145,10 +145,12 @@ Completion is native (`vim.lsp.completion`, autotrigger) with
 
 | Key | Action |
 |-----|--------|
-| `<leader>D` | diagnostics picker (all buffers) |
+| `<leader>D` | diagnostics picker (what the LSP knows — open buffers) |
 | `<leader>q` | toggle the quickfix window |
 
-`:LspDiagWs` fills the quickfix with workspace diagnostics (severity-sorted).
+`:LspDiagWs` runs the whole-project linter (`golangci-lint run ./...`, else
+`go vet ./...`) and loads the results into the quickfix — this covers files you
+haven't opened, which the LSP (and the picker) don't report.
 
 ### Oil (file manager)
 
