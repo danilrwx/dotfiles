@@ -197,21 +197,8 @@ local function apply(buf)
     tcount[rc[2]] = (tcount[rc[2]] or 0) + 1
   end
 
-  for _, rc in ipairs(copies) do
-    local src, dst = rc[1], rc[2]
-    if tcount[dst] > 1 then
-      errors[#errors + 1] = "copy skipped, name used twice: " .. rel(dir, dst)
-    elseif vim.fn.filereadable(dst) == 1 or vim.fn.isdirectory(dst) == 1 then
-      errors[#errors + 1] = "copy skipped, exists: " .. rel(dir, dst)
-    else
-      mkparent(dst)
-      if copy_path(src, dst) ~= 0 then
-        errors[#errors + 1] = ("copy failed: %s → %s"):format(rel(dir, src), rel(dir, dst))
-      end
-    end
-  end
-
-  -- renames in two phases via temp names so swaps/cycles and cross-dir moves work
+  -- names a rename (its source) or delete will free: a copy/rename into one is
+  -- fine once that op has run.
   local vacated = {}
   for _, rc in ipairs(renames) do
     vacated[rc[1]] = true
@@ -219,6 +206,35 @@ local function apply(buf)
   for _, full in ipairs(deletes) do
     vacated[full] = true
   end
+
+  local function do_copy(src, dst)
+    mkparent(dst)
+    if copy_path(src, dst) ~= 0 then
+      errors[#errors + 1] = ("copy failed: %s → %s"):format(rel(dir, src), rel(dir, dst))
+    end
+  end
+  -- a copy into a name that a rename will vacate must run AFTER the renames free
+  -- it; the rest run now, while their source is still in place (a copy source can
+  -- itself be a rename source, e.g. A→B plus A→C).
+  -- ponytail: if a copy is BOTH deferred and its source is a rename source, the
+  -- source has moved by the time it runs and the copy fails — an exotic mix; no
+  -- worse than before, which skipped it as "exists".
+  local deferred_copies = {}
+  for _, rc in ipairs(copies) do
+    local src, dst = rc[1], rc[2]
+    local exists = vim.fn.filereadable(dst) == 1 or vim.fn.isdirectory(dst) == 1
+    if tcount[dst] > 1 then
+      errors[#errors + 1] = "copy skipped, name used twice: " .. rel(dir, dst)
+    elseif exists and not vacated[dst] then
+      errors[#errors + 1] = "copy skipped, exists: " .. rel(dir, dst)
+    elseif exists then
+      deferred_copies[#deferred_copies + 1] = rc
+    else
+      do_copy(src, dst)
+    end
+  end
+
+  -- renames in two phases via temp names so swaps/cycles and cross-dir moves work
   local pending = {}
   local ti = 0
   for _, rc in ipairs(renames) do
@@ -243,6 +259,11 @@ local function apply(buf)
     if vim.fn.rename(td[1], td[2]) ~= 0 then
       errors[#errors + 1] = "rename failed → " .. rel(dir, td[2])
     end
+  end
+
+  -- renames have freed their sources; the deferred copies can now land
+  for _, rc in ipairs(deferred_copies) do
+    do_copy(rc[1], rc[2])
   end
 
   for _, name in ipairs(creates) do
