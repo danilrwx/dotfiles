@@ -3,9 +3,9 @@ local git = require("git")
 
 git.setup_current_line() -- always-on current-line blame
 
-vim.api.nvim_create_user_command("GitCommits", git.commits, {})
-vim.api.nvim_create_user_command("GitStatus", git.status, {})
-vim.api.nvim_create_user_command("GitFileHistory", git.file_history, {})
+-- the picker-backed views (commits/status/file_history) are launchers, reachable
+-- via `:Picker git_commits|git_status|git_file_history`; only the non-picker git
+-- actions get their own commands below.
 vim.api.nvim_create_user_command("GitFileLog", git.file_log, {})
 vim.api.nvim_create_user_command("GitBlameLine", git.blame_line, {})
 vim.api.nvim_create_user_command("GitBlame", git.blame_toggle, {})

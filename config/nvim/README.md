@@ -187,16 +187,25 @@ SSH/tmux, no X server). `<leader>dd` copies `path:line` of the current position.
 
 ## Commands
 
+Every picker is opened by one command — `:Picker {name}` (Tab-completes), so a
+forgotten picker is one `<Tab>` away:
+
+```
+:Picker <Tab>   files  gfiles  buffers  livegrep  git_hunks
+                git_commits  git_status  git_file_history  diagnostics  sessions
+:Picker livegrep foo   " opens live grep seeded with "foo"
+:Picker! diagnostics   " diagnostics for the current buffer only
+```
+
+Other commands:
+
 | Command | Action |
 |---------|--------|
-| `:Files` / `:GFiles` / `:Buffers` | pickers |
-| `:LiveGrep [pattern]` | live grep, optional initial pattern |
-| `:Diagnostics[!]` | diagnostics picker (`!` = current buffer only) |
-| `:GitHunks` | repo hunks picker |
-| `:GitCommits` / `:GitStatus` / `:GitFileHistory` / `:GitFileLog` | git helper views |
+| `:Picker {name}` | open a picker by name (see above) |
+| `:GitFileLog` | current file's full log with patches (in a tab) |
 | `:GitBlame` / `:GitBlameLine` / `:GitLineBlameToggle` / `:GitOpenPR` | blame / PR |
 | `:Grepq {pattern}` | grep into quickfix (uses `grepprg`) |
-| `:LspDiagWs` | workspace diagnostics into quickfix |
+| `:LspDiagWs` | whole-project lint into quickfix (not a picker) |
 | `:Session{Save,Restore,Delete}` | sessions |
 | `:Oil [dir]` | file manager |
 | `:TSBuild` | download + compile treesitter parsers into `site/parser` |

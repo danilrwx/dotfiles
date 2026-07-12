@@ -8,12 +8,37 @@ local picker = require("picker")
 require("picker.sources") -- populates picker.launchers
 local L = picker.launchers
 
-vim.api.nvim_create_user_command("Files", function() L.files() end, {})
-vim.api.nvim_create_user_command("GFiles", function() L.gfiles() end, {})
-vim.api.nvim_create_user_command("Buffers", function() L.buffers() end, {})
-vim.api.nvim_create_user_command("LiveGrep", function(o) L.livegrep({ query = o.args }) end, { nargs = "*" })
-vim.api.nvim_create_user_command("Diagnostics", function(o) L.diagnostics({ buf = o.bang }) end, { bang = true })
-vim.api.nvim_create_user_command("GitHunks", function() L.git_hunks() end, {})
+-- one entry point for every picker: `:Picker <name>` Tab-completes the launcher
+-- names (files, gfiles, buffers, livegrep, git_hunks, git_commits, …), so a
+-- forgotten picker is one <Tab> away. Trailing text seeds the query (live grep);
+-- `:Picker! diagnostics` scopes diagnostics to the current buffer.
+local function launcher_names()
+  local names = vim.tbl_keys(L)
+  table.sort(names)
+  return names
+end
+
+vim.api.nvim_create_user_command("Picker", function(o)
+  local parts = vim.split(o.args, " ", { trimempty = true })
+  local name = table.remove(parts, 1)
+  local launcher = name and L[name]
+  if not launcher then
+    vim.notify("Picker: unknown " .. vim.inspect(name) .. "\navailable: " .. table.concat(launcher_names(), ", "),
+      vim.log.levels.WARN)
+    return
+  end
+  local query = table.concat(parts, " ")
+  launcher({ query = query ~= "" and query or nil, buf = o.bang or nil })
+end, {
+  nargs = "*",
+  bang = true,
+  desc = "Open a picker by name (Tab-completes)",
+  complete = function(lead)
+    return vim.tbl_filter(function(n)
+      return n:find(lead, 1, true) == 1
+    end, launcher_names())
+  end,
+})
 
 vim.keymap.set("n", "<leader>F", function() L.files() end, { silent = true })
 vim.keymap.set("n", "<leader>f", function() L.gfiles() end, { silent = true })
