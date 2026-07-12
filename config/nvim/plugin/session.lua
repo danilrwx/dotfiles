@@ -3,7 +3,9 @@
 -- source in the picker (<leader>s).
 local s = require("session")
 
-vim.o.sessionoptions = "buffers,curdir,folds,tabpages,winsize,winpos,terminal,localoptions"
+-- no localoptions/options: window options like signcolumn/statuscolumn must come
+-- from init.lua, not a stale session (else restoring re-applies old values).
+vim.o.sessionoptions = "buffers,curdir,folds,tabpages,winsize,winpos,terminal"
 
 vim.api.nvim_create_autocmd("VimLeavePre", {
   callback = function()
