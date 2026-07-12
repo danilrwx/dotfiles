@@ -1,5 +1,9 @@
 vim.g.mapleader = " "
 
+-- disable netrw: directories are opened by our Oil instead (see plugin/oil.lua)
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 vim.o.autoindent = true
 vim.o.expandtab = true
 vim.o.tabstop = 2

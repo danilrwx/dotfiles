@@ -354,6 +354,14 @@ function M.open(path)
   -- 'oil:' not 'oil://' -- a :// name is hijacked by netrw's URL handler
   vim.cmd("silent edit " .. vim.fn.fnameescape("oil:" .. d))
   local buf = vim.api.nvim_get_current_buf()
+
+  -- if we replaced a bare directory buffer (startup `nvim dir` / `:e dir`), drop
+  -- it so it doesn't linger in the buffer list.
+  if prev ~= buf and vim.api.nvim_buf_is_valid(prev)
+      and vim.fn.isdirectory(vim.api.nvim_buf_get_name(prev)) == 1 then
+    pcall(vim.api.nvim_buf_delete, prev, { force = true })
+  end
+
   bufdir[buf] = d
   vim.bo[buf].buftype = "acwrite"
   vim.bo[buf].swapfile = false
@@ -387,3 +395,15 @@ end
 vim.api.nvim_create_user_command("Oil", function(o)
   M.open(o.args)
 end, { nargs = "?", complete = "dir" })
+
+-- open a directory (startup `nvim dir`, `:edit dir`, `-`) in Oil, not netrw
+vim.api.nvim_create_autocmd("BufEnter", {
+  group = vim.api.nvim_create_augroup("oil_hijack", { clear = true }),
+  nested = true,
+  callback = function(ev)
+    local path = vim.api.nvim_buf_get_name(ev.buf)
+    if path ~= "" and vim.fn.isdirectory(path) == 1 then
+      M.open(path)
+    end
+  end,
+})
