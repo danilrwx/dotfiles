@@ -2,17 +2,18 @@
 -- (or the visual selection) to the neighbouring tmux pane and runs it. Depends
 -- on tmux only.
 
-local target = vim.g.playbook_target or "{last}"
-
 local function send(lines)
   if not vim.env.TMUX or vim.env.TMUX == "" then
     vim.api.nvim_echo({ { "playbook: not inside tmux", "WarningMsg" } }, true, {})
     return
   end
+  -- read the target each call (per-project g:playbook_target takes effect) and
+  -- pass argv to vim.system — no shell, so the target can't inject.
+  local target = vim.g.playbook_target or "{last}"
   for _, line in ipairs(lines) do
     if line:match("%S") then
-      vim.fn.system("tmux send-keys -t " .. target .. " -l -- " .. vim.fn.shellescape(line))
-      vim.fn.system("tmux send-keys -t " .. target .. " Enter")
+      vim.system({ "tmux", "send-keys", "-t", target, "-l", "--", line }):wait()
+      vim.system({ "tmux", "send-keys", "-t", target, "Enter" }):wait()
     end
   end
 end
