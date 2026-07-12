@@ -1,7 +1,8 @@
 -- Native git signs, buffer-based & async (gitgutter-style): diff the live buffer
 -- against the git index via `git diff --no-index` in a job, so signs stay correct
--- even before saving. ]c/[c jump between hunks, ghp previews, ghu reverts.
--- Depends on git + bash.
+-- even before saving. ]c/[c jump hunks; ghp preview; ghs/ghS stage hunk/buffer;
+-- ghu/ghU undo hunk / reset buffer to index; ghd/ghD diff vs index/HEAD; ih is a
+-- hunk text object. Depends on git + bash.
 
 -- re-set on ColorScheme too: a :colorscheme clears these back to cleared/linked
 -- and the signs would lose their colour.
@@ -199,51 +200,139 @@ local function undo_hunk()
   refresh(true)
 end
 
--- stage the hunk under the cursor: build a minimal unified-diff patch (index →
--- buffer for just this hunk) and `git apply --cached --unidiff-zero`.
-local function stage_hunk()
-  local h = hunk_at(vim.fn.line("."))
-  if not h then
-    return
+-- repo-root-relative path of the current file, "" if not tracked
+local function rel_path(dir, name)
+  return vim.trim(vim.system({ "git", "-C", dir, "ls-files", "--full-name", "--", name },
+    { text = true }):wait().stdout or "")
+end
+
+-- minimal unidiff-zero patch staging the given hunks (index → buffer)
+local function patch_of(rel, hs)
+  local p = {
+    "diff --git a/" .. rel .. " b/" .. rel,
+    "--- a/" .. rel,
+    "+++ b/" .. rel,
+  }
+  for _, h in ipairs(hs) do
+    p[#p + 1] = string.format("@@ -%d,%d +%d,%d @@", h.old_start, #h.old_lines, h.new_start, #h.new_lines)
+    for _, l in ipairs(h.old_lines) do
+      p[#p + 1] = "-" .. l
+    end
+    for _, l in ipairs(h.new_lines) do
+      p[#p + 1] = "+" .. l
+    end
   end
-  local dir = vim.fn.expand("%:p:h")
-  local name = vim.fn.expand("%:t")
-  local rel = vim.trim(vim.system({ "git", "-C", dir, "ls-files", "--full-name", "--", name }, { text = true }):wait().stdout or "")
+  p[#p + 1] = ""
+  return table.concat(p, "\n")
+end
+
+-- `git apply --cached` the patch for hs, then refresh signs
+local function stage(hs, what)
+  local dir, name = vim.fn.expand("%:p:h"), vim.fn.expand("%:t")
+  local rel = rel_path(dir, name)
   if rel == "" then
     vim.notify("gitsigns: file not tracked")
     return
   end
-  local patch = {
-    "diff --git a/" .. rel .. " b/" .. rel,
-    "--- a/" .. rel,
-    "+++ b/" .. rel,
-    string.format("@@ -%d,%d +%d,%d @@", h.old_start, #h.old_lines, h.new_start, #h.new_lines),
-  }
-  for _, l in ipairs(h.old_lines) do
-    patch[#patch + 1] = "-" .. l
-  end
-  for _, l in ipairs(h.new_lines) do
-    patch[#patch + 1] = "+" .. l
-  end
-  patch[#patch + 1] = ""
   vim.system({ "git", "-C", dir, "apply", "--cached", "--unidiff-zero", "-" },
-    { stdin = table.concat(patch, "\n") }, function(r)
+    { stdin = patch_of(rel, hs) }, function(r)
       vim.schedule(function()
         if r.code ~= 0 then
           vim.notify("gitsigns: stage failed\n" .. (r.stderr or ""))
         else
-          vim.notify("gitsigns: hunk staged")
+          vim.notify("gitsigns: " .. what .. " staged")
         end
         refresh(true)
       end)
     end)
 end
 
+local function stage_hunk()
+  local h = hunk_at(vim.fn.line("."))
+  if h then
+    stage({ h }, "hunk")
+  end
+end
+
+local function stage_buffer()
+  local hs = hunks[vim.fn.bufnr("%")] or {}
+  if #hs == 0 then
+    vim.notify("gitsigns: no changes")
+    return
+  end
+  stage(hs, #hs .. (#hs == 1 and " hunk" or " hunks"))
+end
+
+-- reset the whole buffer to its index (staged) content, dropping working changes
+local function reset_buffer()
+  local dir, name = vim.fn.expand("%:p:h"), vim.fn.expand("%:t")
+  if rel_path(dir, name) == "" then
+    vim.notify("gitsigns: file not tracked")
+    return
+  end
+  local r = vim.system({ "git", "-C", dir, "show", ":./" .. name }, { text = true }):wait()
+  if r.code ~= 0 then
+    vim.notify("gitsigns: no index version")
+    return
+  end
+  local content = vim.split(r.stdout or "", "\n")
+  if content[#content] == "" then
+    table.remove(content) -- git show ends with a trailing newline
+  end
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, content)
+  refresh(true)
+end
+
+-- select the hunk under the cursor linewise (text object: dih, yih, Vih, …)
+local function select_hunk()
+  local h = hunk_at(vim.fn.line("."))
+  if not h then
+    return
+  end
+  local s = (h.new_cnt == 0) and h.lnum or h.new_start
+  local e = (h.new_cnt == 0) and h.lnum or (h.new_start + h.new_cnt - 1)
+  vim.cmd(("normal! %dGV%dG"):format(s, e))
+end
+
+-- open the index (ref="") or HEAD version in a diff split beside the file
+local function diff_against(ref, label)
+  local dir, name = vim.fn.expand("%:p:h"), vim.fn.expand("%:t")
+  if rel_path(dir, name) == "" then
+    vim.notify("gitsigns: file not tracked")
+    return
+  end
+  local r = vim.system({ "git", "-C", dir, "show", ref .. ":./" .. name }, { text = true }):wait()
+  if r.code ~= 0 then
+    vim.notify("gitsigns: no " .. label .. " version")
+    return
+  end
+  local content = vim.split(r.stdout or "", "\n")
+  if content[#content] == "" then
+    table.remove(content)
+  end
+  local ft = vim.bo.filetype
+  vim.cmd("diffthis")
+  vim.cmd("leftabove vnew")
+  local buf = vim.api.nvim_get_current_buf()
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, content)
+  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].bufhidden = "wipe"
+  vim.bo[buf].filetype = ft
+  pcall(vim.api.nvim_buf_set_name, buf, name .. " (" .. label .. ")")
+  vim.cmd("diffthis")
+  vim.keymap.set("n", "q", "<cmd>diffoff!<bar>close<cr>", { buffer = buf, silent = true })
+end
+
 vim.keymap.set("n", "]c", next_hunk, { silent = true })
 vim.keymap.set("n", "[c", prev_hunk, { silent = true })
 vim.keymap.set("n", "ghp", preview_hunk, { silent = true })
 vim.keymap.set("n", "ghs", stage_hunk, { silent = true })
+vim.keymap.set("n", "ghS", stage_buffer, { silent = true })
 vim.keymap.set("n", "ghu", undo_hunk, { silent = true })
+vim.keymap.set("n", "ghU", reset_buffer, { silent = true })
+vim.keymap.set("n", "ghd", function() diff_against("", "index") end, { silent = true })
+vim.keymap.set("n", "ghD", function() diff_against("HEAD", "HEAD") end, { silent = true })
+vim.keymap.set({ "o", "x" }, "ih", select_hunk, { silent = true })
 
 local grp = vim.api.nvim_create_augroup("gitsigns", { clear = true })
 -- explicit sync points force a diff (index may have changed without a buffer edit)
