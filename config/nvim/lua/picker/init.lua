@@ -19,6 +19,7 @@ function M.open(cands, opts)
   local filtered, sel, marked = cands, 1, {}
   local positions -- per-row matched byte columns from the matcher (or nil)
   local ftimer, ptimer
+  local live_seq = 0 -- bumped per query; async live results tagged stale if behind
 
   local v = ui.new(opts.prompt or "", HINT .. (opts.hint_extra or ""))
 
@@ -36,7 +37,11 @@ function M.open(cands, opts)
       ptimer:stop()
     end
     ptimer = vim.defer_fn(function()
-      v:preview(item())
+      if opts.preview then
+        opts.preview(v, filtered[sel])
+      else
+        v:preview(item())
+      end
     end, 60)
   end
 
@@ -68,11 +73,28 @@ function M.open(cands, opts)
     paint()
   end
 
+  -- async live sources call this later with results for query #seq; a result for
+  -- a superseded query is dropped so slow greps can't clobber a newer one.
+  local function feed(seq, lines)
+    if seq ~= live_seq then
+      return
+    end
+    filtered, cands, positions = lines, lines, nil
+    sel = 1
+    render()
+  end
+
   local function refilter()
     local q = v:query()
     last_query[opts.name] = q
     if opts.live then
-      filtered, positions = opts.live(q), nil -- live() decides what an empty q means
+      live_seq = live_seq + 1
+      local seq = live_seq
+      -- live() returns what to show immediately (cache/empty) and may push more
+      -- via feed() when an async job (e.g. ripgrep) finishes.
+      filtered, positions = opts.live(q, function(lines)
+        feed(seq, lines)
+      end), nil
       cands = filtered
     else
       filtered, positions = search.fuzzy(cands, q)
@@ -196,7 +218,11 @@ function M.open(cands, opts)
   map("<C-/>", function()
     v:toggle_preview()
     if v.prev_visible then
-      v:preview(item())
+      if opts.preview then
+        opts.preview(v, filtered[sel])
+      else
+        v:preview(item())
+      end
     end
   end)
   map("<C-f>", function() page_move(v.page) end)

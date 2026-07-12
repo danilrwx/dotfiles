@@ -9,14 +9,17 @@ local hlns = vim.api.nvim_create_namespace("picker_hl")
 -- border=grey). default=true lets a colorscheme override.
 local function setup_hl()
   local set = vim.api.nvim_set_hl
-  set(0, "PickerBorder", { fg = "#6b7089", default = true })
-  set(0, "PickerMatch", { fg = "#5fafff", bold = true, default = true })
-  set(0, "PickerMatchFile", { fg = "#e0af68", bold = true, default = true })
-  set(0, "PickerCurrent", { fg = "#00cd00", default = true })
-  set(0, "PickerPointer", { fg = "#00cd00", bold = true, default = true })
-  set(0, "PickerMarker", { fg = "#00cd00", default = true })
-  set(0, "PickerCounter", { fg = "#5fafff", default = true })
-  set(0, "PickerPrompt", { fg = "#dcdccc", bold = true, default = true })
+  -- ctermfg too: termguicolors is often off, and then gui-only colours vanish.
+  set(0, "PickerBorder", { fg = "#6b7089", ctermfg = 60, default = true })
+  set(0, "PickerMatch", { fg = "#5fafff", ctermfg = 75, bold = true, default = true })
+  set(0, "PickerMatchFile", { fg = "#e0af68", ctermfg = 179, bold = true, default = true })
+  set(0, "PickerCurrent", { fg = "#00cd00", ctermfg = 40, default = true })
+  set(0, "PickerPointer", { fg = "#00cd00", ctermfg = 40, bold = true, default = true })
+  set(0, "PickerMarker", { fg = "#00cd00", ctermfg = 40, default = true })
+  set(0, "PickerCounter", { fg = "#5fafff", ctermfg = 75, default = true })
+  set(0, "PickerPrompt", { fg = "#dcdccc", ctermfg = 253, bold = true, default = true })
+  set(0, "PickerGrepFile", { fg = "#d75fd7", ctermfg = 170, default = true }) -- path
+  set(0, "PickerGrepLnum", { fg = "#5faf5f", ctermfg = 71, default = true }) -- line:col
 end
 setup_hl()
 vim.api.nvim_create_autocmd("ColorScheme", { callback = setup_hl })
@@ -99,7 +102,7 @@ function View:render_list(filtered, marked, positions)
     if positions and positions[i] then
       for _, h in ipairs(positions[i]) do
         vim.api.nvim_buf_set_extmark(self.list_buf, ns, i - 1, h.col,
-          { end_col = h.col + 1, hl_group = h.hl })
+          { end_col = h.end_col or (h.col + 1), hl_group = h.hl, priority = h.priority })
       end
     end
   end
@@ -162,6 +165,24 @@ function View:preview(item)
       vim.cmd("normal! zz")
     end)
   end
+end
+
+-- Render arbitrary text (not a file) in the preview pane, e.g. a diff/commit.
+function View:show_text(lines, ft, title)
+  if not vim.api.nvim_win_is_valid(self.prev_win) then
+    return
+  end
+  pcall(vim.treesitter.stop, self.prev_buf)
+  vim.bo[self.prev_buf].modifiable = true
+  vim.api.nvim_buf_set_lines(self.prev_buf, 0, -1, false, lines or {})
+  vim.bo[self.prev_buf].modifiable = false
+  vim.api.nvim_buf_clear_namespace(self.prev_buf, hlns, 0, -1)
+  vim.bo[self.prev_buf].filetype = ft or ""
+  if ft and ft ~= "" then
+    pcall(vim.treesitter.start, self.prev_buf)
+  end
+  pcall(vim.api.nvim_win_set_config, self.prev_win, { title = " " .. (title or "") .. " " })
+  pcall(vim.api.nvim_win_set_cursor, self.prev_win, { 1, 0 })
 end
 
 function View:toggle_preview()

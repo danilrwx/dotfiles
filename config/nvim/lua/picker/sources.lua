@@ -37,9 +37,7 @@ local function edit_at(it, cmd)
 end
 
 local function files_source()
-  if vim.fn.executable("rg") == 1 then
-    return { "rg", "--files" }
-  elseif vim.fn.executable("fd") == 1 then
+  if vim.fn.executable("fd") == 1 then
     return { "fd", "--type", "f" }
   end
   return GIT_LS
@@ -83,14 +81,21 @@ picker.launchers.buffers = function(o)
 end
 
 picker.launchers.livegrep = function(o)
+  -- ugrep, else plain grep (bare machines). rg is skipped on purpose: its Rust
+  -- regex differs from POSIX, and A-r toggles -E (ERE) / -F (fixed), which both
+  -- ugrep and grep accept — so the regex syntax stays uniform. Both emit
+  -- file:line[:col]:text, which grep_parse handles.
   local tool = vim.fn.executable("ugrep") == 1
       and { "ugrep", "-RInk", "--ignore-files", "--color=never" }
-    or { "rg", "--column", "--line-number", "--no-heading", "--color=never" }
-  -- Two persistent queries applied together: the grep pattern (drives ripgrep)
+    or { "grep", "-RInH", "--exclude-dir=.git" }
+  -- Two persistent queries applied together: the grep pattern (drives the search tool)
   -- and the file filter (fuzzy on path). A-g only switches which one the prompt
   -- edits, so you can narrow files then refine the grep, or vice versa. `cache`
   -- holds the last grep hits so editing the file filter doesn't re-grep.
   local mode, gq, fq, cache = "grep", "", "", {}
+  local fixed = false -- pattern is ERE by default (-E); A-r → fixed string (-F)
+  local job -- running search handle, killed when the pattern changes
+  local MAX = 10000 -- cap hits fed to the picker; the tool can flood on short patterns
   local function recompute()
     if fq == "" then
       return cache
@@ -106,37 +111,79 @@ picker.launchers.livegrep = function(o)
     query = o and o.query,
     parse = search.grep_parse,
     resuming = o and o.resuming,
-    hint_extra = "   A-g grep/file",
+    hint_extra = "   A-g grep/file   A-r regex/fixed",
     -- highlight both queries at once, in distinct colours: the grep pattern in
     -- the hit text (blue, literal) and the file filter fuzzily in the path
     -- (orange). The path is the line prefix, so its columns need no offset.
     line_positions = function(line)
       local out = {}
+      -- colour the row structure grep-style: path magenta, line:col green
+      -- (low priority so the match/file-filter highlights below overlay them).
+      local c1 = line:find(":")
+      local c2 = c1 and line:find(":", c1 + 1)
+      if c1 then
+        out[#out + 1] = { col = 0, end_col = c1 - 1, hl = "PickerGrepFile", priority = 100 }
+      end
+      if c1 and c2 then
+        out[#out + 1] = { col = c1, end_col = c2 - 1, hl = "PickerGrepLnum", priority = 100 }
+      end
       for _, c in ipairs(search.find_all(line, gq)) do
-        out[#out + 1] = { col = c, hl = "PickerMatch" }
+        out[#out + 1] = { col = c, hl = "PickerMatch", priority = 200 }
       end
       local it = search.grep_parse(line)
       for _, c in ipairs((it.file and search.subseq_pos(it.file, fq)) or {}) do
-        out[#out + 1] = { col = c, hl = "PickerMatchFile" }
+        out[#out + 1] = { col = c, hl = "PickerMatchFile", priority = 200 }
       end
       return out
     end,
-    live = function(q)
-      if mode == "grep" then
-        if q ~= gq then
-          gq = q
-          cache = q ~= "" and lines_of(vim.list_extend(vim.deepcopy(tool), { "--", q })) or {}
-        end
-      else
+    -- grep runs async: kill any in-flight search, launch the new one, and show
+    -- the current cache now; feed() delivers the fresh hits when it returns.
+    -- File-filter mode never re-greps — it just narrows the cache in-process.
+    live = function(q, feed)
+      if mode == "file" then
         fq = q
+        return recompute()
       end
-      return recompute()
+      if q == gq then
+        return recompute()
+      end
+      gq = q
+      if job then
+        pcall(function()
+          job:kill(9)
+        end)
+        job = nil
+      end
+      if q == "" then
+        cache = {}
+        return {}
+      end
+      local cmd = vim.deepcopy(tool)
+      table.insert(cmd, fixed and "-F" or "-E") -- ERE regex, or fixed-string
+      vim.list_extend(cmd, { "--", q })
+      job = vim.system(cmd, { text = true }, function(res)
+        local lines = vim.split(res.stdout or "", "\n", { trimempty = true })
+        if #lines > MAX then
+          lines = vim.list_slice(lines, 1, MAX)
+        end
+        cache = lines
+        vim.schedule(function()
+          feed(recompute())
+        end)
+      end)
+      return recompute() -- keep showing the previous hits until the new ones land
     end,
     actions = {
       ["<A-g>"] = function(ctx)
         mode = mode == "grep" and "file" or "grep"
         ctx.set_query(mode == "grep" and gq or fq)
         ctx.set_title(mode == "file" and "Filter file" or "LiveGrep")
+        ctx.refilter()
+      end,
+      ["<A-r>"] = function(ctx)
+        fixed = not fixed
+        gq = "\1" -- invalidate cache so the next grep re-runs in the new mode
+        ctx.set_title(fixed and "LiveGrep [fixed]" or "LiveGrep [regex]")
         ctx.refilter()
       end,
     },
@@ -167,6 +214,68 @@ picker.launchers.sessions = function(o)
         end)
       end,
     },
+  })
+end
+
+-- Hunks: every changed hunk in the repo (git diff vs HEAD) as a grep-shaped
+-- file:line row, so you can fuzzy-search and jump to a change. Text is the @@
+-- context (enclosing function git prints), which fuzzy-matches nicely.
+picker.launchers.git_hunks = function(o)
+  local dir = vim.fn.expand("%:p:h")
+  if dir == "" then
+    dir = vim.fn.getcwd()
+  end
+  local root = vim.trim((vim.system({ "git", "-C", dir, "rev-parse", "--show-toplevel" }, { text = true }):wait().stdout or ""))
+  if root == "" then
+    vim.notify("not a git repo")
+    return
+  end
+  local items, file = {}, nil
+  for _, l in ipairs(lines_of({ "git", "-C", root, "diff", "--no-color", "-U0", "HEAD" })) do
+    local f = l:match("^%+%+%+ b/(.+)")
+    if f then
+      file = f
+    elseif file then
+      local ln, tail = l:match("^@@ %-%S+ %+(%d+),?%d* @@ ?(.*)")
+      if ln then
+        items[#items + 1] = string.format("%s/%s:%s:1: %s", root, file, ln, tail)
+      end
+    end
+  end
+  if #items == 0 then
+    vim.notify("git: no hunks")
+    return
+  end
+  local dcache = {} -- file -> its `git diff -U3` lines, for the preview pane
+  picker.open(items, {
+    name = "git_hunks",
+    prompt = "Hunks",
+    parse = search.grep_parse,
+    resuming = o and o.resuming,
+    preview = function(v, line)
+      local it = search.grep_parse(line or "")
+      if not it.file then
+        v:show_text({}, "", "")
+        return
+      end
+      if dcache[it.file] then
+        v:show_text(dcache[it.file], "diff", vim.fn.fnamemodify(it.file, ":t"))
+        return
+      end
+      vim.system({ "git", "-C", root, "diff", "--no-color", "-U3", "HEAD", "--", it.file },
+        { text = true }, function(r)
+          local dl = vim.split(r.stdout or "", "\n")
+          dcache[it.file] = dl
+          vim.schedule(function()
+            pcall(function()
+              v:show_text(dl, "diff", vim.fn.fnamemodify(it.file, ":t"))
+            end)
+          end)
+        end)
+    end,
+    on_pick = function(line, cmd)
+      edit_at(search.grep_parse(line), cmd)
+    end,
   })
 end
 
