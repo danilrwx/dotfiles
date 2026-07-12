@@ -29,10 +29,14 @@ vim.api.nvim_create_autocmd("LspAttach", {
         vim.lsp.buf.format({ async = true })
       end, { buffer = ev.buf })
       if vim.bo[ev.buf].filetype == "go" then
+        -- one per-buffer augroup (clear=true) so re-attach (:LspRestart, a second
+        -- client) doesn't stack duplicate autocmds that format N times per save.
+        local grp = vim.api.nvim_create_augroup("lsp_format_" .. ev.buf, { clear = true })
         vim.api.nvim_create_autocmd("BufWritePre", {
+          group = grp,
           buffer = ev.buf,
           callback = function()
-            vim.lsp.buf.format()
+            vim.lsp.buf.format({ id = client.id })
           end,
         })
       end
