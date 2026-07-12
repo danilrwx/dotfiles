@@ -179,6 +179,16 @@ local function apply(buf)
   end
 
   local errors = {}
+
+  -- deletes run FIRST: a delete target never overlaps a rename source (its id is
+  -- gone), so doing them before copies/renames stops a rename/copy from
+  -- overwriting a file that is then deleted (swap, "delete A + rename B→A", …).
+  for _, full in ipairs(deletes) do
+    if vim.fn.delete(full, vim.fn.isdirectory(full) == 1 and "rf" or "") ~= 0 then
+      errors[#errors + 1] = "delete failed: " .. rel(dir, full)
+    end
+  end
+
   local tcount = {}
   for _, rc in ipairs(renames) do
     tcount[rc[2]] = (tcount[rc[2]] or 0) + 1
@@ -249,12 +259,6 @@ local function apply(buf)
       if not ok then
         errors[#errors + 1] = "create failed: " .. name
       end
-    end
-  end
-
-  for _, full in ipairs(deletes) do
-    if vim.fn.delete(full, vim.fn.isdirectory(full) == 1 and "rf" or "") ~= 0 then
-      errors[#errors + 1] = "delete failed: " .. rel(dir, full)
     end
   end
 
