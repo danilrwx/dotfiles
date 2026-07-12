@@ -43,7 +43,6 @@ end, {
 vim.keymap.set("n", "<leader>F", function() L.files() end, { silent = true })
 vim.keymap.set("n", "<leader>f", function() L.gfiles() end, { silent = true })
 vim.keymap.set("n", "<leader>b", function() L.buffers() end, { silent = true })
-vim.keymap.set("n", "<leader>D", function() L.diagnostics() end, { silent = true })
 vim.keymap.set("n", "<leader>s", function() L.sessions() end, { silent = true })
 vim.keymap.set("n", "<leader>gh", function() L.git_hunks() end, { silent = true })
 vim.keymap.set("n", "<leader>/", function() L.livegrep() end, { silent = true })

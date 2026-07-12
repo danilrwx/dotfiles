@@ -35,6 +35,10 @@ local function edit_at(it, cmd)
     pcall(vim.fn.cursor, it.lnum, it.col or 1)
   end
 end
+-- expose the open-a-grep-hit helper so other launchers (e.g. lint) reuse it
+picker.open_hit = function(line, cmd)
+  edit_at(search.grep_parse(line), cmd)
+end
 
 -- path_hl helpers: byte span of the file path in a row (coloured PickerGrepFile).
 local function whole_path(line)

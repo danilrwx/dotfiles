@@ -145,12 +145,13 @@ Completion is native (`vim.lsp.completion`, autotrigger) with
 
 | Key | Action |
 |-----|--------|
-| `<leader>D` | diagnostics picker (what the LSP knows — open buffers) |
+| `<leader>D` | project-wide error search: runs the linter, hits in a picker |
 | `<leader>q` | toggle the quickfix window |
 
-`:Lint` runs the whole-project linter (`golangci-lint run ./...`, else
-`go vet ./...`) and loads the results into the quickfix — this covers files you
-haven't opened, which the LSP (and the picker) don't report.
+`<leader>D` (and `:Lint`, `:Picker lint`) runs the whole-project linter
+(`golangci-lint run ./...`, else `go vet ./...`) and opens the results in the
+picker — this covers files you haven't opened, which the LSP doesn't report. For
+the open-buffer LSP diagnostics list use `:Picker diagnostics`.
 
 ### Oil (file manager)
 
@@ -191,8 +192,8 @@ Every picker is opened by one command — `:Picker {name}` (Tab-completes), so a
 forgotten picker is one `<Tab>` away:
 
 ```
-:Picker <Tab>   files  gfiles  buffers  livegrep  git_hunks
-                git_commits  git_status  git_file_history  diagnostics  sessions
+:Picker <Tab>   files  gfiles  buffers  livegrep  git_hunks  git_commits
+                git_status  git_file_history  diagnostics  lint  sessions
 :Picker livegrep foo   " opens live grep seeded with "foo"
 :Picker! diagnostics   " diagnostics for the current buffer only
 ```
@@ -205,7 +206,7 @@ Other commands:
 | `:GitFileLog` | current file's full log with patches (in a tab) |
 | `:GitBlame` / `:GitBlameLine` / `:GitLineBlameToggle` / `:GitOpenPR` | blame / PR |
 | `:Grepq {pattern}` | grep into quickfix (uses `grepprg`) |
-| `:Lint` | whole-project lint into quickfix (golangci-lint / go vet) |
+| `:Lint` | whole-project lint into a picker (same as `<leader>D`) |
 | `:Session{Save,Restore,Delete}` | sessions |
 | `:Oil [dir]` | file manager |
 | `:TSBuild` | download + compile treesitter parsers into `site/parser` |
