@@ -275,6 +275,9 @@ function M.open(cands, opts)
           sel = filtered[sel],
           refilter = refilter,
           close = close,
+          keep_pos = function()
+            restore_sel = sel
+          end,
           set_query = function(t)
             v:set_query(t)
             v:focus(#t)

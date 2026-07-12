@@ -199,6 +199,7 @@ picker.launchers.livegrep = function(o)
         lg.mode = lg.mode == "grep" and "file" or "grep"
         ctx.set_query(lg.mode == "grep" and lg.gq or lg.fq)
         ctx.set_title(lg_title())
+        ctx.keep_pos() -- switching mode keeps the same hits; don't jump to the top
         ctx.refilter()
       end,
       ["<A-r>"] = function(ctx)
