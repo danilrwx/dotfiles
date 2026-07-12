@@ -25,6 +25,7 @@ function M.open(cands, opts)
   local ftimer, ptimer
   local live_seq = 0 -- bumped per query; async live results tagged stale if behind
   local entry -- this picker's history record (set below), kept live as query/sel change
+  local restore_sel -- pending list position to reapply once results first arrive
 
   local v = ui.new(opts.prompt or "", HINT .. (opts.hint_extra or ""))
 
@@ -82,6 +83,12 @@ function M.open(cands, opts)
           table.insert(pos[i], 1, { col = s, end_col = e, hl = "PickerGrepFile", priority = 50 })
         end
       end
+    end
+    -- reapply a resumed list position once results exist (fuzzy: this refilter;
+    -- live: the async feed). Spent on first use so later refilters start at top.
+    if restore_sel and #filtered > 0 then
+      sel = math.max(1, math.min(restore_sel, #filtered))
+      restore_sel = nil
     end
     v:render_list(filtered, marked, pos)
     paint()
@@ -289,12 +296,14 @@ function M.open(cands, opts)
   end
   ridx = #history
 
+  restore_sel = opts.resuming and entry.sel or nil
   v:set_query(entry.query)
   refilter()
-  -- restore the list position too (fuzzy sources; live sources repopulate async)
-  if entry.sel and #filtered > 0 then
-    sel = math.max(1, math.min(entry.sel, #filtered))
-    paint()
+  -- set_query fired TextChanged, which queued a debounced refilter that would
+  -- reset sel to 1 and undo the restore; cancel it (the manual refilter above
+  -- already applied the current query).
+  if ftimer then
+    ftimer:stop()
   end
   v:focus(#entry.query)
 end
