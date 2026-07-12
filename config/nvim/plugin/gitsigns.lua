@@ -36,7 +36,9 @@ local function place(buf, lines, tmp)
   if vim.fn.bufexists(buf) == 0 then
     return
   end
+
   vim.fn.sign_unplace(GROUP, { buffer = buf })
+
   local hs = {}
   local cur = nil
   for _, line in ipairs(lines) do
@@ -45,6 +47,7 @@ local function place(buf, lines, tmp)
       if cur then
         hs[#hs + 1] = cur
       end
+
       local new_start = tonumber(m[4])
       local new_cnt = (m[5] == "") and 1 or tonumber(m[5])
       cur = {
@@ -68,6 +71,7 @@ local function place(buf, lines, tmp)
   if cur then
     hs[#hs + 1] = cur
   end
+
   for _, h in ipairs(hs) do
     if h.new_cnt == 0 then
       vim.fn.sign_place(0, GROUP, "GitDelete", buf, { lnum = h.lnum, priority = 10 })
@@ -78,6 +82,7 @@ local function place(buf, lines, tmp)
       end
     end
   end
+
   hunks[buf] = hs
 end
 
@@ -104,10 +109,12 @@ local function refresh(force)
     return
   end
   last_tick[buf] = tick
+
   local dir = vim.fn.expand("%:p:h")
   local name = vim.fn.expand("%:t")
   local tmp = vim.fn.tempname()
   vim.fn.writefile(vim.fn.getline(1, "$"), tmp)
+
   running[buf] = true
   vim.system({ "bash", "-c", DIFF, dir, name, tmp }, { text = true }, function(res)
     running[buf] = false
@@ -196,6 +203,7 @@ local function undo_hunk()
   if #h.old_lines > 0 then
     vim.fn.appendbufline("%", h.new_cnt > 0 and h.new_start - 1 or h.new_start, h.old_lines)
   end
+
   vim.api.nvim_win_set_cursor(0, { h.lnum, 0 })
   refresh(true)
 end
@@ -280,6 +288,7 @@ local function reset_buffer()
   if content[#content] == "" then
     table.remove(content) -- git show ends with a trailing newline
   end
+
   vim.api.nvim_buf_set_lines(0, 0, -1, false, content)
   refresh(true)
 end
@@ -311,9 +320,11 @@ local function diff_against(ref, label)
   if content[#content] == "" then
     table.remove(content)
   end
+
   local ft = vim.bo.filetype
   vim.cmd("diffthis")
   vim.cmd("leftabove vnew")
+
   local buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, content)
   vim.bo[buf].buftype = "nofile"
@@ -321,6 +332,7 @@ local function diff_against(ref, label)
   vim.bo[buf].filetype = ft
   pcall(vim.api.nvim_buf_set_name, buf, name .. " (" .. label .. ")")
   vim.cmd("diffthis")
+
   vim.keymap.set("n", "q", "<cmd>diffoff!<bar>close<cr>", { buffer = buf, silent = true })
 end
 
@@ -338,6 +350,7 @@ vim.keymap.set("n", "ghD", function() diff_against("HEAD", "HEAD") end, { silent
 vim.keymap.set({ "o", "x" }, "ih", select_hunk, { silent = true })
 
 local grp = vim.api.nvim_create_augroup("gitsigns", { clear = true })
+
 -- explicit sync points force a diff (index may have changed without a buffer edit)
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {
   group = grp,
@@ -345,6 +358,7 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {
     refresh(true)
   end,
 })
+
 -- idle/edit events are guarded by changedtick inside refresh
 vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI", "TextChanged", "InsertLeave" }, {
   group = grp,
@@ -352,6 +366,7 @@ vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI", "TextChanged", "Inser
     refresh()
   end,
 })
+
 -- drop per-buffer state on wipe so the tables don't grow across a long session
 vim.api.nvim_create_autocmd("BufWipeout", {
   group = grp,
