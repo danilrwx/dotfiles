@@ -94,6 +94,7 @@ local function apply()
     vim.api.nvim_set_hl(0, group, opts)
   end
   local captures = vim.fn.getcompletion("@", "highlight")
+
   -- 1) link every capture to a base group (unrecognised ones → Normal), then the
   --    non-capture structural groups.
   for _, g in ipairs(captures) do
@@ -102,6 +103,7 @@ local function apply()
   for g, target in pairs(LINKS) do
     hl(g, { link = target })
   end
+
   -- 2) ANSI palette on base + syntax groups, overriding the links it recognises.
   hl("Normal", { ctermfg = 15, ctermbg = "NONE" }) -- bright white, not the dull 7
   local groups = vim.list_extend(vim.deepcopy(captures), {
@@ -115,6 +117,7 @@ local function apply()
       hl(g, PALETTE[b])
     end
   end
+
   -- diff colours (gitsigns preview / diff floats): green +, red -, yellow ~
   for _, g in ipairs({ "Added", "diffAdded", "@diff.plus" }) do
     hl(g, { ctermfg = 10 })
@@ -125,6 +128,7 @@ local function apply()
   for _, g in ipairs({ "Changed", "diffChanged", "@diff.delta" }) do
     hl(g, { ctermfg = 11 })
   end
+
   -- soften the loud default quickfix / statusline colours to muted greys
   hl("QuickFixLine", { ctermbg = 237, bold = true })
   hl("StatusLine", { ctermbg = 236, ctermfg = 245 })
