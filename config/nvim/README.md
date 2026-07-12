@@ -145,12 +145,14 @@ Completion is native (`vim.lsp.completion`, autotrigger) with
 
 | Key | Action |
 |-----|--------|
-| `<leader>D` | project-wide error search (runs the linter, hits in a picker) |
+| `<leader>D` | workspace LSP diagnostics picker (all buffers) |
 | `<leader>q` | toggle the quickfix window |
 
-`<leader>D` (= `:Picker diagnostics`) runs the whole-project linter
-(`golangci-lint run ./...`, else `go vet ./...`) and opens the hits in the picker
-— this covers files you haven't opened, which Neovim's own LSP doesn't report.
+`<leader>D` (= `:Picker diagnostics`) is the workspace LSP diagnostics list
+(fzf-lua's `diagnostics_workspace`); `:Picker! diagnostics` scopes it to the
+current buffer. Separately, `:Lint` runs the project linter
+(`golangci-lint run ./...`, else `go vet ./...`) into the quickfix — that covers
+files you haven't opened, which the LSP doesn't report.
 
 ### Oil (file manager)
 
@@ -200,7 +202,8 @@ Other commands:
 
 | Command | Action |
 |---------|--------|
-| `:Picker {name}` | open a picker by name (see above); `:Picker diagnostics` = project-wide errors |
+| `:Picker {name}` | open a picker by name (see above) |
+| `:Lint` | run the project linter (golangci-lint / go vet) into the quickfix |
 | `:GitFileLog` | current file's full log with patches (in a tab) |
 | `:GitBlame` / `:GitBlameLine` / `:GitLineBlameToggle` / `:GitOpenPR` | blame / PR |
 | `:Grepq {pattern}` | grep into quickfix (uses `grepprg`) |
