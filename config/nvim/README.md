@@ -145,13 +145,12 @@ Completion is native (`vim.lsp.completion`, autotrigger) with
 
 | Key | Action |
 |-----|--------|
-| `<leader>D` | project-wide error search: runs the linter, hits in a picker |
+| `<leader>D` | project-wide error search (runs the linter, hits in a picker) |
 | `<leader>q` | toggle the quickfix window |
 
-`<leader>D` (and `:Diagnostics`, `:Picker lint`) runs the whole-project linter
-(`golangci-lint run ./...`, else `go vet ./...`) and opens the results in the
-picker — this covers files you haven't opened, which the LSP doesn't report. For
-the open-buffer LSP diagnostics list use `:Picker diagnostics`.
+`<leader>D` (= `:Picker diagnostics`) runs the whole-project linter
+(`golangci-lint run ./...`, else `go vet ./...`) and opens the hits in the picker
+— this covers files you haven't opened, which Neovim's own LSP doesn't report.
 
 ### Oil (file manager)
 
@@ -193,16 +192,15 @@ forgotten picker is one `<Tab>` away:
 
 ```
 :Picker <Tab>   files  gfiles  buffers  livegrep  git_hunks  git_commits
-                git_status  git_file_history  diagnostics  lint  sessions
+                git_status  git_file_history  diagnostics  sessions
 :Picker livegrep foo   " opens live grep seeded with "foo"
-:Picker! diagnostics   " diagnostics for the current buffer only
 ```
 
 Other commands:
 
 | Command | Action |
 |---------|--------|
-| `:Picker {name}` | open a picker by name (see above) |
+| `:Picker {name}` | open a picker by name (see above); `:Picker diagnostics` = project-wide errors |
 | `:GitFileLog` | current file's full log with patches (in a tab) |
 | `:GitBlame` / `:GitBlameLine` / `:GitLineBlameToggle` / `:GitOpenPR` | blame / PR |
 | `:Grepq {pattern}` | grep into quickfix (uses `grepprg`) |
