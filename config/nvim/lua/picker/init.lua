@@ -26,6 +26,7 @@ function M.open(cands, opts)
   local live_seq = 0 -- bumped per query; async live results tagged stale if behind
   local entry -- this picker's history record (set below), kept live as query/sel change
   local restore_sel -- pending list position to reapply once results first arrive
+  local last_q -- query of the last refilter; skips no-op debounced refilters
 
   local v = ui.new(opts.prompt or "", HINT .. (opts.hint_extra or ""))
 
@@ -107,6 +108,7 @@ function M.open(cands, opts)
 
   local function refilter()
     local q = v:query()
+    last_q = q
     if entry then
       entry.query = q
     end
@@ -209,6 +211,12 @@ function M.open(cands, opts)
   vim.api.nvim_create_autocmd({ "TextChangedI", "TextChanged" }, {
     buffer = v.prompt_buf,
     callback = function()
+      -- set_query() (open/actions) fires this async after the manual refilter
+      -- already ran; skip when the text is unchanged so live_seq isn't bumped
+      -- (which would drop the in-flight grep job as stale) and sel isn't reset.
+      if v:query() == last_q then
+        return
+      end
       if ftimer then
         ftimer:stop()
       end
@@ -299,12 +307,6 @@ function M.open(cands, opts)
   restore_sel = opts.resuming and entry.sel or nil
   v:set_query(entry.query)
   refilter()
-  -- set_query fired TextChanged, which queued a debounced refilter that would
-  -- reset sel to 1 and undo the restore; cancel it (the manual refilter above
-  -- already applied the current query).
-  if ftimer then
-    ftimer:stop()
-  end
   v:focus(#entry.query)
 end
 
