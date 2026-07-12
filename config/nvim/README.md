@@ -136,6 +136,7 @@ Uses Neovim's **built-in** LSP defaults, plus one added map:
 | `gO` | document symbols |
 | `<C-s>` (insert) | signature help |
 | `grf` | format buffer (added; also runs on save for Go) |
+| `grc` | run the code lens under the cursor (e.g. gopls "go generate") |
 | `[d` / `]d` | previous / next diagnostic |
 
 Completion is native (`vim.lsp.completion`, autotrigger) with

@@ -90,6 +90,12 @@ end
 return {
   cmd = { 'gopls' },
   filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
+  settings = {
+    gopls = {
+      -- show the "run go generate" / "run test" code lenses (grc runs them)
+      codelenses = { generate = true, test = true },
+    },
+  },
   root_dir = function(bufnr, on_dir)
     local fname = vim.api.nvim_buf_get_name(bufnr)
     get_mod_cache_dir()
