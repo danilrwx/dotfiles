@@ -1,8 +1,8 @@
 vim.diagnostic.config({ virtual_text = { prefix = "🐗" }, signs = false })
 
--- whole-workspace diagnostics: LSP drops unopened files, so run the project
--- checker (golangci-lint, else `go vet`) async and parse into quickfix.
-local function diag_ws()
+-- whole-project lint: the LSP only reports open buffers, so run the project
+-- linter (golangci-lint, else `go vet`) async and parse into quickfix.
+local function lint_project()
   local cmd = vim.fn.executable("golangci-lint") == 1 and { "golangci-lint", "run", "./..." }
     or vim.fn.executable("go") == 1 and { "go", "vet", "./..." }
     or nil
@@ -32,5 +32,5 @@ local function diag_ws()
   end)
 end
 -- no keymap: <leader>D is the diagnostics picker (open buffers); this whole-repo
--- lint is heavier and lives under the command.
-vim.api.nvim_create_user_command("LspDiagWs", diag_ws, {})
+-- lint is heavier and lives under the command. It's a linter run, not LSP.
+vim.api.nvim_create_user_command("Lint", lint_project, {})
