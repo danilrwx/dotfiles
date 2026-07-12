@@ -27,6 +27,7 @@ local function id_for(full)
     revreg[full] = tostring(seq)
     registry[revreg[full]] = full
   end
+
   return revreg[full]
 end
 
@@ -63,6 +64,7 @@ local function render(buf)
   for _, name in ipairs(names) do
     isdir[name] = vim.fn.isdirectory(dir .. name) == 1
   end
+
   -- directories first, then by name -- like oil.nvim's default
   table.sort(names, function(a, b)
     if isdir[a] == isdir[b] then
@@ -88,6 +90,7 @@ local function render(buf)
   vim.bo[buf].modifiable = true
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+
   for i, meta in ipairs(metas) do
     if meta[2] ~= "" then
       vim.api.nvim_buf_set_extmark(buf, ns, i - 1, 0, { end_col = meta[1], hl_group = meta[2] })
@@ -99,6 +102,7 @@ local function render(buf)
       })
     end
   end
+
   vim.bo[buf].modified = false
 end
 
@@ -111,6 +115,7 @@ local function apply(buf)
   local reg = bufreg[buf]
   local byid = {} -- id -> list of names
   local creates = {}
+
   for _, l in ipairs(vim.api.nvim_buf_get_lines(buf, 0, -1, false)) do
     if l:match("%S") then
       local p = parse(l)
@@ -296,6 +301,7 @@ local function enter()
   if not p then
     return
   end
+
   vim.bo.modified = false
   local full = registry[p[2]]
   if vim.fn.isdirectory(full) == 1 then
@@ -315,6 +321,7 @@ local function focus(name)
   if name == "" then
     return
   end
+
   for lnum = 1, vim.fn.line("$") do
     local p = parse(vim.fn.getline(lnum))
     if p and (p[1] == name or p[1] == name .. "/") then
@@ -339,8 +346,10 @@ function M.open(path)
   if vim.fn.isdirectory(d) == 0 then
     return
   end
+
   local prev = vim.api.nvim_get_current_buf()
   local leaving = bufdir[prev] and vim.fn.fnamemodify(vim.fn.trim(bufdir[prev], "/", 2), ":t") or vim.fn.expand("%:t")
+
   -- 'oil:' not 'oil://' -- a :// name is hijacked by netrw's URL handler
   vim.cmd("silent edit " .. vim.fn.fnameescape("oil:" .. d))
   local buf = vim.api.nvim_get_current_buf()
@@ -352,6 +361,7 @@ function M.open(path)
   vim.wo.concealcursor = "nvic"
   vim.cmd("syntax clear")
   vim.cmd([[syntax match oilId '\t\d\+$' conceal]])
+
   local function bmap(lhs, fn)
     vim.keymap.set("n", lhs, fn, { buffer = buf, silent = true })
   end
@@ -359,6 +369,7 @@ function M.open(path)
   bmap("-", up)
   bmap("cc", rename_line)
   bmap("S", rename_line)
+
   vim.api.nvim_create_autocmd("BufWriteCmd", {
     buffer = buf,
     callback = function()
@@ -367,6 +378,7 @@ function M.open(path)
       end
     end,
   })
+
   render(buf)
   focus(leaving)
 end

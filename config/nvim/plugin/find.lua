@@ -37,6 +37,7 @@ function _G.__find(cmdarg, _)
   end
   return cmdarg == "" and files_cache or vim.fn.matchfuzzy(files_cache, cmdarg)
 end
+
 vim.o.findfunc = "v:lua.__find"
 
 -- fuzzy matches share no common prefix, so `longest` inserts nothing and the

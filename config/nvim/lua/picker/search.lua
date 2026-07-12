@@ -24,6 +24,7 @@ function M.subseq_pos(s, pat)
     cols[#cols + 1] = f - 1
     si = f + 1
   end
+
   return cols
 end
 
@@ -37,6 +38,7 @@ function M.find_all(s, sub)
   if sub == "" then
     return {}
   end
+
   s, sub = s:lower(), sub:lower()
   local cols, si = {}, 1
   while true do
@@ -49,6 +51,7 @@ function M.find_all(s, sub)
     end
     si = b + 1
   end
+
   return cols
 end
 
@@ -58,6 +61,7 @@ function M.grep_parse(line)
   if not f then
     f, l = line:match("^(.-):(%d+):")
   end
+
   return { file = f, lnum = l and tonumber(l), col = c and tonumber(c) }
 end
 

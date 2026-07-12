@@ -83,6 +83,7 @@ return {
     'typescript',
     'typescriptreact',
   },
+
   root_dir = function(bufnr, on_dir)
     -- The project root is where the LSP can be started from
     -- As stated in the documentation above, this LSP supports monorepos and simple projects.
@@ -108,6 +109,7 @@ return {
     -- We fallback to the current working directory if no project root is found
     on_dir(project_root or vim.fn.getcwd())
   end,
+
   handlers = {
     -- handle rename request for certain code actions like extracting functions / types
     ['_typescript.rename'] = function(_, result, ctx)
@@ -123,6 +125,7 @@ return {
       return vim.NIL
     end,
   },
+
   commands = {
     ['editor.action.showReferences'] = function(command, ctx)
       local client = assert(vim.lsp.get_client_by_id(ctx.client_id))
@@ -149,6 +152,7 @@ return {
       vim.cmd('botright copen')
     end,
   },
+
   on_attach = function(client, bufnr)
     -- ts_ls provides `source.*` code actions that apply to the whole file. These only appear in
     -- `vim.lsp.buf.code_action()` if specified in `context.only`.

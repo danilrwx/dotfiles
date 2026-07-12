@@ -26,6 +26,7 @@ function M.open(cands, opts)
   local parse = opts.parse or function(l)
     return { file = l }
   end
+
   local filtered, sel, marked = cands, 1, {}
   local positions -- per-row matched byte columns from the matcher (or nil)
   local ftimer, ptimer
@@ -83,6 +84,7 @@ function M.open(cands, opts)
         pos[i] = hl
       end
     end
+
     -- base layer: colour the file path (opts.path_hl -> start,end bytes) under the
     -- match/line highlights, so every picker shows paths like live grep does.
     if opts.path_hl then
@@ -94,12 +96,14 @@ function M.open(cands, opts)
         end
       end
     end
+
     -- reapply a resumed list position once results exist (fuzzy: this refilter;
     -- live: the async feed). Spent on first use so later refilters start at top.
     if restore_sel and #filtered > 0 then
       sel = math.max(1, math.min(restore_sel, #filtered))
       restore_sel = nil
     end
+
     v:render_list(filtered, marked, pos)
     paint()
   end
@@ -121,6 +125,7 @@ function M.open(cands, opts)
     if entry then
       entry.query = q
     end
+
     if opts.live then
       live_seq = live_seq + 1
       local seq = live_seq
@@ -133,6 +138,7 @@ function M.open(cands, opts)
     else
       filtered, positions = search.fuzzy(cands, q)
     end
+
     sel = 1
     render()
   end
@@ -142,6 +148,7 @@ function M.open(cands, opts)
     if closing then
       return
     end
+
     closing = true
     if entry then
       entry.sel = sel -- remember list position for a later resume
@@ -162,6 +169,7 @@ function M.open(cands, opts)
         end
       end
     end
+
     if ftimer then
       ftimer:stop()
     end
@@ -171,6 +179,7 @@ function M.open(cands, opts)
     if opts.on_close then
       opts.on_close() -- let a source tear down async work (e.g. kill a grep job)
     end
+
     v:close()
   end
 
@@ -212,6 +221,7 @@ function M.open(cands, opts)
     if #src == 0 then
       return
     end
+
     local items = {}
     for _, line in ipairs(src) do
       local it = parse(line)
@@ -219,6 +229,7 @@ function M.open(cands, opts)
         items[#items + 1] = { filename = it.file, lnum = it.lnum or 1, text = line }
       end
     end
+
     close()
     vim.fn.setqflist({}, " ", { items = items, title = opts.prompt })
     vim.cmd("copen")

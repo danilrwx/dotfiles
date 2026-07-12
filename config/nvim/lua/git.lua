@@ -17,23 +17,27 @@ local function ctx()
   if file == "" or vim.bo.buftype ~= "" or is_symlink(file) then
     return nil
   end
+
   return { dir = vim.fn.expand("%:p:h"), file = file }
 end
 
 local function reldate(epoch)
   local d = math.max(0, os.time() - epoch)
   local units = { { 31536000, "y" }, { 2592000, "mo" }, { 86400, "d" }, { 3600, "h" }, { 60, "m" } }
+
   for _, u in ipairs(units) do
     if d >= u[1] then
       return math.floor(d / u[1]) .. u[2] .. " ago"
     end
   end
+
   return "just now"
 end
 
 -- parse `git blame --line-porcelain` into { [final_line] = {hash,author,time,summary} }
 local function parse_blame(stdout)
   local out, cur = {}, nil
+
   for _, l in ipairs(vim.split(stdout or "", "\n")) do
     local hash, final = l:match("^(%x+)%s+%d+%s+(%d+)")
     if hash and #hash >= 7 then
@@ -52,6 +56,7 @@ local function parse_blame(stdout)
       end
     end
   end
+
   return out
 end
 
@@ -66,9 +71,11 @@ end
 local function blame_contents(dir, file, lines, extra, cb)
   local tmp = vim.fn.tempname()
   vim.fn.writefile(lines, tmp)
+
   local cmd = { "git", "-C", dir, "blame" }
   vim.list_extend(cmd, extra or {})
   vim.list_extend(cmd, { "--line-porcelain", "--contents", tmp, "--", file })
+
   vim.system(cmd, { text = true }, function(r)
     os.remove(tmp)
     vim.schedule(function()
@@ -114,6 +121,7 @@ local function scratch(lines, name, where, dir)
     vim.notify("git: nothing to show")
     return
   end
+
   vim.cmd(where == "tab" and "tabnew" or "botright new")
   local buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
@@ -126,6 +134,7 @@ local function scratch(lines, name, where, dir)
   vim.fn.clearmatches()
   vim.b[buf].git_dir = dir
   pcall(vim.api.nvim_buf_set_name, buf, name)
+
   local function hash_under_cursor()
     local w = vim.fn.expand("<cword>")
     return (w:match("^%x+$") and #w >= 7) and w or nil
@@ -152,6 +161,7 @@ function M.show(rev, opts)
   if opts.path then
     vim.list_extend(args, { "--", opts.path })
   end
+
   vim.system(args, { text = true }, function(r)
     vim.schedule(function()
       scratch(vim.split(r.stdout or "", "\n"), "git show " .. rev:sub(1, 12), "tab", dir)
@@ -185,6 +195,7 @@ function M.file_history(o)
   if not c then
     return
   end
+
   local r = vim.system({
     "git", "-C", c.dir, "log", "--follow",
     "--format=%h  %s  (%cr) <%an>", "--", c.file,
@@ -194,6 +205,7 @@ function M.file_history(o)
     vim.notify("git: no history for this file")
     return
   end
+
   require("picker").open(items, {
     name = "git_file_history",
     prompt = "File history",
@@ -230,12 +242,14 @@ function M.commits(o)
     vim.notify("git: not a repo")
     return
   end
+
   local log = vim.system({ "git", "-C", r, "log", "-n", "10000", "--format=%h  %s  (%cr) <%an>" }, { text = true }):wait()
   local items = vim.split(log.stdout or "", "\n", { trimempty = true })
   if #items == 0 then
     vim.notify("git: no commits")
     return
   end
+
   require("picker").open(items, {
     name = "git_commits",
     prompt = "Commits",
@@ -268,12 +282,14 @@ function M.status(o)
     vim.notify("git: not a repo")
     return
   end
+
   local st = vim.system({ "git", "-C", r, "status", "--porcelain=v1" }, { text = true }):wait()
   local items = vim.split(st.stdout or "", "\n", { trimempty = true })
   if #items == 0 then
     vim.notify("git: clean")
     return
   end
+
   require("picker").open(items, {
     name = "git_status",
     prompt = "Status",
@@ -324,6 +340,7 @@ local function remote_host_path(dir)
   if path then
     path = path:gsub("%.git$", "")
   end
+
   return host, path
 end
 
@@ -335,6 +352,7 @@ function M.open_pr(hash, dir)
     vim.notify("git: no origin remote")
     return
   end
+
   local cmd
   if host:match("github") then
     cmd = { "gh", "api", "repos/{owner}/{repo}/commits/" .. hash .. "/pulls", "--jq", ".[0].html_url // empty" }
@@ -346,6 +364,7 @@ function M.open_pr(hash, dir)
     vim.notify("git: can't parse remote " .. host)
     return
   end
+
   vim.system(cmd, { text = true, cwd = dir }, function(r)
     vim.schedule(function()
       local url = vim.trim(r.stdout or "")
@@ -369,6 +388,7 @@ function M.blame_line()
   if not c then
     return
   end
+
   local lnum = vim.fn.line(".")
   blame_contents(c.dir, c.file, vim.fn.getline(1, "$"), { "-L", lnum .. "," .. lnum }, function(bl)
       local _, e = next(bl)
@@ -385,10 +405,12 @@ function M.blame_line()
       else
         lines = { "● Not committed yet" }
       end
+
       local w = 0
       for _, l in ipairs(lines) do
         w = math.max(w, vim.fn.strdisplaywidth(l))
       end
+
       local buf = vim.api.nvim_create_buf(false, true)
       vim.bo[buf].bufhidden = "wipe" -- drop the scratch buffer with its window
       vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
@@ -456,12 +478,14 @@ function M.blame_toggle()
   if blame_pending[buf] then
     return -- a full-blame call is already running for this buffer
   end
+
   -- full blame annotates every line, so drop the current-line one to avoid overlap
   vim.api.nvim_buf_clear_namespace(buf, cur_ns, 0, -1)
   local c = ctx()
   if not c then
     return
   end
+
   blame_pending[buf] = true
   blame_contents(c.dir, c.file, vim.fn.getline(1, "$"), nil, function(bl)
     blame_pending[buf] = nil
@@ -493,6 +517,7 @@ local function render_cur(buf)
   if not M.line_blame or blame_on[buf] then
     return -- full-file blame already annotates every line
   end
+
   local c = lb_cache[buf]
   if not c or vim.api.nvim_get_current_buf() ~= buf then
     return
@@ -508,6 +533,7 @@ local function render_cur(buf)
   if vim.fn.strdisplaywidth(text) > max then
     text = vim.fn.strcharpart(text, 0, max - 1) .. "…"
   end
+
   pcall(vim.api.nvim_buf_set_extmark, buf, cur_ns, line - 1, 0, {
     virt_text = { { text, "Comment" } },
     virt_text_pos = "right_align",
@@ -521,10 +547,12 @@ refresh_cur = function(buf)
     pcall(vim.api.nvim_buf_clear_namespace, buf, cur_ns, 0, -1)
     return
   end
+
   local tick = vim.api.nvim_buf_get_changedtick(buf)
   if (lb_cache[buf] and lb_cache[buf].tick == tick) or lb_pending[buf] then
     return
   end
+
   lb_pending[buf] = true
   local file = vim.api.nvim_buf_get_name(buf)
   local dir = vim.fn.fnamemodify(file, ":h")
@@ -558,6 +586,7 @@ function M.open_pr_at()
     end
     return
   end
+
   local c = lb_cache[buf]
   local e = c and c.data[vim.fn.line(".")]
   if e and not uncommitted(e.hash) then
@@ -576,12 +605,14 @@ function M.setup_current_line()
       render_cur(a.buf)
     end,
   })
+
   vim.api.nvim_create_autocmd({ "CursorHold", "BufEnter" }, {
     group = grp,
     callback = function(a)
       refresh_cur(a.buf)
     end,
   })
+
   -- drop per-buffer state when a buffer is wiped, so the tables don't grow
   -- unbounded across a long session.
   vim.api.nvim_create_autocmd("BufWipeout", {

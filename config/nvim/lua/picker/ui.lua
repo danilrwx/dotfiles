@@ -66,6 +66,7 @@ function M.new(prompt_name, hint)
   pcall(vim.api.nvim_win_set_config, v.list_win,
     { footer = { { " " .. hint .. " ", "PickerBorder" } }, footer_pos = "center" })
   vim.api.nvim_set_current_win(v.prompt_win)
+
   return v
 end
 
@@ -95,10 +96,12 @@ function View:render_list(filtered, marked, positions)
   if not vim.api.nvim_buf_is_valid(self.list_buf) then
     return -- a late async feed can fire after the picker closed
   end
+
   vim.bo[self.list_buf].modifiable = true
   vim.api.nvim_buf_set_lines(self.list_buf, 0, -1, false, filtered)
   vim.bo[self.list_buf].modifiable = false
   vim.api.nvim_buf_clear_namespace(self.list_buf, ns, 0, -1)
+
   for i = 1, math.min(#filtered, 500) do
     if marked[filtered[i]] then
       vim.api.nvim_buf_set_extmark(self.list_buf, ns, i - 1, 0,
@@ -124,6 +127,7 @@ function View:point(sel, filtered, ncand, nmark)
       vim.cmd("normal! zz")
     end)
   end
+
   local counter = string.format(" %d/%d%s ", #filtered, ncand, nmark > 0 and (" " .. nmark .. "*") or "")
   pcall(vim.api.nvim_win_set_config, self.prompt_win,
     { footer = { { counter, "PickerCounter" } }, footer_pos = "right" })
@@ -141,10 +145,13 @@ function View:preview(item)
     vim.bo[self.prev_buf].modifiable = false
     return
   end
+
   vim.api.nvim_win_set_config(self.prev_win, { title = " " .. vim.fn.fnamemodify(item.file, ":t") .. " " })
+
   -- read enough to include the hit line (grep can point past the first 500)
   local cap = item.lnum and math.max(500, item.lnum + 50) or 500
   local lines = vim.fn.readfile(item.file, "", cap)
+
   -- readfile maps NUL bytes to \n; a line with \n means binary, which
   -- nvim_buf_set_lines rejects — show a placeholder.
   local binary = false
@@ -157,6 +164,7 @@ function View:preview(item)
   if binary then
     lines = { "[binary file]" }
   end
+
   vim.api.nvim_buf_set_lines(self.prev_buf, 0, -1, false, lines)
   vim.bo[self.prev_buf].modifiable = false
   local ft = not binary and (vim.filetype.match({ filename = item.file, contents = lines }) or "") or ""
@@ -164,6 +172,7 @@ function View:preview(item)
   if ft ~= "" then
     pcall(vim.treesitter.start, self.prev_buf)
   end
+
   vim.api.nvim_buf_clear_namespace(self.prev_buf, hlns, 0, -1)
   if item.lnum and item.lnum >= 1 and item.lnum <= #lines then
     vim.api.nvim_buf_set_extmark(self.prev_buf, hlns, item.lnum - 1, 0, { line_hl_group = "PickerPreviewLine" })
@@ -179,6 +188,7 @@ function View:show_text(lines, ft, title)
   if not vim.api.nvim_win_is_valid(self.prev_win) then
     return
   end
+
   pcall(vim.treesitter.stop, self.prev_buf)
   vim.bo[self.prev_buf].modifiable = true
   vim.api.nvim_buf_set_lines(self.prev_buf, 0, -1, false, lines or {})
@@ -188,6 +198,7 @@ function View:show_text(lines, ft, title)
   if ft and ft ~= "" then
     pcall(vim.treesitter.start, self.prev_buf)
   end
+
   pcall(vim.api.nvim_win_set_config, self.prev_win, { title = " " .. (title or "") .. " " })
   pcall(vim.api.nvim_win_set_cursor, self.prev_win, { 1, 0 })
 end

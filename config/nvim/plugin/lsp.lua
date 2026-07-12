@@ -24,6 +24,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
       return
     end
     vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, { autotrigger = true })
+
     if client:supports_method("textDocument/formatting") then
       vim.keymap.set({ "n", "x" }, "grf", function()
         vim.lsp.buf.format({ async = true })

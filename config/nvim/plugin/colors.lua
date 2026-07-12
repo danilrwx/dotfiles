@@ -22,6 +22,7 @@ local function ws_match()
     vim.fn.matchadd("ErrorMsg", [[\s\+$]])
   end
 end
+
 vim.api.nvim_create_autocmd({ "BufWinEnter", "TermOpen" }, {
   group = vim.api.nvim_create_augroup("ws_match", { clear = true }),
   callback = ws_match,
@@ -134,4 +135,5 @@ vim.api.nvim_create_autocmd("ColorScheme", {
   group = vim.api.nvim_create_augroup("claudelook", { clear = true }),
   callback = apply,
 })
+
 vim.cmd.colorscheme("torte") -- fires ColorScheme → apply()

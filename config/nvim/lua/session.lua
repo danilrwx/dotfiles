@@ -21,6 +21,7 @@ local function has_content()
       return true
     end
   end
+
   return false
 end
 
@@ -53,9 +54,11 @@ function M.list()
       files[#files + 1] = { cwd = cwd_of(name), mtime = vim.fn.getftime(p) }
     end
   end
+
   table.sort(files, function(a, b)
     return a.mtime > b.mtime
   end)
+
   local out = {}
   for _, f in ipairs(files) do
     out[#out + 1] = f.cwd

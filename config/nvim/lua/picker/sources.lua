@@ -11,9 +11,11 @@ local function lines_of(cmd)
   local ok, r = pcall(function()
     return vim.system(cmd, { text = true }):wait()
   end)
+
   if not ok or not r then
     return {}
   end
+
   return vim.split(r.stdout or "", "\n", { trimempty = true })
 end
 
@@ -22,6 +24,7 @@ local function edit_file(f, cmd)
   if verb == "edit" and vim.bo.modified then
     verb = "hide edit" -- current buffer has unsaved changes; keep it (no E37)
   end
+
   vim.cmd(verb .. " " .. vim.fn.fnameescape(f))
 end
 
@@ -30,6 +33,7 @@ local function edit_at(it, cmd)
   if not it.file then
     return
   end
+
   edit_file(it.file, cmd)
   if it.lnum then
     pcall(vim.fn.cursor, it.lnum, it.col or 1)
@@ -59,14 +63,17 @@ local function close_buffer(nr)
   if not nr or not vim.api.nvim_buf_is_valid(nr) then
     return
   end
+
   local others = vim.tbl_filter(function(b)
     return b ~= nr and vim.fn.buflisted(b) == 1
   end, vim.api.nvim_list_bufs())
+
   for _, w in ipairs(vim.fn.win_findbuf(nr)) do
     vim.api.nvim_win_call(w, function()
       vim.cmd(#others > 0 and ("buffer " .. others[1]) or "enew")
     end)
   end
+
   pcall(vim.api.nvim_buf_delete, nr, {})
 end
 
@@ -110,6 +117,7 @@ picker.launchers.buffers = function(o)
       bufof[nm] = b.bufnr
     end
   end
+
   picker.open(names, {
     name = "buffers",
     prompt = "Buffers",
@@ -224,6 +232,7 @@ picker.launchers.livegrep = function(o)
         lg.cache = {}
         return {}
       end
+
       local cmd = vim.deepcopy(tool)
       table.insert(cmd, lg.fixed and "-F" or "-E") -- ERE regex, or fixed-string
       vim.list_extend(cmd, { "--", q })
@@ -287,6 +296,7 @@ picker.launchers.git_hunks = function(o)
     vim.notify("not a git repo")
     return
   end
+
   local items, file = {}, nil
   for _, l in ipairs(lines_of({ "git", "-C", root, "diff", "--no-color", "-U0", "HEAD" })) do
     local f = l:match("^%+%+%+ b/(.+)")
@@ -304,6 +314,7 @@ picker.launchers.git_hunks = function(o)
     vim.notify("git: no hunks")
     return
   end
+
   picker.open(items, {
     name = "git_hunks",
     prompt = "Hunks",
