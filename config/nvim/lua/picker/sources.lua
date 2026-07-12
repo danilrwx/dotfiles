@@ -36,6 +36,15 @@ local function edit_at(it, cmd)
   end
 end
 
+-- path_hl helpers: byte span of the file path in a row (coloured PickerGrepFile).
+local function whole_path(line)
+  return 0, #line
+end
+local function grep_path(line)
+  local c = line:find(":")
+  return 0, c and c - 1 or #line
+end
+
 local function files_source()
   if vim.fn.executable("fd") == 1 then
     return { "fd", "--type", "f" }
@@ -45,12 +54,12 @@ end
 
 picker.launchers.files = function(o)
   picker.open(lines_of(files_source()),
-    { name = "files", prompt = "Files", on_pick = edit_file, resuming = o and o.resuming })
+    { name = "files", prompt = "Files", on_pick = edit_file, path_hl = whole_path, resuming = o and o.resuming })
 end
 
 picker.launchers.gfiles = function(o)
   picker.open(lines_of(GIT_LS),
-    { name = "gfiles", prompt = "GFiles", on_pick = edit_file, resuming = o and o.resuming })
+    { name = "gfiles", prompt = "GFiles", on_pick = edit_file, path_hl = whole_path, resuming = o and o.resuming })
 end
 
 picker.launchers.buffers = function(o)
@@ -64,6 +73,7 @@ picker.launchers.buffers = function(o)
     name = "buffers",
     prompt = "Buffers",
     on_pick = edit_file,
+    path_hl = whole_path,
     resuming = o and o.resuming,
     hint_extra = "   ^d del",
     actions = {
@@ -251,6 +261,7 @@ picker.launchers.git_hunks = function(o)
     name = "git_hunks",
     prompt = "Hunks",
     parse = search.grep_parse,
+    path_hl = grep_path,
     resuming = o and o.resuming,
     preview = function(v, line)
       local it = search.grep_parse(line or "")
@@ -302,6 +313,11 @@ picker.launchers.diagnostics = function(o)
     name = "diagnostics",
     prompt = "Diagnostics",
     parse = search.grep_parse,
+    path_hl = function(line)
+      local s = #BOAR
+      local c = line:find(":", s + 1)
+      return s, c and c - 1
+    end,
     resuming = o and o.resuming,
     -- colour the [SEV] marker by severity (builtin Diagnostic* groups)
     line_positions = function(line)

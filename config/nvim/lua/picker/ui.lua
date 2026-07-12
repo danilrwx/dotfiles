@@ -20,6 +20,8 @@ local function setup_hl()
   set(0, "PickerPrompt", { fg = "#dcdccc", ctermfg = 253, bold = true, default = true })
   set(0, "PickerGrepFile", { fg = "#d75fd7", ctermfg = 170, default = true }) -- path
   set(0, "PickerGrepLnum", { fg = "#5faf5f", ctermfg = 71, default = true }) -- line:col
+  -- the previewed hit's line: a faint dark bar, not the loud full-bright Visual
+  set(0, "PickerPreviewLine", { bg = "#1a1c2a", ctermbg = 235, default = true })
 end
 setup_hl()
 vim.api.nvim_create_autocmd("ColorScheme", { callback = setup_hl })
@@ -159,7 +161,7 @@ function View:preview(item)
   end
   vim.api.nvim_buf_clear_namespace(self.prev_buf, hlns, 0, -1)
   if item.lnum and item.lnum >= 1 and item.lnum <= #lines then
-    vim.api.nvim_buf_set_extmark(self.prev_buf, hlns, item.lnum - 1, 0, { line_hl_group = "Visual" })
+    vim.api.nvim_buf_set_extmark(self.prev_buf, hlns, item.lnum - 1, 0, { line_hl_group = "PickerPreviewLine" })
     pcall(vim.api.nvim_win_set_cursor, self.prev_win, { item.lnum, 0 })
     vim.api.nvim_win_call(self.prev_win, function()
       vim.cmd("normal! zz")

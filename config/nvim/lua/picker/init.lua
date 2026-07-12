@@ -51,22 +51,31 @@ function M.open(cands, opts)
   end
 
   local function render()
-    local pos
+    local pos = {}
     if opts.line_positions then
       -- a live source (e.g. grep) supplies its own {col,hl} highlights per row
-      pos = {}
       for i = 1, math.min(#filtered, 500) do
         pos[i] = opts.line_positions(filtered[i])
       end
     elseif positions then
       -- matcher gave plain byte columns; tag them with the match colour
-      pos = {}
       for i, cols in ipairs(positions) do
         local hl = {}
         for _, c in ipairs(cols) do
           hl[#hl + 1] = { col = c, hl = "PickerMatch" }
         end
         pos[i] = hl
+      end
+    end
+    -- base layer: colour the file path (opts.path_hl -> start,end bytes) under the
+    -- match/line highlights, so every picker shows paths like live grep does.
+    if opts.path_hl then
+      for i = 1, math.min(#filtered, 500) do
+        local s, e = opts.path_hl(filtered[i])
+        if s then
+          pos[i] = pos[i] or {}
+          table.insert(pos[i], 1, { col = s, end_col = e, hl = "PickerGrepFile", priority = 50 })
+        end
       end
     end
     v:render_list(filtered, marked, pos)

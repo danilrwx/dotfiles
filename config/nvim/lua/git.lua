@@ -128,6 +128,12 @@ function M.file_log()
     end)
 end
 
+-- byte span of the leading commit hash (first token) in a log row
+local function hash_span(line)
+  local c = line:find("%s")
+  return 0, c and c - 1 or #line
+end
+
 -- fuzzy-pick a commit from the current file's history; <CR> shows its diff
 function M.file_history()
   local c = ctx()
@@ -147,6 +153,7 @@ function M.file_history()
   require("picker").open(items, {
     name = "git_file_history",
     prompt = "File history",
+    path_hl = hash_span,
     preview = function(v, line)
       local hash = line and line:match("^(%x+)")
       if not hash then
@@ -204,6 +211,7 @@ function M.commits()
   require("picker").open(items, {
     name = "git_commits",
     prompt = "Commits",
+    path_hl = hash_span,
     preview = function(v, line)
       local h = line and line:match("^(%x+)")
       if not h then
@@ -255,6 +263,9 @@ function M.status()
     name = "git_status",
     prompt = "Status",
     hint_extra = "   ^s stage  ^u unstage",
+    path_hl = function(line)
+      return 3, #line
+    end,
     preview = function(v, line)
       local p = line and status_path(line)
       if not p then
