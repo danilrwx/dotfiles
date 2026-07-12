@@ -90,6 +90,19 @@ picker.launchers.buffers = function(o)
   })
 end
 
+-- LiveGrep's own state, kept at module scope so a resume (<leader>') reopens it
+-- exactly as left: the grep pattern (gq) and file filter (fq), which one the
+-- prompt edits (mode), the regex/fixed flag, and the last hits (cache — reused
+-- so a resume shows results without re-grepping). A fresh open resets it.
+local lg = { mode = "grep", gq = "", fq = "", fixed = false, cache = {} }
+
+local function lg_title()
+  if lg.mode == "file" then
+    return "Filter file"
+  end
+  return lg.fixed and "LiveGrep [fixed]" or "LiveGrep"
+end
+
 picker.launchers.livegrep = function(o)
   -- ugrep, else plain grep (bare machines). rg is skipped on purpose: its Rust
   -- regex differs from POSIX, and A-r toggles -E (ERE) / -F (fixed), which both
@@ -98,29 +111,27 @@ picker.launchers.livegrep = function(o)
   local tool = vim.fn.executable("ugrep") == 1
       and { "ugrep", "-RInk", "--ignore-files", "--color=never" }
     or { "grep", "-RInH", "--exclude-dir=.git" }
-  -- Two persistent queries applied together: the grep pattern (drives the search tool)
-  -- and the file filter (fuzzy on path). A-g only switches which one the prompt
-  -- edits, so you can narrow files then refine the grep, or vice versa. `cache`
-  -- holds the last grep hits so editing the file filter doesn't re-grep.
-  local mode, gq, fq, cache = "grep", "", "", {}
-  local fixed = false -- pattern is ERE by default (-E); A-r → fixed string (-F)
+  local resuming = o and o.resuming
+  if not resuming then
+    lg.mode, lg.gq, lg.fq, lg.fixed, lg.cache = "grep", "", "", false, {}
+  end
   local job -- running search handle, killed when the pattern changes
   local MAX = 10000 -- cap hits fed to the picker; the tool can flood on short patterns
   local function recompute()
-    if fq == "" then
-      return cache
+    if lg.fq == "" then
+      return lg.cache
     end
     return vim.tbl_filter(function(line)
       local it = search.grep_parse(line)
-      return it.file ~= nil and search.subseq(it.file, fq)
-    end, cache)
+      return it.file ~= nil and search.subseq(it.file, lg.fq)
+    end, lg.cache)
   end
   picker.open({}, {
     name = "livegrep",
-    prompt = "LiveGrep",
+    prompt = lg_title(),
     query = o and o.query,
     parse = search.grep_parse,
-    resuming = o and o.resuming,
+    resuming = resuming,
     hint_extra = "   A-g grep/file   A-r regex/fixed",
     -- highlight both queries at once, in distinct colours: the grep pattern in
     -- the hit text (blue, literal) and the file filter fuzzily in the path
@@ -137,11 +148,11 @@ picker.launchers.livegrep = function(o)
       if c1 and c2 then
         out[#out + 1] = { col = c1, end_col = c2 - 1, hl = "PickerGrepLnum", priority = 100 }
       end
-      for _, c in ipairs(search.find_all(line, gq)) do
+      for _, c in ipairs(search.find_all(line, lg.gq)) do
         out[#out + 1] = { col = c, hl = "PickerMatch", priority = 200 }
       end
       local it = search.grep_parse(line)
-      for _, c in ipairs((it.file and search.subseq_pos(it.file, fq)) or {}) do
+      for _, c in ipairs((it.file and search.subseq_pos(it.file, lg.fq)) or {}) do
         out[#out + 1] = { col = c, hl = "PickerMatchFile", priority = 200 }
       end
       return out
@@ -150,14 +161,14 @@ picker.launchers.livegrep = function(o)
     -- the current cache now; feed() delivers the fresh hits when it returns.
     -- File-filter mode never re-greps — it just narrows the cache in-process.
     live = function(q, feed)
-      if mode == "file" then
-        fq = q
+      if lg.mode == "file" then
+        lg.fq = q
         return recompute()
       end
-      if q == gq then
+      if q == lg.gq then
         return recompute()
       end
-      gq = q
+      lg.gq = q
       if job then
         pcall(function()
           job:kill(9)
@@ -165,18 +176,18 @@ picker.launchers.livegrep = function(o)
         job = nil
       end
       if q == "" then
-        cache = {}
+        lg.cache = {}
         return {}
       end
       local cmd = vim.deepcopy(tool)
-      table.insert(cmd, fixed and "-F" or "-E") -- ERE regex, or fixed-string
+      table.insert(cmd, lg.fixed and "-F" or "-E") -- ERE regex, or fixed-string
       vim.list_extend(cmd, { "--", q })
       job = vim.system(cmd, { text = true }, function(res)
         local lines = vim.split(res.stdout or "", "\n", { trimempty = true })
         if #lines > MAX then
           lines = vim.list_slice(lines, 1, MAX)
         end
-        cache = lines
+        lg.cache = lines
         vim.schedule(function()
           feed(recompute())
         end)
@@ -185,15 +196,15 @@ picker.launchers.livegrep = function(o)
     end,
     actions = {
       ["<A-g>"] = function(ctx)
-        mode = mode == "grep" and "file" or "grep"
-        ctx.set_query(mode == "grep" and gq or fq)
-        ctx.set_title(mode == "file" and "Filter file" or "LiveGrep")
+        lg.mode = lg.mode == "grep" and "file" or "grep"
+        ctx.set_query(lg.mode == "grep" and lg.gq or lg.fq)
+        ctx.set_title(lg_title())
         ctx.refilter()
       end,
       ["<A-r>"] = function(ctx)
-        fixed = not fixed
-        gq = "\1" -- invalidate cache so the next grep re-runs in the new mode
-        ctx.set_title(fixed and "LiveGrep [fixed]" or "LiveGrep [regex]")
+        lg.fixed = not lg.fixed
+        lg.gq = "\1" -- invalidate cache so the next grep re-runs in the new mode
+        ctx.set_title(lg_title())
         ctx.refilter()
       end,
     },
