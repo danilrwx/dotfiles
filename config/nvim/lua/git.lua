@@ -135,7 +135,7 @@ local function hash_span(line)
 end
 
 -- fuzzy-pick a commit from the current file's history; <CR> shows its diff
-function M.file_history()
+function M.file_history(o)
   local c = ctx()
   if not c then
     return
@@ -153,6 +153,7 @@ function M.file_history()
   require("picker").open(items, {
     name = "git_file_history",
     prompt = "File history",
+    resuming = o and o.resuming,
     path_hl = hash_span,
     preview = function(v, line)
       local hash = line and line:match("^(%x+)")
@@ -195,7 +196,7 @@ local function root(dir)
 end
 
 -- browse the whole repo log in the picker: fuzzy over subjects, preview the diff.
-function M.commits()
+function M.commits(o)
   local r = root()
   if not r then
     vim.notify("git: not a repo")
@@ -211,6 +212,7 @@ function M.commits()
   require("picker").open(items, {
     name = "git_commits",
     prompt = "Commits",
+    resuming = o and o.resuming,
     path_hl = hash_span,
     preview = function(v, line)
       local h = line and line:match("^(%x+)")
@@ -247,7 +249,7 @@ local function status_path(line)
   return (p:match(" %-> (.+)$") or p) -- take the new name of a rename
 end
 
-function M.status()
+function M.status(o)
   local r = root()
   if not r then
     vim.notify("git: not a repo")
@@ -262,6 +264,7 @@ function M.status()
   require("picker").open(items, {
     name = "git_status",
     prompt = "Status",
+    resuming = o and o.resuming,
     hint_extra = "   ^s stage  ^u unstage",
     path_hl = function(line)
       return 3, #line
@@ -584,6 +587,19 @@ function M.setup_current_line()
       refresh_cur(a.buf)
     end,
   })
+end
+
+-- register the picker-backed views as launchers so C-o / <leader>' can resume
+-- them (they reresolve ctx/root for the current buffer on reopen).
+local launchers = require("picker").launchers
+launchers.git_file_history = function(o)
+  M.file_history(o)
+end
+launchers.git_commits = function(o)
+  M.commits(o)
+end
+launchers.git_status = function(o)
+  M.status(o)
 end
 
 return M

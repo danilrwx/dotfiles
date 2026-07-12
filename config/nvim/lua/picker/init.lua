@@ -314,20 +314,23 @@ function M.open(cands, opts)
 end
 
 -- History navigation, shared by C-o (advance, relative) and <leader>'/" (resume).
+local function launch(i)
+  local l = history[i] and M.launchers[history[i].name]
+  if l then
+    ridx = i
+    l({ resuming = true })
+  end
+end
+
 function M.advance(step)
   if #history <= 1 then
     return
   end
-  ridx = (ridx - 1 + step) % #history + 1 -- wrap
-  M.launchers[history[ridx].name]({ resuming = true })
+  launch((ridx - 1 + step) % #history + 1) -- wrap
 end
 
 function M.resume(offset)
-  local i = #history - offset
-  if i >= 1 and history[i] then
-    ridx = i
-    M.launchers[history[i].name]({ resuming = true })
-  end
+  launch(#history - offset)
 end
 
 return M
