@@ -3,9 +3,18 @@
 -- even before saving. ]c/[c jump between hunks, ghp previews, ghu reverts.
 -- Depends on git + bash.
 
-vim.api.nvim_set_hl(0, "GitSignAdd", { fg = "#00af5f", ctermfg = "green", default = true })
-vim.api.nvim_set_hl(0, "GitSignChange", { fg = "#d7af00", ctermfg = "yellow", default = true })
-vim.api.nvim_set_hl(0, "GitSignDelete", { fg = "#d70000", ctermfg = "red", default = true })
+-- re-set on ColorScheme too: a :colorscheme clears these back to cleared/linked
+-- and the signs would lose their colour.
+local function set_hl()
+  vim.api.nvim_set_hl(0, "GitSignAdd", { fg = "#00af5f", ctermfg = "green", default = true })
+  vim.api.nvim_set_hl(0, "GitSignChange", { fg = "#d7af00", ctermfg = "yellow", default = true })
+  vim.api.nvim_set_hl(0, "GitSignDelete", { fg = "#d70000", ctermfg = "red", default = true })
+end
+set_hl()
+vim.api.nvim_create_autocmd("ColorScheme", {
+  group = vim.api.nvim_create_augroup("gitsigns_hl", { clear = true }),
+  callback = set_hl,
+})
 
 vim.fn.sign_define("GitAdd", { text = "+", texthl = "GitSignAdd", numhl = "GitSignAdd" })
 vim.fn.sign_define("GitChange", { text = "~", texthl = "GitSignChange", numhl = "GitSignChange" })
@@ -22,7 +31,7 @@ local running = {}
 local last_tick = {} -- buf -> changedtick last diffed, to skip idle CursorHold runs
 
 local function place(buf, lines, tmp)
-  vim.fn.delete(tmp)
+  os.remove(tmp)
   if vim.fn.bufexists(buf) == 0 then
     return
   end
@@ -78,8 +87,7 @@ local function refresh(force)
   end
   -- git stores a symlink as its target path, but nvim edits the followed file's
   -- content — diffing the two marks every line changed. Skip symlinks entirely.
-  local st = vim.uv.fs_lstat(path)
-  if st and st.type == "link" then
+  if require("git").is_symlink(path) then
     vim.fn.sign_unplace(GROUP, { buffer = vim.fn.bufnr("%") })
     return
   end
@@ -237,15 +245,25 @@ vim.keymap.set("n", "ghp", preview_hunk, { silent = true })
 vim.keymap.set("n", "ghs", stage_hunk, { silent = true })
 vim.keymap.set("n", "ghu", undo_hunk, { silent = true })
 
+local grp = vim.api.nvim_create_augroup("gitsigns", { clear = true })
 -- explicit sync points force a diff (index may have changed without a buffer edit)
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {
+  group = grp,
   callback = function()
     refresh(true)
   end,
 })
 -- idle/edit events are guarded by changedtick inside refresh
 vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI", "TextChanged", "InsertLeave" }, {
+  group = grp,
   callback = function()
     refresh()
+  end,
+})
+-- drop per-buffer state on wipe so the tables don't grow across a long session
+vim.api.nvim_create_autocmd("BufWipeout", {
+  group = grp,
+  callback = function(a)
+    hunks[a.buf], running[a.buf], last_tick[a.buf] = nil, nil, nil
   end,
 })
