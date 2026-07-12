@@ -11,6 +11,9 @@ M.launchers = {} -- name -> function(opts); filled by the sources layer
 -- state }, where state is optional source-owned data (e.g. live grep's mode /
 -- filter / cache). C-o steps through it; <leader>'/" resume by offset.
 local HISTORY_MAX = 10
+local RENDER_CAP = 500 -- highlight/position work is bounded to this many rows
+local DEBOUNCE_MS = 30 -- coalesce a typing burst into one refilter
+local PREVIEW_MS = 60 -- delay preview so fast navigation stays instant
 local history = {}
 local ridx = 0
 local pending_resume -- the entry being resumed, handed to M.open by launch()
@@ -37,6 +40,15 @@ function M.open(cands, opts)
     return filtered[sel] and parse(filtered[sel]) or {}
   end
 
+  -- render the current selection into the preview pane (custom hook or file view)
+  local function do_preview()
+    if opts.preview then
+      opts.preview(v, filtered[sel])
+    else
+      v:preview(item())
+    end
+  end
+
   -- preview reads a file and starts treesitter — debounce it so fast navigation
   -- stays instant and the preview catches up on a pause.
   local function schedule_preview()
@@ -46,13 +58,7 @@ function M.open(cands, opts)
     if ptimer then
       ptimer:stop()
     end
-    ptimer = vim.defer_fn(function()
-      if opts.preview then
-        opts.preview(v, filtered[sel])
-      else
-        v:preview(item())
-      end
-    end, 60)
+    ptimer = vim.defer_fn(do_preview, PREVIEW_MS)
   end
 
   local function paint()
@@ -64,7 +70,7 @@ function M.open(cands, opts)
     local pos = {}
     if opts.line_positions then
       -- a live source (e.g. grep) supplies its own {col,hl} highlights per row
-      for i = 1, math.min(#filtered, 500) do
+      for i = 1, math.min(#filtered, RENDER_CAP) do
         pos[i] = opts.line_positions(filtered[i])
       end
     elseif positions then
@@ -80,7 +86,7 @@ function M.open(cands, opts)
     -- base layer: colour the file path (opts.path_hl -> start,end bytes) under the
     -- match/line highlights, so every picker shows paths like live grep does.
     if opts.path_hl then
-      for i = 1, math.min(#filtered, 500) do
+      for i = 1, math.min(#filtered, RENDER_CAP) do
         local s, e = opts.path_hl(filtered[i])
         if s then
           pos[i] = pos[i] or {}
@@ -142,11 +148,15 @@ function M.open(cands, opts)
       if opts.get_state then
         entry.state = opts.get_state()
       end
-      -- an empty search is noise in the history; drop the entry on close
+      -- an empty search is noise in the history; drop the entry on close and keep
+      -- ridx pointing at the same logical spot so C-o doesn't skip after a prune.
       if vim.trim(entry.query) == "" then
         for i = #history, 1, -1 do
           if history[i] == entry then
             table.remove(history, i)
+            if i <= ridx then
+              ridx = ridx - 1
+            end
             break
           end
         end
@@ -157,6 +167,9 @@ function M.open(cands, opts)
     end
     if ptimer then
       ptimer:stop()
+    end
+    if opts.on_close then
+      opts.on_close() -- let a source tear down async work (e.g. kill a grep job)
     end
     v:close()
   end
@@ -235,7 +248,7 @@ function M.open(cands, opts)
       if ftimer then
         ftimer:stop()
       end
-      ftimer = vim.defer_fn(refilter, 30)
+      ftimer = vim.defer_fn(refilter, DEBOUNCE_MS)
     end,
   })
 
@@ -267,11 +280,7 @@ function M.open(cands, opts)
   map("<C-/>", function()
     v:toggle_preview()
     if v.prev_visible then
-      if opts.preview then
-        opts.preview(v, filtered[sel])
-      else
-        v:preview(item())
-      end
+      do_preview()
     end
   end)
   map("<C-f>", function() page_move(v.page) end)

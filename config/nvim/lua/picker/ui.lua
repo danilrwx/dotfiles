@@ -92,6 +92,9 @@ end
 -- positions[i] = list of { col = 0-based byte, hl = group } for filtered[i], or
 -- nil when there's no active query.
 function View:render_list(filtered, marked, positions)
+  if not vim.api.nvim_buf_is_valid(self.list_buf) then
+    return -- a late async feed can fire after the picker closed
+  end
   vim.bo[self.list_buf].modifiable = true
   vim.api.nvim_buf_set_lines(self.list_buf, 0, -1, false, filtered)
   vim.bo[self.list_buf].modifiable = false
@@ -139,7 +142,9 @@ function View:preview(item)
     return
   end
   vim.api.nvim_win_set_config(self.prev_win, { title = " " .. vim.fn.fnamemodify(item.file, ":t") .. " " })
-  local lines = vim.fn.readfile(item.file, "", 500)
+  -- read enough to include the hit line (grep can point past the first 500)
+  local cap = item.lnum and math.max(500, item.lnum + 50) or 500
+  local lines = vim.fn.readfile(item.file, "", cap)
   -- readfile maps NUL bytes to \n; a line with \n means binary, which
   -- nvim_buf_set_lines rejects — show a placeholder.
   local binary = false
