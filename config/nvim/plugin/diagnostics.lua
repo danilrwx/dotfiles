@@ -43,7 +43,7 @@ picker.launchers.lint = function()
   end)
 end
 
-vim.api.nvim_create_user_command("Lint", picker.launchers.lint, {})
+vim.api.nvim_create_user_command("Diagnostics", picker.launchers.lint, {})
 -- project-wide error search (fzf-lua's <leader>D). The open-buffer LSP
 -- diagnostics list stays available as `:Picker diagnostics`.
 vim.keymap.set("n", "<leader>D", picker.launchers.lint, { silent = true })

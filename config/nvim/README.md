@@ -148,7 +148,7 @@ Completion is native (`vim.lsp.completion`, autotrigger) with
 | `<leader>D` | project-wide error search: runs the linter, hits in a picker |
 | `<leader>q` | toggle the quickfix window |
 
-`<leader>D` (and `:Lint`, `:Picker lint`) runs the whole-project linter
+`<leader>D` (and `:Diagnostics`, `:Picker lint`) runs the whole-project linter
 (`golangci-lint run ./...`, else `go vet ./...`) and opens the results in the
 picker — this covers files you haven't opened, which the LSP doesn't report. For
 the open-buffer LSP diagnostics list use `:Picker diagnostics`.
@@ -206,7 +206,7 @@ Other commands:
 | `:GitFileLog` | current file's full log with patches (in a tab) |
 | `:GitBlame` / `:GitBlameLine` / `:GitLineBlameToggle` / `:GitOpenPR` | blame / PR |
 | `:Grepq {pattern}` | grep into quickfix (uses `grepprg`) |
-| `:Lint` | whole-project lint into a picker (same as `<leader>D`) |
+| `:Diagnostics` | whole-project error search into a picker (same as `<leader>D`) |
 | `:Session{Save,Restore,Delete}` | sessions |
 | `:Oil [dir]` | file manager |
 | `:TSBuild` | download + compile treesitter parsers into `site/parser` |
