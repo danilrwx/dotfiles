@@ -59,6 +59,51 @@ local function uncommitted(hash)
   return hash:match("^0+$") ~= nil
 end
 
+-- run `git blame --line-porcelain` over the buffer's live lines (written to a
+-- temp file so unsaved edits are blamed too) and hand the parsed result + the
+-- raw system result to cb on the main loop. extra: argv before --line-porcelain
+-- (e.g. { "-L", "5,5" } for a single line). Always removes the temp file.
+local function blame_contents(dir, file, lines, extra, cb)
+  local tmp = vim.fn.tempname()
+  vim.fn.writefile(lines, tmp)
+  local cmd = { "git", "-C", dir, "blame" }
+  vim.list_extend(cmd, extra or {})
+  vim.list_extend(cmd, { "--line-porcelain", "--contents", tmp, "--", file })
+  vim.system(cmd, { text = true }, function(r)
+    os.remove(tmp)
+    vim.schedule(function()
+      cb(parse_blame(r.stdout), r)
+    end)
+  end)
+end
+
+-- build a picker preview(v, line) that keys each row via key_of(line), runs
+-- cmd_of(key) once (cached for the picker's lifetime) and renders the output as
+-- filetype ft with title title_of(key). Empty/unkeyed rows clear the pane.
+function M.cached_preview(key_of, cmd_of, ft, title_of)
+  local cache = {}
+  return function(v, line)
+    local key = line and key_of(line)
+    if not key then
+      v:show_text({}, "", "")
+      return
+    end
+    if cache[key] then
+      v:show_text(cache[key], ft, title_of(key))
+      return
+    end
+    vim.system(cmd_of(key), { text = true }, function(r)
+      local dl = vim.split(r.stdout or "", "\n", { trimempty = true })
+      cache[key] = dl
+      vim.schedule(function()
+        pcall(function()
+          v:show_text(dl, ft, title_of(key))
+        end)
+      end)
+    end)
+  end
+end
+
 -- git-highlighted scratch buffer (commit/log/diff). where = "tab" | "split".
 -- dir is the repo, so <CR> on a commit hash can open it (fugitive-style browse).
 local function scratch(lines, name, where, dir)
@@ -149,33 +194,16 @@ function M.file_history(o)
     vim.notify("git: no history for this file")
     return
   end
-  local pcache = {} -- hash -> `git show` lines, for the preview pane
   require("picker").open(items, {
     name = "git_file_history",
     prompt = "File history",
     resuming = o and o.resuming,
     path_hl = hash_span,
-    preview = function(v, line)
-      local hash = line and line:match("^(%x+)")
-      if not hash then
-        v:show_text({}, "", "")
-        return
-      end
-      if pcache[hash] then
-        v:show_text(pcache[hash], "git", hash:sub(1, 10))
-        return
-      end
-      vim.system({ "git", "-C", c.dir, "show", "--no-color", hash, "--", c.file },
-        { text = true }, function(r)
-          local dl = vim.split(r.stdout or "", "\n")
-          pcache[hash] = dl
-          vim.schedule(function()
-            pcall(function()
-              v:show_text(dl, "git", hash:sub(1, 10))
-            end)
-          end)
-        end)
-    end,
+    preview = M.cached_preview(
+      function(line) return line:match("^(%x+)") end,
+      function(hash) return { "git", "-C", c.dir, "show", "--no-color", hash, "--", c.file } end,
+      "git",
+      function(hash) return hash:sub(1, 10) end),
     on_pick = function(line)
       local hash = line:match("^(%x+)")
       if hash then
@@ -208,32 +236,16 @@ function M.commits(o)
     vim.notify("git: no commits")
     return
   end
-  local pcache = {}
   require("picker").open(items, {
     name = "git_commits",
     prompt = "Commits",
     resuming = o and o.resuming,
     path_hl = hash_span,
-    preview = function(v, line)
-      local h = line and line:match("^(%x+)")
-      if not h then
-        v:show_text({}, "", "")
-        return
-      end
-      if pcache[h] then
-        v:show_text(pcache[h], "git", h)
-        return
-      end
-      vim.system({ "git", "-C", r, "show", "--no-color", h }, { text = true }, function(res)
-        local dl = vim.split(res.stdout or "", "\n")
-        pcache[h] = dl
-        vim.schedule(function()
-          pcall(function()
-            v:show_text(dl, "git", h)
-          end)
-        end)
-      end)
-    end,
+    preview = M.cached_preview(
+      function(line) return line:match("^(%x+)") end,
+      function(h) return { "git", "-C", r, "show", "--no-color", h } end,
+      "git",
+      function(h) return h end),
     on_pick = function(line)
       local h = line:match("^(%x+)")
       if h then
@@ -271,21 +283,11 @@ function M.status(o)
     path_hl = function(line)
       return 3, #line
     end,
-    preview = function(v, line)
-      local p = line and status_path(line)
-      if not p then
-        v:show_text({}, "", "")
-        return
-      end
-      vim.system({ "git", "-C", r, "diff", "--no-color", "HEAD", "--", p }, { text = true }, function(res)
-        local dl = vim.split(res.stdout or "", "\n")
-        vim.schedule(function()
-          pcall(function()
-            v:show_text(dl, "diff", p)
-          end)
-        end)
-      end)
-    end,
+    preview = M.cached_preview(
+      status_path,
+      function(p) return { "git", "-C", r, "diff", "--no-color", "HEAD", "--", p } end,
+      "diff",
+      function(p) return p end),
     actions = {
       ["<C-s>"] = function(ctx)
         if ctx.sel then
@@ -368,15 +370,8 @@ function M.blame_line()
     return
   end
   local lnum = vim.fn.line(".")
-  local tmp = vim.fn.tempname()
-  vim.fn.writefile(vim.fn.getline(1, "$"), tmp)
-  vim.system({
-    "git", "-C", c.dir, "blame", "-L", lnum .. "," .. lnum,
-    "--line-porcelain", "--contents", tmp, "--", c.file,
-  }, { text = true }, function(r)
-    os.remove(tmp)
-    vim.schedule(function()
-      local _, e = next(parse_blame(r.stdout))
+  blame_contents(c.dir, c.file, vim.fn.getline(1, "$"), { "-L", lnum .. "," .. lnum }, function(bl)
+      local _, e = next(bl)
       if not e then
         vim.notify("git blame: no info")
         return
@@ -395,10 +390,12 @@ function M.blame_line()
         w = math.max(w, vim.fn.strdisplaywidth(l))
       end
       local buf = vim.api.nvim_create_buf(false, true)
+      vim.bo[buf].bufhidden = "wipe" -- drop the scratch buffer with its window
       vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
       local ns = vim.api.nvim_create_namespace("git_blame_float")
       local function hl(group, ln, from, to)
-        pcall(vim.api.nvim_buf_add_highlight, buf, ns, group, ln, from, to)
+        local endcol = to == -1 and #lines[ln + 1] or to
+        pcall(vim.api.nvim_buf_set_extmark, buf, ns, ln, from, { end_col = endcol, hl_group = group })
       end
       if committed then
         hl("Type", 0, 0, 10) -- hash
@@ -410,7 +407,7 @@ function M.blame_line()
         hl("Comment", 0, 0, -1)
       end
       -- flip above the cursor when there isn't room below, so the float never
-      -- spills past the bottom of the window.
+      -- spills past the bottom of the window (+2 leaves room for its border).
       local below = vim.api.nvim_win_get_height(0) - vim.fn.winline()
       local anchor, row = "NW", 1
       if #lines + 2 > below then
@@ -437,11 +434,11 @@ function M.blame_line()
         end, { buffer = buf })
       end
     end)
-  end)
 end
 
 local blame_ns = vim.api.nvim_create_namespace("git_blame")
 local blame_on = {}
+local blame_pending = {} -- buf -> true while a full-blame git call is in flight
 local cur_ns = vim.api.nvim_create_namespace("git_cur_blame")
 local refresh_cur -- forward decl (defined in the current-line section below)
 
@@ -456,32 +453,30 @@ function M.blame_toggle()
     end
     return
   end
+  if blame_pending[buf] then
+    return -- a full-blame call is already running for this buffer
+  end
   -- full blame annotates every line, so drop the current-line one to avoid overlap
   vim.api.nvim_buf_clear_namespace(buf, cur_ns, 0, -1)
   local c = ctx()
   if not c then
     return
   end
-  local tmp = vim.fn.tempname()
-  vim.fn.writefile(vim.fn.getline(1, "$"), tmp)
-  vim.system({
-    "git", "-C", c.dir, "blame", "--line-porcelain", "--contents", tmp, "--", c.file,
-  }, { text = true }, function(r)
-    os.remove(tmp)
-    vim.schedule(function()
-      if not vim.api.nvim_buf_is_valid(buf) then
-        return
-      end
-      for line, e in pairs(parse_blame(r.stdout)) do
-        local text = uncommitted(e.hash) and "● uncommitted"
-          or (e.hash:sub(1, 8) .. " · " .. (e.author or "?") .. " · " .. (e.time and reldate(e.time) or "?"))
-        pcall(vim.api.nvim_buf_set_extmark, buf, blame_ns, line - 1, 0, {
-          virt_text = { { text, "Comment" } },
-          virt_text_pos = "right_align",
-        })
-      end
-      blame_on[buf] = true
-    end)
+  blame_pending[buf] = true
+  blame_contents(c.dir, c.file, vim.fn.getline(1, "$"), nil, function(bl)
+    blame_pending[buf] = nil
+    if not vim.api.nvim_buf_is_valid(buf) then
+      return
+    end
+    for line, e in pairs(bl) do
+      local text = uncommitted(e.hash) and "● uncommitted"
+        or (e.hash:sub(1, 8) .. " · " .. (e.author or "?") .. " · " .. (e.time and reldate(e.time) or "?"))
+      pcall(vim.api.nvim_buf_set_extmark, buf, blame_ns, line - 1, 0, {
+        virt_text = { { text, "Comment" } },
+        virt_text_pos = "right_align",
+      })
+    end
+    blame_on[buf] = true
   end)
 end
 
@@ -533,19 +528,13 @@ refresh_cur = function(buf)
   lb_pending[buf] = true
   local file = vim.api.nvim_buf_get_name(buf)
   local dir = vim.fn.fnamemodify(file, ":h")
-  local tmp = vim.fn.tempname()
-  vim.fn.writefile(vim.api.nvim_buf_get_lines(buf, 0, -1, false), tmp)
-  vim.system({ "git", "-C", dir, "blame", "--line-porcelain", "--contents", tmp, "--", file },
-    { text = true }, function(r)
-      os.remove(tmp)
-      vim.schedule(function()
-        lb_pending[buf] = nil
-        if r.code == 0 and vim.api.nvim_buf_is_valid(buf) then
-          lb_cache[buf] = { tick = tick, data = parse_blame(r.stdout) }
-          render_cur(buf)
-        end
-      end)
-    end)
+  blame_contents(dir, file, vim.api.nvim_buf_get_lines(buf, 0, -1, false), nil, function(bl, r)
+    lb_pending[buf] = nil
+    if r.code == 0 and vim.api.nvim_buf_is_valid(buf) then
+      lb_cache[buf] = { tick = tick, data = bl }
+      render_cur(buf)
+    end
+  end)
 end
 
 function M.line_blame_toggle()
@@ -593,7 +582,20 @@ function M.setup_current_line()
       refresh_cur(a.buf)
     end,
   })
+  -- drop per-buffer state when a buffer is wiped, so the tables don't grow
+  -- unbounded across a long session.
+  vim.api.nvim_create_autocmd("BufWipeout", {
+    group = grp,
+    callback = function(a)
+      blame_on[a.buf], blame_pending[a.buf] = nil, nil
+      lb_cache[a.buf], lb_pending[a.buf] = nil, nil
+    end,
+  })
 end
+
+-- exported for reuse (gitsigns, picker sources) so root/symlink logic lives once
+M.root = root
+M.is_symlink = is_symlink
 
 -- register the picker-backed views as launchers so C-o / <leader>' can resume
 -- them (they reresolve ctx/root for the current buffer on reopen).
