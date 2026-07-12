@@ -8,7 +8,9 @@ vim.o.softtabstop = 2
 vim.o.smartindent = true
 vim.o.number = true
 vim.o.updatetime = 100
-vim.o.signcolumn = "number"
+vim.o.signcolumn = "yes:1"
+-- number then the git sign glyph tight against it (%s), no separate sign column
+vim.o.statuscolumn = "%=%l%s"
 vim.o.laststatus = 0
 vim.o.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
 vim.o.winborder = "rounded"
