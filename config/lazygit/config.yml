@@ -13,3 +13,5 @@ git:
     signOff: true
   autoFetch: false
   autoRefresh: false
+services:
+  "fox.flant.com": "gitlab:fox.flant.com"
