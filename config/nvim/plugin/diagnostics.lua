@@ -99,7 +99,9 @@ local function lint_project()
       vim.fn.setqflist({}, " ", {
         title = table.concat(cmd, " "),
         lines = lines,
-        efm = [[%-G#%.%#,%f:%l:%c: %m,%f:%l: %m]],
+        -- trailing %-G%.%# drops every non-issue line (golangci's `/*`, summary,
+        -- blank lines) so only real file:line entries land in the quickfix.
+        efm = [[%-G#%.%#,%f:%l:%c: %m,%f:%l: %m,%-G%.%#]],
       })
 
       local valid = vim.tbl_filter(function(i)
