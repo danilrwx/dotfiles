@@ -54,6 +54,20 @@ end
 
 vim.keymap.set("n", "<leader>D", picker.launchers.diagnostics, { silent = true })
 
+-- The linter's ./... is module-scoped, so run it from the right root: the go.work
+-- dir if the file sits in a workspace, else the nearest enclosing go.mod. Running
+-- from nvim's cwd misses issues in multi-module repos with no root module.
+local function module_root()
+  local file = vim.api.nvim_buf_get_name(0)
+  local dir = file ~= "" and vim.fs.dirname(file) or vim.fn.getcwd()
+  local work = vim.fs.find("go.work", { path = dir, upward = true })[1]
+  if work then
+    return vim.fs.dirname(work)
+  end
+  local mod = vim.fs.find("go.mod", { path = dir, upward = true })[1]
+  return mod and vim.fs.dirname(mod) or nil
+end
+
 -- Whole-project lint into the quickfix: the LSP only reports open buffers, so run
 -- the project linter (golangci-lint, else `go vet`) async and parse its output.
 -- Kept as a command, separate from the diagnostics picker.
@@ -66,9 +80,21 @@ local function lint_project()
     return
   end
 
-  vim.notify("running " .. table.concat(cmd, " ") .. " …")
-  vim.system(cmd, { text = true }, function(res)
+  local root = module_root()
+  if not root then
+    vim.notify("lint: no go.work / go.mod above this file", vim.log.levels.WARN)
+    return
+  end
+
+  vim.notify("running " .. table.concat(cmd, " ") .. " in " .. vim.fn.fnamemodify(root, ":~") .. " …")
+  vim.system(cmd, { cwd = root, text = true }, function(res)
     local lines = vim.split((res.stdout or "") .. (res.stderr or ""), "\n")
+    -- paths are printed relative to `root` (typecheck errors ignore --path-mode);
+    -- absolutise them so quickfix resolves regardless of nvim's cwd.
+    local prefix = root .. "/"
+    for i, l in ipairs(lines) do
+      lines[i] = l:gsub("^([^%s/][^:]-%.go):", prefix .. "%1:")
+    end
     vim.schedule(function()
       vim.fn.setqflist({}, " ", {
         title = table.concat(cmd, " "),
