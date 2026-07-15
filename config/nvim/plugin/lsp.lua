@@ -26,18 +26,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, { autotrigger = true })
 
     -- code lenses (gopls shows a "run go generate" lens above //go:generate
-    -- directives): render them, refresh on view/edit, grc runs the one under the
-    -- cursor. Own per-buffer augroup so a re-attach doesn't stack refreshers.
+    -- directives): enable() renders them and owns its own debounced refresh on
+    -- view/edit; grc runs the one under the cursor.
     if client:supports_method("textDocument/codeLens") then
-      local grp = vim.api.nvim_create_augroup("lsp_codelens_" .. ev.buf, { clear = true })
-      vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
-        group = grp,
-        buffer = ev.buf,
-        callback = function()
-          vim.lsp.codelens.refresh({ bufnr = ev.buf })
-        end,
-      })
-      vim.lsp.codelens.refresh({ bufnr = ev.buf })
+      vim.lsp.codelens.enable(true, { bufnr = ev.buf })
       vim.keymap.set("n", "grc", vim.lsp.codelens.run, { buffer = ev.buf })
     end
 
