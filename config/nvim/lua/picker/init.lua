@@ -240,9 +240,12 @@ function M.open(cands, opts)
     if #history <= 1 then
       return -- only this picker in history; nothing to switch to (don't close)
     end
+    -- pick the target before close(): closing an empty-query picker prunes it
+    -- from history and shifts ridx, so a post-close index would miss.
+    local target = history[(ridx - 1 + step) % #history + 1]
     close()
     vim.schedule(function()
-      M.advance(step)
+      M.resume_entry(target)
     end)
   end
 
@@ -357,11 +360,14 @@ local function launch(i)
   pending_resume = nil
 end
 
-function M.advance(step)
-  if #history <= 1 then
-    return
+-- Resume a specific history entry by reference, regardless of index shifts
+-- (close() may have pruned an empty current entry between capture and relaunch).
+function M.resume_entry(entry)
+  for i = #history, 1, -1 do
+    if history[i] == entry then
+      return launch(i)
+    end
   end
-  launch((ridx - 1 + step) % #history + 1) -- wrap
 end
 
 function M.resume(offset)
