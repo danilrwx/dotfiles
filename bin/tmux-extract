@@ -22,7 +22,8 @@ fi
 
 pane=$(tmux display-message -p '#{pane_id}')
 
-out=$(tmux capture-pane -pJ -t "$pane" -S -200 | extract \
+out=$(tmux list-panes -F '#{pane_id}' \
+  | while read -r p; do tmux capture-pane -pJ -t "$p" -S -200; done | extract \
   | fzf --no-sort --tac --height=100% --expect=tab,enter \
         --input-label=' extract ' \
         --header='Enter: Copy   Tab: Insert   Esc: Cancel') || exit 0
