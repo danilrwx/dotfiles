@@ -20,9 +20,9 @@ cd ~/dotfiles && ./install
 
 `./install` symlinks the configs, installs the system CLIs (`zsh`, `git`, `tmux`,
 `fzf`, `jq`, `gnupg`) from brew/apt, and everything else (Go, Node, `neovim`,
-`kubectl`, `helm`, `gh`, `glab`, `golangci-lint`, `gopls`, …) through
-[mise](https://mise.jdx.dev) from `config/mise/config.toml`. `d8` and `claude`
-use their own installers. It also sets `zsh` as the login shell.
+`kubectl`, `helm`, `gh`, `glab`, `d8`, `golangci-lint`, `gopls`, the LSP servers,
+…) through [mise](https://mise.jdx.dev) from `config/mise/config.toml`. `claude`
+uses its own installer. It also sets `zsh` as the login shell.
 
 On a bare Debian netinst (no desktop task selected) run `./install --desktop`
 instead: it additionally installs X11, lightdm, and the i3 desktop stack mirroring
