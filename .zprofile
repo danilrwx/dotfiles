@@ -1,9 +1,10 @@
-for b in /opt/homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
-  [ -x "$b" ] && eval "$($b shellenv)"
-done
+if [ -x /opt/homebrew/bin/brew ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 
 typeset -U path PATH
 
+export PATH="/usr/local/go/bin:$PATH"
 export PATH="$HOME/go/bin:$PATH"
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"

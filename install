@@ -71,30 +71,26 @@ if [ "$ID" == "fedora" ]; then
 
   sudo dnf install -y lame\* --exclude=lame-devel
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
-  # dev tools (tmux, gpg, …) come from brew via tools/repo.sh; keep only the
-  # system/GUI packages and brew prerequisites (git, make) here.
+  # ops binaries (go, kubectl, gh, glab, yq, neovim, …) come from devcontainer/tools/binaries.sh
   sudo dnf install -y git make wget zip unzip curl file procps-ng tigervnc openssh-askpass pinentry-gnome3 virt-manager \
-	xclip xsel zsh telegram-desktop discord
+	xclip xsel zsh tmux fzf jq gnupg2 htop ugrep ripgrep nodejs npm telegram-desktop discord
 elif [ "$ID" == "ubuntu" ]; then
   log "Installing ubuntu packages"
 
   sudo apt update -y
 
-  # dev tools (tmux, gpg, …) come from brew via tools/repo.sh; keep only the
-  # system/GUI packages and brew prerequisites (build-essential, git) here.
+  # ops binaries (go, kubectl, gh, glab, yq, neovim, …) come from devcontainer/tools/binaries.sh
   sudo apt install -y build-essential git wget zip unzip curl file procps tigervnc-viewer ssh-askpass pinentry-gnome3 \
-	virt-manager xclip xsel zsh
+	virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop lazygit ugrep ripgrep nodejs npm
 fi
 
 
-# Install Homebrew ──────────────────────────────────────────────────────────────────────────────────────────────────────
-if ! command -v brew &> /dev/null; then
+# Install Homebrew (macOS only) ─────────────────────────────────────────────────────────────────────────────────────────
+if [[ "$OS" == "Darwin" ]] && [ ! -x /opt/homebrew/bin/brew ]; then
   log "Installing homebrew"
   NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
-for b in /opt/homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
-  [ -x "$b" ] && eval "$($b shellenv)"
-done
+[ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
 
 # Install DevPod CLI (runs the devbox dev container: docker locally, kubernetes
@@ -113,8 +109,15 @@ fi
 
 # Host tooling: launcher + ops CLIs + the Go dev toolchain ──────────────────────────────────────────────────────────────
 log "Installing host tools"
-brew install go kubectl gh glab tmux fzf jq yq gnupg watch htop lazygit ugrep node neovim
-[[ "$OS" == "Darwin" ]] && brew install pinentry-mac
+if [[ "$OS" == "Darwin" ]]; then
+  brew install go kubectl gh glab tmux fzf jq yq gnupg pinentry-mac watch htop lazygit ugrep node neovim
+else
+  # same static binaries as the devbox image (go into /usr/local/go, the rest into /usr/local/bin)
+  bash "$HOME/dotfiles/devcontainer/tools/binaries.sh"
+  export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
+  # lazygit is not in Fedora repos
+  command -v lazygit &> /dev/null || go install github.com/jesseduffield/lazygit@latest
+fi
 
 # Go dev tools into ~/go/bin (same set as the devbox image, devcontainer/tools/go.sh)
 log "Installing go tools"
