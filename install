@@ -153,15 +153,15 @@ fi
 # Discord: official tar.gz into ~/.local/Discord (Linux desktop only). It does not
 # self-update: when the client refuses to start, rm -rf ~/.local/Discord and rerun
 if [[ "$OS" == "Linux" ]] && [ "$DESKTOP" == 1 ]; then
-  if [ ! -x "$HOME/.local/Discord/Discord" ]; then
+  if [ ! -x "$HOME/.local/Discord/discord" ]; then
     log "Installing Discord"
     mkdir -p "$HOME/.local/bin"
     curl -fsSL "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xzf - -C "$HOME/.local"
-    ln -sf "$HOME/.local/Discord/Discord" "$HOME/.local/bin/discord"
+    ln -sf "$HOME/.local/Discord/discord" "$HOME/.local/bin/discord"
   fi
   log "Refreshing desktop entries"
   mkdir -p "$HOME/.local/share/applications"
-  sed "s|^Exec=.*|Exec=$HOME/.local/Discord/Discord|;s|^Icon=.*|Icon=$HOME/.local/Discord/discord.png|" \
+  sed "s|^Exec=.*|Exec=$HOME/.local/Discord/discord|;s|^Icon=.*|Icon=$HOME/.local/Discord/discord.png|" \
     "$HOME/.local/Discord/discord.desktop" > "$HOME/.local/share/applications/discord.desktop"
   update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
   rm -f "$HOME/.cache/dmenu_run"
