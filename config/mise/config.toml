@@ -1,3 +1,9 @@
+# slow GitHub link: the 30s default drops big downloads mid-way
+[settings]
+http_timeout = "15m"
+fetch_remote_versions_timeout = "2m"
+jobs = 2
+
 [tools]
 go = "1.25"
 node = "lts"
