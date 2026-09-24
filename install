@@ -63,8 +63,6 @@ if [[ "$OS" == "Linux" ]]; then
   ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
   ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
   ln -sf $HOME/dotfiles/.Xresources $HOME/
-  mkdir -p $HOME/.config/xfce4/xfconf/xfce-perchannel-xml
-  ln -sf $HOME/dotfiles/config/xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/
 fi
 
 # Install packages for different OSes ───────────────────────────────────────────────────────────────────────────────────
@@ -75,7 +73,7 @@ if [[ "$OS" == "Linux" ]]; then
   sudo apt install -y build-essential git wget zip unzip curl file procps tigervnc-viewer ssh-askpass pinentry-gnome3 \
 	virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop lazygit ugrep ripgrep nodejs npm golang-go gh neovim \
 	i3 i3lock suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin \
-	x11-xserver-utils pavucontrol bc xfce4-terminal
+	x11-xserver-utils pavucontrol bc alacritty
 fi
 
 
