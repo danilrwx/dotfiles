@@ -79,7 +79,7 @@ if [[ "$OS" == "Linux" ]]; then
   log "Installing apt packages"
   sudo apt update -y
 
-  sudo apt install -y build-essential git wget zip unzip curl file procps zsh tmux fzf jq gnupg2 pinentry-curses \
+  sudo apt install -y build-essential git wget zip unzip curl file procps zsh tmux fzf jq gnupg2 \
 	htop lazygit ugrep ripgrep nodejs npm golang-go gh neovim
 fi
 
