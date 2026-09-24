@@ -71,17 +71,17 @@ if [ "$ID" == "fedora" ]; then
 
   sudo dnf install -y lame\* --exclude=lame-devel
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
-  # ops binaries (go, kubectl, gh, glab, yq, neovim, …) come from devcontainer/tools/binaries.sh
   sudo dnf install -y git make wget zip unzip curl file procps-ng tigervnc openssh-askpass pinentry-gnome3 virt-manager \
-	xclip xsel zsh tmux fzf jq gnupg2 htop ugrep ripgrep nodejs npm telegram-desktop discord
+	xclip xsel zsh tmux fzf jq gnupg2 htop ugrep ripgrep nodejs npm telegram-desktop discord \
+	golang kubernetes-client helm gh glab neovim
 elif [ "$ID" == "ubuntu" ]; then
   log "Installing ubuntu packages"
 
   sudo apt update -y
 
-  # ops binaries (go, kubectl, gh, glab, yq, neovim, …) come from devcontainer/tools/binaries.sh
+  # kubectl, helm and glab are not in apt
   sudo apt install -y build-essential git wget zip unzip curl file procps tigervnc-viewer ssh-askpass pinentry-gnome3 \
-	virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop lazygit ugrep ripgrep nodejs npm
+	virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop lazygit ugrep ripgrep nodejs npm golang-go gh neovim
 fi
 
 
@@ -112,15 +112,11 @@ if [[ "$OS" == "Darwin" ]]; then
   log "Installing host tools from brew"
   brew install go kubectl gh glab tmux fzf jq yq gnupg pinentry-mac watch htop lazygit ugrep node neovim
 else
-  # same static binaries as the devbox image (go into /usr/local/go, the rest into /usr/local/bin)
-  log "Installing host binaries (go, kubectl, gh, glab, yq, neovim, …)"
-  bash "$HOME/dotfiles/devcontainer/tools/binaries.sh"
-  export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
-  # lazygit is not in Fedora repos
-  if ! command -v lazygit &> /dev/null; then
-    log "Installing lazygit"
-    go install github.com/jesseduffield/lazygit@latest
-  fi
+  export PATH="$HOME/go/bin:$PATH"
+  # yq (mikefarah) and lazygit are not in Fedora repos
+  log "Installing yq and lazygit"
+  go install github.com/mikefarah/yq/v4@latest
+  command -v lazygit &> /dev/null || go install github.com/jesseduffield/lazygit@latest
 fi
 
 # Go dev tools into ~/go/bin (same set as the devbox image, devcontainer/tools/go.sh)
