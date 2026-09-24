@@ -23,9 +23,10 @@ cd ~/dotfiles && ./install
 and sets `zsh` as the login shell.
 
 On a bare Debian netinst (no desktop task selected) run `./install --desktop`
-instead: it additionally installs X11, lightdm, and the i3 desktop stack modelled
-on the Fedora i3 Spin (nm-applet, thunar, mousepad, firefox, polkit agent,
-pipewire, fonts, firmware) and enables lightdm and NetworkManager.
+instead: it additionally installs X11, lightdm, and the i3 desktop stack mirroring
+the Fedora i3 Spin comps group (i3status, nm-applet, mousepad, pavucontrol,
+volumeicon, firefox, pipewire, fonts, firmware) and enables lightdm and
+NetworkManager.
 
 ## Base config on other servers
 

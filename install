@@ -80,17 +80,17 @@ if [[ "$OS" == "Linux" ]]; then
 	x11-xserver-utils pavucontrol bc alacritty
 fi
 
-# Desktop stack for a bare netinst, modelled on the Fedora i3 Spin (lightdm, i3,
-# nm-applet, thunar, mousepad, firefox, polkit agent, audio, fonts) ────────────────────────────────────────────────────
+# Desktop stack for a bare netinst, mirroring the Fedora i3 Spin comps group "i3"
+# (lightdm, i3status, nm-applet, mousepad, pavucontrol, volumeicon, firefox) plus
+# its base-x / fonts / hardware-support / multimedia environment groups ────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
   log "Installing desktop packages"
-  sudo apt install -y xorg xinit lightdm lightdm-gtk-greeter \
-	network-manager network-manager-gnome \
-	pipewire pipewire-pulse wireplumber alsa-utils \
-	thunar thunar-volman thunar-archive-plugin gvfs gvfs-backends xarchiver mousepad \
-	firefox-esr feh arandr lxpolkit gnome-keyring xdg-utils xdg-user-dirs \
+  sudo apt install -y xorg xinit lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings \
+	i3status network-manager network-manager-gnome \
+	pipewire pipewire-pulse wireplumber pulseaudio-utils alsa-utils volumeicon-alsa \
+	mousepad firefox-esr feh lxpolkit xdg-utils xdg-user-dirs \
 	fonts-dejavu fonts-noto-core fonts-noto-color-emoji \
-	blueman bluez firmware-linux
+	firmware-linux
   sudo systemctl enable lightdm NetworkManager
 fi
 
