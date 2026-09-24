@@ -50,8 +50,4 @@ alias vim=nvim
 alias lg='lazygit'
 
 setopt PROMPT_SUBST
-if [ -n "${DEVCONTAINER:-}" ]; then
-  PROMPT='[%F{11}%*%f] %F{9}[${DEVCONTAINER}]%f %F{green}%~%f %F{12}󰅂%f '
-else
-  PROMPT='[%F{11}%*%f] %F{green}%~%f %F{12}󰅂%f '
-fi
+PROMPT='[%F{11}%*%f] %F{green}%~%f %F{12}󰅂%f '

@@ -35,13 +35,14 @@ log "Linking configs"
 mkdir -p $HOME/.config
 mkdir -p $HOME/.local/share
 
-# CLI/shell configs shared with the devbox container
-bash $HOME/dotfiles/devcontainer/links.sh
-
-# Host-only GUI terminal configs
-ln -snf $HOME/dotfiles/config/kitty $HOME/.config/
-ln -snf $HOME/dotfiles/config/alacritty $HOME/.config/
-ln -snf $HOME/dotfiles/config/ghostty $HOME/.config/
+ln -sf $HOME/dotfiles/.gitconfig $HOME/
+ln -sf $HOME/dotfiles/.gitignore_global $HOME/
+ln -sf $HOME/dotfiles/.tmux.conf $HOME/.tmux.conf
+ln -sf $HOME/dotfiles/.zprofile $HOME/
+ln -sf $HOME/dotfiles/.zshrc $HOME/
+for c in k9s htop lazygit nvim kitty alacritty ghostty; do
+  ln -snf $HOME/dotfiles/config/$c $HOME/.config/
+done
 
 # Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
 # plugin. Queries are vendored in the repo; parsers are compiled here.
@@ -93,20 +94,6 @@ fi
 [ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
 
-# Install DevPod CLI (runs the devbox dev container: docker locally, kubernetes
-# for remote; forwards ssh-agent and gpg-agent) ─────────────────────────────────────────────────────────────────────────
-if ! command -v devpod &> /dev/null; then
-  log "Installing devpod CLI"
-  arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
-  os=$(uname -s | tr '[:upper:]' '[:lower:]')
-  mkdir -p "$HOME/.local/bin"
-  curl -fsSL -o "$HOME/.local/bin/devpod" \
-    "https://github.com/loft-sh/devpod/releases/latest/download/devpod-${os}-${arch}"
-  chmod +x "$HOME/.local/bin/devpod"
-  bash "$HOME/dotfiles/bin/devbox" provider || true
-fi
-
-
 # Host tooling: launcher + ops CLIs + the Go dev toolchain ──────────────────────────────────────────────────────────────
 if [[ "$OS" == "Darwin" ]]; then
   log "Installing host tools from brew"
@@ -119,7 +106,7 @@ else
   command -v lazygit &> /dev/null || go install github.com/jesseduffield/lazygit@latest
 fi
 
-# Go dev tools into ~/go/bin (same set as the devbox image, devcontainer/tools/go.sh)
+# Go dev tools into ~/go/bin
 log "Installing go tools"
 go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
 go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
@@ -154,9 +141,11 @@ if [[ "$OS" == "Linux" ]]; then
 fi
 
 
-# Shell extras (completions + tmux plugins) shared with the devbox container ────────────────────────────────────────────
-log "Installing shell extras"
-bash "$HOME/dotfiles/devcontainer/shell-setup.sh"
+# zsh completions (sourced from .zshrc) ────────────────────────────────────────────────────────────────────────────────
+log "Generating zsh completions"
+mkdir -p $HOME/.local/share/completions
+command -v fzf     >/dev/null && fzf --zsh              > $HOME/.local/share/completions/fzf.zsh     2>/dev/null || true
+command -v kubectl >/dev/null && kubectl completion zsh > $HOME/.local/share/completions/kubectl.zsh 2>/dev/null || true
 
 
 # Linux desktop: docker, groups, fonts ─────────────────────────────────────────────────────────────────────────────────
