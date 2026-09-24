@@ -139,8 +139,9 @@ if ! command -v mise &> /dev/null && [ ! -x "$HOME/.local/bin/mise" ]; then
 fi
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 
-# gh first: a logged-in gh gives mise a token, otherwise the unauthenticated
-# GitHub API limit (60/h) is exhausted resolving the rest of the tools
+# gh first: mise reads the token of a logged-in gh (github.gh_cli_tokens),
+# otherwise the unauthenticated GitHub API limit (60/h) is exhausted resolving
+# the rest of the tools. Drop version lists cached while rate-limited.
 log "Installing gh"
 mise install -y gh
 if ! gh auth status &> /dev/null; then
@@ -148,7 +149,7 @@ if ! gh auth status &> /dev/null; then
   gh auth login
   gh auth status &> /dev/null || { log "Not logged in to GitHub. Aborting."; exit 1; }
 fi
-export MISE_GITHUB_TOKEN="$(gh auth token)"
+mise cache clear
 
 log "Installing mise tools"
 mise install -y
