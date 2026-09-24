@@ -43,9 +43,14 @@ ln -sf $HOME/dotfiles/.gitignore_global $HOME/
 ln -sf $HOME/dotfiles/.tmux.conf $HOME/.tmux.conf
 ln -sf $HOME/dotfiles/.zprofile $HOME/
 ln -sf $HOME/dotfiles/.zshrc $HOME/
-for c in k9s htop lazygit nvim kitty alacritty ghostty; do
+for c in k9s htop lazygit nvim; do
   ln -snf $HOME/dotfiles/config/$c $HOME/.config/
 done
+if [[ "$OS" == "Darwin" ]] || [ "$DESKTOP" == 1 ]; then
+  for c in kitty alacritty ghostty; do
+    ln -snf $HOME/dotfiles/config/$c $HOME/.config/
+  done
+fi
 
 # Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
 # plugin. Queries are vendored in the repo; parsers are compiled here.
@@ -63,7 +68,7 @@ if [ -f $HOME/dotfiles/private/install ]; then
   fi
 fi
 
-if [[ "$OS" == "Linux" ]]; then
+if [ "$DESKTOP" == 1 ]; then
   ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
   ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
   ln -sf $HOME/dotfiles/.Xresources $HOME/
@@ -74,10 +79,8 @@ if [[ "$OS" == "Linux" ]]; then
   log "Installing apt packages"
   sudo apt update -y
 
-  sudo apt install -y build-essential git wget zip unzip curl file procps tigervnc-viewer ssh-askpass pinentry-gnome3 \
-	virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop lazygit ugrep ripgrep nodejs npm golang-go gh neovim \
-	i3 i3lock suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin \
-	x11-xserver-utils pavucontrol bc alacritty
+  sudo apt install -y build-essential git wget zip unzip curl file procps zsh tmux fzf jq gnupg2 pinentry-curses \
+	htop lazygit ugrep ripgrep nodejs npm golang-go gh neovim
 fi
 
 # Desktop stack for a bare netinst, mirroring the Fedora i3 Spin comps group "i3"
@@ -86,11 +89,13 @@ fi
 if [ "$DESKTOP" == 1 ]; then
   log "Installing desktop packages"
   sudo apt install -y xorg xinit lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings \
-	i3status network-manager network-manager-gnome \
-	pipewire pipewire-pulse wireplumber pulseaudio-utils alsa-utils volumeicon-alsa \
+	i3 i3lock i3status suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin \
+	x11-xserver-utils xclip xsel bc alacritty \
+	network-manager network-manager-gnome \
+	pipewire pipewire-pulse wireplumber pulseaudio-utils alsa-utils pavucontrol volumeicon-alsa \
 	mousepad firefox-esr feh lxpolkit xdg-utils xdg-user-dirs \
-	fonts-dejavu fonts-noto-core fonts-noto-color-emoji \
-	firmware-linux
+	fonts-dejavu fonts-noto-core fonts-noto-color-emoji firmware-linux \
+	virt-manager tigervnc-viewer ssh-askpass pinentry-gnome3
   sudo systemctl enable lightdm NetworkManager
 fi
 
@@ -135,7 +140,7 @@ else
   fi
 
   # Telegram: official static build into ~/.local/Telegram
-  if ! command -v Telegram &> /dev/null && [ ! -x "$HOME/.local/Telegram/Telegram" ]; then
+  if [ "$DESKTOP" == 1 ] && [ ! -x "$HOME/.local/Telegram/Telegram" ]; then
     log "Installing Telegram"
     mkdir -p "$HOME/.local/bin"
     curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJf - -C "$HOME/.local"
@@ -187,7 +192,7 @@ command -v fzf     >/dev/null && fzf --zsh              > $HOME/.local/share/com
 command -v kubectl >/dev/null && kubectl completion zsh > $HOME/.local/share/completions/kubectl.zsh 2>/dev/null || true
 
 
-# Linux desktop: docker, groups, fonts ─────────────────────────────────────────────────────────────────────────────────
+# Linux: docker; then (--desktop only) libvirt group and fonts ─────────────────────────────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
   # install docker ──────────────────────────────────────────────────────────────────────────────────────────────────────
   if [ ! -f /usr/bin/docker ]; then
@@ -205,6 +210,8 @@ if [[ "$OS" == "Linux" ]]; then
     log "Adding user to docker group"
     sudo usermod -aG docker $USER
   fi
+
+  [ "$DESKTOP" == 1 ] || exit 0
 
   # add user to libvirt group ───────────────────────────────────────────────────────────────────────────────────────────
   if ! groups | grep -q '\blibvirt\b'; then
