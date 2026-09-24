@@ -131,8 +131,10 @@ go install github.com/google/go-containerregistry/cmd/crane@latest
 go install github.com/go-task/task/v3/cmd/task@latest
 
 # claude-code via the native installer (self-updating, no node needed)
-log "Installing claude-code"
-curl -fsSL https://claude.ai/install.sh | bash
+if ! command -v claude &> /dev/null; then
+  log "Installing claude-code"
+  curl -fsSL https://claude.ai/install.sh | bash
+fi
 
 # d8 / deckhouse-cli (official installer; default INSTALL_DIR is /opt not on PATH)
 if ! command -v d8 &> /dev/null; then
