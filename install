@@ -20,6 +20,7 @@ fi
 
 # SSH remote and private submodules (need ~/.ssh) ─────────────────────────────────────────────────────────────────────
 if [ -d "$HOME/.ssh" ]; then
+  log "Switching origin to ssh and updating submodules"
   git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
   if ! git submodule update --init --recursive; then
@@ -30,6 +31,7 @@ else
 fi
 
 # Create directories and synlinks to config files ───────────────────────────────────────────────────────────────────────
+log "Linking configs"
 mkdir -p $HOME/.config
 mkdir -p $HOME/.local/share
 
@@ -44,12 +46,14 @@ ln -snf $HOME/dotfiles/config/ghostty $HOME/.config/
 # Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
 # plugin. Queries are vendored in the repo; parsers are compiled here.
 if command -v cc >/dev/null 2>&1; then
+  log "Building treesitter parsers"
   nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
 fi
 
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
 # which also keeps those paths out of this public repo.
 if [ -f $HOME/dotfiles/private/install ]; then
+  log "Running private install"
   if ! "$HOME/dotfiles/private/install"; then
     log "Failed to run private install. Continue installation."
   fi
@@ -125,6 +129,7 @@ go install github.com/google/go-containerregistry/cmd/crane@latest
 go install github.com/go-task/task/v3/cmd/task@latest
 
 # claude-code via the native installer (self-updating, no node needed)
+log "Installing claude-code"
 curl -fsSL https://claude.ai/install.sh | bash
 
 # d8 / deckhouse-cli (official installer; default INSTALL_DIR is /opt not on PATH)
@@ -166,6 +171,7 @@ if [[ "$OS" == "Linux" ]]; then
 
   # install google chrome ───────────────────────────────────────────────────────────────────────────────────────────────
   if ! command -v google-chrome &> /dev/null; then
+    log "Installing google chrome"
     if [ "$ID" == "ubuntu" ]; then
       wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
       sudo dpkg -i google-chrome-stable_current_amd64.deb
