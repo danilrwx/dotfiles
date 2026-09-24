@@ -5,8 +5,7 @@ log() {
 }
 
 # ./install [--desktop] [--ru-mirror]
-#   --desktop    also set up X11 + lightdm + i3 desktop (bare netinst); an existing
-#                display manager is kept
+#   --desktop    X11 + i3 desktop stack; lightdm only if no display manager is enabled
 #   --ru-mirror  pin the distro repos to mirror.yandex.ru instead of the geo metalink
 DESKTOP=0; RU_MIRROR=0
 for arg in "$@"; do
