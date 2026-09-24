@@ -88,11 +88,18 @@ fi
 log "Installing base packages ($PM)"
 case "$PM" in
   apt)
+    DEB_HOST=deb.debian.org
+    if [ "$RU_MIRROR" == 1 ]; then
+      log "Pinning apt repos to mirror.yandex.ru"
+      DEB_HOST=mirror.yandex.ru
+      sudo sed -i -E 's|https?://(archive\.ubuntu\.com\|[a-z]{2}\.archive\.ubuntu\.com\|deb\.debian\.org\|ftp\.[a-z]{2}\.debian\.org)/|https://mirror.yandex.ru/|' \
+        /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null
+    fi
     sudo apt update -y
     pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq nodejs npm clangd
     if [ "$ID" == "debian" ]; then
       # stable ships go 1.24; backports track the current minor like Ubuntu/Fedora
-      echo "deb http://deb.debian.org/debian ${VERSION_CODENAME}-backports main" \
+      echo "deb https://$DEB_HOST/debian ${VERSION_CODENAME}-backports main" \
         | sudo tee /etc/apt/sources.list.d/backports.list > /dev/null
       sudo apt update -y
       pkg -t "${VERSION_CODENAME}-backports" golang-go
