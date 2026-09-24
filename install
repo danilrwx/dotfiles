@@ -43,20 +43,13 @@ ln -sf $HOME/dotfiles/.gitignore_global $HOME/
 ln -sf $HOME/dotfiles/.tmux.conf $HOME/.tmux.conf
 ln -sf $HOME/dotfiles/.zprofile $HOME/
 ln -sf $HOME/dotfiles/.zshrc $HOME/
-for c in k9s htop lazygit nvim; do
+for c in k9s htop lazygit nvim mise; do
   ln -snf $HOME/dotfiles/config/$c $HOME/.config/
 done
 if [[ "$OS" == "Darwin" ]] || [ "$DESKTOP" == 1 ]; then
   for c in kitty alacritty ghostty; do
     ln -snf $HOME/dotfiles/config/$c $HOME/.config/
   done
-fi
-
-# Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
-# plugin. Queries are vendored in the repo; parsers are compiled here.
-if command -v cc >/dev/null 2>&1; then
-  log "Building treesitter parsers"
-  nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
 fi
 
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
@@ -79,8 +72,7 @@ if [[ "$OS" == "Linux" ]]; then
   log "Installing apt packages"
   sudo apt update -y
 
-  sudo apt install -y build-essential git wget zip unzip curl file procps zsh tmux fzf jq gnupg2 \
-	htop lazygit ugrep ripgrep nodejs npm golang-go gh neovim
+  sudo apt install -y build-essential git wget zip unzip curl file procps zsh tmux fzf jq gnupg2 htop ugrep ripgrep
 fi
 
 # Desktop stack for a bare netinst, mirroring the Fedora i3 Spin comps group "i3"
@@ -108,57 +100,35 @@ fi
 [ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
 
-# Host tooling: launcher + ops CLIs + the Go dev toolchain ──────────────────────────────────────────────────────────────
+# System CLIs from brew (macOS); apt covers Linux above ────────────────────────────────────────────────────────────────
 if [[ "$OS" == "Darwin" ]]; then
   log "Installing host tools from brew"
-  brew install go kubectl gh glab tmux fzf jq yq gnupg pinentry-mac watch htop lazygit ugrep node neovim
-else
-  export PATH="$HOME/go/bin:$PATH"
-  arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
-
-  # CLIs missing from distro repos; all are Go modules except kubectl
-  log "Installing yq, lazygit, gh, glab, helm"
-  go install github.com/mikefarah/yq/v4@latest
-  command -v lazygit &> /dev/null || go install github.com/jesseduffield/lazygit@latest
-  command -v gh      &> /dev/null || go install github.com/cli/cli/v2/cmd/gh@latest
-  command -v glab    &> /dev/null || go install gitlab.com/gitlab-org/cli/cmd/glab@main
-  command -v helm    &> /dev/null || go install helm.sh/helm/v3/cmd/helm@latest
-
-  if ! command -v kubectl &> /dev/null; then
-    log "Installing kubectl"
-    curl -fsSL "https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/${arch}/kubectl" \
-      | sudo tee /usr/local/bin/kubectl > /dev/null
-    sudo chmod +x /usr/local/bin/kubectl
-  fi
-
-  # distro neovim may be too old for the config
-  if ! command -v nvim &> /dev/null; then
-    log "Installing neovim from github"
-    nvim_arch=$(uname -m | sed 's/aarch64/arm64/')
-    curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${nvim_arch}.tar.gz" \
-      | sudo tar -xzf - -C /usr/local --strip-components=1
-  fi
-
-  # Telegram: official static build into ~/.local/Telegram
-  if [ "$DESKTOP" == 1 ] && [ ! -x "$HOME/.local/Telegram/Telegram" ]; then
-    log "Installing Telegram"
-    mkdir -p "$HOME/.local/bin"
-    curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJf - -C "$HOME/.local"
-    ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
-  fi
+  brew install tmux fzf jq gnupg pinentry-mac watch htop ugrep
 fi
 
-# Go dev tools into ~/go/bin
-log "Installing go tools"
-go install github.com/onsi/ginkgo/v2/ginkgo@v2.14.0
-go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
-go install golang.org/x/tools/gopls@latest
-go install mvdan.cc/gofumpt@latest
-go install golang.org/x/tools/cmd/goimports@latest
-go install github.com/go-delve/delve/cmd/dlv@latest
-go install github.com/matryer/moq@latest
-go install github.com/google/go-containerregistry/cmd/crane@latest
-go install github.com/go-task/task/v3/cmd/task@latest
+# Telegram: official static build into ~/.local/Telegram (Linux desktop only)
+if [[ "$OS" == "Linux" ]] && [ "$DESKTOP" == 1 ] && [ ! -x "$HOME/.local/Telegram/Telegram" ]; then
+  log "Installing Telegram"
+  mkdir -p "$HOME/.local/bin"
+  curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJf - -C "$HOME/.local"
+  ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
+fi
+
+# Languages and dev/ops CLIs via mise (config/mise/config.toml) ────────────────────────────────────────────────────────
+if ! command -v mise &> /dev/null && [ ! -x "$HOME/.local/bin/mise" ]; then
+  log "Installing mise"
+  curl -fsSL https://mise.run | sh
+fi
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+log "Installing mise tools"
+mise install -y
+
+# Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
+# plugin. Queries are vendored in the repo; parsers are compiled here.
+if command -v cc >/dev/null 2>&1; then
+  log "Building treesitter parsers"
+  nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
+fi
 
 # claude-code via the native installer (self-updating, no node needed)
 if ! command -v claude &> /dev/null; then

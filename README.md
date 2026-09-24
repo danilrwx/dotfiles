@@ -18,9 +18,11 @@ git clone https://github.com/danilrwx/dotfiles ~/dotfiles
 cd ~/dotfiles && ./install
 ```
 
-`./install` symlinks the configs, installs the host tools (`zsh`, `git`, `tmux`,
-`fzf`, `neovim`, `kubectl`, `gh`, `d8`, `claude`, the Go toolchain and dev tools)
-and sets `zsh` as the login shell.
+`./install` symlinks the configs, installs the system CLIs (`zsh`, `git`, `tmux`,
+`fzf`, `jq`, `gnupg`) from brew/apt, and everything else (Go, Node, `neovim`,
+`kubectl`, `helm`, `gh`, `glab`, `golangci-lint`, `gopls`, …) through
+[mise](https://mise.jdx.dev) from `config/mise/config.toml`. `d8` and `claude`
+use their own installers. It also sets `zsh` as the login shell.
 
 On a bare Debian netinst (no desktop task selected) run `./install --desktop`
 instead: it additionally installs X11, lightdm, and the i3 desktop stack mirroring
@@ -47,6 +49,7 @@ See `server/README.md` for what it installs and the requirements.
 
 | Path | What |
 |---|---|
-| `install` | host setup (symlinks, packages, host tools) |
+| `install` | host setup (symlinks, packages, mise tools) |
+| `config/mise/config.toml` | languages and CLIs pinned for mise |
 | `bin/clip` | pipe stdin to the local clipboard over OSC 52 |
 | `server/install.sh` | base vim/tmux config + clipboard (OSC 52) for any server |
