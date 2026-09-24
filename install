@@ -60,6 +60,12 @@ if [ -f $HOME/dotfiles/private/install ]; then
   fi
 fi
 
+if [[ "$OS" == "Linux" ]]; then
+  ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
+  ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
+  ln -sf $HOME/dotfiles/.Xresources $HOME/
+fi
+
 # Install packages for different OSes ───────────────────────────────────────────────────────────────────────────────────
 if [ "$ID" == "fedora" ]; then
   log "Installing fedora packages"
@@ -74,7 +80,9 @@ if [ "$ID" == "fedora" ]; then
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
   sudo dnf install -y git make wget zip unzip curl file procps-ng tigervnc openssh-askpass pinentry-gnome3 virt-manager \
 	xclip xsel zsh tmux fzf jq gnupg2 htop ugrep ripgrep nodejs npm telegram-desktop discord \
-	golang kubernetes-client helm gh glab neovim
+	golang kubernetes-client helm gh glab neovim \
+	i3 i3lock dmenu dunst xss-lock dex-autostart hsetroot xcompmgr maim brightnessctl acpi libnotify \
+	xsetroot setxkbmap xset xrdb pavucontrol bc kitty
 elif [ "$ID" == "ubuntu" ]; then
   log "Installing ubuntu packages"
 
@@ -82,7 +90,9 @@ elif [ "$ID" == "ubuntu" ]; then
 
   # kubectl, helm and glab are not in apt
   sudo apt install -y build-essential git wget zip unzip curl file procps tigervnc-viewer ssh-askpass pinentry-gnome3 \
-	virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop lazygit ugrep ripgrep nodejs npm golang-go gh neovim
+	virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop lazygit ugrep ripgrep nodejs npm golang-go gh neovim \
+	i3 i3lock suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin \
+	x11-xserver-utils pavucontrol bc kitty
 fi
 
 

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+hsetroot -cover $(find ~/Backgrounds -type f \( -iname "*.jpg" -o -iname "*.png" \) | shuf -n 1)
