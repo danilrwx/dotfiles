@@ -63,12 +63,12 @@ fi
 
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
 # which also keeps those paths out of this public repo.
-if [ -f $HOME/dotfiles/private/install ]; then
+private_install() {
+  [ -f $HOME/dotfiles/private/install ] || return 0
   log "Running private install"
-  if ! "$HOME/dotfiles/private/install"; then
-    log "Failed to run private install. Continue installation."
-  fi
-fi
+  "$HOME/dotfiles/private/install" || log "Failed to run private install. Continue installation."
+}
+private_install
 
 if [ "$DESKTOP" == 1 ]; then
   ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
@@ -196,6 +196,14 @@ if ! gh auth status &> /dev/null; then
   gh auth status &> /dev/null || { log "Not logged in to GitHub. Aborting."; exit 1; }
 fi
 mise cache clear
+
+# no ssh key: fetch the private submodule over https with gh's credential helper
+if [ ! -f $HOME/dotfiles/private/install ]; then
+  log "Fetching private submodule over https via gh"
+  gh auth setup-git
+  git -c url.https://github.com/.insteadOf=git@github.com: submodule update --init --recursive \
+    && private_install || log "Failed to update submodules. Continue installation."
+fi
 
 log "Installing mise tools"
 mise install -y
