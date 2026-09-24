@@ -1,10 +1,10 @@
 # dotfiles
 
-Personal dotfiles for macOS and Linux (Fedora / Ubuntu).
+Personal dotfiles for macOS and Linux (RED OS / Ubuntu).
 
 ## Requirements
 
-- **macOS**, or **Linux** (Ubuntu / Fedora — `install` exits on other distros)
+- **macOS**, or **Linux** (RED OS / Ubuntu — `install` exits on other distros)
 - `git`, `curl`, and `sudo` on Linux
 - macOS: Homebrew is bootstrapped by `install` if missing. Linux uses the distro
   packages only

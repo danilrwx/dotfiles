@@ -11,8 +11,8 @@ if [ -f /etc/os-release ]; then
 
   if [ "$ID" == "ubuntu" ]; then
     log "This is a Ubuntu system."
-  elif [ "$ID" == "fedora" ]; then
-    log "This is a Fedora system."
+  elif [ "$ID" == "redos" ]; then
+    log "This is a RED OS system."
   else
     exit
   fi
@@ -69,20 +69,14 @@ if [[ "$OS" == "Linux" ]]; then
 fi
 
 # Install packages for different OSes ───────────────────────────────────────────────────────────────────────────────────
-if [ "$ID" == "fedora" ]; then
-  log "Installing fedora packages"
-  sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
-  sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-
+if [ "$ID" == "redos" ]; then
+  log "Installing redos packages"
   sudo dnf update -y
 
-  sudo dnf group install c-development
-
-  sudo dnf install -y lame\* --exclude=lame-devel
-  sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
-  sudo dnf install -y git make wget zip unzip curl file procps-ng tigervnc openssh-askpass pinentry-gnome3 virt-manager \
-	xclip xsel zsh tmux fzf jq gnupg2 htop ugrep ripgrep nodejs npm telegram-desktop discord \
-	golang kubernetes-client helm gh glab neovim \
+  # ponytail: strict=0 skips packages missing from RED OS repos instead of failing the whole transaction;
+  # tighten the list once we know what RED OS actually ships
+  sudo dnf install -y --setopt=strict=0 gcc gcc-c++ make git wget zip unzip curl file procps-ng tigervnc openssh-askpass \
+	pinentry-gnome3 virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop ugrep ripgrep nodejs npm golang neovim \
 	i3 i3lock dmenu dunst xss-lock dex-autostart hsetroot xcompmgr maim brightnessctl acpi libnotify \
 	xsetroot setxkbmap xset xrdb pavucontrol bc xfce4-terminal
 elif [ "$ID" == "ubuntu" ]; then
@@ -90,7 +84,6 @@ elif [ "$ID" == "ubuntu" ]; then
 
   sudo apt update -y
 
-  # kubectl, helm and glab are not in apt
   sudo apt install -y build-essential git wget zip unzip curl file procps tigervnc-viewer ssh-askpass pinentry-gnome3 \
 	virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop lazygit ugrep ripgrep nodejs npm golang-go gh neovim \
 	i3 i3lock suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin \
@@ -112,10 +105,38 @@ if [[ "$OS" == "Darwin" ]]; then
   brew install go kubectl gh glab tmux fzf jq yq gnupg pinentry-mac watch htop lazygit ugrep node neovim
 else
   export PATH="$HOME/go/bin:$PATH"
-  # yq (mikefarah) and lazygit are not in Fedora repos
-  log "Installing yq and lazygit"
+  arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+
+  # CLIs missing from distro repos; all are Go modules except kubectl
+  log "Installing yq, lazygit, gh, glab, helm"
   go install github.com/mikefarah/yq/v4@latest
   command -v lazygit &> /dev/null || go install github.com/jesseduffield/lazygit@latest
+  command -v gh      &> /dev/null || go install github.com/cli/cli/v2/cmd/gh@latest
+  command -v glab    &> /dev/null || go install gitlab.com/gitlab-org/cli/cmd/glab@main
+  command -v helm    &> /dev/null || go install helm.sh/helm/v3/cmd/helm@latest
+
+  if ! command -v kubectl &> /dev/null; then
+    log "Installing kubectl"
+    curl -fsSL "https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/${arch}/kubectl" \
+      | sudo tee /usr/local/bin/kubectl > /dev/null
+    sudo chmod +x /usr/local/bin/kubectl
+  fi
+
+  # distro neovim may be too old for the config
+  if ! command -v nvim &> /dev/null; then
+    log "Installing neovim from github"
+    nvim_arch=$(uname -m | sed 's/aarch64/arm64/')
+    curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${nvim_arch}.tar.gz" \
+      | sudo tar -xzf - -C /usr/local --strip-components=1
+  fi
+
+  # Telegram: official static build into ~/.local/Telegram
+  if ! command -v Telegram &> /dev/null && [ ! -x "$HOME/.local/Telegram/Telegram" ]; then
+    log "Installing Telegram"
+    mkdir -p "$HOME/.local"
+    curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJf - -C "$HOME/.local"
+    ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
+  fi
 fi
 
 # Go dev tools into ~/go/bin
