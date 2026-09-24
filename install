@@ -134,6 +134,13 @@ if [ "$DESKTOP" == 1 ]; then
 
   sudo systemctl enable NetworkManager
   if [ -n "$DM" ]; then sudo systemctl enable lightdm; fi
+
+  # inside a VM: guest agents so the display follows the viewer window size
+  if systemd-detect-virt -q; then
+    log "Installing VM guest agents"
+    pkg spice-vdagent qemu-guest-agent
+    sudo systemctl enable --now spice-vdagentd qemu-guest-agent
+  fi
 fi
 
 
