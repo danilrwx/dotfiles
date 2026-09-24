@@ -94,7 +94,7 @@ if [ "$DESKTOP" == 1 ]; then
 
   if [ "$ID" == "redos" ]; then
     pkg() { sudo dnf install -y --setopt=strict=0 "$@"; }
-    X="xorg-x11-server-Xorg xorg-x11-xinit xsetroot setxkbmap xset xrdb xclip xsel"
+    X="xorg-x11-server-Xorg xorg-x11-xinit xsetroot setxkbmap xset xrdb xclip xsel mesa-dri-drivers mesa-vulkan-drivers vulkan-loader vulkan-tools"
     DM_PKGS="lightdm lightdm-gtk lightdm-gtk-greeter-settings"
     I3="i3 i3lock i3status dmenu dunst xss-lock dex-autostart hsetroot xcompmgr maim brightnessctl acpi libnotify bc alacritty"
     NET="NetworkManager network-manager-applet"
@@ -104,7 +104,7 @@ if [ "$DESKTOP" == 1 ]; then
     VIRT="virt-manager tigervnc openssh-askpass pinentry-gnome3"
   else
     pkg() { sudo apt install -y "$@"; }
-    X="xorg xinit x11-xserver-utils xclip xsel firmware-linux"
+    X="xorg xinit x11-xserver-utils xclip xsel firmware-linux mesa-vulkan-drivers libgl1-mesa-dri libvulkan1 vulkan-tools"
     DM_PKGS="lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings"
     I3="i3 i3lock i3status suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin bc alacritty"
     NET="network-manager network-manager-gnome"
