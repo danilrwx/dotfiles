@@ -81,31 +81,50 @@ elif [[ "$OS" == "Linux" ]]; then
   sudo apt install -y build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep clangd
 fi
 
-# Desktop stack for a bare netinst, mirroring the Fedora i3 Spin comps group "i3"
-# (lightdm, i3status, nm-applet, mousepad, pavucontrol, volumeicon, firefox) plus
-# its base-x / fonts / hardware-support / multimedia environment groups ────────────────────────────────────────────────
-if [ "$DESKTOP" == 1 ] && [ "$ID" == "redos" ]; then
-  log "Installing desktop packages"
-  sudo dnf install -y --setopt=strict=0 xorg-x11-server-Xorg xorg-x11-xinit lightdm lightdm-gtk lightdm-gtk-greeter-settings \
-	i3 i3lock i3status dmenu dunst xss-lock dex-autostart hsetroot xcompmgr maim brightnessctl acpi libnotify \
-	xsetroot setxkbmap xset xrdb xclip xsel bc alacritty \
-	NetworkManager network-manager-applet \
-	pipewire pipewire-pulseaudio wireplumber pulseaudio-utils alsa-utils pavucontrol volumeicon \
-	mousepad firefox feh lxpolkit xdg-utils xdg-user-dirs \
-	dejavu-fonts-all google-noto-sans-fonts google-noto-emoji-color-fonts \
-	virt-manager tigervnc openssh-askpass pinentry-gnome3
-  sudo systemctl enable lightdm NetworkManager
-elif [ "$DESKTOP" == 1 ]; then
-  log "Installing desktop packages"
-  sudo apt install -y xorg xinit lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings \
-	i3 i3lock i3status suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin \
-	x11-xserver-utils xclip xsel bc alacritty \
-	network-manager network-manager-gnome \
-	pipewire pipewire-pulse wireplumber pulseaudio-utils alsa-utils pavucontrol volumeicon-alsa \
-	mousepad firefox-esr feh lxpolkit xdg-utils xdg-user-dirs \
-	fonts-dejavu fonts-noto-core fonts-noto-color-emoji firmware-linux \
-	virt-manager tigervnc-viewer ssh-askpass pinentry-gnome3
-  sudo systemctl enable lightdm NetworkManager
+# Desktop stack, mirroring the Fedora i3 Spin comps group "i3" plus its base-x /
+# fonts / hardware-support / multimedia environment groups ─────────────────────────────────────────────────────────────
+if [ "$DESKTOP" == 1 ]; then
+  # a distro that already ships a DE has a display manager enabled; keep it
+  if [ -e /etc/systemd/system/display-manager.service ]; then
+    log "Display manager already enabled: $(basename "$(readlink /etc/systemd/system/display-manager.service)")"
+    DM=""
+  else
+    DM=lightdm
+  fi
+
+  if [ "$ID" == "redos" ]; then
+    pkg() { sudo dnf install -y --setopt=strict=0 "$@"; }
+    X="xorg-x11-server-Xorg xorg-x11-xinit xsetroot setxkbmap xset xrdb xclip xsel"
+    DM_PKGS="lightdm lightdm-gtk lightdm-gtk-greeter-settings"
+    I3="i3 i3lock i3status dmenu dunst xss-lock dex-autostart hsetroot xcompmgr maim brightnessctl acpi libnotify bc alacritty"
+    NET="NetworkManager network-manager-applet"
+    AUDIO="pipewire pipewire-pulseaudio wireplumber pulseaudio-utils alsa-utils pavucontrol volumeicon"
+    APPS="mousepad firefox feh lxpolkit xdg-utils xdg-user-dirs"
+    FONTS="dejavu-fonts-all google-noto-sans-fonts google-noto-emoji-color-fonts"
+    VIRT="virt-manager tigervnc openssh-askpass pinentry-gnome3"
+  else
+    pkg() { sudo apt install -y "$@"; }
+    X="xorg xinit x11-xserver-utils xclip xsel firmware-linux"
+    DM_PKGS="lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings"
+    I3="i3 i3lock i3status suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin bc alacritty"
+    NET="network-manager network-manager-gnome"
+    AUDIO="pipewire pipewire-pulse wireplumber pulseaudio-utils alsa-utils pavucontrol volumeicon-alsa"
+    APPS="mousepad firefox-esr feh lxpolkit xdg-utils xdg-user-dirs"
+    FONTS="fonts-dejavu fonts-noto-core fonts-noto-color-emoji"
+    VIRT="virt-manager tigervnc-viewer ssh-askpass pinentry-gnome3"
+  fi
+
+  log "Installing X11";           pkg $X
+  [ -n "$DM" ] && { log "Installing lightdm"; pkg $DM_PKGS; }
+  log "Installing i3 stack";      pkg $I3
+  log "Installing network";       pkg $NET
+  log "Installing audio";         pkg $AUDIO
+  log "Installing desktop apps";  pkg $APPS
+  log "Installing fonts";         pkg $FONTS
+  log "Installing virtualization"; pkg $VIRT
+
+  sudo systemctl enable NetworkManager
+  [ -n "$DM" ] && sudo systemctl enable lightdm
 fi
 
 
