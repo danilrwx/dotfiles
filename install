@@ -18,8 +18,8 @@ if [ -f /etc/os-release ]; then
   fi
 fi
 
-# SSH remote and private submodules (need ~/.ssh) ─────────────────────────────────────────────────────────────────────
-if [ -d "$HOME/.ssh" ]; then
+# SSH remote and private submodules (need an ssh key) ─────────────────────────────────────────────────────────────────
+if compgen -G "$HOME/.ssh/id_*" | grep -qv '\.pub$'; then
   log "Switching origin to ssh and updating submodules"
   git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
@@ -27,7 +27,7 @@ if [ -d "$HOME/.ssh" ]; then
     log "Failed to update submodules. Continue installation."
   fi
 else
-  log "No ~/.ssh found. Skip ssh remote and private submodules."
+  log "No ssh key in ~/.ssh. Skip ssh remote and private submodules."
 fi
 
 # Create directories and synlinks to config files ───────────────────────────────────────────────────────────────────────
