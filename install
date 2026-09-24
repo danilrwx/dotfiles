@@ -13,7 +13,7 @@ OS=$(uname -s)
 if [ -f /etc/os-release ]; then
   . /etc/os-release
 
-  if [ "$ID" == "debian" ] || [ "$ID" == "ubuntu" ]; then
+  if [ "$ID" == "debian" ] || [ "$ID" == "ubuntu" ] || [ "$ID" == "redos" ]; then
     log "This is a $ID system."
   else
     log "Unsupported distro: $ID"
@@ -68,18 +68,34 @@ if [ "$DESKTOP" == 1 ]; then
 fi
 
 # Install packages for different OSes ───────────────────────────────────────────────────────────────────────────────────
-if [[ "$OS" == "Linux" ]]; then
+# clangd: not in the mise registry; macOS has it in the Xcode CLT
+if [ "$ID" == "redos" ]; then
+  log "Installing dnf packages"
+  sudo dnf update -y
+  # ponytail: strict=0 skips packages missing from RED OS repos; tighten once the list is verified
+  sudo dnf install -y --setopt=strict=0 gcc gcc-c++ make git wget zip unzip curl file procps-ng zsh tmux gnupg2 htop ugrep \
+	clang-tools-extra
+elif [[ "$OS" == "Linux" ]]; then
   log "Installing apt packages"
   sudo apt update -y
-
-  # clangd: not in the mise registry; macOS has it in the Xcode CLT
   sudo apt install -y build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep clangd
 fi
 
 # Desktop stack for a bare netinst, mirroring the Fedora i3 Spin comps group "i3"
 # (lightdm, i3status, nm-applet, mousepad, pavucontrol, volumeicon, firefox) plus
 # its base-x / fonts / hardware-support / multimedia environment groups ────────────────────────────────────────────────
-if [ "$DESKTOP" == 1 ]; then
+if [ "$DESKTOP" == 1 ] && [ "$ID" == "redos" ]; then
+  log "Installing desktop packages"
+  sudo dnf install -y --setopt=strict=0 xorg-x11-server-Xorg xorg-x11-xinit lightdm lightdm-gtk lightdm-gtk-greeter-settings \
+	i3 i3lock i3status dmenu dunst xss-lock dex-autostart hsetroot xcompmgr maim brightnessctl acpi libnotify \
+	xsetroot setxkbmap xset xrdb xclip xsel bc alacritty \
+	NetworkManager network-manager-applet \
+	pipewire pipewire-pulseaudio wireplumber pulseaudio-utils alsa-utils pavucontrol volumeicon \
+	mousepad firefox feh lxpolkit xdg-utils xdg-user-dirs \
+	dejavu-fonts-all google-noto-sans-fonts google-noto-emoji-color-fonts \
+	virt-manager tigervnc openssh-askpass pinentry-gnome3
+  sudo systemctl enable lightdm NetworkManager
+elif [ "$DESKTOP" == 1 ]; then
   log "Installing desktop packages"
   sudo apt install -y xorg xinit lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings \
 	i3 i3lock i3status suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin \
@@ -169,7 +185,11 @@ if [[ "$OS" == "Linux" ]]; then
   # install docker ──────────────────────────────────────────────────────────────────────────────────────────────────────
   if [ ! -f /usr/bin/docker ]; then
     log "Installing docker"
-    curl -fsSL get.docker.com | bash
+    if [ "$ID" == "redos" ]; then
+      sudo dnf install -y docker-ce
+    else
+      curl -fsSL get.docker.com | bash
+    fi
 
     log "Starting docker"
     sudo systemctl start docker.socket
