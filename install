@@ -70,6 +70,8 @@ if [ "$DESKTOP" == 1 ]; then
   ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
   ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
   ln -sf $HOME/dotfiles/.Xresources $HOME/
+  ln -sf $HOME/dotfiles/.xprofile $HOME/.xprofile
+  ln -sf $HOME/dotfiles/.xprofile $HOME/.profile
 fi
 
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
