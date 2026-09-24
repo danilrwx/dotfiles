@@ -7,8 +7,6 @@ fi
 
 autoload -Uz compinit && compinit -u
 
-command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
-
 # EDITOR=nvim contains "vi", which makes zsh pick vi keymap; force emacs (ctrl-f/ctrl-b).
 bindkey -e
 

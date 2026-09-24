@@ -4,31 +4,37 @@ log() {
   echo -e "\033[0;31m$1\033[0m"
 }
 
-# ./install [--desktop] [--no-mise]
-#   --desktop  also set up X11 + lightdm + i3 desktop on a bare Debian netinst
-#   --no-mise  skip mise, the GitHub login and everything built on the mise tools
-#              (first run on a bare box; rerun without it once a browser is at hand)
-DESKTOP=0; MISE=1
+# ./install [--desktop]
+#   --desktop  also set up X11 + lightdm + i3 desktop (bare netinst); an existing
+#              display manager is kept
+DESKTOP=0
 for arg in "$@"; do
   case "$arg" in
     --desktop) DESKTOP=1 ;;
-    --no-mise) MISE=0 ;;
     *) log "Unknown option: $arg"; exit 1 ;;
   esac
 done
 
-# Some useful functions ─────────────────────────────────────────────────────────────────────────────────────────────────
+# Detect OS / package manager ───────────────────────────────────────────────────────────────────────────────────────────
 OS=$(uname -s)
+PM=brew
 if [ -f /etc/os-release ]; then
   . /etc/os-release
-
-  if [ "$ID" == "debian" ] || [ "$ID" == "ubuntu" ] || [ "$ID" == "redos" ]; then
-    log "This is a $ID system."
-  else
-    log "Unsupported distro: $ID"
-    exit 1
-  fi
+  case "$ID" in
+    debian|ubuntu) PM=apt ;;
+    fedora)        PM=dnf ;;
+    *) log "Unsupported distro: $ID"; exit 1 ;;
+  esac
+  log "This is a $ID system."
 fi
+
+pkg() {
+  case "$PM" in
+    apt)  sudo apt install -y "$@" ;;
+    dnf)  sudo dnf install -y "$@" ;;
+    brew) brew install "$@" ;;
+  esac
+}
 
 # SSH remote and private submodules (need an ssh key) ─────────────────────────────────────────────────────────────────
 if compgen -G "$HOME/.ssh/id_*" | grep -qv '\.pub$'; then
@@ -45,20 +51,25 @@ fi
 # Create directories and synlinks to config files ───────────────────────────────────────────────────────────────────────
 log "Linking configs"
 mkdir -p $HOME/.config
-mkdir -p $HOME/.local/share
+mkdir -p $HOME/.local/bin $HOME/.local/share
 
 ln -sf $HOME/dotfiles/.gitconfig $HOME/
 ln -sf $HOME/dotfiles/.gitignore_global $HOME/
 ln -sf $HOME/dotfiles/.tmux.conf $HOME/.tmux.conf
 ln -sf $HOME/dotfiles/.zprofile $HOME/
 ln -sf $HOME/dotfiles/.zshrc $HOME/
-for c in k9s htop lazygit nvim mise; do
+for c in k9s htop lazygit nvim; do
   ln -snf $HOME/dotfiles/config/$c $HOME/.config/
 done
 if [[ "$OS" == "Darwin" ]] || [ "$DESKTOP" == 1 ]; then
   for c in kitty alacritty ghostty; do
     ln -snf $HOME/dotfiles/config/$c $HOME/.config/
   done
+fi
+if [ "$DESKTOP" == 1 ]; then
+  ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
+  ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
+  ln -sf $HOME/dotfiles/.Xresources $HOME/
 fi
 
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
@@ -70,25 +81,38 @@ private_install() {
 }
 private_install
 
-if [ "$DESKTOP" == 1 ]; then
-  ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
-  ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
-  ln -sf $HOME/dotfiles/.Xresources $HOME/
-fi
-
-# Install packages for different OSes ───────────────────────────────────────────────────────────────────────────────────
-# clangd: not in the mise registry; macOS has it in the Xcode CLT
-if [ "$ID" == "redos" ]; then
-  log "Installing dnf packages"
-  sudo dnf update -y
-  # ponytail: strict=0 skips packages missing from RED OS repos; tighten once the list is verified
-  sudo dnf install -y --setopt=strict=0 gcc gcc-c++ make git wget zip unzip curl file procps-ng zsh tmux gnupg2 htop ugrep \
-	clang-tools-extra
-elif [[ "$OS" == "Linux" ]]; then
-  log "Installing apt packages"
-  sudo apt update -y
-  sudo apt install -y build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep clangd
-fi
+# Base CLI packages from the distro / brew. Everything Go-based comes from
+# `go install` below so the versions match across OSes ─────────────────────────────────────────────────────────────────
+log "Installing base packages ($PM)"
+case "$PM" in
+  apt)
+    sudo apt update -y
+    pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq nodejs npm clangd
+    if [ "$ID" == "debian" ]; then
+      # stable ships go 1.24; backports track the current minor like Ubuntu/Fedora
+      echo "deb http://deb.debian.org/debian ${VERSION_CODENAME}-backports main" \
+        | sudo tee /etc/apt/sources.list.d/backports.list > /dev/null
+      sudo apt update -y
+      pkg -t "${VERSION_CODENAME}-backports" golang-go
+    else
+      pkg golang-go neovim
+    fi
+    ;;
+  dnf)
+    sudo dnf update -y
+    pkg gcc gcc-c++ make git wget zip unzip curl file procps-ng zsh tmux gnupg2 htop ugrep ripgrep fzf jq nodejs npm \
+      golang clang-tools-extra neovim
+    ;;
+  brew)
+    if [ ! -x /opt/homebrew/bin/brew ]; then
+      log "Installing homebrew"
+      NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    # clangd comes with the Xcode CLT
+    pkg tmux gnupg pinentry-mac watch htop ugrep ripgrep fzf jq node go kubectl neovim
+    ;;
+esac
 
 # Desktop stack, mirroring the Fedora i3 Spin comps group "i3" plus its base-x /
 # fonts / hardware-support / multimedia environment groups ─────────────────────────────────────────────────────────────
@@ -101,8 +125,7 @@ if [ "$DESKTOP" == 1 ]; then
     DM=lightdm
   fi
 
-  if [ "$ID" == "redos" ]; then
-    pkg() { sudo dnf install -y --setopt=strict=0 "$@"; }
+  if [ "$PM" == dnf ]; then
     X="xorg-x11-server-Xorg xorg-x11-xinit xsetroot setxkbmap xset xrdb xclip xsel mesa-dri-drivers mesa-vulkan-drivers vulkan-loader vulkan-tools"
     DM_PKGS="lightdm lightdm-gtk lightdm-gtk-greeter-settings"
     I3="i3 i3lock i3status dmenu dunst xss-lock dex-autostart hsetroot xcompmgr maim brightnessctl acpi libnotify bc alacritty"
@@ -112,7 +135,6 @@ if [ "$DESKTOP" == 1 ]; then
     FONTS="dejavu-fonts-all google-noto-sans-fonts google-noto-emoji-color-fonts"
     VIRT="virt-manager tigervnc openssh-askpass pinentry-gnome3"
   else
-    pkg() { sudo apt install -y "$@"; }
     X="xorg xinit x11-xserver-utils xclip xsel firmware-linux mesa-vulkan-drivers libgl1-mesa-dri libvulkan1 vulkan-tools"
     DM_PKGS="lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings"
     I3="i3 i3lock i3status suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin bc alacritty"
@@ -123,13 +145,13 @@ if [ "$DESKTOP" == 1 ]; then
     VIRT="virt-manager tigervnc-viewer ssh-askpass pinentry-gnome3"
   fi
 
-  log "Installing X11";           pkg $X
+  log "Installing X11";            pkg $X
   if [ -n "$DM" ]; then log "Installing lightdm"; pkg $DM_PKGS; fi
-  log "Installing i3 stack";      pkg $I3
-  log "Installing network";       pkg $NET
-  log "Installing audio";         pkg $AUDIO
-  log "Installing desktop apps";  pkg $APPS
-  log "Installing fonts";         pkg $FONTS
+  log "Installing i3 stack";       pkg $I3
+  log "Installing network";        pkg $NET
+  log "Installing audio";          pkg $AUDIO
+  log "Installing desktop apps";   pkg $APPS
+  log "Installing fonts";          pkg $FONTS
   log "Installing virtualization"; pkg $VIRT
 
   sudo systemctl enable NetworkManager
@@ -141,37 +163,18 @@ if [ "$DESKTOP" == 1 ]; then
     pkg spice-vdagent qemu-guest-agent
     sudo systemctl enable --now spice-vdagentd qemu-guest-agent
   fi
-fi
 
+  # Telegram: official static build into ~/.local/Telegram
+  if [ ! -x "$HOME/.local/Telegram/Telegram" ]; then
+    log "Installing Telegram"
+    curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJf - -C "$HOME/.local"
+    ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
+  fi
 
-# Install Homebrew (macOS only) ─────────────────────────────────────────────────────────────────────────────────────────
-if [[ "$OS" == "Darwin" ]] && [ ! -x /opt/homebrew/bin/brew ]; then
-  log "Installing homebrew"
-  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
-[ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
-
-
-# System CLIs from brew (macOS); apt covers Linux above ────────────────────────────────────────────────────────────────
-if [[ "$OS" == "Darwin" ]]; then
-  log "Installing host tools from brew"
-  brew install tmux gnupg pinentry-mac watch htop ugrep
-fi
-
-# Telegram: official static build into ~/.local/Telegram (Linux desktop only)
-if [[ "$OS" == "Linux" ]] && [ "$DESKTOP" == 1 ] && [ ! -x "$HOME/.local/Telegram/Telegram" ]; then
-  log "Installing Telegram"
-  mkdir -p "$HOME/.local/bin"
-  curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJf - -C "$HOME/.local"
-  ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
-fi
-
-# Discord: official tar.gz into ~/.local/Discord (Linux desktop only). It does not
-# self-update: when the client refuses to start, rm -rf ~/.local/Discord and rerun
-if [[ "$OS" == "Linux" ]] && [ "$DESKTOP" == 1 ]; then
+  # Discord: official tar.gz into ~/.local/Discord. It does not self-update:
+  # when the client refuses to start, rm -rf ~/.local/Discord and rerun
   if [ ! -x "$HOME/.local/Discord/discord" ]; then
     log "Installing Discord"
-    mkdir -p "$HOME/.local/bin"
     curl -fsSL "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xzf - -C "$HOME/.local"
     ln -sf "$HOME/.local/Discord/discord" "$HOME/.local/bin/discord"
   fi
@@ -183,37 +186,66 @@ if [[ "$OS" == "Linux" ]] && [ "$DESKTOP" == 1 ]; then
   rm -f "$HOME/.cache/dmenu_run"
 fi
 
-# Languages and dev/ops CLIs via mise (config/mise/config.toml) ────────────────────────────────────────────────────────
-if [ "$MISE" == 1 ]; then
-if ! command -v mise &> /dev/null && [ ! -x "$HOME/.local/bin/mise" ]; then
-  log "Installing mise"
-  # the mise.jdx.dev CDN is far slower than GitHub releases from here
-  curl -fsSL https://mise.run | MISE_INSTALL_FROM_GITHUB=1 sh
+# kubectl on Linux (not in every distro repo; dl.k8s.io is a Google CDN) ───────────────────────────────────────────────
+if [[ "$OS" == "Linux" ]] && ! command -v kubectl &> /dev/null; then
+  log "Installing kubectl"
+  arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+  curl -fsSL "https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/${arch}/kubectl" \
+    | sudo tee /usr/local/bin/kubectl > /dev/null
+  sudo chmod +x /usr/local/bin/kubectl
 fi
-export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 
-# gh first: mise reads the token of a logged-in gh (github.gh_cli_tokens),
-# otherwise the unauthenticated GitHub API limit (60/h) is exhausted resolving
-# the rest of the tools. Drop version lists cached while rate-limited.
-log "Installing gh"
-mise install -y gh
-if ! gh auth status &> /dev/null; then
-  log "GitHub login required for the rest of the install"
-  gh auth login
-  gh auth status &> /dev/null || { log "Not logged in to GitHub. Aborting."; exit 1; }
+# neovim: the config needs 0.11+ (vim.lsp.config); Debian stable ships 0.10 ──────────────────────────────────────────
+nvim_ok() { command -v nvim &> /dev/null && nvim --version | head -1 | grep -qE 'v0\.(1[1-9]|[2-9][0-9])|v[1-9]'; }
+if [[ "$OS" == "Linux" ]] && ! nvim_ok; then
+  log "Installing neovim from github"
+  nvim_arch=$(uname -m | sed 's/aarch64/arm64/')
+  curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${nvim_arch}.tar.gz" \
+    | sudo tar -xzf - -C /usr/local --strip-components=1
 fi
-mise cache clear
 
-# no ssh key: fetch the private submodule over https with gh's credential helper
+# Go-based CLIs and dev tools into ~/go/bin: same modules, same versions on
+# every OS; fetched through proxy.golang.org, no GitHub involved ─────────────────────────────────────────────────────
+export PATH="$HOME/go/bin:$HOME/.local/bin:$PATH"
+log "Installing go tools"
+for mod in \
+  github.com/cli/cli/v2/cmd/gh@latest \
+  gitlab.com/gitlab-org/cli/cmd/glab@latest \
+  helm.sh/helm/v3/cmd/helm@latest \
+  github.com/derailed/k9s@latest \
+  github.com/mikefarah/yq/v4@latest \
+  github.com/jesseduffield/lazygit@latest \
+  github.com/google/go-containerregistry/cmd/crane@latest \
+  github.com/go-task/task/v3/cmd/task@latest \
+  github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest \
+  golang.org/x/tools/gopls@latest \
+  golang.org/x/tools/cmd/goimports@latest \
+  mvdan.cc/gofumpt@latest \
+  github.com/go-delve/delve/cmd/dlv@latest \
+  github.com/matryer/moq@latest \
+  github.com/onsi/ginkgo/v2/ginkgo@v2.14.0 \
+  github.com/mrjosh/helm-ls@latest \
+  github.com/nametake/golangci-lint-langserver@latest
+do
+  go install "$mod" || log "go install $mod failed. Continue installation."
+done
+
+# Node-based LSP servers into ~/.local (npm registry, no sudo) ─────────────────────────────────────────────────────────
+log "Installing npm tools"
+npm config set prefix "$HOME/.local"
+npm install -g bash-language-server typescript-language-server typescript
+
+# Private submodule over https when there is no ssh key but gh is logged in
 if [ ! -f $HOME/dotfiles/private/install ]; then
-  log "Fetching private submodule over https via gh"
-  gh auth setup-git
-  git -c url.https://github.com/.insteadOf=git@github.com: submodule update --init --recursive \
-    && private_install || log "Failed to update submodules. Continue installation."
+  if gh auth status &> /dev/null; then
+    log "Fetching private submodule over https via gh"
+    gh auth setup-git
+    git -c url.https://github.com/.insteadOf=git@github.com: submodule update --init --recursive \
+      && private_install || log "Failed to update submodules. Continue installation."
+  else
+    log "Private submodule skipped: no ssh key and gh is not logged in (gh auth login, then rerun)"
+  fi
 fi
-
-log "Installing mise tools"
-mise install -y
 
 # Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
 # plugin. Queries are vendored in the repo; parsers are compiled here.
@@ -227,9 +259,6 @@ log "Generating zsh completions"
 mkdir -p $HOME/.local/share/completions
 fzf --zsh              > $HOME/.local/share/completions/fzf.zsh     2>/dev/null || true
 kubectl completion zsh > $HOME/.local/share/completions/kubectl.zsh 2>/dev/null || true
-else
-  log "Skipping mise, GitHub login, treesitter and completions (--no-mise)"
-fi
 
 # d8 / deckhouse-cli (official installer; default INSTALL_DIR is /opt not on PATH)
 if ! command -v d8 &> /dev/null; then
@@ -243,7 +272,6 @@ if ! command -v claude &> /dev/null; then
   curl -fsSL https://claude.ai/install.sh | bash
 fi
 
-
 # Use zsh as the login shell (macOS already defaults to it; install + chsh on
 # Linux) ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
@@ -255,25 +283,15 @@ if [[ "$OS" == "Linux" ]]; then
   fi
 fi
 
-
-# Linux: docker; then (--desktop only) libvirt group and fonts ─────────────────────────────────────────────────────────────────────────────────
+# Linux: docker; then (--desktop only) libvirt group and fonts ─────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
-  # install docker ──────────────────────────────────────────────────────────────────────────────────────────────────────
   if [ ! -f /usr/bin/docker ]; then
     log "Installing docker"
-    if [ "$ID" == "redos" ]; then
-      sudo dnf install -y docker-ce
-    else
-      curl -fsSL get.docker.com | bash
-    fi
-
-    log "Starting docker"
-    sudo systemctl start docker.socket
+    curl -fsSL get.docker.com | bash
     log "Enabling docker"
-    sudo systemctl enable docker.socket
+    sudo systemctl enable --now docker.socket
   fi
 
-  # add user to docker group ────────────────────────────────────────────────────────────────────────────────────────────
   if ! groups | grep -q '\bdocker\b'; then
     log "Adding user to docker group"
     sudo usermod -aG docker $USER
@@ -281,26 +299,23 @@ if [[ "$OS" == "Linux" ]]; then
 
   [ "$DESKTOP" == 1 ] || exit 0
 
-  # add user to libvirt group ───────────────────────────────────────────────────────────────────────────────────────────
   if ! groups | grep -q '\blibvirt\b'; then
     log "Adding user to libvirt group"
     sudo usermod -aG libvirt $USER
   fi
 
-  # download Iosevka nerd font ──────────────────────────────────────────────────────────────────────────────────────────
   if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
     log "Downloading Iosevka nerd font"
-    wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip
     mkdir -p $HOME/.local/share/fonts
-    cd $HOME/.local/share/fonts && unzip $HOME/dotfiles/Iosevka.zip
-    rm $HOME/dotfiles/Iosevka.zip
+    curl -fsSL -o /tmp/Iosevka.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip
+    unzip -o -q /tmp/Iosevka.zip -d $HOME/.local/share/fonts && rm /tmp/Iosevka.zip
     fc-cache -f
   fi
 
-  # download Apple Emoji font ───────────────────────────────────────────────────────────────────────────────────────────
   if [ ! -f $HOME/.local/share/fonts/AppleColorEmoji.ttf ]; then
     log "Downloading Apple Emoji font"
-    wget -P $HOME/.local/share/fonts https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
+    curl -fsSL -o $HOME/.local/share/fonts/AppleColorEmoji.ttf \
+      https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
     fc-cache -f
   fi
 fi

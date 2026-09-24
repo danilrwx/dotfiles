@@ -1,13 +1,12 @@
 # dotfiles
 
-Personal dotfiles for macOS and Linux (Debian / Ubuntu / RED OS).
+Personal dotfiles for macOS and Linux (Debian / Ubuntu / Fedora).
 
 ## Requirements
 
-- **macOS**, or **Linux** (Debian / Ubuntu / RED OS — `install` exits on other distros)
+- **macOS**, or **Linux** (Debian / Ubuntu / Fedora — `install` exits on other distros)
 - `git`, `curl`, and `sudo` on Linux
-- macOS: Homebrew is bootstrapped by `install` if missing. Linux uses the distro
-  packages only
+- macOS: Homebrew is bootstrapped by `install` if missing
 - Optional: an SSH key in `~/.ssh` — with one, `install` switches the repo
   remote to SSH and pulls the private submodule; without one both are skipped
 
@@ -18,15 +17,21 @@ git clone https://github.com/danilrwx/dotfiles ~/dotfiles
 cd ~/dotfiles && ./install
 ```
 
-`./install` symlinks the configs, installs the system CLIs (`zsh`, `git`, `tmux`,
-`fzf`, `jq`, `gnupg`) from brew/apt, and everything else (Go, Node, `neovim`,
-`kubectl`, `helm`, `gh`, `glab`, `golangci-lint`, `gopls`, the LSP servers, …)
-through [mise](https://mise.jdx.dev) from `config/mise/config.toml`. `d8` and
-`claude` use their own installers. It also sets `zsh` as the login shell.
+`./install` symlinks the configs and installs the tool set from three sources,
+the same on every OS:
 
-`./install --no-mise` skips mise, the GitHub login it needs, and everything
-built on the mise tools. Use it for the first run on a bare box where `gh auth
-login` cannot finish yet, then rerun `./install` once a browser is at hand.
+- system CLIs from the distro (`apt` on Debian/Ubuntu, `dnf` on Fedora) or
+  `brew` on macOS: `zsh`, `git`, `tmux`, `gnupg`, `fzf`, `jq`, `ripgrep`,
+  `ugrep`, `htop`, `clangd`, `go`, `node`, `neovim` (a GitHub tarball on Debian,
+  whose 0.10 is too old for the config)
+- Go-based CLIs and dev tools via `go install` through proxy.golang.org:
+  `gh`, `glab`, `helm`, `k9s`, `yq`, `lazygit`, `crane`, `task`,
+  `golangci-lint`, `gopls`, `gofumpt`, `goimports`, `dlv`, `moq`, `ginkgo`,
+  `helm-ls`, `golangci-lint-langserver`
+- Node-based LSP servers via `npm -g` into `~/.local`
+
+`kubectl` comes from dl.k8s.io on Linux, `d8` and `claude` use their own
+installers. The script also sets `zsh` as the login shell.
 
 On a bare Debian netinst (no desktop task selected) run `./install --desktop`
 instead: it additionally installs X11, lightdm, and the i3 desktop stack mirroring
@@ -54,7 +59,6 @@ See `server/README.md` for what it installs and the requirements.
 
 | Path | What |
 |---|---|
-| `install` | host setup (symlinks, packages, mise tools) |
-| `config/mise/config.toml` | languages and CLIs pinned for mise |
+| `install` | host setup (symlinks, packages, go/npm tools) |
 | `bin/clip` | pipe stdin to the local clipboard over OSC 52 |
 | `server/install.sh` | base vim/tmux config + clipboard (OSC 52) for any server |
