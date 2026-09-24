@@ -138,6 +138,18 @@ if ! command -v mise &> /dev/null && [ ! -x "$HOME/.local/bin/mise" ]; then
   curl -fsSL https://mise.run | MISE_INSTALL_FROM_GITHUB=1 sh
 fi
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+
+# gh first: a logged-in gh gives mise a token, otherwise the unauthenticated
+# GitHub API limit (60/h) is exhausted resolving the rest of the tools
+log "Installing gh"
+mise install -y gh
+if ! gh auth status &> /dev/null; then
+  log "GitHub login required for the rest of the install"
+  gh auth login
+  gh auth status &> /dev/null || { log "Not logged in to GitHub. Aborting."; exit 1; }
+fi
+export MISE_GITHUB_TOKEN="$(gh auth token)"
+
 log "Installing mise tools"
 mise install -y
 
