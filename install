@@ -4,13 +4,15 @@ log() {
   echo -e "\033[0;31m$1\033[0m"
 }
 
-# ./install [--desktop]
-#   --desktop  also set up X11 + lightdm + i3 desktop (bare netinst); an existing
-#              display manager is kept
-DESKTOP=0
+# ./install [--desktop] [--ru-mirror]
+#   --desktop    also set up X11 + lightdm + i3 desktop (bare netinst); an existing
+#                display manager is kept
+#   --ru-mirror  pin the distro repos to mirror.yandex.ru instead of the geo metalink
+DESKTOP=0; RU_MIRROR=0
 for arg in "$@"; do
   case "$arg" in
-    --desktop) DESKTOP=1 ;;
+    --desktop)   DESKTOP=1 ;;
+    --ru-mirror) RU_MIRROR=1 ;;
     *) log "Unknown option: $arg"; exit 1 ;;
   esac
 done
@@ -99,6 +101,11 @@ case "$PM" in
     fi
     ;;
   dnf)
+    if [ "$RU_MIRROR" == 1 ]; then
+      log "Pinning dnf repos to mirror.yandex.ru"
+      sudo sed -i 's|^metalink=|#metalink=|;s|^#baseurl=http://download.example/pub/fedora/linux|baseurl=https://mirror.yandex.ru/fedora/linux|' \
+        /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
+    fi
     sudo dnf update -y
     pkg gcc gcc-c++ make git wget zip unzip curl file procps-ng zsh tmux gnupg2 htop ugrep ripgrep fzf jq nodejs npm \
       golang clang-tools-extra neovim
