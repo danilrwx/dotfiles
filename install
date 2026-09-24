@@ -150,6 +150,17 @@ if [[ "$OS" == "Linux" ]] && [ "$DESKTOP" == 1 ] && [ ! -x "$HOME/.local/Telegra
   ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
 fi
 
+# Discord: official tar.gz into ~/.local/Discord (Linux desktop only). It does not
+# self-update: when the client refuses to start, rm -rf ~/.local/Discord and rerun
+if [[ "$OS" == "Linux" ]] && [ "$DESKTOP" == 1 ] && [ ! -x "$HOME/.local/Discord/Discord" ]; then
+  log "Installing Discord"
+  mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications"
+  curl -fsSL "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xzf - -C "$HOME/.local"
+  ln -sf "$HOME/.local/Discord/Discord" "$HOME/.local/bin/discord"
+  sed "s|^Exec=.*|Exec=$HOME/.local/Discord/Discord|;s|^Icon=.*|Icon=$HOME/.local/Discord/discord.png|" \
+    "$HOME/.local/Discord/discord.desktop" > "$HOME/.local/share/applications/discord.desktop"
+fi
+
 # Languages and dev/ops CLIs via mise (config/mise/config.toml) ────────────────────────────────────────────────────────
 if ! command -v mise &> /dev/null && [ ! -x "$HOME/.local/bin/mise" ]; then
   log "Installing mise"
