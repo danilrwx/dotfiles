@@ -28,4 +28,3 @@ helm-ls = "latest"
 "npm:bash-language-server" = "latest"
 "npm:typescript-language-server" = "latest"
 "npm:typescript" = "latest"
-"ubi:deckhouse/deckhouse-cli" = { version = "latest", exe = "d8" }
