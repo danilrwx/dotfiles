@@ -69,8 +69,8 @@ if [ "$ID" == "fedora" ]; then
   sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
   # dev tools (tmux, gpg, …) come from brew via tools/repo.sh; keep only the
   # system/GUI packages and brew prerequisites (git, make) here.
-  sudo dnf install -y git make wget zip unzip curl tigervnc openssh-askpass pinentry-gnome3 virt-manager \
-	xclip xsel
+  sudo dnf install -y git make wget zip unzip curl file procps-ng tigervnc openssh-askpass pinentry-gnome3 virt-manager \
+	xclip xsel flatpak zsh
 elif [ "$ID" == "ubuntu" ]; then
   log "Installing ubuntu packages"
 
@@ -78,16 +78,19 @@ elif [ "$ID" == "ubuntu" ]; then
 
   # dev tools (tmux, gpg, …) come from brew via tools/repo.sh; keep only the
   # system/GUI packages and brew prerequisites (build-essential, git) here.
-  sudo apt install -y build-essential git wget zip unzip curl virt-manager xclip xsel flatpak zsh
+  sudo apt install -y build-essential git wget zip unzip curl file procps tigervnc-viewer ssh-askpass pinentry-gnome3 \
+	virt-manager xclip xsel flatpak zsh
 fi
 
 
-# Install Homebrew (macOS only) ─────────────────────────────────────────────────────────────────────────────────────────
-if [[ "$OS" == "Darwin" ]] && [ ! -d /opt/homebrew ]; then
+# Install Homebrew ──────────────────────────────────────────────────────────────────────────────────────────────────────
+if ! command -v brew &> /dev/null; then
   log "Installing homebrew"
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  eval "$(/opt/homebrew/bin/brew shellenv)"
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
+for b in /opt/homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
+  [ -x "$b" ] && eval "$($b shellenv)"
+done
 
 
 # Install DevPod CLI (runs the devbox dev container: docker locally, kubernetes
@@ -106,7 +109,8 @@ fi
 
 # Host tooling: launcher + ops CLIs + the Go dev toolchain ──────────────────────────────────────────────────────────────
 log "Installing host tools"
-brew install go kubectl gh glab tmux fzf jq yq gnupg pinentry-mac watch htop lazygit ugrep node neovim
+brew install go kubectl gh glab tmux fzf jq yq gnupg watch htop lazygit ugrep node neovim
+[[ "$OS" == "Darwin" ]] && brew install pinentry-mac
 
 # Go dev tools into ~/go/bin (same set as the devbox image, devcontainer/tools/go.sh)
 log "Installing go tools"

@@ -1,6 +1,6 @@
-if [ -e "/opt/homebrew/bin/brew" ]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
+for b in /opt/homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/brew; do
+  [ -x "$b" ] && eval "$($b shellenv)"
+done
 
 typeset -U path PATH
 
