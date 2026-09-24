@@ -24,6 +24,10 @@ cd ~/dotfiles && ./install
 through [mise](https://mise.jdx.dev) from `config/mise/config.toml`. `d8` and
 `claude` use their own installers. It also sets `zsh` as the login shell.
 
+`./install --no-mise` skips mise, the GitHub login it needs, and everything
+built on the mise tools. Use it for the first run on a bare box where `gh auth
+login` cannot finish yet, then rerun `./install` once a browser is at hand.
+
 On a bare Debian netinst (no desktop task selected) run `./install --desktop`
 instead: it additionally installs X11, lightdm, and the i3 desktop stack mirroring
 the Fedora i3 Spin comps group (i3status, nm-applet, mousepad, pavucontrol,

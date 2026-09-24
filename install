@@ -4,9 +4,18 @@ log() {
   echo -e "\033[0;31m$1\033[0m"
 }
 
-# ./install --desktop: also set up X11 + lightdm + i3 desktop on a bare Debian netinst
-DESKTOP=0
-[ "${1:-}" == "--desktop" ] && DESKTOP=1
+# ./install [--desktop] [--no-mise]
+#   --desktop  also set up X11 + lightdm + i3 desktop on a bare Debian netinst
+#   --no-mise  skip mise, the GitHub login and everything built on the mise tools
+#              (first run on a bare box; rerun without it once a browser is at hand)
+DESKTOP=0; MISE=1
+for arg in "$@"; do
+  case "$arg" in
+    --desktop) DESKTOP=1 ;;
+    --no-mise) MISE=0 ;;
+    *) log "Unknown option: $arg"; exit 1 ;;
+  esac
+done
 
 # Some useful functions ─────────────────────────────────────────────────────────────────────────────────────────────────
 OS=$(uname -s)
@@ -168,6 +177,7 @@ if [[ "$OS" == "Linux" ]] && [ "$DESKTOP" == 1 ]; then
 fi
 
 # Languages and dev/ops CLIs via mise (config/mise/config.toml) ────────────────────────────────────────────────────────
+if [ "$MISE" == 1 ]; then
 if ! command -v mise &> /dev/null && [ ! -x "$HOME/.local/bin/mise" ]; then
   log "Installing mise"
   # the mise.jdx.dev CDN is far slower than GitHub releases from here
@@ -197,6 +207,15 @@ if command -v cc >/dev/null 2>&1; then
   nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
 fi
 
+# zsh completions (sourced from .zshrc)
+log "Generating zsh completions"
+mkdir -p $HOME/.local/share/completions
+fzf --zsh              > $HOME/.local/share/completions/fzf.zsh     2>/dev/null || true
+kubectl completion zsh > $HOME/.local/share/completions/kubectl.zsh 2>/dev/null || true
+else
+  log "Skipping mise, GitHub login, treesitter and completions (--no-mise)"
+fi
+
 # d8 / deckhouse-cli (official installer; default INSTALL_DIR is /opt not on PATH)
 if ! command -v d8 &> /dev/null; then
   log "Installing d8"
@@ -220,13 +239,6 @@ if [[ "$OS" == "Linux" ]]; then
     chsh -s "$zsh_bin"
   fi
 fi
-
-
-# zsh completions (sourced from .zshrc) ────────────────────────────────────────────────────────────────────────────────
-log "Generating zsh completions"
-mkdir -p $HOME/.local/share/completions
-command -v fzf     >/dev/null && fzf --zsh              > $HOME/.local/share/completions/fzf.zsh     2>/dev/null || true
-command -v kubectl >/dev/null && kubectl completion zsh > $HOME/.local/share/completions/kubectl.zsh 2>/dev/null || true
 
 
 # Linux: docker; then (--desktop only) libvirt group and fonts ─────────────────────────────────────────────────────────────────────────────────
