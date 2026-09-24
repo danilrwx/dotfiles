@@ -133,7 +133,7 @@ else
   # Telegram: official static build into ~/.local/Telegram
   if ! command -v Telegram &> /dev/null && [ ! -x "$HOME/.local/Telegram/Telegram" ]; then
     log "Installing Telegram"
-    mkdir -p "$HOME/.local"
+    mkdir -p "$HOME/.local/bin"
     curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJf - -C "$HOME/.local"
     ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
   fi
