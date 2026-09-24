@@ -74,7 +74,7 @@ if [ "$ID" == "fedora" ]; then
   # dev tools (tmux, gpg, …) come from brew via tools/repo.sh; keep only the
   # system/GUI packages and brew prerequisites (git, make) here.
   sudo dnf install -y git make wget zip unzip curl file procps-ng tigervnc openssh-askpass pinentry-gnome3 virt-manager \
-	xclip xsel flatpak zsh
+	xclip xsel zsh telegram-desktop discord
 elif [ "$ID" == "ubuntu" ]; then
   log "Installing ubuntu packages"
 
@@ -83,7 +83,7 @@ elif [ "$ID" == "ubuntu" ]; then
   # dev tools (tmux, gpg, …) come from brew via tools/repo.sh; keep only the
   # system/GUI packages and brew prerequisites (build-essential, git) here.
   sudo apt install -y build-essential git wget zip unzip curl file procps tigervnc-viewer ssh-askpass pinentry-gnome3 \
-	virt-manager xclip xsel flatpak zsh
+	virt-manager xclip xsel zsh
 fi
 
 
@@ -156,32 +156,8 @@ log "Installing shell extras"
 bash "$HOME/dotfiles/devcontainer/shell-setup.sh"
 
 
-# Install platpak repository and applications ───────────────────────────────────────────────────────────────────────────
+# Linux desktop: docker, groups, fonts ─────────────────────────────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
-  # install flapak applications ─────────────────────────────────────────────────────────────────────────────────────────
-  if command -v flatpak &> /dev/null; then
-    if ! flatpak remotes --columns=name | grep -q '\bflathub\b'; then
-      log "Adding flathub remote"
-      sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    fi
-
-    log "Installing flatpak apps"
-    flatpak install flathub -y org.telegram.desktop com.discordapp.Discord
-  fi
-
-  # install google chrome ───────────────────────────────────────────────────────────────────────────────────────────────
-  if ! command -v google-chrome &> /dev/null; then
-    log "Installing google chrome"
-    if [ "$ID" == "ubuntu" ]; then
-      wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-      sudo dpkg -i google-chrome-stable_current_amd64.deb
-      sudo apt-get install -f -y
-      rm google-chrome-stable_current_amd64.deb
-    elif [ "$ID" == "fedora" ]; then
-      sudo dnf install -y google-chrome-stable
-    fi
-  fi
-
   # install docker ──────────────────────────────────────────────────────────────────────────────────────────────────────
   if [ ! -f /usr/bin/docker ]; then
     log "Installing docker"
