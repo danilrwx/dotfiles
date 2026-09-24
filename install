@@ -99,7 +99,7 @@ if [ "$DESKTOP" == 1 ]; then
     I3="i3 i3lock i3status dmenu dunst xss-lock dex-autostart hsetroot xcompmgr maim brightnessctl acpi libnotify bc alacritty"
     NET="NetworkManager network-manager-applet"
     AUDIO="pipewire pipewire-pulseaudio wireplumber pulseaudio-utils alsa-utils pavucontrol volumeicon"
-    APPS="mousepad firefox feh lxpolkit xdg-utils xdg-user-dirs"
+    APPS="mousepad feh lxpolkit xdg-utils xdg-user-dirs"
     FONTS="dejavu-fonts-all google-noto-sans-fonts google-noto-emoji-color-fonts"
     VIRT="virt-manager tigervnc openssh-askpass pinentry-gnome3"
   else
@@ -109,13 +109,13 @@ if [ "$DESKTOP" == 1 ]; then
     I3="i3 i3lock i3status suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin bc alacritty"
     NET="network-manager network-manager-gnome"
     AUDIO="pipewire pipewire-pulse wireplumber pulseaudio-utils alsa-utils pavucontrol volumeicon-alsa"
-    APPS="mousepad firefox-esr feh lxpolkit xdg-utils xdg-user-dirs"
+    APPS="mousepad feh lxpolkit xdg-utils xdg-user-dirs"
     FONTS="fonts-dejavu fonts-noto-core fonts-noto-color-emoji"
     VIRT="virt-manager tigervnc-viewer ssh-askpass pinentry-gnome3"
   fi
 
   log "Installing X11";           pkg $X
-  [ -n "$DM" ] && { log "Installing lightdm"; pkg $DM_PKGS; }
+  if [ -n "$DM" ]; then log "Installing lightdm"; pkg $DM_PKGS; fi
   log "Installing i3 stack";      pkg $I3
   log "Installing network";       pkg $NET
   log "Installing audio";         pkg $AUDIO
@@ -124,7 +124,7 @@ if [ "$DESKTOP" == 1 ]; then
   log "Installing virtualization"; pkg $VIRT
 
   sudo systemctl enable NetworkManager
-  [ -n "$DM" ] && sudo systemctl enable lightdm
+  if [ -n "$DM" ]; then sudo systemctl enable lightdm; fi
 fi
 
 

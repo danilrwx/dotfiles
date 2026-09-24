@@ -27,8 +27,9 @@ through [mise](https://mise.jdx.dev) from `config/mise/config.toml`. `d8` and
 On a bare Debian netinst (no desktop task selected) run `./install --desktop`
 instead: it additionally installs X11, lightdm, and the i3 desktop stack mirroring
 the Fedora i3 Spin comps group (i3status, nm-applet, mousepad, pavucontrol,
-volumeicon, firefox, pipewire, fonts, firmware) and enables lightdm and
-NetworkManager.
+volumeicon, pipewire, fonts, firmware) and enables NetworkManager. lightdm is
+installed only when no display manager is enabled yet, so a distro that already
+ships a DE keeps its own.
 
 ## Base config on other servers
 
