@@ -1,6 +1,9 @@
 [tools]
 go = "1.25"
 node = "lts"
+jq = "latest"
+ripgrep = "latest"
+fzf = "latest"
 golangci-lint = "latest"
 kubectl = "latest"
 helm = "latest"
