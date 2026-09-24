@@ -9,12 +9,11 @@ OS=$(uname -s)
 if [ -f /etc/os-release ]; then
   . /etc/os-release
 
-  if [ "$ID" == "ubuntu" ]; then
-    log "This is a Ubuntu system."
-  elif [ "$ID" == "redos" ]; then
-    log "This is a RED OS system."
+  if [ "$ID" == "debian" ] || [ "$ID" == "ubuntu" ]; then
+    log "This is a $ID system."
   else
-    exit
+    log "Unsupported distro: $ID"
+    exit 1
   fi
 fi
 
@@ -69,19 +68,8 @@ if [[ "$OS" == "Linux" ]]; then
 fi
 
 # Install packages for different OSes ───────────────────────────────────────────────────────────────────────────────────
-if [ "$ID" == "redos" ]; then
-  log "Installing redos packages"
-  sudo dnf update -y
-
-  # ponytail: strict=0 skips packages missing from RED OS repos instead of failing the whole transaction;
-  # tighten the list once we know what RED OS actually ships
-  sudo dnf install -y --setopt=strict=0 gcc gcc-c++ make git wget zip unzip curl file procps-ng tigervnc openssh-askpass \
-	pinentry-gnome3 virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop ugrep ripgrep nodejs npm golang neovim \
-	i3 i3lock dmenu dunst xss-lock dex-autostart hsetroot xcompmgr maim brightnessctl acpi libnotify \
-	xsetroot setxkbmap xset xrdb pavucontrol bc xfce4-terminal
-elif [ "$ID" == "ubuntu" ]; then
-  log "Installing ubuntu packages"
-
+if [[ "$OS" == "Linux" ]]; then
+  log "Installing apt packages"
   sudo apt update -y
 
   sudo apt install -y build-essential git wget zip unzip curl file procps tigervnc-viewer ssh-askpass pinentry-gnome3 \
