@@ -108,15 +108,19 @@ fi
 
 
 # Host tooling: launcher + ops CLIs + the Go dev toolchain ──────────────────────────────────────────────────────────────
-log "Installing host tools"
 if [[ "$OS" == "Darwin" ]]; then
+  log "Installing host tools from brew"
   brew install go kubectl gh glab tmux fzf jq yq gnupg pinentry-mac watch htop lazygit ugrep node neovim
 else
   # same static binaries as the devbox image (go into /usr/local/go, the rest into /usr/local/bin)
+  log "Installing host binaries (go, kubectl, gh, glab, yq, neovim, …)"
   bash "$HOME/dotfiles/devcontainer/tools/binaries.sh"
   export PATH="/usr/local/go/bin:$HOME/go/bin:$PATH"
   # lazygit is not in Fedora repos
-  command -v lazygit &> /dev/null || go install github.com/jesseduffield/lazygit@latest
+  if ! command -v lazygit &> /dev/null; then
+    log "Installing lazygit"
+    go install github.com/jesseduffield/lazygit@latest
+  fi
 fi
 
 # Go dev tools into ~/go/bin (same set as the devbox image, devcontainer/tools/go.sh)
