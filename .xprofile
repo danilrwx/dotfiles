@@ -1,3 +1,3 @@
-# Sourced by the display manager's Xsession (~/.xsessionrc and ~/.profile on
-# Debian/Ubuntu, ~/.xprofile on Fedora), so i3, i3bar and dmenu see the same PATH as zsh.
+# Sourced by the display manager's Xsession (~/.xsessionrc on Debian/Ubuntu,
+# ~/.xprofile on Fedora), so i3, i3bar and dmenu see the same PATH as zsh.
 export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/go/bin:$HOME/bin:$PATH"

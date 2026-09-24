@@ -71,7 +71,6 @@ if [ "$DESKTOP" == 1 ]; then
   ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
   ln -sf $HOME/dotfiles/.Xresources $HOME/
   ln -sf $HOME/dotfiles/.xprofile $HOME/.xprofile
-  ln -sf $HOME/dotfiles/.xprofile $HOME/.profile
   ln -sf $HOME/dotfiles/.xprofile $HOME/.xsessionrc
 fi
 
