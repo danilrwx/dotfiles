@@ -74,12 +74,10 @@ fi
 
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
 # which also keeps those paths out of this public repo.
-private_install() {
-  [ -f $HOME/dotfiles/private/install ] || return 0
+if [ -f $HOME/dotfiles/private/install ]; then
   log "Running private install"
   "$HOME/dotfiles/private/install" || log "Failed to run private install. Continue installation."
-}
-private_install
+fi
 
 # Base CLI packages from the distro / brew. Everything Go-based comes from
 # `go install` below so the versions match across OSes ─────────────────────────────────────────────────────────────────
@@ -234,18 +232,6 @@ done
 log "Installing npm tools"
 npm config set prefix "$HOME/.local"
 npm install -g bash-language-server typescript-language-server typescript
-
-# Private submodule over https when there is no ssh key but gh is logged in
-if [ ! -f $HOME/dotfiles/private/install ]; then
-  if gh auth status &> /dev/null; then
-    log "Fetching private submodule over https via gh"
-    gh auth setup-git
-    git -c url.https://github.com/.insteadOf=git@github.com: submodule update --init --recursive \
-      && private_install || log "Failed to update submodules. Continue installation."
-  else
-    log "Private submodule skipped: no ssh key and gh is not logged in (gh auth login, then rerun)"
-  fi
-fi
 
 # Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
 # plugin. Queries are vendored in the repo; parsers are compiled here.
