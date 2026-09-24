@@ -117,7 +117,8 @@ fi
 # Languages and dev/ops CLIs via mise (config/mise/config.toml) ────────────────────────────────────────────────────────
 if ! command -v mise &> /dev/null && [ ! -x "$HOME/.local/bin/mise" ]; then
   log "Installing mise"
-  curl -fsSL https://mise.run | sh
+  # the mise.jdx.dev CDN is far slower than GitHub releases from here
+  curl -fsSL https://mise.run | MISE_INSTALL_FROM_GITHUB=1 sh
 fi
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 log "Installing mise tools"
