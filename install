@@ -18,12 +18,15 @@ if [ -f /etc/os-release ]; then
   fi
 fi
 
-# Change to ssh remote ──────────────────────────────────────────────────────────────────────────────────────────────────
-git remote set-url origin git@github.com:danilrwx/dotfiles.git
+# SSH remote and private submodules (need ~/.ssh) ─────────────────────────────────────────────────────────────────────
+if [ -d "$HOME/.ssh" ]; then
+  git remote set-url origin git@github.com:danilrwx/dotfiles.git
 
-# Update submodules ──────────────────────────────────────────────────────────────────────────────────────────────────────
-if ! git submodule update --init --recursive; then
-  log "Failed to update submodules. Continue installation."
+  if ! git submodule update --init --recursive; then
+    log "Failed to update submodules. Continue installation."
+  fi
+else
+  log "No ~/.ssh found. Skip ssh remote and private submodules."
 fi
 
 # Create directories and synlinks to config files ───────────────────────────────────────────────────────────────────────
