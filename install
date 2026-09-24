@@ -4,6 +4,10 @@ log() {
   echo -e "\033[0;31m$1\033[0m"
 }
 
+# ./install --desktop: also set up X11 + lightdm + i3 desktop on a bare Debian netinst
+DESKTOP=0
+[ "${1:-}" == "--desktop" ] && DESKTOP=1
+
 # Some useful functions ─────────────────────────────────────────────────────────────────────────────────────────────────
 OS=$(uname -s)
 if [ -f /etc/os-release ]; then
@@ -74,6 +78,20 @@ if [[ "$OS" == "Linux" ]]; then
 	virt-manager xclip xsel zsh tmux fzf jq gnupg2 htop lazygit ugrep ripgrep nodejs npm golang-go gh neovim \
 	i3 i3lock suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin \
 	x11-xserver-utils pavucontrol bc alacritty
+fi
+
+# Desktop stack for a bare netinst, modelled on the Fedora i3 Spin (lightdm, i3,
+# nm-applet, thunar, mousepad, firefox, polkit agent, audio, fonts) ────────────────────────────────────────────────────
+if [ "$DESKTOP" == 1 ]; then
+  log "Installing desktop packages"
+  sudo apt install -y xorg xinit lightdm lightdm-gtk-greeter \
+	network-manager network-manager-gnome \
+	pipewire pipewire-pulse wireplumber alsa-utils \
+	thunar thunar-volman thunar-archive-plugin gvfs gvfs-backends xarchiver mousepad \
+	firefox-esr feh arandr lxpolkit gnome-keyring xdg-utils xdg-user-dirs \
+	fonts-dejavu fonts-noto-core fonts-noto-color-emoji \
+	blueman bluez firmware-linux
+  sudo systemctl enable lightdm NetworkManager
 fi
 
 
