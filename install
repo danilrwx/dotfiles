@@ -247,6 +247,10 @@ if [ "$NVIDIA" == 1 ] && [[ "$OS" == "Linux" ]]; then
             /etc/yum.repos.d/rpmfusion-*.repo
         fi
         pkg akmods mokutil akmod-nvidia xorg-x11-drv-nvidia-cuda
+        # akmods builds in the background; rebooting before it finishes leaves no GPU driver at all
+        log "Building the NVIDIA kernel module (takes a few minutes)"
+        sudo akmods --force
+        sudo dracut --force
         sudo kmodgenca -a
         MOK_PUB=/etc/pki/akmods/certs/public_key.der
         ;;
