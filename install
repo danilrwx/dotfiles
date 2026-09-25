@@ -160,27 +160,38 @@ if [ "$DESKTOP" == 1 ]; then
     sudo systemctl enable --now spice-vdagentd qemu-guest-agent
   fi
 
-  # Telegram: official static build into ~/.local/Telegram (registers its own
-  # .desktop entry on first launch)
-  if [ ! -x "$HOME/.local/Telegram/Telegram" ]; then
-    log "Installing Telegram"
-    curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJf - -C "$HOME/.local"
-    ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
-  fi
+  # Telegram and Discord from Flathub: the official tarballs never self-update
+  # (Discord refuses to start until updated by hand), so a user timer runs
+  # `flatpak update` daily. Symlinks give dmenu the plain command names.
+  log "Installing Telegram and Discord (flatpak)"
+  pkg flatpak
+  flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  flatpak install --user -y --noninteractive flathub org.telegram.desktop com.discordapp.Discord
+  ln -sf "$HOME/.local/share/flatpak/exports/bin/org.telegram.desktop" "$HOME/.local/bin/telegram-desktop"
+  ln -sf "$HOME/.local/share/flatpak/exports/bin/com.discordapp.Discord" "$HOME/.local/bin/discord"
 
-  # Discord: official tarball into ~/.local/Discord; SKIP_HOST_UPDATE stops the
-  # client refusing to start until the host is updated by hand
-  if [ ! -x "$HOME/.local/Discord/discord" ]; then
-    log "Installing Discord"
-    curl -fsSL "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xzf - -C "$HOME/.local"
-    ln -sf "$HOME/.local/Discord/discord" "$HOME/.local/bin/discord"
-    mkdir -p "$HOME/.config/discord"
-    echo '{"SKIP_HOST_UPDATE": true}' > "$HOME/.config/discord/settings.json"
-  fi
-  mkdir -p "$HOME/.local/share/applications"
-  sed "s|^Exec=.*|Exec=$HOME/.local/Discord/discord|;s|^Icon=.*|Icon=$HOME/.local/Discord/discord.png|" \
-    "$HOME/.local/Discord/discord.desktop" > "$HOME/.local/share/applications/discord.desktop"
-  update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+  mkdir -p "$HOME/.config/systemd/user"
+  cat > "$HOME/.config/systemd/user/flatpak-update.service" <<'EOF'
+[Unit]
+Description=Update user flatpaks
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/flatpak update --user -y --noninteractive
+EOF
+  cat > "$HOME/.config/systemd/user/flatpak-update.timer" <<'EOF'
+[Unit]
+Description=Daily flatpak update
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+  systemctl --user daemon-reload
+  systemctl --user enable --now flatpak-update.timer
 fi
 
 # i3 stack (--i3), mirroring the Fedora i3 Spin comps group "i3" plus its

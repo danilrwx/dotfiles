@@ -38,7 +38,8 @@ NVIDIA's own Debian repo (Debian's packages stop at 550, too old for RTX 50xx),
 the dkms/akmods signing key via `mokutil`; confirm it in MokManager on reboot.
 
 `./install --desktop` adds the GUI apps that fit any desktop environment:
-alacritty, fonts, Telegram, Discord, virt-manager, and the VM guest agents when
+alacritty, fonts, Telegram and Discord from Flathub (updated daily by a user
+timer), virt-manager, and the VM guest agents when
 running inside a VM. `./install --i3` builds on that with X11 and the i3 stack
 mirroring the Fedora i3 Spin comps group (i3status, dmenu, dunst, nm-applet,
 pavucontrol, volumeicon, pipewire); lightdm is installed only when no display
