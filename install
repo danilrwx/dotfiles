@@ -186,12 +186,12 @@ if [ "$DESKTOP" == 1 ]; then
     ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
   fi
 
-  # Discord: official .deb; SKIP_HOST_UPDATE stops the client refusing to start
-  # until the host package is updated by hand
-  if [ "$PM" == apt ] && ! command -v discord &> /dev/null; then
+  # Discord: official tarball into ~/.local/Discord; SKIP_HOST_UPDATE stops the
+  # client refusing to start until the host is updated by hand
+  if [ ! -x "$HOME/.local/Discord/discord" ]; then
     log "Installing Discord"
-    curl -fsSL -o /tmp/discord.deb "https://discord.com/api/download?platform=linux&format=deb"
-    pkg /tmp/discord.deb && rm /tmp/discord.deb
+    curl -fsSL "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xzf - -C "$HOME/.local"
+    ln -sf "$HOME/.local/Discord/discord" "$HOME/.local/bin/discord"
     mkdir -p "$HOME/.config/discord"
     echo '{"SKIP_HOST_UPDATE": true}' > "$HOME/.config/discord/settings.json"
   fi
