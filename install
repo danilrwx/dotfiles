@@ -256,10 +256,13 @@ if [ "$NVIDIA" == 1 ] && [[ "$OS" == "Linux" ]]; then
             /etc/yum.repos.d/rpmfusion-*.repo
         fi
         pkg akmods mokutil akmod-nvidia xorg-x11-drv-nvidia-cuda
-        # akmods builds in the background; rebooting before it finishes leaves no GPU driver at all
-        log "Building the NVIDIA kernel module (takes a few minutes)"
-        sudo akmods --force
+        # sign key first so the modules built below carry it; then build for the
+        # newest installed kernel, not the running one: dnf update above may have
+        # installed a kernel we have not booted yet
         sudo kmodgenca -a
+        newest_kernel=$(rpm -q kernel-core --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' | sort -V | tail -1)
+        log "Building the NVIDIA kernel module for $newest_kernel (takes a few minutes)"
+        sudo akmods --force --kernels "$newest_kernel"
         MOK_PUB=/etc/pki/akmods/certs/public_key.der
         ;;
     esac
