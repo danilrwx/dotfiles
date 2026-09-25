@@ -63,6 +63,6 @@ See `server/README.md` for what it installs and the requirements.
 
 | Path | What |
 |---|---|
-| `install` | host setup (symlinks, packages, go/npm tools) |
+| `install` | host setup (symlinks, packages, go tools) |
 | `bin/clip` | pipe stdin to the local clipboard over OSC 52 |
 | `server/install.sh` | base vim/tmux config + clipboard (OSC 52) for any server |
