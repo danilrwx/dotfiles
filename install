@@ -97,7 +97,7 @@ case "$PM" in
         /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null
     fi
     sudo apt update -y
-    pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd nodejs npm
+    pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd
     if [ "$ID" == "debian" ]; then
       # stable ships go 1.24; backports track the current minor like Ubuntu/Fedora
       echo "deb https://$DEB_HOST/debian ${VERSION_CODENAME}-backports main" \
@@ -115,7 +115,7 @@ case "$PM" in
         /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
     fi
     sudo dnf update -y
-    pkg gcc gcc-c++ make git wget zip unzip curl file procps-ng zsh tmux gnupg2 htop ugrep ripgrep fzf jq nodejs npm \
+    pkg gcc gcc-c++ make git wget zip unzip curl file procps-ng zsh tmux gnupg2 htop ugrep ripgrep fzf jq \
       golang clang-tools-extra neovim
     ;;
   brew)
@@ -125,7 +125,7 @@ case "$PM" in
     fi
     eval "$(/opt/homebrew/bin/brew shellenv)"
     # clangd comes with the Xcode CLT
-    pkg tmux gnupg pinentry-mac watch htop ugrep ripgrep fzf jq node go kubectl neovim
+    pkg tmux gnupg pinentry-mac watch htop ugrep ripgrep fzf jq go kubectl neovim
     ;;
 esac
 
@@ -295,11 +295,6 @@ for mod in \
 do
   go install "$mod" || log "go install $mod failed. Continue installation."
 done
-
-# Node-based LSP servers into ~/.local (npm registry, no sudo) ─────────────────────────────────────────────────────────
-log "Installing npm tools"
-npm config set prefix "$HOME/.local"
-npm install -g bash-language-server typescript-language-server typescript
 
 # Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
 # plugin. Queries are vendored in the repo; parsers are compiled here.

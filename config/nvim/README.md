@@ -18,7 +18,7 @@ to start, nothing to lock or break on update.
 | `tmux` (optional) | `<leader>gg` lazygit, playbook runner |
 | `lazygit` (optional) | `<leader>gg` |
 | `cc`, `curl`, `tar` | `:TSBuild` (compile treesitter parsers) |
-| language servers | `gopls`, `lua_ls`, `clangd`, `rust_analyzer`, `ts_ls`, `bashls`, `helm_ls`, `golangci_lint_ls` — auto-skipped if the binary is absent |
+| language servers | `gopls`, `clangd`, `helm_ls`, `golangci_lint_ls` — auto-skipped if the binary is absent |
 
 ## Layout
 

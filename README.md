@@ -22,13 +22,12 @@ the same on every OS:
 
 - system CLIs from the distro (`apt` on Debian/Ubuntu, `dnf` on Fedora) or
   `brew` on macOS: `zsh`, `git`, `tmux`, `gnupg`, `fzf`, `jq`, `ripgrep`,
-  `ugrep`, `htop`, `clangd`, `go`, `node`, `npm`, `neovim` (a GitHub tarball on
-  Debian, whose 0.10 is too old for the config)
+  `ugrep`, `htop`, `clangd`, `go`, `neovim` (a GitHub tarball on Debian, whose
+  0.10 is too old for the config)
 - Go-based CLIs and dev tools via `go install` through proxy.golang.org:
   `gh`, `glab`, `helm`, `k9s`, `yq`, `lazygit`, `crane`, `task`,
   `golangci-lint`, `gopls`, `gofumpt`, `goimports`, `dlv`, `moq`, `ginkgo`,
   `helm-ls`, `golangci-lint-langserver`
-- Node-based LSP servers via `npm -g` into `~/.local`
 
 `kubectl` comes from dl.k8s.io on Linux, `d8` and `claude` use their own
 installers. The script also sets `zsh` as the login shell.
