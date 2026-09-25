@@ -186,19 +186,12 @@ if [ "$DESKTOP" == 1 ]; then
     ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
   fi
 
-  # Discord: official tar.gz into ~/.local/Discord. It does not self-update:
-  # when the client refuses to start, rm -rf ~/.local/Discord and rerun
-  if [ ! -x "$HOME/.local/Discord/discord" ]; then
+  # Discord: official .deb (it does not self-update; rerun when the client nags)
+  if [ "$PM" == apt ] && ! command -v discord &> /dev/null; then
     log "Installing Discord"
-    curl -fsSL "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xzf - -C "$HOME/.local"
-    ln -sf "$HOME/.local/Discord/discord" "$HOME/.local/bin/discord"
+    curl -fsSL -o /tmp/discord.deb "https://discord.com/api/download?platform=linux&format=deb"
+    pkg /tmp/discord.deb && rm /tmp/discord.deb
   fi
-  log "Refreshing desktop entries"
-  mkdir -p "$HOME/.local/share/applications"
-  sed "s|^Exec=.*|Exec=$HOME/.local/Discord/discord|;s|^Icon=.*|Icon=$HOME/.local/Discord/discord.png|" \
-    "$HOME/.local/Discord/discord.desktop" > "$HOME/.local/share/applications/discord.desktop"
-  update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
-  rm -f "$HOME/.cache/dmenu_run"
 fi
 
 # NVIDIA driver. Debian's own packages stop at 550 (no Blackwell), so the
