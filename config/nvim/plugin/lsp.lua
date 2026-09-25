@@ -3,12 +3,8 @@
 for _, name in ipairs({
   "gopls",
   "golangci_lint_ls",
-  "lua_ls",
   "helm_ls",
   "clangd",
-  "ts_ls",
-  "rust_analyzer",
-  "bashls",
 }) do
   local cfg = vim.lsp.config[name]
   local exe = cfg and cfg.cmd and cfg.cmd[1]
