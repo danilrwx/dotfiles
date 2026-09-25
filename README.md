@@ -29,8 +29,8 @@ the same on every OS:
   `golangci-lint`, `gopls`, `gofumpt`, `goimports`, `dlv`, `moq`, `ginkgo`,
   `helm-ls`, `golangci-lint-langserver`
 
-`kubectl` comes from dl.k8s.io on Linux, `d8` and `claude` use their own
-installers. The script also sets `zsh` as the login shell.
+`kubectl` comes from the official pkgs.k8s.io repo on Linux, `d8` and `claude`
+use their own installers. The script also sets `zsh` as the login shell.
 
 `./install --nvidia` installs the NVIDIA driver with open kernel modules: from
 NVIDIA's own Debian repo (Debian's packages stop at 550, too old for RTX 50xx),
