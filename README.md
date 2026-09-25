@@ -22,8 +22,8 @@ the same on every OS:
 
 - system CLIs from the distro (`apt` on Debian/Ubuntu, `dnf` on Fedora) or
   `brew` on macOS: `zsh`, `git`, `tmux`, `gnupg`, `fzf`, `jq`, `ripgrep`,
-  `ugrep`, `htop`, `clangd`, `go`, `node`, `neovim` (a GitHub tarball on Debian,
-  whose 0.10 is too old for the config)
+  `ugrep`, `htop`, `clangd`, `go`, `neovim` (a GitHub tarball on Debian, whose
+  0.10 is too old for the config); Node LTS from the nodejs.org tarball on Linux
 - Go-based CLIs and dev tools via `go install` through proxy.golang.org:
   `gh`, `glab`, `helm`, `k9s`, `yq`, `lazygit`, `crane`, `task`,
   `golangci-lint`, `gopls`, `gofumpt`, `goimports`, `dlv`, `moq`, `ginkgo`,
