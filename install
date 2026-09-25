@@ -54,30 +54,39 @@ else
   log "No ssh key in ~/.ssh. Skip ssh remote and private submodules."
 fi
 
-# Create directories and synlinks to config files ───────────────────────────────────────────────────────────────────────
+# Symlink configs. A real file/dir already at the target (e.g. the i3 config a
+# distro spin drops into ~/.config/i3) is moved aside, otherwise ln would put
+# the link inside that dir ─────────────────────────────────────────────────────────────────────────────────────────────
+link() {
+  local src=$HOME/dotfiles/$1 dst=$2
+  if [ -e "$dst" ] && [ ! -L "$dst" ]; then
+    log "Backing up $dst to $dst.bak"
+    rm -rf "$dst.bak" && mv "$dst" "$dst.bak"
+  fi
+  ln -snf "$src" "$dst"
+}
+
 log "Linking configs"
 mkdir -p $HOME/.config
 mkdir -p $HOME/.local/bin $HOME/.local/share
 
-ln -sf $HOME/dotfiles/.gitconfig $HOME/
-ln -sf $HOME/dotfiles/.gitignore_global $HOME/
-ln -sf $HOME/dotfiles/.tmux.conf $HOME/.tmux.conf
-ln -sf $HOME/dotfiles/.zprofile $HOME/
-ln -sf $HOME/dotfiles/.zshrc $HOME/
+for f in .gitconfig .gitignore_global .tmux.conf .zprofile .zshrc; do
+  link $f $HOME/$f
+done
 for c in k9s htop lazygit nvim; do
-  ln -snf $HOME/dotfiles/config/$c $HOME/.config/
+  link config/$c $HOME/.config/$c
 done
 if [[ "$OS" == "Darwin" ]] || [ "$DESKTOP" == 1 ]; then
   for c in kitty alacritty ghostty; do
-    ln -snf $HOME/dotfiles/config/$c $HOME/.config/
+    link config/$c $HOME/.config/$c
   done
 fi
 if [ "$I3" == 1 ]; then
-  ln -snf $HOME/dotfiles/config/i3 $HOME/.config/
-  ln -snf $HOME/dotfiles/config/dunst $HOME/.config/
-  ln -sf $HOME/dotfiles/.Xresources $HOME/
-  ln -sf $HOME/dotfiles/.xprofile $HOME/.xprofile
-  ln -sf $HOME/dotfiles/.xprofile $HOME/.xsessionrc
+  link config/i3 $HOME/.config/i3
+  link config/dunst $HOME/.config/dunst
+  link .Xresources $HOME/.Xresources
+  link .xprofile $HOME/.xprofile
+  link .xprofile $HOME/.xsessionrc
 fi
 
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
