@@ -252,32 +252,13 @@ if [ "$NVIDIA" == 1 ] && [[ "$OS" == "Linux" ]]; then
   fi
 fi
 
-# kubectl from the official pkgs.k8s.io repo (one repo per minor; the current
-# stable minor is picked, rerun after a Kubernetes release to move forward) ───────────────────────────────────────────
-if [[ "$OS" == "Linux" ]]; then
-  k8s=$(curl -fsSL https://dl.k8s.io/release/stable.txt | cut -d. -f1,2)
-  log "Adding Kubernetes repo $k8s"
-  case "$PM" in
-    apt)
-      sudo mkdir -p /etc/apt/keyrings
-      curl -fsSL "https://pkgs.k8s.io/core:/stable:/${k8s}/deb/Release.key" \
-        | sudo gpg --dearmor --yes -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-      echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${k8s}/deb/ /" \
-        | sudo tee /etc/apt/sources.list.d/kubernetes.list > /dev/null
-      sudo apt update -y
-      ;;
-    dnf)
-      sudo tee /etc/yum.repos.d/kubernetes.repo > /dev/null <<KREPO
-[kubernetes]
-name=Kubernetes
-baseurl=https://pkgs.k8s.io/core:/stable:/${k8s}/rpm/
-enabled=1
-gpgcheck=1
-gpgkey=https://pkgs.k8s.io/core:/stable:/${k8s}/rpm/repodata/repomd.xml.key
-KREPO
-      ;;
-  esac
-  pkg kubectl
+# kubectl: one static binary from dl.k8s.io ───────────────────────────────────────────────────────────────────────────
+if [[ "$OS" == "Linux" ]] && ! command -v kubectl &> /dev/null; then
+  log "Installing kubectl"
+  arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+  curl -fsSL "https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/${arch}/kubectl" \
+    | sudo tee /usr/local/bin/kubectl > /dev/null
+  sudo chmod +x /usr/local/bin/kubectl
 fi
 
 # neovim: the config needs 0.11+ (vim.lsp.config); Debian stable ships 0.10 ──────────────────────────────────────────
