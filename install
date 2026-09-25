@@ -7,11 +7,13 @@ log() {
 # ./install [--desktop] [--ru-mirror]
 #   --desktop    X11 + i3 desktop stack; lightdm only if no display manager is enabled
 #   --ru-mirror  pin the distro repos to mirror.yandex.ru instead of the geo metalink
-DESKTOP=0; RU_MIRROR=0
+#   --nvidia     proprietary NVIDIA driver (open kernel modules) + Secure Boot MOK signing
+DESKTOP=0; RU_MIRROR=0; NVIDIA=0
 for arg in "$@"; do
   case "$arg" in
     --desktop)   DESKTOP=1 ;;
     --ru-mirror) RU_MIRROR=1 ;;
+    --nvidia)    NVIDIA=1 ;;
     *) log "Unknown option: $arg"; exit 1 ;;
   esac
 done
@@ -197,6 +199,57 @@ if [ "$DESKTOP" == 1 ]; then
     "$HOME/.local/Discord/discord.desktop" > "$HOME/.local/share/applications/discord.desktop"
   update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
   rm -f "$HOME/.cache/dmenu_run"
+fi
+
+# NVIDIA driver. Debian's own packages stop at 550 (no Blackwell), so the
+# driver comes from NVIDIA's repo for Debian; Ubuntu's archive and RPM Fusion
+# carry current versions themselves. Kernel modules are built by dkms/akmods;
+# with Secure Boot on they must be signed with a MOK key that the firmware
+# knows, so the key is enrolled here and confirmed in MokManager on next boot ─────────────────────────────────────────
+if [ "$NVIDIA" == 1 ] && [[ "$OS" == "Linux" ]]; then
+  if ! lspci | grep -qi 'vga.*nvidia\|3d.*nvidia'; then
+    log "No NVIDIA GPU found, skipping the driver"
+  else
+    case "$ID" in
+      debian)
+        log "Installing NVIDIA driver from the NVIDIA Debian repo"
+        curl -fsSL -o /tmp/cuda-keyring.deb \
+          "https://developer.download.nvidia.com/compute/cuda/repos/debian${VERSION_ID}/x86_64/cuda-keyring_1.1-1_all.deb"
+        sudo dpkg -i /tmp/cuda-keyring.deb && rm /tmp/cuda-keyring.deb
+        sudo apt update -y
+        pkg linux-headers-amd64 dkms mokutil nvidia-open
+        MOK_PUB=/var/lib/dkms/mok.pub
+        ;;
+      ubuntu)
+        log "Installing NVIDIA driver via ubuntu-drivers"
+        pkg ubuntu-drivers-common mokutil
+        sudo ubuntu-drivers install
+        MOK_PUB=/var/lib/shim-signed/mok/MOK.der
+        ;;
+      fedora)
+        log "Installing NVIDIA driver from RPM Fusion"
+        pkg "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-${VERSION_ID}.noarch.rpm" \
+            "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${VERSION_ID}.noarch.rpm"
+        if [ "$RU_MIRROR" == 1 ]; then
+          sudo sed -i 's|^metalink=|#metalink=|;s|^#baseurl=http://download1.rpmfusion.org|baseurl=https://mirror.yandex.ru/fedora/rpmfusion|' \
+            /etc/yum.repos.d/rpmfusion-*.repo
+        fi
+        pkg akmods mokutil akmod-nvidia xorg-x11-drv-nvidia-cuda
+        sudo kmodgenca -a
+        MOK_PUB=/etc/pki/akmods/certs/public_key.der
+        ;;
+    esac
+
+    if mokutil --sb-state 2>/dev/null | grep -q enabled; then
+      if mokutil --test-key "$MOK_PUB" 2>/dev/null | grep -q 'already enrolled'; then
+        log "Secure Boot: MOK key already enrolled"
+      else
+        log "Secure Boot is on: enrolling the module signing key (choose a one-time password)"
+        sudo mokutil --import "$MOK_PUB"
+        log "Reboot, pick 'Enroll MOK' in the blue MokManager screen and enter that password"
+      fi
+    fi
+  fi
 fi
 
 # kubectl on Linux (not in every distro repo; dl.k8s.io is a Google CDN) ───────────────────────────────────────────────

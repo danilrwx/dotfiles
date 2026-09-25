@@ -33,6 +33,11 @@ the same on every OS:
 `kubectl` comes from dl.k8s.io on Linux, `d8` and `claude` use their own
 installers. The script also sets `zsh` as the login shell.
 
+`./install --nvidia` installs the NVIDIA driver with open kernel modules: from
+NVIDIA's own Debian repo (Debian's packages stop at 550, too old for RTX 50xx),
+`ubuntu-drivers` on Ubuntu, RPM Fusion on Fedora. With Secure Boot on it enrolls
+the dkms/akmods signing key via `mokutil`; confirm it in MokManager on reboot.
+
 On a bare Debian netinst (no desktop task selected) run `./install --desktop`
 instead: it additionally installs X11, lightdm, and the i3 desktop stack mirroring
 the Fedora i3 Spin comps group (i3status, nm-applet, mousepad, pavucontrol,
