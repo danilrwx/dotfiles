@@ -97,7 +97,7 @@ case "$PM" in
         /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null
     fi
     sudo apt update -y
-    pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd nodejs
+    pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd nodejs npm
     if [ "$ID" == "debian" ]; then
       # stable ships go 1.24; backports track the current minor like Ubuntu/Fedora
       echo "deb https://$DEB_HOST/debian ${VERSION_CODENAME}-backports main" \
@@ -115,7 +115,7 @@ case "$PM" in
         /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
     fi
     sudo dnf update -y
-    pkg gcc gcc-c++ make git wget zip unzip curl file procps-ng zsh tmux gnupg2 htop ugrep ripgrep fzf jq nodejs \
+    pkg gcc gcc-c++ make git wget zip unzip curl file procps-ng zsh tmux gnupg2 htop ugrep ripgrep fzf jq nodejs npm \
       golang clang-tools-extra neovim
     ;;
   brew)
@@ -295,14 +295,6 @@ for mod in \
 do
   go install "$mod" || log "go install $mod failed. Continue installation."
 done
-
-# npm into ~/.local via its own installer: the distro npm package drags in a
-# hundred node-* packages, while nodejs alone is a single one ─────────────────────────────────────────────────────────
-export NPM_CONFIG_PREFIX="$HOME/.local"
-if [[ "$OS" == "Linux" ]] && ! command -v npm &> /dev/null; then
-  log "Installing npm"
-  curl -fsSL https://www.npmjs.com/install.sh | sh
-fi
 
 # Node-based LSP servers into ~/.local (npm registry, no sudo) ─────────────────────────────────────────────────────────
 log "Installing npm tools"
