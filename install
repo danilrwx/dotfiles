@@ -273,7 +273,8 @@ if [ "$NVIDIA" == 1 ] && [[ "$OS" == "Linux" ]]; then
       else
         log "Secure Boot is on: enrolling the module signing key (choose a one-time password)"
         sudo mokutil --import "$MOK_PUB"
-        log "Reboot, pick 'Enroll MOK' in the blue MokManager screen and enter that password"
+        log "Reboot and press an arrow key right after POST: the blue MokManager screen times out in seconds"
+        log "and a slow-waking monitor may still be dark; pick 'Enroll MOK' and enter that password"
       fi
     fi
   fi
