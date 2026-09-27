@@ -6,7 +6,7 @@ log() {
 
 # ./install [--desktop] [--i3] [--ru-mirror] [--nvidia]
 #   --desktop    GUI apps for any DE: terminal, fonts, Telegram, Discord, virt-manager
-#   --i3         X11 + i3 stack on top of --desktop; lightdm only if no display manager is enabled
+#   --i3         X11 + i3 stack on top of --desktop; switches the display manager to lightdm
 #   --ru-mirror  pin the distro repos to mirror.yandex.ru instead of the geo metalink
 #   --nvidia     proprietary NVIDIA driver (open kernel modules) + Secure Boot MOK signing
 DESKTOP=0; I3=0; RU_MIRROR=0; NVIDIA=0
@@ -197,14 +197,6 @@ fi
 # i3 stack (--i3), mirroring the Fedora i3 Spin comps group "i3" plus its
 # base-x / networkmanager / multimedia environment groups ──────────────────────────────────────────────────────────────
 if [ "$I3" == 1 ]; then
-  # a distro that already ships a DE has a display manager enabled; keep it
-  if [ -e /etc/systemd/system/display-manager.service ]; then
-    log "Display manager already enabled: $(basename "$(readlink /etc/systemd/system/display-manager.service)")"
-    DM=""
-  else
-    DM=lightdm
-  fi
-
   if [ "$PM" == dnf ]; then
     X="xorg-x11-server-Xorg xorg-x11-xinit xsetroot setxkbmap xset xrdb mesa-dri-drivers mesa-vulkan-drivers vulkan-loader vulkan-tools"
     DM_PKGS="lightdm lightdm-gtk lightdm-gtk-greeter-settings"
@@ -222,14 +214,28 @@ if [ "$I3" == 1 ]; then
   fi
 
   log "Installing X11";      pkg $X
-  if [ -n "$DM" ]; then log "Installing lightdm"; pkg $DM_PKGS; fi
+  # GDM 49+ is built without X11 and never lists i3, so the distro's display
+  # manager is replaced with lightdm. Debian's DM units refuse to start unless
+  # /etc/X11/default-display-manager names them, and lightdm's postinst asks
+  # which DM to make default unless debconf already knows
+  log "Installing lightdm"
+  if [ "$PM" == apt ]; then
+    echo "lightdm shared/default-x-display-manager select lightdm" | sudo debconf-set-selections
+  fi
+  pkg $DM_PKGS
   log "Installing i3 stack"; pkg $I3_PKGS
   log "Installing network";  pkg $NET
   log "Installing audio";    pkg $AUDIO
   log "Installing i3 tools"; pkg $TOOLS
 
   sudo systemctl enable NetworkManager
-  if [ -n "$DM" ]; then sudo systemctl enable lightdm; fi
+  if [ -e /etc/systemd/system/display-manager.service ]; then
+    sudo systemctl disable "$(basename "$(readlink /etc/systemd/system/display-manager.service)")"
+  fi
+  if [ "$PM" == apt ]; then
+    echo /usr/sbin/lightdm | sudo tee /etc/X11/default-display-manager > /dev/null
+  fi
+  sudo systemctl enable lightdm
   rm -f "$HOME/.cache/dmenu_run"
 fi
 

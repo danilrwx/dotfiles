@@ -42,8 +42,8 @@ alacritty, fonts, Telegram and Discord from Flathub (updated daily by a user
 timer), virt-manager, and the VM guest agents when
 running inside a VM. `./install --i3` builds on that with X11 and the i3 stack
 mirroring the Fedora i3 Spin comps group (i3status, dmenu, dunst, nm-applet,
-pavucontrol, volumeicon, pipewire); lightdm is installed only when no display
-manager is enabled yet, so a distro that already ships a DE keeps its own.
+pavucontrol, volumeicon, pipewire) and switches the display manager to lightdm:
+GDM 49+ is built without X11 and never offers the i3 session.
 
 ## Base config on other servers
 
