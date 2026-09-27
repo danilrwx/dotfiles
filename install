@@ -4,16 +4,14 @@ log() {
   echo -e "\033[0;31m$1\033[0m"
 }
 
-# ./install [--desktop] [--i3] [--ru-mirror] [--nvidia]
+# ./install [--desktop] [--ru-mirror] [--nvidia]
 #   --desktop    GUI apps for any DE: terminal, fonts, Telegram, Discord, virt-manager
-#   --i3         X11 + i3 stack on top of --desktop; switches the display manager to lightdm
 #   --ru-mirror  pin the distro repos to mirror.yandex.ru instead of the geo metalink
 #   --nvidia     proprietary NVIDIA driver (open kernel modules) + Secure Boot MOK signing
-DESKTOP=0; I3=0; RU_MIRROR=0; NVIDIA=0
+DESKTOP=0; RU_MIRROR=0; NVIDIA=0
 for arg in "$@"; do
   case "$arg" in
     --desktop)   DESKTOP=1 ;;
-    --i3)        DESKTOP=1; I3=1 ;;
     --ru-mirror) RU_MIRROR=1 ;;
     --nvidia)    NVIDIA=1 ;;
     -h|--help)   sed -n '/^# \.\/install/,/^[^#]/{s/^# \{0,1\}//p;}' "$0"; exit 0 ;;
@@ -54,9 +52,8 @@ else
   log "No ssh key in ~/.ssh. Skip ssh remote and private submodules."
 fi
 
-# Symlink configs. A real file/dir already at the target (e.g. the i3 config a
-# distro spin drops into ~/.config/i3) is moved aside, otherwise ln would put
-# the link inside that dir ─────────────────────────────────────────────────────────────────────────────────────────────
+# Symlink configs. A real file/dir already at the target is moved aside,
+# otherwise ln would put the link inside that dir ──────────────────────────────────────────────────────────────────────
 link() {
   local src=$HOME/dotfiles/$1 dst=$2
   if [ -e "$dst" ] && [ ! -L "$dst" ]; then
@@ -81,14 +78,6 @@ if [[ "$OS" == "Darwin" ]] || [ "$DESKTOP" == 1 ]; then
     link config/$c $HOME/.config/$c
   done
 fi
-if [ "$I3" == 1 ]; then
-  link config/i3 $HOME/.config/i3
-  link config/dunst $HOME/.config/dunst
-  link .Xresources $HOME/.Xresources
-  link .xprofile $HOME/.xprofile
-  link .xprofile $HOME/.xsessionrc
-fi
-
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
 # which also keeps those paths out of this public repo.
 if [ -f $HOME/dotfiles/private/install ]; then
@@ -144,10 +133,10 @@ esac
 # GUI apps for any desktop (--desktop) ─────────────────────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
   if [ "$PM" == dnf ]; then
-    APPS="alacritty xclip xsel dejavu-fonts-all google-noto-sans-fonts google-noto-emoji-color-fonts"
+    APPS="alacritty dejavu-fonts-all google-noto-sans-fonts google-noto-emoji-color-fonts"
     VIRT="virt-manager tigervnc openssh-askpass pinentry-gnome3"
   else
-    APPS="alacritty xclip xsel fonts-dejavu fonts-noto-core fonts-noto-color-emoji"
+    APPS="alacritty fonts-dejavu fonts-noto-core fonts-noto-color-emoji"
     VIRT="virt-manager tigervnc-viewer ssh-askpass pinentry-gnome3"
   fi
   log "Installing desktop apps";   pkg $APPS
@@ -192,51 +181,6 @@ WantedBy=timers.target
 EOF
   systemctl --user daemon-reload
   systemctl --user enable --now flatpak-update.timer
-fi
-
-# i3 stack (--i3), mirroring the Fedora i3 Spin comps group "i3" plus its
-# base-x / networkmanager / multimedia environment groups ──────────────────────────────────────────────────────────────
-if [ "$I3" == 1 ]; then
-  if [ "$PM" == dnf ]; then
-    X="xorg-x11-server-Xorg xorg-x11-xinit xsetroot setxkbmap xset xrdb mesa-dri-drivers mesa-vulkan-drivers vulkan-loader vulkan-tools"
-    DM_PKGS="lightdm lightdm-gtk lightdm-gtk-greeter-settings"
-    I3_PKGS="i3 i3lock i3status dmenu dunst xss-lock dex-autostart hsetroot xcompmgr maim brightnessctl acpi libnotify bc"
-    NET="NetworkManager network-manager-applet"
-    AUDIO="pipewire pipewire-pulseaudio wireplumber pulseaudio-utils alsa-utils pavucontrol volumeicon"
-    TOOLS="mousepad feh lxpolkit xdg-utils xdg-user-dirs"
-  else
-    X="xorg xinit x11-xserver-utils firmware-linux mesa-vulkan-drivers libgl1-mesa-dri libvulkan1 vulkan-tools"
-    DM_PKGS="lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings"
-    I3_PKGS="i3 i3lock i3status suckless-tools dunst xss-lock dex hsetroot xcompmgr maim brightnessctl acpi libnotify-bin bc"
-    NET="network-manager network-manager-gnome"
-    AUDIO="pipewire pipewire-pulse wireplumber pulseaudio-utils alsa-utils pavucontrol volumeicon-alsa"
-    TOOLS="mousepad feh lxpolkit xdg-utils xdg-user-dirs"
-  fi
-
-  log "Installing X11";      pkg $X
-  # GDM 49+ is built without X11 and never lists i3, so the distro's display
-  # manager is replaced with lightdm. Debian's DM units refuse to start unless
-  # /etc/X11/default-display-manager names them, and lightdm's postinst asks
-  # which DM to make default unless debconf already knows
-  log "Installing lightdm"
-  if [ "$PM" == apt ]; then
-    echo "lightdm shared/default-x-display-manager select lightdm" | sudo debconf-set-selections
-  fi
-  pkg $DM_PKGS
-  log "Installing i3 stack"; pkg $I3_PKGS
-  log "Installing network";  pkg $NET
-  log "Installing audio";    pkg $AUDIO
-  log "Installing i3 tools"; pkg $TOOLS
-
-  sudo systemctl enable NetworkManager
-  if [ -e /etc/systemd/system/display-manager.service ]; then
-    sudo systemctl disable "$(basename "$(readlink /etc/systemd/system/display-manager.service)")"
-  fi
-  if [ "$PM" == apt ]; then
-    echo /usr/sbin/lightdm | sudo tee /etc/X11/default-display-manager > /dev/null
-  fi
-  sudo systemctl enable lightdm
-  rm -f "$HOME/.cache/dmenu_run"
 fi
 
 # NVIDIA driver. Debian's own packages stop at 550 (no Blackwell), so the

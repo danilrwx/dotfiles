@@ -40,10 +40,7 @@ the dkms/akmods signing key via `mokutil`; confirm it in MokManager on reboot.
 `./install --desktop` adds the GUI apps that fit any desktop environment:
 alacritty, fonts, Telegram and Discord from Flathub (updated daily by a user
 timer), virt-manager, and the VM guest agents when
-running inside a VM. `./install --i3` builds on that with X11 and the i3 stack
-mirroring the Fedora i3 Spin comps group (i3status, dmenu, dunst, nm-applet,
-pavucontrol, volumeicon, pipewire) and switches the display manager to lightdm:
-GDM 49+ is built without X11 and never offers the i3 session.
+running inside a VM.
 
 ## Base config on other servers
 

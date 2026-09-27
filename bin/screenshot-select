@@ -1,3 +1,0 @@
-#!/bin/sh
-
-maim --format=png --select | xclip -selection clipboard -t image/png

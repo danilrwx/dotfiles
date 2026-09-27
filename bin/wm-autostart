@@ -1,5 +1,0 @@
-#!/bin/bash
-
-xsetroot -cursor_name left_ptr
-setxkbmap -model pc105 -layout us,ru -option grp:ctrl_space_toggle -option caps:ctrl_modifier
-hsetroot -cover $(find ~/Backgrounds -type f \( -iname "*.jpg" -o -iname "*.png" \) | shuf -n 1)
