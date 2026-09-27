@@ -6,7 +6,7 @@ log() {
 
 # ./install [--desktop] [--ru-mirror] [--nvidia]
 #   --desktop    GUI apps for any DE: fonts, Telegram, Discord, virt-manager
-#   --ru-mirror  pin the distro repos to mirror.yandex.ru instead of the geo metalink
+#   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
 #   --nvidia     proprietary NVIDIA driver (open kernel modules) + Secure Boot MOK signing
 DESKTOP=0; RU_MIRROR=0; NVIDIA=0
 for arg in "$@"; do
@@ -24,18 +24,14 @@ OS=$(uname -s)
 PM=brew
 if [ -f /etc/os-release ]; then
   . /etc/os-release
-  case "$ID" in
-    debian|ubuntu) PM=apt ;;
-    fedora)        PM=dnf ;;
-    *) log "Unsupported distro: $ID"; exit 1 ;;
-  esac
-  log "This is a $ID system."
+  [ "$ID" == ubuntu ] || { log "Unsupported distro: $ID"; exit 1; }
+  PM=apt
+  log "This is an Ubuntu $VERSION_ID system."
 fi
 
 pkg() {
   case "$PM" in
     apt)  sudo apt install -y "$@" ;;
-    dnf)  sudo dnf install -y "$@" ;;
     brew) brew install "$@" ;;
   esac
 }
@@ -73,7 +69,7 @@ done
 for c in k9s htop lazygit nvim; do
   link config/$c $HOME/.config/$c
 done
-if [[ "$OS" == "Darwin" ]] || [ "$DESKTOP" == 1 ]; then
+if [[ "$OS" == "Darwin" ]]; then
   for c in kitty alacritty ghostty; do
     link config/$c $HOME/.config/$c
   done
@@ -85,39 +81,19 @@ if [ -f $HOME/dotfiles/private/install ]; then
   "$HOME/dotfiles/private/install" || log "Failed to run private install. Continue installation."
 fi
 
-# Base CLI packages from the distro / brew. Everything Go-based comes from
+# Base CLI packages from apt / brew. Everything Go-based comes from
 # `go install` below so the versions match across OSes ─────────────────────────────────────────────────────────────────
 log "Installing base packages ($PM)"
 case "$PM" in
   apt)
-    DEB_HOST=deb.debian.org
     if [ "$RU_MIRROR" == 1 ]; then
       log "Pinning apt repos to mirror.yandex.ru"
-      DEB_HOST=mirror.yandex.ru
-      sudo sed -i -E 's|https?://(archive\.ubuntu\.com\|[a-z]{2}\.archive\.ubuntu\.com\|deb\.debian\.org\|ftp\.[a-z]{2}\.debian\.org)/|https://mirror.yandex.ru/|' \
+      sudo sed -i -E 's|https?://([a-z]{2}\.)?archive\.ubuntu\.com/|https://mirror.yandex.ru/|' \
         /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null
     fi
     sudo apt update -y
-    pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd
-    if [ "$ID" == "debian" ]; then
-      # stable ships go 1.24; backports track the current minor like Ubuntu/Fedora
-      echo "deb https://$DEB_HOST/debian ${VERSION_CODENAME}-backports main" \
-        | sudo tee /etc/apt/sources.list.d/backports.list > /dev/null
-      sudo apt update -y
-      pkg -t "${VERSION_CODENAME}-backports" golang-go
-    else
-      pkg golang-go neovim
-    fi
-    ;;
-  dnf)
-    if [ "$RU_MIRROR" == 1 ]; then
-      log "Pinning dnf repos to mirror.yandex.ru"
-      sudo sed -i 's|^metalink=|#metalink=|;s|^#baseurl=http://download.example/pub/fedora/linux|baseurl=https://mirror.yandex.ru/fedora/linux|' \
-        /etc/yum.repos.d/fedora.repo /etc/yum.repos.d/fedora-updates.repo
-    fi
-    sudo dnf update -y
-    pkg gcc gcc-c++ make git wget zip unzip curl file procps-ng zsh tmux gnupg2 htop ugrep ripgrep fzf jq \
-      golang clang-tools-extra neovim
+    pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd \
+      golang-go neovim
     ;;
   brew)
     if [ ! -x /opt/homebrew/bin/brew ]; then
@@ -132,15 +108,7 @@ esac
 
 # GUI apps for any desktop (--desktop) ─────────────────────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
-  if [ "$PM" == dnf ]; then
-    APPS="dejavu-fonts-all google-noto-sans-fonts google-noto-emoji-color-fonts"
-    VIRT="virt-manager tigervnc openssh-askpass pinentry-gnome3"
-  else
-    APPS="fonts-dejavu fonts-noto-core fonts-noto-color-emoji"
-    VIRT="virt-manager tigervnc-viewer ssh-askpass pinentry-gnome3"
-  fi
-  log "Installing desktop apps";   pkg $APPS
-  log "Installing virtualization"; pkg $VIRT
+  log "Installing virtualization"; pkg virt-manager tigervnc-viewer ssh-askpass
 
   # inside a VM: guest agents so the display follows the viewer window size
   if systemd-detect-virt -q; then
@@ -150,14 +118,12 @@ if [ "$DESKTOP" == 1 ]; then
   fi
 
   # Telegram and Discord from Flathub: the official tarballs never self-update
-  # (Discord refuses to start until updated by hand), so a user timer runs
-  # `flatpak update` daily. Symlinks give dmenu the plain command names.
+  # (Discord refuses to start until updated by hand) and snaps start slowly, so
+  # flatpak plus a user timer running `flatpak update` daily
   log "Installing Telegram and Discord (flatpak)"
   pkg flatpak
   flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   flatpak install --user -y --noninteractive flathub org.telegram.desktop com.discordapp.Discord
-  ln -sf "$HOME/.local/share/flatpak/exports/bin/org.telegram.desktop" "$HOME/.local/bin/telegram-desktop"
-  ln -sf "$HOME/.local/share/flatpak/exports/bin/com.discordapp.Discord" "$HOME/.local/bin/discord"
 
   mkdir -p "$HOME/.config/systemd/user"
   cat > "$HOME/.config/systemd/user/flatpak-update.service" <<'EOF'
@@ -183,52 +149,19 @@ EOF
   systemctl --user enable --now flatpak-update.timer
 fi
 
-# NVIDIA driver. Debian's own packages stop at 550 (no Blackwell), so the
-# driver comes from NVIDIA's repo for Debian; Ubuntu's archive and RPM Fusion
-# carry current versions themselves. Kernel modules are built by dkms/akmods;
-# with Secure Boot on they must be signed with a MOK key that the firmware
-# knows, so the key is enrolled here and confirmed in MokManager on next boot ─────────────────────────────────────────
+# NVIDIA driver via ubuntu-drivers: prebuilt modules signed by Canonical where
+# the archive has them, otherwise dkms builds them with a MOK key that Secure
+# Boot must know, so the key is enrolled here and confirmed in MokManager ──────────────────────────────────────────────
 if [ "$NVIDIA" == 1 ] && [[ "$OS" == "Linux" ]]; then
   if ! lspci | grep -qi 'vga.*nvidia\|3d.*nvidia'; then
     log "No NVIDIA GPU found, skipping the driver"
   else
-    case "$ID" in
-      debian)
-        log "Installing NVIDIA driver from the NVIDIA Debian repo"
-        curl -fsSL -o /tmp/cuda-keyring.deb \
-          "https://developer.download.nvidia.com/compute/cuda/repos/debian${VERSION_ID}/x86_64/cuda-keyring_1.1-1_all.deb"
-        sudo dpkg -i /tmp/cuda-keyring.deb && rm /tmp/cuda-keyring.deb
-        sudo apt update -y
-        pkg linux-headers-amd64 dkms mokutil nvidia-open
-        MOK_PUB=/var/lib/dkms/mok.pub
-        ;;
-      ubuntu)
-        log "Installing NVIDIA driver via ubuntu-drivers"
-        pkg ubuntu-drivers-common mokutil
-        sudo ubuntu-drivers install
-        MOK_PUB=/var/lib/shim-signed/mok/MOK.der
-        ;;
-      fedora)
-        log "Installing NVIDIA driver from RPM Fusion"
-        pkg "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-${VERSION_ID}.noarch.rpm" \
-            "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${VERSION_ID}.noarch.rpm"
-        if [ "$RU_MIRROR" == 1 ]; then
-          sudo sed -i 's|^metalink=|#metalink=|;s|^#baseurl=http://download1.rpmfusion.org|baseurl=https://mirror.yandex.ru/fedora/rpmfusion|' \
-            /etc/yum.repos.d/rpmfusion-*.repo
-        fi
-        pkg akmods mokutil akmod-nvidia xorg-x11-drv-nvidia-cuda
-        # sign key first so the modules built below carry it; then build for the
-        # newest installed kernel, not the running one: dnf update above may have
-        # installed a kernel we have not booted yet
-        sudo kmodgenca -a
-        newest_kernel=$(rpm -q kernel-core --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' | sort -V | tail -1)
-        log "Building the NVIDIA kernel module for $newest_kernel (takes a few minutes)"
-        sudo akmods --force --kernels "$newest_kernel"
-        MOK_PUB=/etc/pki/akmods/certs/public_key.der
-        ;;
-    esac
+    log "Installing NVIDIA driver via ubuntu-drivers"
+    pkg ubuntu-drivers-common mokutil
+    sudo ubuntu-drivers install
+    MOK_PUB=/var/lib/shim-signed/mok/MOK.der
 
-    if mokutil --sb-state 2>/dev/null | grep -q enabled; then
+    if [ -f "$MOK_PUB" ] && mokutil --sb-state 2>/dev/null | grep -q enabled; then
       if mokutil --test-key "$MOK_PUB" 2>/dev/null | grep -q 'already enrolled'; then
         log "Secure Boot: MOK key already enrolled"
       else
@@ -250,7 +183,7 @@ if [[ "$OS" == "Linux" ]] && ! command -v kubectl &> /dev/null; then
   sudo chmod +x /usr/local/bin/kubectl
 fi
 
-# neovim: the config needs 0.11+ (vim.lsp.config); Debian stable ships 0.10 ──────────────────────────────────────────
+# neovim: the config needs 0.11+ (vim.lsp.config); older Ubuntu LTS ship less ──────────────────────────────────────────
 nvim_ok() { command -v nvim &> /dev/null && nvim --version | head -1 | grep -qE 'v0\.(1[1-9]|[2-9][0-9])|v[1-9]'; }
 if [[ "$OS" == "Linux" ]] && ! nvim_ok; then
   log "Installing neovim from github"

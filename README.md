@@ -1,10 +1,10 @@
 # dotfiles
 
-Personal dotfiles for macOS and Linux (Debian / Ubuntu / Fedora).
+Personal dotfiles for macOS and Ubuntu.
 
 ## Requirements
 
-- **macOS**, or **Linux** (Debian / Ubuntu / Fedora — `install` exits on other distros)
+- **macOS**, or **Ubuntu** (`install` exits on other distros)
 - `git`, `curl`, and `sudo` on Linux
 - macOS: Homebrew is bootstrapped by `install` if missing
 - Optional: an SSH key in `~/.ssh` — with one, `install` switches the repo
@@ -20,10 +20,9 @@ cd ~/dotfiles && ./install
 `./install` symlinks the configs and installs the tool set from three sources,
 the same on every OS:
 
-- system CLIs from the distro (`apt` on Debian/Ubuntu, `dnf` on Fedora) or
-  `brew` on macOS: `zsh`, `git`, `tmux`, `gnupg`, `fzf`, `jq`, `ripgrep`,
-  `ugrep`, `htop`, `clangd`, `go`, `neovim` (a GitHub tarball on Debian, whose
-  0.10 is too old for the config)
+- system CLIs from `apt` on Ubuntu or `brew` on macOS: `zsh`, `git`, `tmux`,
+  `gnupg`, `fzf`, `jq`, `ripgrep`, `ugrep`, `htop`, `clangd`, `go`, `neovim`
+  (a GitHub tarball when the archive's build is older than 0.11)
 - Go-based CLIs and dev tools via `go install` through proxy.golang.org:
   `gh`, `glab`, `helm`, `k9s`, `yq`, `lazygit`, `crane`, `task`,
   `golangci-lint`, `gopls`, `gofumpt`, `goimports`, `dlv`, `moq`, `ginkgo`,
@@ -32,15 +31,13 @@ the same on every OS:
 `kubectl` comes from dl.k8s.io on Linux, `d8` and `claude` use their own
 installers. The script also sets `zsh` as the login shell.
 
-`./install --nvidia` installs the NVIDIA driver with open kernel modules: from
-NVIDIA's own Debian repo (Debian's packages stop at 550, too old for RTX 50xx),
-`ubuntu-drivers` on Ubuntu, RPM Fusion on Fedora. With Secure Boot on it enrolls
-the dkms/akmods signing key via `mokutil`; confirm it in MokManager on reboot.
+`./install --nvidia` installs the NVIDIA driver via `ubuntu-drivers`. When the
+modules are built by dkms rather than shipped presigned, Secure Boot needs the
+signing key enrolled via `mokutil`; confirm it in MokManager on reboot.
 
-`./install --desktop` adds the GUI apps that fit any desktop environment:
-fonts, Telegram and Discord from Flathub (updated daily by a user
-timer), virt-manager, and the VM guest agents when
-running inside a VM.
+`./install --desktop` adds virt-manager, Telegram and Discord from Flathub
+(updated daily by a user timer), and the VM guest agents when running inside a
+VM.
 
 ## Base config on other servers
 
