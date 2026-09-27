@@ -5,7 +5,7 @@ log() {
 }
 
 # ./install [--desktop] [--ru-mirror] [--nvidia]
-#   --desktop    GUI apps for any DE: fonts, Telegram, Discord, virt-manager
+#   --desktop    GUI apps: virt-manager, Telegram, Discord, Steam
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
 #   --nvidia     proprietary NVIDIA driver (open kernel modules) + Secure Boot MOK signing
 DESKTOP=0; RU_MIRROR=0; NVIDIA=0
@@ -121,6 +121,13 @@ if [ "$DESKTOP" == 1 ]; then
   # (Discord refuses to start until updated by hand), snapd refreshes on its own
   log "Installing Telegram and Discord (snap)"
   sudo snap install telegram-desktop discord
+
+  # Steam: Valve's own .deb via the multiverse installer. i386 must be enabled
+  # before the NVIDIA block below so the driver brings its 32-bit GL libs
+  log "Installing Steam"
+  sudo dpkg --add-architecture i386
+  sudo apt update -y
+  pkg steam-installer
 fi
 
 # NVIDIA driver via ubuntu-drivers: prebuilt modules signed by Canonical where
