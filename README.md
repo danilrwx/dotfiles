@@ -31,10 +31,6 @@ the same on every OS:
 `kubectl` comes from dl.k8s.io on Linux, `d8` and `claude` use their own
 installers. The script also sets `zsh` as the login shell.
 
-`./install --nvidia` installs the NVIDIA driver via `ubuntu-drivers`. When the
-modules are built by dkms rather than shipped presigned, Secure Boot needs the
-signing key enrolled via `mokutil`; confirm it in MokManager on reboot.
-
 `./install --desktop` adds virt-manager, Telegram and Discord from their
 self-updating official tarballs, Steam from Valve's .deb, and the VM guest
 agents when running inside a VM.

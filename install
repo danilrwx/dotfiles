@@ -4,16 +4,14 @@ log() {
   echo -e "\033[0;31m$1\033[0m"
 }
 
-# ./install [--desktop] [--ru-mirror] [--nvidia]
+# ./install [--desktop] [--ru-mirror]
 #   --desktop    GUI apps: virt-manager, Telegram, Discord, Steam
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
-#   --nvidia     proprietary NVIDIA driver (open kernel modules) + Secure Boot MOK signing
-DESKTOP=0; RU_MIRROR=0; NVIDIA=0
+DESKTOP=0; RU_MIRROR=0
 for arg in "$@"; do
   case "$arg" in
     --desktop)   DESKTOP=1 ;;
     --ru-mirror) RU_MIRROR=1 ;;
-    --nvidia)    NVIDIA=1 ;;
     -h|--help)   sed -n '/^# \.\/install/,/^[^#]/{s/^# \{0,1\}//p;}' "$0"; exit 0 ;;
     *) log "Unknown option: $arg"; exit 1 ;;
   esac
@@ -136,37 +134,11 @@ if [ "$DESKTOP" == 1 ]; then
     update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
   fi
 
-  # Steam: Valve's own .deb via the multiverse installer. i386 must be enabled
-  # before the NVIDIA block below so the driver brings its 32-bit GL libs
+  # Steam: Valve's own .deb via the multiverse installer, needs i386 enabled
   log "Installing Steam"
   sudo dpkg --add-architecture i386
   sudo apt update -y
   pkg steam-installer
-fi
-
-# NVIDIA driver via ubuntu-drivers: prebuilt modules signed by Canonical where
-# the archive has them, otherwise dkms builds them with a MOK key that Secure
-# Boot must know, so the key is enrolled here and confirmed in MokManager ──────────────────────────────────────────────
-if [ "$NVIDIA" == 1 ] && [[ "$OS" == "Linux" ]]; then
-  if ! lspci | grep -qi 'vga.*nvidia\|3d.*nvidia'; then
-    log "No NVIDIA GPU found, skipping the driver"
-  else
-    log "Installing NVIDIA driver via ubuntu-drivers"
-    pkg ubuntu-drivers-common mokutil
-    sudo ubuntu-drivers install
-    MOK_PUB=/var/lib/shim-signed/mok/MOK.der
-
-    if [ -f "$MOK_PUB" ] && mokutil --sb-state 2>/dev/null | grep -q enabled; then
-      if mokutil --test-key "$MOK_PUB" 2>/dev/null | grep -q 'already enrolled'; then
-        log "Secure Boot: MOK key already enrolled"
-      else
-        log "Secure Boot is on: enrolling the module signing key (choose a one-time password)"
-        sudo mokutil --import "$MOK_PUB"
-        log "Reboot and press an arrow key right after POST: the blue MokManager screen times out in seconds"
-        log "and a slow-waking monitor may still be dark; pick 'Enroll MOK' and enter that password"
-      fi
-    fi
-  fi
 fi
 
 # kubectl: one static binary from dl.k8s.io ───────────────────────────────────────────────────────────────────────────
