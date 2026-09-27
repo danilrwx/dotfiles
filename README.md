@@ -35,8 +35,9 @@ installers. The script also sets `zsh` as the login shell.
 modules are built by dkms rather than shipped presigned, Secure Boot needs the
 signing key enrolled via `mokutil`; confirm it in MokManager on reboot.
 
-`./install --desktop` adds virt-manager, Telegram and Discord as snaps, Steam
-from Valve's .deb, and the VM guest agents when running inside a VM.
+`./install --desktop` adds virt-manager, Telegram and Discord from their
+self-updating official tarballs, Steam from Valve's .deb, and the VM guest
+agents when running inside a VM.
 
 ## Base config on other servers
 
