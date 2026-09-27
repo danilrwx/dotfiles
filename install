@@ -117,36 +117,10 @@ if [ "$DESKTOP" == 1 ]; then
     sudo systemctl enable --now spice-vdagentd qemu-guest-agent
   fi
 
-  # Telegram and Discord from Flathub: the official tarballs never self-update
-  # (Discord refuses to start until updated by hand) and snaps start slowly, so
-  # flatpak plus a user timer running `flatpak update` daily
-  log "Installing Telegram and Discord (flatpak)"
-  pkg flatpak
-  flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  flatpak install --user -y --noninteractive flathub org.telegram.desktop com.discordapp.Discord
-
-  mkdir -p "$HOME/.config/systemd/user"
-  cat > "$HOME/.config/systemd/user/flatpak-update.service" <<'EOF'
-[Unit]
-Description=Update user flatpaks
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/flatpak update --user -y --noninteractive
-EOF
-  cat > "$HOME/.config/systemd/user/flatpak-update.timer" <<'EOF'
-[Unit]
-Description=Daily flatpak update
-
-[Timer]
-OnCalendar=daily
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOF
-  systemctl --user daemon-reload
-  systemctl --user enable --now flatpak-update.timer
+  # Telegram and Discord as snaps: the official tarballs never self-update
+  # (Discord refuses to start until updated by hand), snapd refreshes on its own
+  log "Installing Telegram and Discord (snap)"
+  sudo snap install telegram-desktop discord
 fi
 
 # NVIDIA driver via ubuntu-drivers: prebuilt modules signed by Canonical where
