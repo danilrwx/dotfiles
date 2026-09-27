@@ -5,7 +5,7 @@ log() {
 }
 
 # ./install [--desktop] [--ru-mirror] [--nvidia]
-#   --desktop    GUI apps for any DE: terminal, fonts, Telegram, Discord, virt-manager
+#   --desktop    GUI apps for any DE: fonts, Telegram, Discord, virt-manager
 #   --ru-mirror  pin the distro repos to mirror.yandex.ru instead of the geo metalink
 #   --nvidia     proprietary NVIDIA driver (open kernel modules) + Secure Boot MOK signing
 DESKTOP=0; RU_MIRROR=0; NVIDIA=0
@@ -133,10 +133,10 @@ esac
 # GUI apps for any desktop (--desktop) ─────────────────────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
   if [ "$PM" == dnf ]; then
-    APPS="alacritty dejavu-fonts-all google-noto-sans-fonts google-noto-emoji-color-fonts"
+    APPS="dejavu-fonts-all google-noto-sans-fonts google-noto-emoji-color-fonts"
     VIRT="virt-manager tigervnc openssh-askpass pinentry-gnome3"
   else
-    APPS="alacritty fonts-dejavu fonts-noto-core fonts-noto-color-emoji"
+    APPS="fonts-dejavu fonts-noto-core fonts-noto-color-emoji"
     VIRT="virt-manager tigervnc-viewer ssh-askpass pinentry-gnome3"
   fi
   log "Installing desktop apps";   pkg $APPS

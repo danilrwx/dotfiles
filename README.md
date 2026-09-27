@@ -38,7 +38,7 @@ NVIDIA's own Debian repo (Debian's packages stop at 550, too old for RTX 50xx),
 the dkms/akmods signing key via `mokutil`; confirm it in MokManager on reboot.
 
 `./install --desktop` adds the GUI apps that fit any desktop environment:
-alacritty, fonts, Telegram and Discord from Flathub (updated daily by a user
+fonts, Telegram and Discord from Flathub (updated daily by a user
 timer), virt-manager, and the VM guest agents when
 running inside a VM.
 
