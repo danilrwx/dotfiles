@@ -141,6 +141,13 @@ if [ "$DESKTOP" == 1 ]; then
   pkg steam-installer
 fi
 
+# GNOME session settings: only from a running desktop session, gsettings needs dconf on the bus ────────────────────
+if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAND_DISPLAY:-$DISPLAY}" ]; then
+  log "Applying GNOME settings"
+  gsettings set org.gnome.desktop.peripherals.touchpad click-method fingers
+  gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
+fi
+
 # kubectl: one static binary from dl.k8s.io ───────────────────────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]] && ! command -v kubectl &> /dev/null; then
   log "Installing kubectl"
