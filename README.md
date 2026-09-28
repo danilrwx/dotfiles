@@ -33,8 +33,8 @@ installers. The script also sets `zsh` as the login shell.
 
 On a HONOR MagicBook Pro 14 2026 (`ZQC-P`) it also clones
 [honor-magicbook-pro-14-2026-ubuntu](https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu)
-into `~/w` and runs its `apply_patch.sh`, which is a no-op once a revision has
-been applied. From a running GNOME session it also sets two-finger click as
+into `~/w` and runs its `apply_patch.sh` without the headset-mic and DSC fixes,
+which is a no-op once a revision has been applied. From a running GNOME session it also sets two-finger click as
 right click on the touchpad and Caps Lock as Ctrl.
 
 `./install --desktop` adds virt-manager, Telegram and Discord from their
