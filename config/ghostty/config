@@ -24,4 +24,7 @@ clipboard-write = allow
 # put on the clipboard. Note: this lets any app read the clipboard without a
 # prompt; set to "ask" if you'd rather confirm each read.
 clipboard-read = allow
+# No "Copied to clipboard" toast on every copy (tmux copy-command pipes each
+# selection through the clipboard, so it fired constantly).
+app-notifications = no-clipboard-copy
 
