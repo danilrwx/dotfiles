@@ -31,6 +31,11 @@ the same on every OS:
 `kubectl` comes from dl.k8s.io on Linux, `d8` and `claude` use their own
 installers. The script also sets `zsh` as the login shell.
 
+On a HONOR MagicBook Pro 14 2026 (`ZQC-P`) it also clones
+[honor-magicbook-pro-14-2026-ubuntu](https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu)
+into `~/w` and runs its `apply_patch.sh`, which is a no-op once a revision has
+been applied.
+
 `./install --desktop` adds virt-manager, Telegram and Discord from their
 self-updating official tarballs, Steam from Valve's .deb, and the VM guest
 agents when running inside a VM.

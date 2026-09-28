@@ -221,7 +221,7 @@ if [[ "$OS" == "Linux" ]]; then
   fi
 fi
 
-# Linux: docker; then (--desktop only) libvirt group and fonts ─────────────────────────────────────────────────────────
+# Linux: docker, HONOR MagicBook fixes; then (--desktop only) libvirt group and fonts ─────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
   if [ ! -f /usr/bin/docker ]; then
     log "Installing docker"
@@ -233,6 +233,22 @@ if [[ "$OS" == "Linux" ]]; then
   if ! groups | grep -q '\bdocker\b'; then
     log "Adding user to docker group"
     sudo usermod -aG docker $USER
+  fi
+
+  # HONOR MagicBook Pro 14 2026 (ZQC-P): firmware and driver fixes from the
+  # fork. apply_patch.sh skips a revision it has already applied, so this is
+  # cheap on every run; kernel updates are handled by its own hook
+  HONOR=$HOME/w/honor-magicbook-pro-14-2026-ubuntu
+  if [ "$(cat /sys/class/dmi/id/product_name 2>/dev/null)" == "ZQC-P" ]; then
+    if [ -d "$HONOR/.git" ]; then
+      git -C "$HONOR" pull -q --ff-only || log "Failed to update $HONOR. Continue installation."
+    else
+      log "Cloning the HONOR MagicBook fixes"
+      mkdir -p "$HOME/w"
+      git clone -q https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu "$HONOR"
+    fi
+    log "Applying the HONOR MagicBook fixes"
+    sudo "$HONOR/apply_patch.sh" || log "HONOR fixes reported problems, see above. Continue installation."
   fi
 
   [ "$DESKTOP" == 1 ] || exit 0
