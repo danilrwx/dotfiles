@@ -41,6 +41,7 @@ setopt SHARE_HISTORY HIST_IGNORE_DUPS
 alias k=kubectl
 compdef k=kubectl
 
+alias ls='ls --color=auto'
 alias ll='ls -lah'
 
 alias so='source ~/.zshrc'
