@@ -247,8 +247,11 @@ if [[ "$OS" == "Linux" ]]; then
       mkdir -p "$HOME/w"
       git clone -q https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu "$HONOR"
     fi
+    # No pipe around it: under sudo's pty a piped apt stops on SIGTTOU.
+    # The OLED VBT and the two audio overlays hang this unit at xe init.
     log "Applying the HONOR MagicBook fixes"
-    sudo "$HONOR/apply_patch.sh" || log "HONOR fixes reported problems, see above. Continue installation."
+    sudo SKIP_OLED=1 SKIP_SOF=1 SKIP_HEADSET=1 "$HONOR/apply_patch.sh" \
+      || log "HONOR fixes reported problems, see above. Continue installation."
   fi
 
   [ "$DESKTOP" == 1 ] || exit 0

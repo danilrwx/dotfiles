@@ -41,3 +41,6 @@
 
 [includeIf "gitdir:~/w/"]
     path = ~/dotfiles/private/work.gitconfig
+
+# [url "ssh://git@fox.flant.com/"]
+# 	insteadOf = https://fox.flant.com/
