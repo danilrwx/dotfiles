@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+# Mirror tmux key bindings onto the Russian (ЙЦУКЕН) layout: for every binding
+# in the prefix and copy-mode-vi tables whose key is a plain Latin letter or a
+# punctuation key that turns into a Cyrillic letter on the RU layout, bind the
+# Cyrillic key to the same command. Keys whose RU counterpart is still ASCII
+# (/ ? $ # ^ ...) are left alone: they would shadow the Latin binding.
+# Ctrl/Alt combos are skipped too — VTE already maps those to the Latin letter.
+#
+# Run from .tmux.conf after all bindings are defined (run-shell), so it is
+# re-applied on every source-file.
+set -euo pipefail
+
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+
+for table in prefix copy-mode-vi; do
+  tmux list-keys -T "$table"
+done | awk '
+BEGIN {
+  # pairs "<latin> <cyrillic>", listed as words so mawk never splits UTF-8 bytes
+  pairs = "q й w ц e у r к t е y н u г i ш o щ p з [ х ] ъ" \
+      " a ф s ы d в f а g п h р j о k л l д ; ж '\'' э" \
+      " z я x ч c с v м b и n т m ь , б . ю ` ё" \
+      " Q Й W Ц E У R К T Е Y Н U Г I Ш O Щ P З { Х } Ъ" \
+      " A Ф S Ы D В F А G П H Р J О K Л L Д : Ж \" Э" \
+      " Z Я X Ч C С V М B И N Т M Ь < Б > Ю ~ Ё"
+  n = split(pairs, p, " ")
+  for (i = 1; i < n; i += 2) map[p[i]] = p[i + 1]
+}
+# bind-key [-r] -T <table> <key> <command...>
+match($0, /^bind-key +(-r +)?-T +[^ ]+ +/) {
+  head = substr($0, 1, RLENGTH); rest = substr($0, RLENGTH + 1)
+  sub(/ +$/, "", head)
+  key = rest; sub(/ .*/, "", key); sub(/^\\/, "", key)   # list-keys escapes \" \; \{ ...
+  if (!(key in map)) next
+  cmd = rest; sub(/^[^ ]+ +/, "", cmd)
+  print head " " map[key] " " cmd
+}' > "$tmp"
+
+tmux source-file "$tmp"
