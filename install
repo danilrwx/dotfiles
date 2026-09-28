@@ -106,7 +106,46 @@ esac
 
 # GUI apps for any desktop (--desktop) ─────────────────────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
-  log "Installing virtualization"; pkg virt-manager tigervnc-viewer ssh-askpass
+  log "Installing virtualization"; pkg virt-manager tigervnc-viewer
+
+  # ssh: the plain ssh-agent with a GTK askpass, so AddKeysToAgent confirm shows a dialog per key use.
+  # GNOME's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh never loads the
+  # key file itself and the confirm constraint never applies; mask it and let ssh-agent.socket own SSH_AUTH_SOCK
+  log "Installing ssh askpass"; pkg ssh-askpass-gnome
+  sudo apt purge -y ssh-askpass 2>/dev/null || true   # else alternatives keep the x11 dialog
+  if command -v systemctl &> /dev/null && [ -n "${XDG_RUNTIME_DIR:-}" ]; then
+    systemctl --user mask --now gcr-ssh-agent.socket gcr-ssh-agent.service
+    systemctl --user enable --now ssh-agent.socket
+  fi
+
+  # Pin ssh to that socket: terminals started before the switch (or by a stale session) still carry the gcr
+  # SSH_AUTH_SOCK, and without an agent ssh reads the key file and asks the passphrase every time
+  mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+  if ! grep -qsF 'IdentityAgent ${XDG_RUNTIME_DIR}/openssh_agent' "$HOME/.ssh/config"; then
+    log "Pinning ssh to the systemd ssh-agent socket"
+    { cat <<'EOT'
+# Linux: pin ssh to the systemd ssh-agent socket, whatever stale SSH_AUTH_SOCK a terminal carries
+Match exec "test -S ${XDG_RUNTIME_DIR}/openssh_agent"
+    IdentityAgent ${XDG_RUNTIME_DIR}/openssh_agent
+
+EOT
+      cat "$HOME/.ssh/config" 2>/dev/null; } > "$HOME/.ssh/config.new"
+    mv "$HOME/.ssh/config.new" "$HOME/.ssh/config" && chmod 600 "$HOME/.ssh/config"
+  fi
+
+  # The askpass grabs the keyboard, which under Wayland is an "inhibit shortcuts" permission prompt.
+  # GNOME Shell remembers the answer only for apps it can map to a .desktop file, so give it one
+  mkdir -p "$HOME/.local/share/applications"
+  cat > "$HOME/.local/share/applications/ssh-askpass.desktop" <<'EOT'
+[Desktop Entry]
+Type=Application
+Name=SSH Askpass
+Exec=/usr/bin/ssh-askpass
+Icon=dialog-password
+NoDisplay=true
+StartupWMClass=ssh-askpass
+EOT
+  update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
 
   # inside a VM: guest agents so the display follows the viewer window size
   if systemd-detect-virt -q; then
