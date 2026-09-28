@@ -3,3 +3,4 @@
 *.log
 
 config/k9s/clusters
+config/ghostty/os

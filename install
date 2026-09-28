@@ -67,8 +67,11 @@ done
 for c in k9s htop lazygit nvim; do
   link config/$c $HOME/.config/$c
 done
+link config/ghostty $HOME/.config/ghostty
+# ghostty reads `os` for the per-OS bits (config-file = ?os), point it at the right one
+if [[ "$OS" == "Darwin" ]]; then ln -snf os-macos config/ghostty/os; else ln -snf os-linux config/ghostty/os; fi
 if [[ "$OS" == "Darwin" ]]; then
-  for c in kitty alacritty ghostty; do
+  for c in kitty alacritty; do
     link config/$c $HOME/.config/$c
   done
 fi
@@ -107,6 +110,13 @@ esac
 # GUI apps for any desktop (--desktop) ─────────────────────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
   log "Installing virtualization"; pkg virt-manager tigervnc-viewer
+
+  # Terminal: Ghostty instead of Ubuntu's Ptyxis, because VTE refuses OSC 52 and the devbox/tmux clipboard
+  # relies on it (config/ghostty). Ptyxis stays installed: purging it drags ubuntu-desktop-minimal along.
+  # xdg-terminal-exec (Ctrl+Alt+T, nautilus "Open in Terminal") picks the first entry of xdg-terminals.list
+  log "Installing ghostty"; pkg ghostty
+  echo com.mitchellh.ghostty.desktop > $HOME/.config/xdg-terminals.list
+  sudo update-alternatives --set x-terminal-emulator /usr/bin/ghostty
 
   # Look: stock GNOME instead of Ubuntu's, like Fedora. The `ubuntu` session mode hardwires the Yaru
   # theme and its extensions (dock, desktop icons, tiling assistant), so the way out is the vanilla
