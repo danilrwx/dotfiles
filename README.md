@@ -38,7 +38,9 @@ which is a no-op once a revision has been applied. From a running GNOME session 
 right click on the touchpad and Caps Lock as Ctrl.
 
 `./install --desktop` adds virt-manager, Telegram and Discord from snap, Steam
-from Valve's .deb, and the VM guest agents when running inside a VM.
+from Valve's .deb, the VM guest agents when running inside a VM, and the vanilla
+"GNOME" session with the stock Adwaita look, like Fedora (pick it in the GDM
+gear once).
 
 ## Base config on other servers
 

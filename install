@@ -108,6 +108,14 @@ esac
 if [ "$DESKTOP" == 1 ]; then
   log "Installing virtualization"; pkg virt-manager tigervnc-viewer
 
+  # Look: stock GNOME instead of Ubuntu's, like Fedora. The `ubuntu` session mode hardwires the Yaru
+  # theme and its extensions (dock, desktop icons, tiling assistant), so the way out is the vanilla
+  # "GNOME" session from gnome-session (pick it once in the GDM gear, GDM remembers it). It runs the
+  # shell in the `user` mode: stock Adwaita, extensions from gsettings. Icons, the legacy GTK theme
+  # and the Adwaita fonts follow in the gsettings block. The alternative is GDM's own theme.
+  log "Installing the GNOME session"; pkg gnome-session
+  sudo update-alternatives --set gdm-theme.gresource /usr/share/gnome-shell/gnome-shell-theme.gresource
+
   # ssh: the plain ssh-agent with a GTK askpass, so AddKeysToAgent confirm shows a dialog per key use.
   # GNOME's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh never loads the
   # key file itself and the confirm constraint never applies; mask it and let ssh-agent.socket own SSH_AUTH_SOCK
@@ -172,6 +180,15 @@ if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAN
   log "Applying GNOME settings"
   gsettings set org.gnome.desktop.peripherals.touchpad click-method fingers
   gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
+  if [ "$DESKTOP" == 1 ]; then
+    gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+    gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
+    gsettings set org.gnome.desktop.interface icon-theme Adwaita
+    gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 11'
+    gsettings set org.gnome.desktop.interface document-font-name 'Adwaita Sans 11'
+    # only the tray stays on (Telegram, Discord); dock, desktop icons and tiling assistant go
+    gsettings set org.gnome.shell enabled-extensions "['ubuntu-appindicators@ubuntu.com']"
+  fi
 fi
 
 # kubectl: one static binary from dl.k8s.io ───────────────────────────────────────────────────────────────────────────
