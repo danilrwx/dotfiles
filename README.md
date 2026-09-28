@@ -37,9 +37,8 @@ into `~/w` and runs its `apply_patch.sh` without the headset-mic and DSC fixes,
 which is a no-op once a revision has been applied. From a running GNOME session it also sets two-finger click as
 right click on the touchpad and Caps Lock as Ctrl.
 
-`./install --desktop` adds virt-manager, Telegram and Discord from their
-self-updating official tarballs, Steam from Valve's .deb, and the VM guest
-agents when running inside a VM.
+`./install --desktop` adds virt-manager, Telegram and Discord from snap, Steam
+from Valve's .deb, and the VM guest agents when running inside a VM.
 
 ## Base config on other servers
 

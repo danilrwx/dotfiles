@@ -154,24 +154,11 @@ EOT
     sudo systemctl enable --now spice-vdagentd qemu-guest-agent
   fi
 
-  # Telegram and Discord from their official tarballs, which update themselves
-  # (unlike the snap/flatpak/distro builds). Telegram registers its own .desktop
-  # entry on first launch; Discord 1.0 is a bootstrap that installs and updates
-  # the real client under ~/.config/discord
-  if [ ! -x "$HOME/.local/Telegram/Telegram" ]; then
-    log "Installing Telegram"
-    curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJf - -C "$HOME/.local"
-    ln -sf "$HOME/.local/Telegram/Telegram" "$HOME/.local/bin/telegram-desktop"
-  fi
-  if [ ! -x "$HOME/.local/Discord/discord" ]; then
-    log "Installing Discord"
-    curl -fsSL "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xzf - -C "$HOME/.local"
-    ln -sf "$HOME/.local/Discord/discord" "$HOME/.local/bin/discord"
-    mkdir -p "$HOME/.local/share/applications"
-    sed "s|^Exec=.*|Exec=$HOME/.local/Discord/discord --url -- %u|;s|^Icon=.*|Icon=$HOME/.local/Discord/discord.png|;/^Path=/d" \
-      "$HOME/.local/Discord/discord.desktop" > "$HOME/.local/share/applications/discord.desktop"
-    update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
-  fi
+  # Telegram and Discord from snap. Their official tarballs update themselves
+  # too, but Discord's Chromium sandbox needs an AppArmor profile on Ubuntu;
+  # snapd covers the sandbox and the updates for both
+  log "Installing Telegram and Discord"
+  sudo snap install telegram-desktop discord
 
   # Steam: Valve's own .deb via the multiverse installer, needs i386 enabled
   log "Installing Steam"
