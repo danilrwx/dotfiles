@@ -94,7 +94,7 @@ case "$PM" in
     fi
     sudo apt update -y
     pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd \
-      golang-go neovim nodejs npm fd-find
+      golang-go neovim nodejs npm fd-find fastfetch
     # Ubuntu ships fd as fdfind; nvim's :find and file picker look for fd
     ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
     ;;
@@ -105,7 +105,7 @@ case "$PM" in
     fi
     eval "$(/opt/homebrew/bin/brew shellenv)"
     # clangd comes with the Xcode CLT
-    pkg tmux gnupg pinentry-mac watch htop ugrep ripgrep fzf jq go kubectl neovim node fd
+    pkg tmux gnupg pinentry-mac watch htop ugrep ripgrep fzf jq go kubectl neovim node fd fastfetch
     ;;
 esac
 

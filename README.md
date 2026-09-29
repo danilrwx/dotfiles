@@ -21,7 +21,7 @@ cd ~/dotfiles && ./install
 the configs and installs the tool set:
 
 - system CLIs from `apt` on Ubuntu or `brew` on macOS: `tmux`, `gnupg`, `fzf`,
-  `jq`, `ripgrep`, `ugrep`, `fd`, `htop`, `go`, `neovim`, `nodejs`/`npm`; on
+  `jq`, `ripgrep`, `ugrep`, `fd`, `htop`, `fastfetch`, `go`, `neovim`, `nodejs`/`npm`; on
   Ubuntu also `zsh`, `git`, `clangd` (macOS has them), and `neovim` from a
   GitHub tarball when the archive's build is older than 0.11
 - Go-based CLIs and dev tools via `go install` through proxy.golang.org:
