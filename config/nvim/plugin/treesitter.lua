@@ -6,16 +6,17 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     if vim.treesitter.get_parser(nil, nil, { error = false }) then
       vim.treesitter.start()
-      vim.wo.foldmethod = "expr"
-      vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-      vim.wo.foldlevel = 99
+      -- [0][0] is :setlocal, so the folds stay with this buffer in this window
+      vim.wo[0][0].foldmethod = "expr"
+      vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+      vim.wo[0][0].foldlevel = 99
     end
   end,
 })
 
 -- :TSBuild — compile parsers into site/parser without any plugin or git clone.
 -- Each grammar's parser.c is fetched as a GitHub tarball (curl) at a pinned
--- revision and compiled with cc. Queries are vendored in config/queries/ (see
+-- revision and compiled with cc. Queries are vendored in config/nvim/queries/ (see
 -- the repo), so they are not touched here. Pins came once from nvim-treesitter's
 -- parsers.lua; bump a revision here to update a parser. Requires: curl, tar, cc.
 -- { lang, owner/repo, revision-or-tag, subdir? }
@@ -97,4 +98,4 @@ local function build()
   end
 end
 
-vim.api.nvim_create_user_command("TSBuild", build, { desc = "Build treesitter parsers + queries" })
+vim.api.nvim_create_user_command("TSBuild", build, { desc = "Build treesitter parsers" })

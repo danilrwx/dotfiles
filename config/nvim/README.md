@@ -13,12 +13,13 @@ to start, nothing to lock or break on update.
 |------|----------|
 | `git`, `bash` | git signs, git helper, blame |
 | `ugrep` (or `grep`) | live grep picker and `:Grepq` (ugrep preferred, falls back to grep) |
-| `fd` (optional) | `<leader>F` file list (falls back to `git ls-files`) |
+| `fd` (optional) | `<leader>F` file list and `:find` (fall back to `git ls-files`; `fdfind` on Ubuntu, `install` links it as `fd`) |
 | `gh` / `glab` (optional) | open PR/MR for a commit (GitHub / GitLab) |
 | `tmux` (optional) | `<leader>gg` lazygit, playbook runner |
 | `lazygit` (optional) | `<leader>gg` |
+| `go`, `golangci-lint` (optional) | `:Lint` (golangci-lint, else `go vet`) |
 | `cc`, `curl`, `tar` | `:TSBuild` (compile treesitter parsers) |
-| language servers | `gopls`, `clangd`, `helm_ls`, `golangci_lint_ls` — auto-skipped if the binary is absent |
+| language servers | `gopls`, `clangd`, `helm-ls`, `golangci-lint-langserver` — auto-skipped if the binary is absent |
 
 ## Layout
 
@@ -28,8 +29,8 @@ plugin/             feature modules, auto-sourced on start
   picker.lua          fuzzy picker keymaps/commands (Files/Grep/Buffers/…)
   git.lua             git helper keymaps/commands (log/blame/status/PR)
   gitsigns.lua        native git signs + hunk actions
-  lsp.lua             enable servers, completion, format-on-save
-  diagnostics.lua     workspace diagnostics -> quickfix
+  lsp.lua             enable servers, completion, code lens, format-on-save
+  diagnostics.lua     workspace diagnostics picker, :Lint -> quickfix
   find.lua            :find / :Grepq / quickfix toggle
   oil.lua             file manager (edit the dir like a buffer)
   session.lua         auto save/restore per-cwd sessions
@@ -123,7 +124,8 @@ Current-line blame is always on (subtle right-aligned virtual text); toggle with
 
 ### LSP
 
-Uses Neovim's **built-in** LSP defaults, plus one added map:
+Uses Neovim's **built-in** LSP defaults, plus two added maps (`grf` format,
+`grc` run the code lens under the cursor):
 
 | Key | Action |
 |-----|--------|
@@ -150,7 +152,7 @@ Completion is native (`vim.lsp.completion`, autotrigger) with
 | `<leader>q` | toggle the quickfix window |
 
 `<leader>D` (= `:Picker diagnostics`) is the workspace LSP diagnostics list
-(fzf-lua's `diagnostics_workspace`); `:Picker! diagnostics` scopes it to the
+`:Picker! diagnostics` scopes it to the
 current buffer. Separately, `:Lint` runs the project linter
 (`golangci-lint run ./...`, else `go vet ./...`) into the quickfix — that covers
 files you haven't opened, which the LSP doesn't report.
@@ -208,7 +210,6 @@ Other commands:
 | `:GitFileLog` | current file's full log with patches (in a tab) |
 | `:GitBlame` / `:GitBlameLine` / `:GitLineBlameToggle` / `:GitOpenPR` | blame / PR |
 | `:Grepq {pattern}` | grep into quickfix (uses `grepprg`) |
-| `:Diagnostics` | whole-project error search into a picker (same as `<leader>D`) |
 | `:Session{Save,Restore,Delete}` | sessions |
 | `:Oil [dir]` | file manager |
 | `:TSBuild` | download + compile treesitter parsers into `site/parser` |

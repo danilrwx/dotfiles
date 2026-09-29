@@ -84,7 +84,8 @@ local function get_root_dir(fname)
     end
   end
 
-  return vim.fs.root(fname, '.git')
+  -- upstream order: a go.work above all, then the module, then the repo
+  return vim.fs.root(fname, 'go.work') or vim.fs.root(fname, 'go.mod') or vim.fs.root(fname, '.git')
 end
 
 return {

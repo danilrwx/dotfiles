@@ -1,18 +1,22 @@
 -- Native fuzzy file find: list files once, fuzzy-filter with matchfuzzy() via
 -- the built-in 'findfunc'. Use `:find <fuzzy><Tab>` / <leader>e. Plus `:Grepq`
--- -> quickfix via 'grepprg', and a vim.ui.select buffer picker. No fzf.
+-- -> quickfix via 'grepprg' and a quickfix toggle. No fzf.
 
 local files_cache = {}
 vim.api.nvim_create_autocmd("CmdlineEnter", {
+  group = vim.api.nvim_create_augroup("find_cache", { clear = true }),
   pattern = ":",
   callback = function()
     files_cache = {}
   end,
 })
 
+-- fd, else git's own file list (honours .gitignore like fd), else a plain find
 local function find_cmd()
   if vim.fn.executable("fd") == 1 then
     return "fd . --path-separator / --type f --hidden --follow --exclude .git"
+  elseif vim.fn.executable("git") == 1 and vim.fs.root(0, ".git") then
+    return "git ls-files --cached --others --exclude-standard"
   elseif vim.fn.executable("find") == 1 then
     return 'find . -type f -not -path "*/.git/*"'
   end
@@ -65,6 +69,6 @@ local function toggle_qf()
   end
 end
 
--- files/buffers/grep pickers live in fzf.lua; :find keeps the native fuzzy find
+-- files/buffers/grep pickers live in lua/picker; :find keeps the native fuzzy find
 vim.keymap.set("n", "<leader>e", ":find ", {})
 vim.keymap.set("n", "<leader>q", toggle_qf, { silent = true })

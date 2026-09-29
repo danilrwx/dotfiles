@@ -39,7 +39,7 @@ local function edit_at(it, cmd)
     pcall(vim.fn.cursor, it.lnum, it.col or 1)
   end
 end
--- expose the open-a-grep-hit helper so other launchers (e.g. lint) reuse it
+-- expose the open-a-grep-hit helper so other launchers (diagnostics) reuse it
 picker.open_hit = function(line, cmd)
   edit_at(search.grep_parse(line), cmd)
 end
@@ -159,6 +159,7 @@ picker.launchers.livegrep = function(o)
   -- and re-grep on resume instead.
   local lg = (o and o.state) or { mode = "grep", gq = "", fq = "", fixed = false, cache = {} }
   local job -- running search handle, killed when the pattern changes or on close
+  local seq = 0 -- bumped per query; a callback from an older job sees a newer seq and drops its result
   local MAX = 10000 -- cap hits fed to the picker; the tool can flood on short patterns
   local function recompute()
     if lg.fq == "" then
@@ -222,6 +223,7 @@ picker.launchers.livegrep = function(o)
         return recompute()
       end
       lg.gq = q
+      seq = seq + 1
       if job then
         pcall(function()
           job:kill(9)
@@ -236,7 +238,13 @@ picker.launchers.livegrep = function(o)
       local cmd = vim.deepcopy(tool)
       table.insert(cmd, lg.fixed and "-F" or "-E") -- ERE regex, or fixed-string
       vim.list_extend(cmd, { "--", q })
+      local mine = seq
       job = vim.system(cmd, { text = true }, function(res)
+        -- a killed or superseded job still calls back: its partial hits must not
+        -- overwrite the cache of the current (or cleared) query
+        if mine ~= seq then
+          return
+        end
         local lines = vim.split(res.stdout or "", "\n", { trimempty = true })
         if #lines > MAX then
           lines = vim.list_slice(lines, 1, MAX)

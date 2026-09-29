@@ -130,7 +130,7 @@ function M.open(cands, opts)
       live_seq = live_seq + 1
       local seq = live_seq
       -- live() returns what to show immediately (cache/empty) and may push more
-      -- via feed() when an async job (e.g. ripgrep) finishes.
+      -- via feed() when an async job (the live grep) finishes.
       filtered, positions = opts.live(q, function(lines)
         feed(seq, lines)
       end), nil

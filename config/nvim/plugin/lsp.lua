@@ -14,6 +14,7 @@ for _, name in ipairs({
 end
 
 vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("lsp_attach", { clear = true }),
   callback = function(ev)
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
     if not client then
@@ -29,7 +30,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- code lenses (gopls shows a "run go generate" lens above //go:generate
     -- directives): enable() renders them and owns its own debounced refresh on
     -- view/edit; grc runs the one under the cursor. enable() is 0.12+, on 0.11
-    -- (Ubuntu) refresh by hand on the same per-buffer augroup as the formatter.
+    -- (Ubuntu) refresh by hand on a per-buffer augroup of its own.
     if client:supports_method("textDocument/codeLens") then
       if vim.lsp.codelens.enable then
         vim.lsp.codelens.enable(true, { bufnr = ev.buf })

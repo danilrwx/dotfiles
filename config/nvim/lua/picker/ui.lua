@@ -24,7 +24,10 @@ local function setup_hl()
   set(0, "PickerPreviewLine", { bg = "#1a1c2a", ctermbg = 235, default = true })
 end
 setup_hl()
-vim.api.nvim_create_autocmd("ColorScheme", { callback = setup_hl })
+vim.api.nvim_create_autocmd("ColorScheme", {
+  group = vim.api.nvim_create_augroup("picker_hl", { clear = true }),
+  callback = setup_hl,
+})
 
 local View = {}
 View.__index = View

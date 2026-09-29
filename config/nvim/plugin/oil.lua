@@ -12,6 +12,7 @@ local revreg = {} -- absolute path -> id (reused across renders)
 local seq = 0
 local ns = vim.api.nvim_create_namespace("oil_mini")
 local bufdir = {} -- bufnr -> dir
+local opening = false -- M.open is running its own :edit oil:..., BufReadCmd keeps out
 local bufreg = {} -- bufnr -> { id -> disp }
 
 vim.api.nvim_set_hl(0, "OilDir", { link = "Directory", default = true })
@@ -297,9 +298,17 @@ local function apply(buf)
   return true
 end
 
+-- leaving a listing with pending edits (renames, deletes) would drop them silently
+local function discard_ok()
+  if not vim.bo.modified then
+    return true
+  end
+  return vim.fn.confirm("Oil: discard unsaved changes? (:w applies them)", "&Discard\n&Cancel", 2) == 1
+end
+
 local function enter()
   local p = parse(vim.api.nvim_get_current_line())
-  if not p then
+  if not p or not discard_ok() then
     return
   end
 
@@ -313,6 +322,9 @@ local function enter()
 end
 
 local function up()
+  if not discard_ok() then
+    return
+  end
   local buf = vim.api.nvim_get_current_buf()
   vim.bo.modified = false
   M.open(vim.fn.fnamemodify(vim.fn.trim(bufdir[buf], "/", 2), ":h") .. "/")
@@ -352,7 +364,12 @@ function M.open(path)
   local leaving = bufdir[prev] and vim.fn.fnamemodify(vim.fn.trim(bufdir[prev], "/", 2), ":t") or vim.fn.expand("%:t")
 
   -- 'oil:' not 'oil://' -- a :// name is hijacked by netrw's URL handler
-  vim.cmd("silent edit " .. vim.fn.fnameescape("oil:" .. d))
+  opening = true
+  local ok, err = pcall(vim.cmd, "silent edit " .. vim.fn.fnameescape("oil:" .. d))
+  opening = false
+  if not ok then
+    error(err)
+  end
   local buf = vim.api.nvim_get_current_buf()
 
   -- if we replaced a bare directory buffer (startup `nvim dir` / `:e dir`), drop
@@ -399,6 +416,30 @@ end
 vim.api.nvim_create_user_command("Oil", function(o)
   M.open(o.args)
 end, { nargs = "?", complete = "dir" })
+
+-- an oil:/dir/ buffer restored from a session (or :e oil:/dir/) has no content
+-- of its own: render the directory into it
+vim.api.nvim_create_autocmd("BufReadCmd", {
+  group = vim.api.nvim_create_augroup("oil_read", { clear = true }),
+  pattern = "oil:/*", -- with a "/" the pattern is matched against the full name, not its tail
+  nested = true,
+  callback = function(ev)
+    if opening then
+      return
+    end
+    local dir = vim.api.nvim_buf_get_name(ev.buf):match("^oil:(.*)$")
+    if dir and bufdir[ev.buf] == nil and vim.fn.isdirectory(dir) == 1 then
+      vim.schedule(function()
+        local win = vim.fn.bufwinid(ev.buf)
+        if win ~= -1 then
+          vim.api.nvim_win_call(win, function()
+            M.open(dir)
+          end)
+        end
+      end)
+    end
+  end,
+})
 
 -- register Oil as the file explorer: claim netrw's "FileExplorer" augroup (so we
 -- win even if netrw ever loads) and open any directory buffer — startup

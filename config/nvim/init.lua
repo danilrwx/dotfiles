@@ -51,6 +51,10 @@ vim.keymap.set("n", "<leader>gg", function()
     vim.notify("lazygit: not inside tmux", vim.log.levels.WARN)
     return
   end
+  if vim.fn.executable("lazygit") == 0 then
+    vim.notify("lazygit is not installed", vim.log.levels.WARN)
+    return
+  end
   vim.cmd("silent !tmux neww lazygit")
   vim.cmd("redraw!")
 end, { silent = true })

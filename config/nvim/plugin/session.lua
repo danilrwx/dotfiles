@@ -8,10 +8,23 @@ local s = require("session")
 vim.o.sessionoptions = "buffers,curdir,folds,tabpages,winsize,winpos,terminal"
 
 local grp = vim.api.nvim_create_augroup("session", { clear = true })
+
+-- only a bare `nvim` owns the cwd session: `nvim file.go` or `cmd | nvim -` would
+-- overwrite the project's session with that one buffer on exit
+local owns_session = vim.fn.argc() == 0
+vim.api.nvim_create_autocmd("StdinReadPre", {
+  group = grp,
+  callback = function()
+    owns_session = false
+  end,
+})
+
 vim.api.nvim_create_autocmd("VimLeavePre", {
   group = grp,
   callback = function()
-    s.save()
+    if owns_session then
+      s.save()
+    end
   end,
 })
 
@@ -19,7 +32,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
   group = grp,
   nested = true, -- let the sourced session's own autocmds fire
   callback = function()
-    if vim.fn.argc() ~= 0 then
+    if not owns_session then
       return
     end
     s.restore()

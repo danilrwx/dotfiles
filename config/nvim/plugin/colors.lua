@@ -13,9 +13,9 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
--- trailing-whitespace highlight. matchadd is window-local, and fzf reuses the
--- window for its terminal, so always clear first (else the padded fzf header
--- stays highlighted red) and re-add only for normal file buffers.
+-- trailing-whitespace highlight. matchadd is window-local and a window gets
+-- reused for terminal/scratch buffers (lazygit, the picker), so always clear
+-- first and re-add only for normal file buffers.
 local function ws_match()
   vim.fn.clearmatches()
   if vim.bo.buftype == "" then

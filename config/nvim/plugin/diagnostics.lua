@@ -5,7 +5,7 @@ vim.diagnostic.config({ virtual_text = { prefix = "🐗" }, signs = false })
 
 local BOAR = "🐗 " -- diagnostics line prefix; stripped before parsing the path
 
--- Workspace diagnostics picker (fzf-lua's diagnostics_workspace): one grep-shaped
+-- Workspace diagnostics picker: one grep-shaped
 -- row per diagnostic across all buffers, severity-sorted, fuzzy-filtered and
 -- jumped to. `:Picker! diagnostics` / o.buf scopes it to the current buffer.
 picker.launchers.diagnostics = function(o)
