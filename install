@@ -191,10 +191,9 @@ fi
 if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAND_DISPLAY:-$DISPLAY}" ]; then
   log "Applying GNOME settings"
   gsettings set org.gnome.desktop.peripherals.touchpad click-method fingers
-  # screenshots without PrtSc, macOS/Windows style: Super+Shift+3 the whole screen at once,
-  # Super+Shift+4/5 or Super+Shift+S the screenshot UI (area by default)
-  gsettings set org.gnome.shell.keybindings show-screenshot-ui "['Print', '<Super><Shift>4', '<Super><Shift>5', '<Super><Shift>s']"
-  gsettings set org.gnome.shell.keybindings screenshot "['<Shift>Print', '<Super><Shift>3']"
+  # screenshots without PrtSc, as in the old i3 config: Super+Shift+S opens the screenshot UI (area by
+  # default, into the clipboard and ~/Pictures/Screenshots); Print stays GNOME's own
+  gsettings set org.gnome.shell.keybindings show-screenshot-ui "['Print', '<Super><Shift>s']"
   if [ "$DESKTOP" == 1 ]; then
     gsettings set org.gnome.desktop.interface color-scheme prefer-dark
     gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
