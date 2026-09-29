@@ -1,11 +1,8 @@
 promptToReturnFromSubprocess: false
 disableStartupPopups: true
+# installed by `go install` (install), which also updates it
 update:
-  method: background
-  days: 2
-refresher:
-  refreshInterval: 10
-  fetchInterval: 60
+  method: never
 gui:
   nerdFontsVersion: "3"
 git:

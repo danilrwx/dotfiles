@@ -10,7 +10,7 @@
 .agents
 .auto-claude
 tags
-CLAUDE.MD
+CLAUDE.md
 AGENTS.md
 AGENTS-RU.md
 AugmentChatHistory

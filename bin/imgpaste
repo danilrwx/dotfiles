@@ -8,10 +8,12 @@
 #   imgpaste shot.png   ->  shot.png
 #
 # ponytail: OSC 52 *read* must be enabled in the terminal (ghostty
-# clipboard-read=allow, kitty clipboard_control read-clipboard) and, under tmux,
+# clipboard-read=allow) and, under tmux,
 # `set -g allow-passthrough on`. If it hangs/empty, that's why — the docker
 # devbox can instead just read the file straight from the ~/w bind mount.
 set -euo pipefail
+# read -N below is bash 4+; macOS's /bin/bash is 3.2
+(( BASH_VERSINFO[0] >= 4 )) || { echo "imgpaste: needs bash 4+" >&2; exit 1; }
 
 out="${1:-$HOME/clip.png}"
 tty=/dev/tty

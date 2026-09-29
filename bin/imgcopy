@@ -2,19 +2,22 @@
 
 # Put an image on the host clipboard as base64 text, so a devbox `imgpaste` can
 # pull it over OSC 52 (works even for the remote k8s devbox with no bind mount).
-# With no argument, uses the most recent screenshot on the Desktop. macOS host.
+# With no argument, uses the most recent screenshot: ~/Desktop/Screen* on macOS,
+# ~/Pictures/Screenshots on GNOME. Goes out through OSC 52 (bin/clip), so it
+# needs no pbcopy/wl-copy and works on either host.
 #
-#   imgcopy shot.png     |     imgcopy      (latest ~/Desktop/Screen*.png)
+#   imgcopy shot.png     |     imgcopy      (latest screenshot)
 set -euo pipefail
 
 f="${1:-}"
 if [ -z "$f" ]; then
-  f=$(ls -t "$HOME/Desktop/"Screen*.png "$HOME/Desktop/"Screen*.jpg 2>/dev/null | head -1 || true)
+  f=$(ls -t "$HOME/Desktop/"Screen*.png "$HOME/Desktop/"Screen*.jpg \
+    "$HOME/Pictures/Screenshots/"*.png 2>/dev/null | head -1 || true)
 fi
 [ -n "$f" ] && [ -f "$f" ] || {
   echo "imgcopy: no image — pass a file or take a screenshot first" >&2
   exit 1
 }
 
-base64 -i "$f" | tr -d '\n' | pbcopy
+base64 <"$f" | tr -d '\n' | "$(dirname "$0")/clip"
 echo "imgcopy: $f ($(wc -c <"$f" | tr -d ' ') bytes) -> clipboard as base64"

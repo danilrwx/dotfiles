@@ -27,8 +27,10 @@ inject() {
   f="$1"; c="$2"; b="$c >>> $3 >>>"; e="$c <<< $3 <<<"
   body="$(cat)"
   touch "$f"
-  if grep -qxF "$b" "$f"; then
-    awk -v b="$b" -v e="$e" '$0==b{s=1} !s{print} $0==e{s=0}' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+  # only a complete block is cut: with the end marker gone, awk would drop the rest of the file.
+  # `cat >` rather than mv, so a symlinked ~/.vimrc stays a symlink
+  if grep -qxF "$b" "$f" && grep -qxF "$e" "$f"; then
+    awk -v b="$b" -v e="$e" '$0==b{s=1} !s{print} $0==e{s=0}' "$f" > "$f.tmp" && cat "$f.tmp" > "$f" && rm -f "$f.tmp"
   fi
   { printf '%s\n' "$b"; printf '%s\n' "$body"; printf '%s\n' "$e"; } >> "$f"
 }

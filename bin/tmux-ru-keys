@@ -5,7 +5,7 @@
 # punctuation key that turns into a Cyrillic letter on the RU layout, bind the
 # Cyrillic key to the same command. Keys whose RU counterpart is still ASCII
 # (/ ? $ # ^ ...) are left alone: they would shadow the Latin binding.
-# Ctrl/Alt combos are skipped too — VTE already maps those to the Latin letter.
+# Ctrl/Alt combos are skipped too — the terminal already sends those as the Latin letter.
 #
 # Run from .tmux.conf after all bindings are defined (run-shell), so it is
 # re-applied on every source-file.
