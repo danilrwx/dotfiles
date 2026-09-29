@@ -1,0 +1,29 @@
+#!/bin/sh
+# The HONOR Fn keys that swayosd does not cover: the action where sway is the
+# one to act, and an OSD card through mako in every case. The performance and
+# camera keys are acted on by honor-hotkey-actions.service; here we only show
+# what it did.
+osd() { notify-send -a fnkeys -r 9912 -t 1500 "$1" "${2:-}"; }
+
+case ${1:-} in
+touchpad-on)
+	swaymsg -q input type:touchpad events enabled && osd "Touchpad" "on" ;;
+touchpad-off)
+	swaymsg -q input type:touchpad events disabled && osd "Touchpad" "off" ;;
+touchpad-toggle)
+	swaymsg -q input type:touchpad events toggle enabled disabled
+	state=$(swaymsg -t get_inputs | jq -r '[.[] | select(.type == "touchpad")][0].libinput.send_events')
+	osd "Touchpad" "$([ "$state" = enabled ] && echo on || echo off)" ;;
+profile)
+	sleep 0.3
+	osd "Power profile" "$(powerprofilesctl get)" ;;
+camera)
+	sleep 0.5
+	[ -e /dev/video0 ] && osd "Camera" "on" || osd "Camera" "off" ;;
+mic)
+	wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+	wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | grep -q MUTED && osd "Microphone" "muted" || osd "Microphone" "on" ;;
+*)
+	echo "usage: sway-fnkeys touchpad-on|touchpad-off|touchpad-toggle|profile|camera|mic" >&2
+	exit 1 ;;
+esac

@@ -1,0 +1,17 @@
+# Caps Lock is Left Ctrl at the evdev level, so every consumer agrees: xkb,
+# games under Xwayland that read raw scancodes (SDL, CS2), swayosd's libinput
+# backend. The xkb option caps:ctrl_modifier only changed the modifier and
+# left the keysym as Caps Lock, which is why the OSD kept saying "caps" and
+# games saw no Ctrl.
+#
+# Internal keyboard of the HONOR MagicBook (AT scancode 3a is Caps Lock).
+evdev:atkbd:dmi:bvn*:bvr*:bd*:svnHONOR*:pn*
+ KEYBOARD_KEY_3a=leftctrl
+
+# Any USB keyboard (HID usage 0x70039 is Caps Lock).
+evdev:input:b0003v*p*
+ KEYBOARD_KEY_70039=leftctrl
+
+# Any Bluetooth keyboard.
+evdev:input:b0005v*p*
+ KEYBOARD_KEY_70039=leftctrl
