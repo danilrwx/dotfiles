@@ -78,11 +78,9 @@ done
 link config/ghostty $HOME/.config/ghostty
 # ghostty reads `os` for the per-OS bits (config-file = ?os), point it at the right one
 if [[ "$OS" == "Darwin" ]]; then ln -snf os-macos config/ghostty/os; else ln -snf os-linux config/ghostty/os; fi
-if [[ "$OS" == "Darwin" ]]; then
-  for c in kitty alacritty; do
-    link config/$c $HOME/.config/$c
-  done
-fi
+for c in kitty alacritty; do
+  link config/$c $HOME/.config/$c
+done
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
 # which also keeps those paths out of this public repo.
 if [ -f $HOME/dotfiles/private/install ]; then
