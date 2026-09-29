@@ -1,8 +1,8 @@
 # Caps Lock is Left Ctrl at the evdev level, so every consumer agrees: xkb,
-# games under Xwayland that read raw scancodes (SDL, CS2), swayosd's libinput
-# backend. The xkb option caps:ctrl_modifier only changed the modifier and
-# left the keysym as Caps Lock, which is why the OSD kept saying "caps" and
-# games saw no Ctrl.
+# GNOME, games under Xwayland that read raw scancodes (SDL, CS2). The xkb
+# option caps:ctrl_modifier only changed the modifier and left the keysym as
+# Caps Lock, so the OSD kept saying "caps" and games saw no Ctrl. `install`
+# copies this into /etc/udev/hwdb.d/.
 #
 # Internal keyboard of the HONOR MagicBook (AT scancode 3a is Caps Lock).
 evdev:atkbd:dmi:bvn*:bvr*:bd*:svnHONOR*:pn*

@@ -97,7 +97,9 @@ case "$PM" in
     fi
     sudo apt update -y
     pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd \
-      golang-go neovim nodejs npm
+      golang-go neovim nodejs npm fd-find
+    # Ubuntu ships fd as fdfind; nvim's :find and file picker look for fd
+    ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
     ;;
   brew)
     if [ ! -x /opt/homebrew/bin/brew ]; then
@@ -106,7 +108,7 @@ case "$PM" in
     fi
     eval "$(/opt/homebrew/bin/brew shellenv)"
     # clangd comes with the Xcode CLT
-    pkg tmux gnupg pinentry-mac watch htop ugrep ripgrep fzf jq go kubectl neovim node
+    pkg tmux gnupg pinentry-mac watch htop ugrep ripgrep fzf jq go kubectl neovim node fd
     ;;
 esac
 
@@ -123,7 +125,7 @@ if [ "$DESKTOP" == 1 ]; then
   sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/ghostty 50
   sudo update-alternatives --set x-terminal-emulator /usr/bin/ghostty
 
-  # Look: stock GNOME instead of Ubuntu's, like Fedora. The `ubuntu` session mode hardwires the Yaru
+  # Look: stock upstream GNOME instead of Ubuntu's. The `ubuntu` session mode hardwires the Yaru
   # theme and its extensions (dock, desktop icons, tiling assistant), so the way out is the vanilla
   # "GNOME" session from gnome-session (pick it once in the GDM gear, GDM remembers it). It runs the
   # shell in the `user` mode: stock Adwaita, extensions from gsettings. Icons, the legacy GTK theme
@@ -143,18 +145,26 @@ if [ "$DESKTOP" == 1 ]; then
 
   # Pin ssh to that socket: terminals started before the switch (or by a stale session) still carry the gcr
   # SSH_AUTH_SOCK, and without an agent ssh reads the key file and asks the passphrase every time
-  mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
-  if ! grep -qsF 'IdentityAgent ${XDG_RUNTIME_DIR}/openssh_agent' "$HOME/.ssh/config"; then
-    log "Pinning ssh to the systemd ssh-agent socket"
-    { cat <<'EOT'
+  # The Match block goes last: a Match scopes every line after it, so at the top it swallowed the global
+  # options and Includes that followed. Any earlier copy is cut out first, so a rerun (or an old top-placed
+  # block) always ends with exactly one at the end. Written with `cat >`, which keeps a symlinked config.
+  mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh" && touch "$HOME/.ssh/config"
+  log "Pinning ssh to the systemd ssh-agent socket"
+  ssh_tmp=$(mktemp)
+  awk 'skip > 0 { skip--; next }
+       /^# Linux: pin ssh to the systemd ssh-agent socket/ { skip = 2; next }
+       n == 0 && $0 == "" { next }
+       { line[++n] = $0 }
+       END { while (n > 0 && line[n] == "") n--; for (i = 1; i <= n; i++) print line[i] }' \
+    "$HOME/.ssh/config" > "$ssh_tmp"
+  cat >> "$ssh_tmp" <<'EOT'
+
 # Linux: pin ssh to the systemd ssh-agent socket, whatever stale SSH_AUTH_SOCK a terminal carries
 Match exec "test -S ${XDG_RUNTIME_DIR}/openssh_agent"
     IdentityAgent ${XDG_RUNTIME_DIR}/openssh_agent
-
 EOT
-      cat "$HOME/.ssh/config" 2>/dev/null; } > "$HOME/.ssh/config.new"
-    mv "$HOME/.ssh/config.new" "$HOME/.ssh/config" && chmod 600 "$HOME/.ssh/config"
-  fi
+  cat "$ssh_tmp" > "$HOME/.ssh/config" && chmod 600 "$HOME/.ssh/config"
+  rm -f "$ssh_tmp"
 
   # The askpass grabs the keyboard, which under Wayland is an "inhibit shortcuts" permission prompt.
   # GNOME Shell remembers the answer only for apps it can map to a .desktop file, so give it one
@@ -174,7 +184,8 @@ EOT
   if systemd-detect-virt -q; then
     log "Installing VM guest agents"
     pkg spice-vdagent qemu-guest-agent
-    sudo systemctl enable --now spice-vdagentd qemu-guest-agent
+    # both units are static, started by udev/socket activation; start them once for this boot
+    sudo systemctl start spice-vdagentd.socket qemu-guest-agent || true
   fi
 
   # Telegram and Discord from snap. Their official tarballs update themselves
@@ -183,10 +194,12 @@ EOT
   log "Installing Telegram and Discord"
   sudo snap install telegram-desktop discord
 
-  # Steam: Valve's own .deb via the multiverse installer, needs i386 enabled
+  # Steam: multiverse's steam-installer, which fetches and updates Valve's client; needs i386 enabled
   log "Installing Steam"
-  sudo dpkg --add-architecture i386
-  sudo apt update -y
+  if ! dpkg --print-foreign-architectures | grep -qx i386; then
+    sudo dpkg --add-architecture i386
+    sudo apt update -y
+  fi
   pkg steam-installer
 fi
 
@@ -194,7 +207,6 @@ fi
 if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAND_DISPLAY:-$DISPLAY}" ]; then
   log "Applying GNOME settings"
   gsettings set org.gnome.desktop.peripherals.touchpad click-method fingers
-  gsettings set org.gnome.desktop.input-sources xkb-options "['caps:ctrl_modifier']"
   if [ "$DESKTOP" == 1 ]; then
     gsettings set org.gnome.desktop.interface color-scheme prefer-dark
     gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
@@ -291,8 +303,9 @@ fi
 # Linux) ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
   zsh_bin="$(command -v zsh || true)"
-  if [ -n "$zsh_bin" ] && [ "$SHELL" != "$zsh_bin" ]; then
-    grep -qw "$zsh_bin" /etc/shells || echo "$zsh_bin" | sudo tee -a /etc/shells
+  # passwd, not $SHELL: $SHELL stays stale until the next login, so chsh would ask on every run
+  if [ -n "$zsh_bin" ] && [ "$(getent passwd "$USER" | cut -d: -f7)" != "$zsh_bin" ]; then
+    grep -qxF "$zsh_bin" /etc/shells || echo "$zsh_bin" | sudo tee -a /etc/shells
     log "Setting zsh as default shell"
     chsh -s "$zsh_bin"
   fi
@@ -307,9 +320,19 @@ if [[ "$OS" == "Linux" ]]; then
     sudo systemctl enable --now docker.socket
   fi
 
-  if ! groups | grep -q '\bdocker\b'; then
+  # id -nG USER reads the group db; bare `groups` is this process, stale until relogin
+  if ! id -nG "$USER" | grep -qw docker; then
     log "Adding user to docker group"
     sudo usermod -aG docker $USER
+  fi
+
+  # Caps Lock as Left Ctrl at the evdev level (config/hwdb), so xkb, GNOME and games reading raw
+  # scancodes all agree; replaces the old caps:ctrl_modifier xkb option. Rebuilt only on change
+  hwdb=/etc/udev/hwdb.d/62-caps-as-ctrl.hwdb
+  if ! cmp -s config/hwdb/62-caps-as-ctrl.hwdb "$hwdb"; then
+    log "Installing the Caps as Ctrl hwdb rule"
+    sudo install -D -m 644 config/hwdb/62-caps-as-ctrl.hwdb "$hwdb"
+    sudo systemd-hwdb update && sudo udevadm trigger --subsystem-match=input --action=change
   fi
 
   # HONOR MagicBook Pro 14 2026 (ZQC-P): firmware and driver fixes from the
@@ -334,7 +357,7 @@ if [[ "$OS" == "Linux" ]]; then
 
   [ "$DESKTOP" == 1 ] || exit 0
 
-  if ! groups | grep -q '\blibvirt\b'; then
+  if ! id -nG "$USER" | grep -qw libvirt; then
     log "Adding user to libvirt group"
     sudo usermod -aG libvirt $USER
   fi
@@ -342,8 +365,12 @@ if [[ "$OS" == "Linux" ]]; then
   if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
     log "Downloading Iosevka nerd font"
     mkdir -p $HOME/.local/share/fonts
-    curl -fsSL -o /tmp/Iosevka.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip
-    unzip -o -q /tmp/Iosevka.zip -d $HOME/.local/share/fonts && rm /tmp/Iosevka.zip
+    # only IosevkaNerdFont-* ("Iosevka NF" in ghostty); the zip also carries the Mono and Propo
+    # families, 700 MB nothing uses
+    font_tmp=$(mktemp -d)
+    curl -fsSL -o "$font_tmp/Iosevka.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip \
+      && unzip -o -q "$font_tmp/Iosevka.zip" 'IosevkaNerdFont-*' -d $HOME/.local/share/fonts
+    rm -rf "$font_tmp"
     fc-cache -f
   fi
 
