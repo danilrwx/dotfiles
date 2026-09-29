@@ -17,6 +17,10 @@ for arg in "$@"; do
   esac
 done
 
+# Everything below (git remote/submodules, the ghostty `os` link) is relative to the repo, and
+# bin/dotfiles-update is this script on PATH, so it may be started from any directory
+cd "$HOME/dotfiles" || { log "No $HOME/dotfiles"; exit 1; }
+
 # Detect OS / package manager ───────────────────────────────────────────────────────────────────────────────────────────
 OS=$(uname -s)
 PM=brew
@@ -25,6 +29,10 @@ if [ -f /etc/os-release ]; then
   [ "$ID" == ubuntu ] || { log "Unsupported distro: $ID"; exit 1; }
   PM=apt
   log "This is an Ubuntu $VERSION_ID system."
+fi
+
+if [ "$DESKTOP" == 1 ] && [ "$PM" != apt ]; then
+  log "--desktop is Ubuntu-only"; exit 1
 fi
 
 pkg() {
@@ -116,6 +124,8 @@ if [ "$DESKTOP" == 1 ]; then
   # xdg-terminal-exec (Ctrl+Alt+T, nautilus "Open in Terminal") picks the first entry of xdg-terminals.list
   log "Installing ghostty"; pkg ghostty
   echo com.mitchellh.ghostty.desktop > $HOME/.config/xdg-terminals.list
+  # the ghostty package does not register itself as x-terminal-emulator, so add it first
+  sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/ghostty 50
   sudo update-alternatives --set x-terminal-emulator /usr/bin/ghostty
 
   # Look: stock GNOME instead of Ubuntu's, like Fedora. The `ubuntu` session mode hardwires the Yaru
@@ -196,8 +206,13 @@ if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAN
     gsettings set org.gnome.desktop.interface icon-theme Adwaita
     gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 11'
     gsettings set org.gnome.desktop.interface document-font-name 'Adwaita Sans 11'
-    # only the tray stays on (Telegram, Discord); dock, desktop icons and tiling assistant go
-    gsettings set org.gnome.shell enabled-extensions "['ubuntu-appindicators@ubuntu.com']"
+    # the tray for Telegram and Discord; appended, so extensions enabled by hand survive a rerun
+    exts=$(gsettings get org.gnome.shell enabled-extensions)
+    case "$exts" in
+      *ubuntu-appindicators@ubuntu.com*) ;;
+      "@as []"|"[]") gsettings set org.gnome.shell enabled-extensions "['ubuntu-appindicators@ubuntu.com']" ;;
+      *) gsettings set org.gnome.shell enabled-extensions "${exts%]}, 'ubuntu-appindicators@ubuntu.com']" ;;
+    esac
   fi
 fi
 
@@ -205,9 +220,16 @@ fi
 if [[ "$OS" == "Linux" ]] && ! command -v kubectl &> /dev/null; then
   log "Installing kubectl"
   arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
-  curl -fsSL "https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/${arch}/kubectl" \
-    | sudo tee /usr/local/bin/kubectl > /dev/null
-  sudo chmod +x /usr/local/bin/kubectl
+  # into a temp file and checked against the published sha256: a failed download must not leave an
+  # empty /usr/local/bin/kubectl that `command -v` then takes as installed on every later run
+  url="https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/${arch}/kubectl"
+  tmp=$(mktemp)
+  if curl -fsSL -o "$tmp" "$url" && echo "$(curl -fsSL "$url.sha256")  $tmp" | sha256sum -c --quiet; then
+    sudo install -m 755 "$tmp" /usr/local/bin/kubectl
+  else
+    log "kubectl download failed. Continue installation."
+  fi
+  rm -f "$tmp"
 fi
 
 # neovim: the config needs 0.11+ (vim.lsp.config); older Ubuntu LTS ship less ──────────────────────────────────────────
@@ -285,7 +307,7 @@ fi
 if [[ "$OS" == "Linux" ]]; then
   if [ ! -f /usr/bin/docker ]; then
     log "Installing docker"
-    curl -fsSL get.docker.com | bash
+    curl -fsSL https://get.docker.com | bash
     log "Enabling docker"
     sudo systemctl enable --now docker.socket
   fi
