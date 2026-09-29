@@ -365,6 +365,10 @@ function M.open_pr(hash, dir)
     return
   end
 
+  if vim.fn.executable(cmd[1]) == 0 then
+    vim.notify("git: " .. cmd[1] .. " is not installed")
+    return
+  end
   vim.system(cmd, { text = true, cwd = dir }, function(r)
     vim.schedule(function()
       local url = vim.trim(r.stdout or "")
@@ -372,11 +376,7 @@ function M.open_pr(hash, dir)
         vim.notify("git: no PR/MR for " .. hash:sub(1, 10))
         return
       end
-      if vim.ui.open then
-        vim.ui.open(url)
-      else
-        vim.fn.jobstart({ "open", url })
-      end
+      vim.ui.open(url)
     end)
   end)
 end
@@ -559,10 +559,12 @@ refresh_cur = function(buf)
   local dir = vim.fn.fnamemodify(file, ":h")
   blame_contents(dir, file, vim.api.nvim_buf_get_lines(buf, 0, -1, false), nil, function(bl, r)
     lb_pending[buf] = nil
-    if r.code == 0 and vim.api.nvim_buf_is_valid(buf) then
-      lb_cache[buf] = { tick = tick, data = bl }
-      render_cur(buf)
+    if not vim.api.nvim_buf_is_valid(buf) then
+      return
     end
+    -- a failure (untracked file, no repo) is cached as empty too: same tick, no rerun
+    lb_cache[buf] = { tick = tick, data = r.code == 0 and bl or {} }
+    render_cur(buf)
   end)
 end
 

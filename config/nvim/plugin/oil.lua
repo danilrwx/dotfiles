@@ -366,8 +366,9 @@ function M.open(path)
   vim.bo[buf].buftype = "acwrite"
   vim.bo[buf].swapfile = false
   vim.bo[buf].bufhidden = "wipe"
-  vim.wo.conceallevel = 3
-  vim.wo.concealcursor = "nvic"
+  -- [0][0] is :setlocal; plain vim.wo is :set and leaks into the file opened from here
+  vim.wo[0][0].conceallevel = 3
+  vim.wo[0][0].concealcursor = "nvic"
   vim.cmd("syntax clear")
   vim.cmd([[syntax match oilId '\t\d\+$' conceal]])
 
@@ -379,7 +380,10 @@ function M.open(path)
   bmap("cc", rename_line)
   bmap("S", rename_line)
 
+  -- :Oil on a directory that is already open reuses its buffer: clear=true keeps one
+  -- BufWriteCmd, else every reopen stacks another and :w applies the listing N times
   vim.api.nvim_create_autocmd("BufWriteCmd", {
+    group = vim.api.nvim_create_augroup("oil_write_" .. buf, { clear = true }),
     buffer = buf,
     callback = function()
       if apply(buf) then

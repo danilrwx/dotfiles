@@ -19,13 +19,31 @@ vim.api.nvim_create_autocmd("LspAttach", {
     if not client then
       return
     end
+    -- colours come from treesitter: LSP semantic tokens (clangd sends them,
+    -- gopls does not) would paint over it with the @lsp.* groups, which
+    -- colors.lua links to Normal. Dropping the capability here, before nvim
+    -- starts the token requests, keeps the highlighting treesitter-only.
+    client.server_capabilities.semanticTokensProvider = nil
     vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, { autotrigger = true })
 
     -- code lenses (gopls shows a "run go generate" lens above //go:generate
     -- directives): enable() renders them and owns its own debounced refresh on
-    -- view/edit; grc runs the one under the cursor.
+    -- view/edit; grc runs the one under the cursor. enable() is 0.12+, on 0.11
+    -- (Ubuntu) refresh by hand on the same per-buffer augroup as the formatter.
     if client:supports_method("textDocument/codeLens") then
-      vim.lsp.codelens.enable(true, { bufnr = ev.buf })
+      if vim.lsp.codelens.enable then
+        vim.lsp.codelens.enable(true, { bufnr = ev.buf })
+      else
+        local grp = vim.api.nvim_create_augroup("lsp_codelens_" .. ev.buf, { clear = true })
+        vim.api.nvim_create_autocmd({ "BufEnter", "InsertLeave", "BufWritePost" }, {
+          group = grp,
+          buffer = ev.buf,
+          callback = function()
+            vim.lsp.codelens.refresh({ bufnr = ev.buf })
+          end,
+        })
+        vim.lsp.codelens.refresh({ bufnr = ev.buf })
+      end
       vim.keymap.set("n", "grc", vim.lsp.codelens.run, { buffer = ev.buf })
     end
 
