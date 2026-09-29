@@ -1,4 +1,4 @@
--- Clipboard for the devbox (nvim over SSH, no X server). There is no <leader>y:
+-- Clipboard for nvim locally and on a server over SSH. There is no <leader>y:
 -- every plain yank is mirrored to the host clipboard with an OSC 52 escape,
 -- emitted by neovim's builtin osc52 provider through nvim's own output channel.
 -- Writing to /dev/tty (directly or via a subprocess) fails with ENXIO when nvim

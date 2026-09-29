@@ -114,7 +114,7 @@ if [ "$DESKTOP" == 1 ]; then
   log "Installing virtualization"; pkg virt-manager tigervnc-viewer
 
   # Terminal: Ubuntu's Ptyxis. VTE drops OSC 52, so copies that only reach tmux (mouse, copy mode, nvim or
-  # tmux over ssh/in the devbox) get to the desktop clipboard through bin/tmux-clip-sync and wl-copy
+  # tmux on a server over ssh) get to the desktop clipboard through bin/tmux-clip-sync and wl-copy
   log "Installing wl-clipboard"; pkg wl-clipboard
 
   # Look: stock upstream GNOME instead of Ubuntu's. The `ubuntu` session mode hardwires the Yaru

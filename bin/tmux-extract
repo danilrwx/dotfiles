@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # fzf-based replacement for the extrakto tmux plugin: no python, no TPM, works
-# anywhere fzf+tmux exist (incl. devbox containers). Opens on prefix+Tab; inside
+# anywhere fzf+tmux exist (incl. servers). Opens on prefix+Tab; inside
 # fzf, Tab types the picked token (word/path/url) into the pane, Enter copies it
-# to the clipboard (via OSC52, so it also works over SSH/devbox).
+# to the clipboard (via OSC52, so it also works over SSH).
 #
 # The pane is resolved via display-message rather than passed in: display-popup
 # does NOT expand #{pane_id} in its command, so we ask tmux from the popup.

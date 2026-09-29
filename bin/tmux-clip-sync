@@ -6,8 +6,8 @@
 # tells control-mode clients (%paste-buffer-changed), so this attaches one
 # read-only client that takes no part in sizing and gets no pane output, and
 # pipes each new buffer into the clipboard tool. That covers mouse selections, `y` in copy
-# mode and OSC 52 from apps in any pane, including nvim/tmux over ssh or in the
-# devbox (with set-clipboard on, tmux turns their OSC 52 into a buffer).
+# mode and OSC 52 from apps in any pane, including nvim/tmux on a server over
+# ssh (with set-clipboard on, tmux turns their OSC 52 into a buffer).
 #
 # Started by .tmux.conf with run-shell -b; one instance per tmux server.
 if [ -n "${WAYLAND_DISPLAY:-}" ] && command -v wl-copy >/dev/null 2>&1; then
@@ -15,7 +15,7 @@ if [ -n "${WAYLAND_DISPLAY:-}" ] && command -v wl-copy >/dev/null 2>&1; then
 elif command -v pbcopy >/dev/null 2>&1; then
 	copier=pbcopy
 else
-	exit 0 # a server or devbox: OSC 52 to the outer terminal is all there is
+	exit 0 # a server: OSC 52 to the outer terminal is all there is
 fi
 
 socket=$(tmux display-message -p '#{socket_path}') || exit 0

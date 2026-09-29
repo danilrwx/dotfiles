@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Copy stdin to the host clipboard via OSC 52, for use from the devbox over SSH
-# where pbcopy/xclip cannot reach the host. The terminal emulator turns the
+# Copy stdin to the local clipboard via OSC 52, for use on a server over SSH
+# where pbcopy/wl-copy cannot reach the laptop. The terminal emulator turns the
 # escape sequence into a real clipboard write; inside tmux it is forwarded to the
 # outer terminal (needs set-clipboard on + the clipboard terminal-feature, see
 # .tmux.conf). Usage:  some-command | clip   |   clip < file

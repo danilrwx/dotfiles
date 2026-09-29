@@ -72,7 +72,6 @@ See `server/README.md` for what it installs and the requirements.
 |---|---|
 | `install` | host setup (symlinks, packages, go tools); `bin/dotfiles-update` is the same script on PATH |
 | `bin/clip` | pipe stdin to the local clipboard over OSC 52 |
-| `bin/imgcopy`, `bin/imgpaste` | move an image from the host clipboard into a devbox over OSC 52 |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
 | `bin/askpass` | ssh-askpass on zenity (GTK4): passphrase, per-use confirm, security-key notice |
