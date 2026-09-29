@@ -42,7 +42,7 @@ it also sets two-finger click as right click on the touchpad.
 
 `./install --desktop` is Ubuntu-only and adds:
 
-- wl-clipboard for `bin/tmux-clip-sync` (Ptyxis drops OSC 52), the Iosevka Nerd
+- wl-clipboard for tmux and nvim copies, the Iosevka Nerd
   Font for Ptyxis and Apple Color Emoji
 - virt-manager (and the `libvirt` group), Telegram and Discord from snap, Steam
   from multiverse's `steam-installer`, the VM guest agents inside a VM
@@ -51,31 +51,13 @@ it also sets two-finger click as right click on the touchpad.
 - ssh through the plain `ssh-agent` with a GTK4 askpass (`bin/askpass`, zenity) instead of gcr's agent,
   pinned by a `Match` block appended to `~/.ssh/config`
 
-## Base config on other servers
-
-`server/install.sh` drops a minimal, plugin-free vim + tmux config onto any plain
-server to make it feel like home — editing defaults and keymaps, `alt+1..9`
-windows and pane nav, plus clipboard over SSH (OSC 52): vim yanks and tmux mouse
-selections land on your local clipboard, with a `clip` command to pipe anything
-there (`cmd | clip`). No X, no `pbcopy`/`xclip`. Self-contained — paste it into a
-server shell, or:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/danilrwx/dotfiles/master/server/install.sh | bash
-```
-
-See `server/README.md` for what it installs and the requirements.
-
 ## Layout
 
 | Path | What |
 |---|---|
 | `install` | host setup (symlinks, packages, go tools); `bin/dotfiles-update` is the same script on PATH |
-| `bin/clip` | pipe stdin to the local clipboard over OSC 52 |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
 | `bin/askpass` | ssh-askpass on zenity (GTK4): passphrase, per-use confirm, security-key notice |
-| `bin/tmux-clip-sync` | every tmux buffer into the desktop clipboard (wl-copy, pbcopy), since Ptyxis/VTE and Terminal.app drop OSC 52 |
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
 | `bin/sway-fnkeys` | HONOR Fn-key actions and OSD under sway |
-| `server/install.sh` | base vim/tmux config + clipboard (OSC 52) for any server |

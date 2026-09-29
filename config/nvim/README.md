@@ -35,7 +35,7 @@ plugin/             feature modules, auto-sourced on start
   oil.lua             file manager (edit the dir like a buffer)
   session.lua         auto save/restore per-cwd sessions
   playbook.lua        run playbook.sh lines in a tmux pane
-  clipboard.lua       OSC 52 yank mirroring (works over SSH)
+  clipboard.lua       yank mirroring to wl-copy/pbcopy
   colors.lua          dark-ansi palette (terminal ANSI colours)
   treesitter.lua      enable TS + :TSBuild parser compiler
 lua/                engine code (picker/*, git.lua, session.lua)
@@ -187,8 +187,8 @@ Commands: `:SessionSave`, `:SessionRestore`, `:SessionDelete`.
 
 ### Clipboard
 
-Every yank is mirrored to the host clipboard via **OSC 52** (works over
-SSH/tmux, no X server). `<leader>dd` copies `path:line` of the current position.
+Every yank is mirrored to the desktop clipboard through `wl-copy` (Wayland) or
+`pbcopy` (macOS). `<leader>dd` copies `path:line` of the current position.
 
 ## Commands
 

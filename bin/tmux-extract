@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # fzf-based replacement for the extrakto tmux plugin: no python, no TPM, works
-# anywhere fzf+tmux exist (incl. servers). Opens on prefix+Tab; inside
-# fzf, Tab types the picked token (word/path/url) into the pane, Enter copies it
-# to the clipboard (via OSC52, so it also works over SSH).
+# anywhere fzf+tmux exist. Opens on prefix+Tab; inside fzf, Tab types the picked
+# token (word/path/url) into the pane, Enter copies it to the clipboard through
+# tmux's copy-command (wl-copy/pbcopy, see .tmux.conf).
 #
 # The pane is resolved via display-message rather than passed in: display-popup
 # does NOT expand #{pane_id} in its command, so we ask tmux from the popup.
@@ -33,5 +33,8 @@ sel=$(printf '%s\n' "$out" | sed -n 2p)
 
 case "$key" in
   tab) tmux send-keys -t "$pane" -l -- "$sel" ;;      # insert into the pane
-  *)   printf '%s' "$sel" | tmux load-buffer -w - ;;  # enter: copy to clipboard
+  *)   # enter: into a tmux buffer and the desktop clipboard
+       printf '%s' "$sel" | tmux load-buffer -
+       cmd=$(tmux show-options -gv copy-command 2>/dev/null || true)
+       [ -z "$cmd" ] || printf '%s' "$sel" | sh -c "$cmd" ;;
 esac
