@@ -4,7 +4,16 @@
 -- Writing to /dev/tty (directly or via a subprocess) fails with ENXIO when nvim
 -- has no controlling terminal (SSH/tmux) — that is why plain y/yy stopped
 -- copying. tmux forwards it out via set-clipboard + the clipboard feature.
-local copy = require("vim.ui.clipboard.osc52").copy("+")
+-- Locally on Wayland the yank goes to wl-copy instead: Ptyxis/VTE drops OSC 52.
+local copy
+if vim.env.SSH_CONNECTION == nil and vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") == 1 then
+  copy = function(lines, regtype)
+    local text = table.concat(lines, "\n") .. (regtype == "V" and "\n" or "")
+    vim.system({ "wl-copy" }, { stdin = text, detach = true })
+  end
+else
+  copy = require("vim.ui.clipboard.osc52").copy("+")
+end
 
 -- only real yanks (not deletes) to the unnamed or clipboard registers
 vim.api.nvim_create_autocmd("TextYankPost", {

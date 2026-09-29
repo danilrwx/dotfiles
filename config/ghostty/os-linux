@@ -1,7 +1,0 @@
-font-size = 12
-
-# paint the GTK headerbar black like the top bar of the vanilla GNOME session
-# (Ubuntu's Yaru would paint it #131313 instead)
-window-theme = ghostty
-window-titlebar-background = #000000
-window-titlebar-foreground = #ffffff

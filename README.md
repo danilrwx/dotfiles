@@ -42,7 +42,8 @@ it also sets two-finger click as right click on the touchpad.
 
 `./install --desktop` is Ubuntu-only and adds:
 
-- Ghostty as the default terminal, with the Iosevka Nerd Font and Apple Color Emoji
+- wl-clipboard for `bin/tmux-clip-sync` (Ptyxis drops OSC 52), the Iosevka Nerd
+  Font for Ptyxis and Apple Color Emoji
 - virt-manager (and the `libvirt` group), Telegram and Discord from snap, Steam
   from multiverse's `steam-installer`, the VM guest agents inside a VM
 - the vanilla "GNOME" session with the stock Adwaita look and a dark theme
@@ -75,6 +76,7 @@ See `server/README.md` for what it installs and the requirements.
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
 | `bin/askpass` | ssh-askpass on zenity (GTK4): passphrase, per-use confirm, security-key notice |
+| `bin/tmux-clip-sync` | every tmux buffer into the Wayland clipboard, since Ptyxis/VTE drops OSC 52 |
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
 | `bin/sway-fnkeys` | HONOR Fn-key actions and OSD under sway |
 | `server/install.sh` | base vim/tmux config + clipboard (OSC 52) for any server |

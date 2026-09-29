@@ -60,7 +60,8 @@ BIN=/usr/local/bin bash install.sh     # needs write access there
 
 - Vim 8+ (needs `TextYankPost`).
 - Your local terminal must allow OSC 52 writes (alacritty/kitty/iTerm2/WezTerm/
-  ghostty do, mostly by default).
+  ghostty do, mostly by default). VTE terminals (Ptyxis, GNOME Terminal) drop
+  it: ssh from inside a local tmux running `bin/tmux-clip-sync` instead.
 - GNU or BSD `base64`.
 - Any tmux version: the config detects the running version and uses
   `terminal-features` on 3.2+ or the `Ms` terminal-override on older tmux.

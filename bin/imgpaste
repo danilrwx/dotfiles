@@ -7,8 +7,8 @@
 #   imgpaste            ->  ~/clip.png
 #   imgpaste shot.png   ->  shot.png
 #
-# ponytail: OSC 52 *read* must be enabled in the terminal (ghostty
-# clipboard-read=allow) and, under tmux,
+# ponytail: OSC 52 *read* must be enabled in the terminal (VTE/Ptyxis has no
+# OSC 52 at all, so from there this cannot work) and, under tmux,
 # `set -g allow-passthrough on`. If it hangs/empty, that's why — the docker
 # devbox can instead just read the file straight from the ~/w bind mount.
 set -euo pipefail
