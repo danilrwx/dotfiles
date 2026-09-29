@@ -4,12 +4,21 @@
 -- Writing to /dev/tty (directly or via a subprocess) fails with ENXIO when nvim
 -- has no controlling terminal (SSH/tmux) — that is why plain y/yy stopped
 -- copying. tmux forwards it out via set-clipboard + the clipboard feature.
--- Locally on Wayland the yank goes to wl-copy instead: Ptyxis/VTE drops OSC 52.
+-- Locally the yank goes to wl-copy or pbcopy instead: Ptyxis/VTE and
+-- Terminal.app drop OSC 52.
+local tool
+if vim.env.SSH_CONNECTION == nil then
+  if vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") == 1 then
+    tool = "wl-copy"
+  elseif vim.fn.executable("pbcopy") == 1 then
+    tool = "pbcopy"
+  end
+end
 local copy
-if vim.env.SSH_CONNECTION == nil and vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") == 1 then
+if tool then
   copy = function(lines, regtype)
     local text = table.concat(lines, "\n") .. (regtype == "V" and "\n" or "")
-    vim.system({ "wl-copy" }, { stdin = text, detach = true })
+    vim.system({ tool }, { stdin = text, detach = true })
   end
 else
   copy = require("vim.ui.clipboard.osc52").copy("+")

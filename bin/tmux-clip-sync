@@ -1,21 +1,29 @@
 #!/bin/sh
-# Mirror every tmux paste buffer into the Wayland clipboard. VTE terminals
-# (Ptyxis, GNOME Terminal) drop OSC 52, so a copy that only reaches tmux never
+# Mirror every tmux paste buffer into the desktop clipboard (wl-copy on Wayland,
+# pbcopy on macOS). VTE terminals (Ptyxis, GNOME Terminal) and macOS Terminal.app
+# drop OSC 52, so a copy that only reaches tmux never
 # lands on the desktop clipboard. tmux has no hook for "buffer changed", but it
 # tells control-mode clients (%paste-buffer-changed), so this attaches one
 # read-only client that takes no part in sizing and gets no pane output, and
-# pipes each new buffer into wl-copy. That covers mouse selections, `y` in copy
+# pipes each new buffer into the clipboard tool. That covers mouse selections, `y` in copy
 # mode and OSC 52 from apps in any pane, including nvim/tmux over ssh or in the
 # devbox (with set-clipboard on, tmux turns their OSC 52 into a buffer).
 #
 # Started by .tmux.conf with run-shell -b; one instance per tmux server.
-command -v wl-copy >/dev/null 2>&1 || exit 0
-[ -n "${WAYLAND_DISPLAY:-}" ] || exit 0
+if [ -n "${WAYLAND_DISPLAY:-}" ] && command -v wl-copy >/dev/null 2>&1; then
+	copier=wl-copy
+elif command -v pbcopy >/dev/null 2>&1; then
+	copier=pbcopy
+else
+	exit 0 # a server or devbox: OSC 52 to the outer terminal is all there is
+fi
 
 socket=$(tmux display-message -p '#{socket_path}') || exit 0
 lock="${XDG_RUNTIME_DIR:-/tmp}/tmux-clip-sync.$(echo "$socket" | tr / %).lock"
 exec 9>"$lock"
-flock -n 9 || exit 0 # already running for this server
+if command -v flock >/dev/null 2>&1; then
+	flock -n 9 || exit 0 # already running for this server
+fi
 
 # control mode detaches on EOF, so its stdin is a FIFO opened read-write: it
 # never hits EOF and needs no extra process that could outlive tmux
@@ -28,7 +36,7 @@ while tmux -S "$socket" has-session 2>/dev/null; do
 	tmux -S "$socket" -C attach-session -f read-only,ignore-size,no-output <&8 2>/dev/null |
 		while IFS=' ' read -r event name _; do
 			[ "$event" = "%paste-buffer-changed" ] || continue
-			tmux -S "$socket" save-buffer -b "$name" - | wl-copy
+			tmux -S "$socket" save-buffer -b "$name" - | $copier
 		done
 	sleep 1
 done

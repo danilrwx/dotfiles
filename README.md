@@ -76,7 +76,7 @@ See `server/README.md` for what it installs and the requirements.
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
 | `bin/askpass` | ssh-askpass on zenity (GTK4): passphrase, per-use confirm, security-key notice |
-| `bin/tmux-clip-sync` | every tmux buffer into the Wayland clipboard, since Ptyxis/VTE drops OSC 52 |
+| `bin/tmux-clip-sync` | every tmux buffer into the desktop clipboard (wl-copy, pbcopy), since Ptyxis/VTE and Terminal.app drop OSC 52 |
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
 | `bin/sway-fnkeys` | HONOR Fn-key actions and OSD under sway |
 | `server/install.sh` | base vim/tmux config + clipboard (OSC 52) for any server |

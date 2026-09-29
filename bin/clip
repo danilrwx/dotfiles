@@ -6,11 +6,13 @@
 # outer terminal (needs set-clipboard on + the clipboard terminal-feature, see
 # .tmux.conf). Usage:  some-command | clip   |   clip < file
 #
-# Locally on Wayland it goes straight to wl-copy: Ptyxis/VTE ignores OSC 52.
+# Locally it goes straight to wl-copy or pbcopy: Ptyxis/VTE and Terminal.app
+# ignore OSC 52.
 set -euo pipefail
 
-if [ -z "${SSH_CONNECTION:-}" ] && [ -n "${WAYLAND_DISPLAY:-}" ] && command -v wl-copy >/dev/null; then
-  exec wl-copy
+if [ -z "${SSH_CONNECTION:-}" ]; then
+  if [ -n "${WAYLAND_DISPLAY:-}" ] && command -v wl-copy >/dev/null; then exec wl-copy; fi
+  if command -v pbcopy >/dev/null; then exec pbcopy; fi
 fi
 
 b64=$(base64 | tr -d '\n')
