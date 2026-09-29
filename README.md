@@ -39,7 +39,7 @@ On a HONOR MagicBook Pro 14 2026 (`ZQC-P`) it also clones
 into `~/w` and runs its `apply_patch.sh` without the headset-mic and DSC fixes,
 which is a no-op once a revision has been applied. From a running GNOME session
 it also sets two-finger click as right click on the touchpad and `Super+Shift+S`
-for the screenshot UI, as in the old i3 config.
+for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
 
 `./install --desktop` is Ubuntu-only and adds:
 

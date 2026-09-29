@@ -194,6 +194,8 @@ if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAN
   # screenshots without PrtSc, as in the old i3 config: Super+Shift+S opens the screenshot UI (area by
   # default, into the clipboard and ~/Pictures/Screenshots); Print stays GNOME's own
   gsettings set org.gnome.shell.keybindings show-screenshot-ui "['Print', '<Super><Shift>s']"
+  # mic mute on Super+Shift+M, as in i3 (GNOME leaves it unbound)
+  gsettings set org.gnome.settings-daemon.plugins.media-keys mic-mute "['<Super><Shift>m']"
   if [ "$DESKTOP" == 1 ]; then
     gsettings set org.gnome.desktop.interface color-scheme prefer-dark
     gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
