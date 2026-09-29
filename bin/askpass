@@ -12,10 +12,10 @@ prompt=${1:-SSH}
 
 case ${SSH_ASKPASS_PROMPT:-} in
 confirm)
-	exec zenity --question --no-markup --title "SSH" --icon dialog-password \
+	exec zenity --question --no-markup --title "SSH" \
 		--ok-label "Allow" --cancel-label "Deny" --text "$prompt" ;;
 none)
-	exec zenity --info --no-markup --title "SSH" --icon security-high \
+	exec zenity --info --no-markup --title "SSH" \
 		--text "$prompt" ;;
 *)
 	exec zenity --entry --hide-text --no-markup --title "SSH" --text "$prompt" ;;
