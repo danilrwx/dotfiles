@@ -133,12 +133,15 @@ if [ "$DESKTOP" == 1 ]; then
   log "Installing the GNOME session"; pkg gnome-session
   sudo update-alternatives --set gdm-theme.gresource /usr/share/gnome-shell/gnome-shell-theme.gresource
 
-  # ssh: the plain ssh-agent with a GTK askpass, so AddKeysToAgent confirm shows a dialog per key use.
-  # GNOME's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh never loads the
-  # key file itself and the confirm constraint never applies; mask it and let ssh-agent.socket own SSH_AUTH_SOCK
-  log "Installing ssh askpass"; pkg ssh-askpass-gnome
-  sudo apt purge -y ssh-askpass 2>/dev/null || true   # else alternatives keep the x11 dialog
+  # ssh: the plain ssh-agent with a GTK4 askpass (bin/askpass on zenity), so AddKeysToAgent confirm shows
+  # a dialog per key use. GNOME's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh
+  # never loads the key file itself and the confirm constraint never applies (its gcr4-ssh-askpass has no
+  # confirm mode either); mask it and let ssh-agent.socket own SSH_AUTH_SOCK
+  log "Setting up ssh-agent with the GTK4 askpass"; pkg zenity
+  mkdir -p "$HOME/.config/systemd/user/ssh-agent.service.d"
+  link config/systemd/ssh-agent-askpass.conf "$HOME/.config/systemd/user/ssh-agent.service.d/askpass.conf"
   if command -v systemctl &> /dev/null && [ -n "${XDG_RUNTIME_DIR:-}" ]; then
+    systemctl --user daemon-reload
     systemctl --user mask --now gcr-ssh-agent.socket gcr-ssh-agent.service
     systemctl --user enable --now ssh-agent.socket
   fi
@@ -166,19 +169,9 @@ EOT
   cat "$ssh_tmp" > "$HOME/.ssh/config" && chmod 600 "$HOME/.ssh/config"
   rm -f "$ssh_tmp"
 
-  # The askpass grabs the keyboard, which under Wayland is an "inhibit shortcuts" permission prompt.
-  # GNOME Shell remembers the answer only for apps it can map to a .desktop file, so give it one
-  mkdir -p "$HOME/.local/share/applications"
-  cat > "$HOME/.local/share/applications/ssh-askpass.desktop" <<'EOT'
-[Desktop Entry]
-Type=Application
-Name=SSH Askpass
-Exec=/usr/bin/ssh-askpass
-Icon=dialog-password
-NoDisplay=true
-StartupWMClass=ssh-askpass
-EOT
-  update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+  # the old gnome-ssh-askpass grabbed the keyboard and needed a .desktop file for GNOME to remember the
+  # "inhibit shortcuts" answer; zenity grabs nothing, so drop that file
+  rm -f "$HOME/.local/share/applications/ssh-askpass.desktop"
 
   # inside a VM: guest agents so the display follows the viewer window size
   if systemd-detect-virt -q; then

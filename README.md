@@ -47,7 +47,7 @@ it also sets two-finger click as right click on the touchpad.
   from multiverse's `steam-installer`, the VM guest agents inside a VM
 - the vanilla "GNOME" session with the stock Adwaita look and a dark theme
   (pick it in the GDM gear once); the tray extension is added to the enabled ones
-- ssh through the plain `ssh-agent` with a GTK askpass instead of gcr's agent,
+- ssh through the plain `ssh-agent` with a GTK4 askpass (`bin/askpass`, zenity) instead of gcr's agent,
   pinned by a `Match` block appended to `~/.ssh/config`
 
 ## Base config on other servers
@@ -74,6 +74,7 @@ See `server/README.md` for what it installs and the requirements.
 | `bin/imgcopy`, `bin/imgpaste` | move an image from the host clipboard into a devbox over OSC 52 |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
+| `bin/askpass` | ssh-askpass on zenity (GTK4): passphrase, per-use confirm, security-key notice |
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
 | `bin/sway-fnkeys` | HONOR Fn-key actions and OSD under sway |
 | `server/install.sh` | base vim/tmux config + clipboard (OSC 52) for any server |

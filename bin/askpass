@@ -1,0 +1,22 @@
+#!/bin/sh
+# ssh-askpass on zenity 4 (GTK4 + libadwaita, installed with GNOME). Covers the
+# three prompts OpenSSH asks for, told apart by SSH_ASKPASS_PROMPT:
+#   confirm  AddKeysToAgent/ssh-add -c: allow one use of the key. ssh-agent
+#            reads exit 0 with empty output as yes, anything else as no.
+#   none     a notice, e.g. "touch your security key"; ssh kills it when done.
+#   (unset)  a passphrase or PIN, printed on stdout.
+# zenity does not grab the keyboard, so unlike gnome-ssh-askpass there is no
+# "inhibit shortcuts" prompt under Wayland. Wired to the systemd ssh-agent by
+# config/systemd/ssh-agent-askpass.conf.
+prompt=${1:-SSH}
+
+case ${SSH_ASKPASS_PROMPT:-} in
+confirm)
+	exec zenity --question --no-markup --title "SSH" --icon dialog-password \
+		--ok-label "Allow" --cancel-label "Deny" --text "$prompt" ;;
+none)
+	exec zenity --info --no-markup --title "SSH" --icon security-high \
+		--text "$prompt" ;;
+*)
+	exec zenity --entry --hide-text --no-markup --title "SSH" --text "$prompt" ;;
+esac
