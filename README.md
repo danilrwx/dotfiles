@@ -51,7 +51,8 @@ for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
   browser
 - virt-manager (and the `libvirt` group), Telegram and Discord from snap, Steam
   from multiverse's `steam-installer`, the VM guest agents inside a VM
-- a dark Yaru theme with the blue accent in the stock Ubuntu session
+- the vanilla "GNOME" session with the stock Adwaita look and a dark theme
+  (pick it in the GDM gear once); the tray extension is added to the enabled ones
 - ssh through the plain `ssh-agent` with an askpass on the GNOME Shell system prompt (`bin/askpass`, gcr 4) instead of gcr's agent,
   pinned by a `Match` block appended to `~/.ssh/config`
 

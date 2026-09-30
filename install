@@ -116,10 +116,18 @@ if [ "$DESKTOP" == 1 ]; then
   # Terminal: Ubuntu's Ptyxis. tmux (copy-command) and nvim copy through wl-copy
   log "Installing wl-clipboard"; pkg wl-clipboard
 
+  # Look: stock upstream GNOME instead of Ubuntu's. The `ubuntu` session mode hardwires the Yaru
+  # theme and its extensions (dock, desktop icons, tiling assistant), so the way out is the vanilla
+  # "GNOME" session from gnome-session (pick it once in the GDM gear, GDM remembers it). It runs the
+  # shell in the `user` mode: stock Adwaita, extensions from gsettings. Icons, the legacy GTK theme
+  # and the Adwaita fonts follow in the gsettings block. The alternative is GDM's own theme.
+  log "Installing the GNOME session"; pkg gnome-session
+  sudo update-alternatives --set gdm-theme.gresource /usr/share/gnome-shell/gnome-shell-theme.gresource
+
   # ssh: the plain ssh-agent with an askpass on the GNOME Shell system prompt (bin/askpass on gcr 4), so
-  # AddKeysToAgent confirm shows a modal dialog per key use. GNOME's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh
-  # never loads the key file itself and the confirm constraint never applies (its gcr4-ssh-askpass has no
-  # confirm mode either); mask it and let ssh-agent.socket own SSH_AUTH_SOCK
+  # AddKeysToAgent confirm shows a modal dialog per key use. GNOME's gcr-ssh-agent sits in front of the agent
+  # and pre-lists ~/.ssh keys, so ssh never loads the key file itself and the confirm constraint never applies
+  # (its gcr4-ssh-askpass has no confirm mode either); mask it and let ssh-agent.socket own SSH_AUTH_SOCK
   log "Setting up ssh-agent with the GNOME Shell askpass"; pkg python3-gi gir1.2-gcr-4
   mkdir -p "$HOME/.config/systemd/user/ssh-agent.service.d"
   link config/systemd/ssh-agent-askpass.conf "$HOME/.config/systemd/user/ssh-agent.service.d/askpass.conf"
@@ -201,11 +209,11 @@ if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAN
   # mic mute on Super+Shift+M, as in i3 (GNOME leaves it unbound)
   gsettings set org.gnome.settings-daemon.plugins.media-keys mic-mute "['<Super><Shift>m']"
   if [ "$DESKTOP" == 1 ]; then
-    # the stock Ubuntu session (Yaru, dock, Ubuntu Sans), dark with the blue accent
     gsettings set org.gnome.desktop.interface color-scheme prefer-dark
-    gsettings set org.gnome.desktop.interface accent-color blue
-    gsettings set org.gnome.desktop.interface gtk-theme Yaru-blue-dark
-    gsettings set org.gnome.desktop.interface icon-theme Yaru-blue-dark
+    gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
+    gsettings set org.gnome.desktop.interface icon-theme Adwaita
+    gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 11'
+    gsettings set org.gnome.desktop.interface document-font-name 'Adwaita Sans 11'
     gsettings set org.gnome.Ptyxis use-system-font false
     gsettings set org.gnome.Ptyxis font-name 'Iosevka Nerd Font 12'
     # the palette lives in the default profile, keyed by a UUID Ptyxis makes on its first start; before
@@ -223,6 +231,13 @@ if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAN
       gsettings set org.gnome.Ptyxis.Shortcuts "focus-tab-$ptyxis_tab" "<Control>$key"
       ptyxis_tab=$((ptyxis_tab + 1))
     done
+    # the tray for Telegram and Discord; appended, so extensions enabled by hand survive a rerun
+    exts=$(gsettings get org.gnome.shell enabled-extensions)
+    case "$exts" in
+      *ubuntu-appindicators@ubuntu.com*) ;;
+      "@as []"|"[]") gsettings set org.gnome.shell enabled-extensions "['ubuntu-appindicators@ubuntu.com']" ;;
+      *) gsettings set org.gnome.shell enabled-extensions "${exts%]}, 'ubuntu-appindicators@ubuntu.com']" ;;
+    esac
   fi
 fi
 
