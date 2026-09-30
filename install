@@ -5,7 +5,7 @@ log() {
 }
 
 # ./install [--desktop] [--ru-mirror]
-#   --desktop    GUI apps: Chrome, Kontur.Talk, virt-manager, Telegram, Discord, Steam
+#   --desktop    GUI apps: Chrome, virt-manager, Telegram, Discord, Steam
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
 DESKTOP=0; RU_MIRROR=0
 for arg in "$@"; do
@@ -175,17 +175,6 @@ EOT
     rm -f "$chrome_deb"
   fi
   command -v google-chrome &> /dev/null && xdg-settings set default-web-browser google-chrome.desktop
-
-  # Kontur.Talk (ktalk): the .deb behind app.ktalk.ru/download/app, x64 and arm64. No apt repo, so a rerun
-  # only installs it when missing; the app offers its own updates
-  if ! dpkg -s ktalk &> /dev/null; then
-    log "Installing Kontur.Talk"
-    ktalk_deb=$(mktemp --suffix .deb)
-    ktalk_url=https://app.ktalk.ru/system/dist/download/linux-deb
-    [ "$(dpkg --print-architecture)" == arm64 ] && ktalk_url=$ktalk_url-arm
-    curl -fsSL -o "$ktalk_deb" "$ktalk_url" && sudo apt install -y "$ktalk_deb"
-    rm -f "$ktalk_deb"
-  fi
 
   # Telegram and Discord from snap. Their official tarballs update themselves
   # too, but Discord's Chromium sandbox needs an AppArmor profile on Ubuntu;

@@ -49,7 +49,6 @@ for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
   Font for Ptyxis and Apple Color Emoji
 - Google Chrome from Google's .deb (their apt repo comes with it), set as the default
   browser
-- Kontur.Talk from its .deb (no apt repo, the app updates itself)
 - virt-manager (and the `libvirt` group), Telegram and Discord from snap, Steam
   from multiverse's `steam-installer`, the VM guest agents inside a VM
 - a dark Yaru theme with the blue accent in the stock Ubuntu session
