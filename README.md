@@ -50,8 +50,7 @@ for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
 - Kontur.Talk from its .deb (no apt repo, the app updates itself)
 - virt-manager (and the `libvirt` group), Telegram and Discord from snap, Steam
   from multiverse's `steam-installer`, the VM guest agents inside a VM
-- the vanilla "GNOME" session with the stock Adwaita look and a dark theme
-  (pick it in the GDM gear once); the tray extension is added to the enabled ones
+- a dark Yaru theme with the blue accent in the stock Ubuntu session
 - ssh through the plain `ssh-agent` with a GTK4 askpass (`bin/askpass`, zenity) instead of gcr's agent,
   pinned by a `Match` block appended to `~/.ssh/config`
 
