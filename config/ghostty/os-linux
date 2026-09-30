@@ -1,0 +1,5 @@
+font-size = 12
+
+# no headerbar at all, as under i3: the maximized window takes the whole screen below the GNOME top bar
+# (move it with Super+drag)
+window-decoration = none

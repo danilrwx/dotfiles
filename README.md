@@ -45,8 +45,8 @@ for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
 
 `./install --desktop` is Ubuntu-only and adds:
 
-- wl-clipboard for tmux and nvim copies, the Iosevka Nerd
-  Font for Ptyxis and Apple Color Emoji
+- Ghostty as the default terminal (`config/ghostty`), with the Iosevka Nerd Font
+  and Apple Color Emoji; wl-clipboard for tmux and nvim copies
 - Google Chrome from Google's .deb (their apt repo comes with it), set as the default
   browser
 - virt-manager (and the `libvirt` group), Telegram and Discord from snap, Steam

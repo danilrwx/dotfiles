@@ -17,7 +17,7 @@ for arg in "$@"; do
   esac
 done
 
-# Everything below (git remote/submodules, `link`, config/hwdb) is relative to the repo, and
+# Everything below (git remote/submodules, `link`, the ghostty `os` link, config/hwdb) is relative to the repo, and
 # bin/dotfiles-update is this script on PATH, so it may be started from any directory
 cd "$HOME/dotfiles" || { log "No $HOME/dotfiles"; exit 1; }
 
@@ -75,6 +75,9 @@ done
 for c in k9s htop lazygit nvim; do
   link config/$c $HOME/.config/$c
 done
+link config/ghostty $HOME/.config/ghostty
+# ghostty reads `os` for the per-OS bits (config-file = ?os), point it at the right one
+if [[ "$OS" == "Darwin" ]]; then ln -snf os-macos config/ghostty/os; else ln -snf os-linux config/ghostty/os; fi
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
 # which also keeps those paths out of this public repo.
 if [ -f $HOME/dotfiles/private/install ]; then
@@ -113,7 +116,15 @@ esac
 if [ "$DESKTOP" == 1 ]; then
   log "Installing virtualization"; pkg virt-manager tigervnc-viewer
 
-  # Terminal: Ubuntu's Ptyxis. tmux (copy-command) and nvim copy through wl-copy
+  # Terminal: Ghostty from universe instead of Ubuntu's Ptyxis, for a config file (config/ghostty) instead of
+  # dconf profiles. Ptyxis stays installed: purging it drags ubuntu-desktop-minimal along. xdg-terminal-exec (Ctrl+Alt+T, nautilus "Open in Terminal") picks the first
+  # entry of xdg-terminals.list
+  log "Installing ghostty"; pkg ghostty
+  echo com.mitchellh.ghostty.desktop > $HOME/.config/xdg-terminals.list
+  # the ghostty package does not register itself as x-terminal-emulator, so add it first
+  sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/ghostty 50
+  sudo update-alternatives --set x-terminal-emulator /usr/bin/ghostty
+  # tmux (copy-command) and nvim copy through wl-copy
   log "Installing wl-clipboard"; pkg wl-clipboard
 
   # Look: stock upstream GNOME instead of Ubuntu's. The `ubuntu` session mode hardwires the Yaru
@@ -214,23 +225,6 @@ if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAN
     gsettings set org.gnome.desktop.interface icon-theme Adwaita
     gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 11'
     gsettings set org.gnome.desktop.interface document-font-name 'Adwaita Sans 11'
-    gsettings set org.gnome.Ptyxis use-system-font false
-    gsettings set org.gnome.Ptyxis font-name 'Iosevka Nerd Font 12'
-    # the palette lives in the default profile, keyed by a UUID Ptyxis makes on its first start; before
-    # that there is none, so register one of our own, which Ptyxis then takes as its default
-    ptyxis_profile=$(gsettings get org.gnome.Ptyxis default-profile-uuid | tr -d "'")
-    if [ -z "$ptyxis_profile" ]; then
-      ptyxis_profile=$(tr -d - < /proc/sys/kernel/random/uuid)
-      gsettings set org.gnome.Ptyxis profile-uuids "['$ptyxis_profile']"
-      gsettings set org.gnome.Ptyxis default-profile-uuid "$ptyxis_profile"
-    fi
-    gsettings set "org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/$ptyxis_profile/" palette 'Dark Pastel'
-    # tabs on Ctrl+Shift+1..0 (the shifted digits of a US layout)
-    ptyxis_tab=1
-    for key in exclam at numbersign dollar percent asciicircum ampersand asterisk parenleft parenright; do
-      gsettings set org.gnome.Ptyxis.Shortcuts "focus-tab-$ptyxis_tab" "<Control>$key"
-      ptyxis_tab=$((ptyxis_tab + 1))
-    done
     # the tray for Telegram and Discord; appended, so extensions enabled by hand survive a rerun
     exts=$(gsettings get org.gnome.shell enabled-extensions)
     case "$exts" in
@@ -410,7 +404,7 @@ if [[ "$OS" == "Linux" ]]; then
   if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
     log "Downloading Iosevka nerd font"
     mkdir -p $HOME/.local/share/fonts
-    # only IosevkaNerdFont-* (the Ptyxis font below); the zip also carries the Mono and Propo
+    # only IosevkaNerdFont-* ("Iosevka NF" in ghostty); the zip also carries the Mono and Propo
     # families, 700 MB nothing uses
     font_tmp=$(mktemp -d)
     curl -fsSL -o "$font_tmp/Iosevka.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip \
