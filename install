@@ -5,7 +5,7 @@ log() {
 }
 
 # ./install [--desktop] [--ru-mirror]
-#   --desktop    GUI apps: virt-manager, Telegram, Discord, Steam
+#   --desktop    GUI apps: Chrome, virt-manager, Telegram, Discord, Steam
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
 DESKTOP=0; RU_MIRROR=0
 for arg in "$@"; do
@@ -171,6 +171,18 @@ EOT
     # both units are static, started by udev/socket activation; start them once for this boot
     sudo systemctl start spice-vdagentd.socket qemu-guest-agent || true
   fi
+
+  # Google Chrome from Google's own .deb, which adds their apt repo and key, so later updates come with
+  # apt upgrade. Chrome rather than the Chromium snap: snap confinement keeps native messaging hosts (the
+  # Claude in Chrome extension) out. Only amd64, Google ships no Linux arm64 build
+  if [ "$(dpkg --print-architecture)" == amd64 ] && ! dpkg -s google-chrome-stable &> /dev/null; then
+    log "Installing Google Chrome"
+    chrome_deb=$(mktemp --suffix .deb)
+    curl -fsSL -o "$chrome_deb" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+      && sudo apt install -y "$chrome_deb"
+    rm -f "$chrome_deb"
+  fi
+  command -v google-chrome &> /dev/null && xdg-settings set default-web-browser google-chrome.desktop
 
   # Telegram and Discord from snap. Their official tarballs update themselves
   # too, but Discord's Chromium sandbox needs an AppArmor profile on Ubuntu;
