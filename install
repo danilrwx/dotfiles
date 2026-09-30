@@ -208,6 +208,21 @@ if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAN
     gsettings set org.gnome.desktop.interface icon-theme Yaru-blue-dark
     gsettings set org.gnome.Ptyxis use-system-font false
     gsettings set org.gnome.Ptyxis font-name 'Iosevka Nerd Font 12'
+    # the palette lives in the default profile, keyed by a UUID Ptyxis makes on its first start; before
+    # that there is none, so register one of our own, which Ptyxis then takes as its default
+    ptyxis_profile=$(gsettings get org.gnome.Ptyxis default-profile-uuid | tr -d "'")
+    if [ -z "$ptyxis_profile" ]; then
+      ptyxis_profile=$(tr -d - < /proc/sys/kernel/random/uuid)
+      gsettings set org.gnome.Ptyxis profile-uuids "['$ptyxis_profile']"
+      gsettings set org.gnome.Ptyxis default-profile-uuid "$ptyxis_profile"
+    fi
+    gsettings set "org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/$ptyxis_profile/" palette 'Dark Pastel'
+    # tabs on Ctrl+Shift+1..0 (the shifted digits of a US layout)
+    ptyxis_tab=1
+    for key in exclam at numbersign dollar percent asciicircum ampersand asterisk parenleft parenright; do
+      gsettings set org.gnome.Ptyxis.Shortcuts "focus-tab-$ptyxis_tab" "<Control>$key"
+      ptyxis_tab=$((ptyxis_tab + 1))
+    done
   fi
 fi
 
