@@ -352,6 +352,33 @@ if [[ "$OS" == "Linux" ]]; then
     log "Applying the HONOR MagicBook fixes"
     sudo SKIP_HEADSET=1 SKIP_DSC=1 "$HONOR/apply_patch.sh" \
       || log "HONOR fixes reported problems, see above. Continue installation."
+
+    # Touchpad scroll speed: GNOME has no setting for it. wayland-scroll-factor scales libinput's
+    # continuous scroll inside gnome-shell (an LD_PRELOAD in environment.d that loads only there and
+    # drops itself from child processes); the mouse wheel stays as is. Pinned release, checked
+    # against its SHA256SUMS. Takes effect at the next login; tune with `wsf set` or wsf-gui
+    WSF_VERSION=1.0.0
+    if ! dpkg -s wayland-scroll-factor &> /dev/null; then
+      log "Installing wayland-scroll-factor $WSF_VERSION"
+      wsf_url=https://github.com/daniel-g-carrasco/wayland-scroll-factor/releases/download/v$WSF_VERSION
+      wsf_deb=wayland-scroll-factor_${WSF_VERSION}-1_amd64.deb
+      wsf_tmp=$(mktemp -d)
+      if curl -fsSL -o "$wsf_tmp/$wsf_deb" "$wsf_url/$wsf_deb" \
+        && curl -fsSL -o "$wsf_tmp/SHA256SUMS" "$wsf_url/SHA256SUMS" \
+        && (cd "$wsf_tmp" && grep "  $wsf_deb\$" SHA256SUMS | sha256sum -c --quiet); then
+        sudo apt install -y "$wsf_tmp/$wsf_deb"
+      else
+        log "wayland-scroll-factor download failed. Continue installation."
+      fi
+      rm -rf "$wsf_tmp"
+    fi
+    if command -v wsf &> /dev/null; then
+      # upstream's suggested factor on first install only, a later `wsf set` is kept
+      [ -f "$HOME/.config/wayland-scroll-factor/config" ] || wsf set 0.35
+      wsf enable
+      # the per-app scroll extension would scale on top of it
+      gnome-extensions disable touchpad-speed-control@ritesh 2> /dev/null || true
+    fi
   fi
 
   [ "$DESKTOP" == 1 ] || exit 0
