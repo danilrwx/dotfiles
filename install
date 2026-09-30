@@ -116,11 +116,11 @@ if [ "$DESKTOP" == 1 ]; then
   # Terminal: Ubuntu's Ptyxis. tmux (copy-command) and nvim copy through wl-copy
   log "Installing wl-clipboard"; pkg wl-clipboard
 
-  # ssh: the plain ssh-agent with a GTK4 askpass (bin/askpass on zenity), so AddKeysToAgent confirm shows
-  # a dialog per key use. GNOME's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh
+  # ssh: the plain ssh-agent with an askpass on the GNOME Shell system prompt (bin/askpass on gcr 4), so
+  # AddKeysToAgent confirm shows a modal dialog per key use. GNOME's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh
   # never loads the key file itself and the confirm constraint never applies (its gcr4-ssh-askpass has no
   # confirm mode either); mask it and let ssh-agent.socket own SSH_AUTH_SOCK
-  log "Setting up ssh-agent with the GTK4 askpass"; pkg zenity
+  log "Setting up ssh-agent with the GNOME Shell askpass"; pkg python3-gi gir1.2-gcr-4
   mkdir -p "$HOME/.config/systemd/user/ssh-agent.service.d"
   link config/systemd/ssh-agent-askpass.conf "$HOME/.config/systemd/user/ssh-agent.service.d/askpass.conf"
   if command -v systemctl &> /dev/null && [ -n "${XDG_RUNTIME_DIR:-}" ]; then
@@ -153,7 +153,7 @@ EOT
   rm -f "$ssh_tmp"
 
   # the old gnome-ssh-askpass grabbed the keyboard and needed a .desktop file for GNOME to remember the
-  # "inhibit shortcuts" answer; zenity grabs nothing, so drop that file
+  # "inhibit shortcuts" answer; the shell's system prompt needs none, so drop that file
   rm -f "$HOME/.local/share/applications/ssh-askpass.desktop"
 
   # inside a VM: guest agents so the display follows the viewer window size

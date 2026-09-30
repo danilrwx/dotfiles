@@ -53,7 +53,7 @@ for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
 - virt-manager (and the `libvirt` group), Telegram and Discord from snap, Steam
   from multiverse's `steam-installer`, the VM guest agents inside a VM
 - a dark Yaru theme with the blue accent in the stock Ubuntu session
-- ssh through the plain `ssh-agent` with a GTK4 askpass (`bin/askpass`, zenity) instead of gcr's agent,
+- ssh through the plain `ssh-agent` with an askpass on the GNOME Shell system prompt (`bin/askpass`, gcr 4) instead of gcr's agent,
   pinned by a `Match` block appended to `~/.ssh/config`
 
 ## Layout
@@ -63,6 +63,6 @@ for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
 | `install` | host setup (symlinks, packages, go tools); `bin/dotfiles-update` is the same script on PATH |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
-| `bin/askpass` | ssh-askpass on zenity (GTK4): passphrase, per-use confirm, security-key notice |
+| `bin/askpass` | ssh-askpass on the GNOME Shell system prompt (modal, dims the screen): passphrase, per-use confirm, security-key notice |
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
 | `bin/sway-fnkeys` | HONOR Fn-key actions and OSD under sway |
