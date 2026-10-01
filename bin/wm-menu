@@ -1,7 +1,36 @@
 #!/bin/sh
 # dmenu for i3, in the old dmenu colours.
-#   wm-menu             run a program; the session PATH lacks the user dirs, so they are added first
+#   wm-menu             launch an app: the ones with a .desktop entry, by name, through gtk-launch (which
+#                       opens st for the terminal ones); a name not in the list runs as a command
 #   wm-menu pick PROMPT choose a line of stdin, print it
 export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
-[ "${1:-}" = pick ] && exec dmenu -p "$2" -fn 'Iosevka-11' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'
-exec dmenu_run -fn 'Iosevka-11' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'
+dmenu() { command dmenu -fn 'Iosevka-11' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000' "$@"; }
+[ "${1:-}" = pick ] && { dmenu -p "$2"; exit; }
+
+# apps: "NAME<tab>ID" per entry an app launcher shows, an ID in ~/.local/share/applications hiding the
+# system one of that name (as Steam's own steam.desktop does the installer's), Hidden and NoDisplay left out
+apps() {
+	dirs=''
+	for dir in "$HOME/.local/share/applications" /usr/local/share/applications /usr/share/applications; do
+		[ -d "$dir" ] && dirs="$dirs $dir"
+	done
+	# shellcheck disable=SC2086 # the dirs, none with a space, word by word
+	find $dirs -maxdepth 1 -name '*.desktop' -print0 | xargs -0 awk '
+		function emit() { if (!(id in seen)) { seen[id] = 1; if (app && !skip && name != "") print name "\t" id } }
+		FNR == 1 { if (file) emit(); file = FILENAME; id = file; sub(/.*\//, "", id); sec = ""; name = ""; skip = 0; app = 0 }
+		/^\[/ { sec = $0; next }
+		sec == "[Desktop Entry]" && /^Name=/ && name == "" { name = substr($0, 6) }
+		sec == "[Desktop Entry]" && /^Type=Application/ { app = 1 }
+		sec == "[Desktop Entry]" && /^(Hidden|NoDisplay)=true/ { skip = 1 }
+		END { if (file) emit() }
+	' | sort -f
+}
+
+list=$(apps)
+choice=$(printf '%s\n' "$list" | cut -f1 | dmenu) || exit 0
+id=$(printf '%s\n' "$list" | awk -F '\t' -v c="$choice" '$1 == c { print $2; exit }')
+if [ -n "$id" ]; then
+	exec gtk-launch "${id%.desktop}"
+else
+	exec sh -c "$choice"
+fi

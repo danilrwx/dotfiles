@@ -1,0 +1,4 @@
+# dotfiles: yad-icon-browser.desktop hidden from app menus (bin/wm-menu): a tool, not an app to launch. Linked to
+# ~/.local/share/applications by install, where it stands in for the system one
+[Desktop Entry]
+Hidden=true

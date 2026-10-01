@@ -197,6 +197,8 @@ desktop_session() {
   for g in gtk-3.0 gtk-4.0; do link "config/$g/settings.ini" "$HOME/.config/$g/settings.ini"; done
   # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE, GDK_SCALE), and .profile the session
   for e in config/environment.d/*.conf; do link "$e" "$HOME/.config/environment.d/${e##*/}"; done
+  # the system's app entries that are tools, hidden from bin/wm-menu's list
+  for a in config/applications/*.desktop; do link "$a" "$HOME/.local/share/applications/${a##*/}"; done
 
   # st, the terminal, my own build (github.com/danilrwx/st, patched, config.def.h as config) into
   # /usr/local; a rerun pulls and rebuilds
