@@ -246,6 +246,8 @@ desktop_apps() {
       | gunzip > "$mihomo.new" && chmod +x "$mihomo.new" && mv "$mihomo.new" "$mihomo"
   fi
   getcap "$mihomo" | grep -q cap_net_admin || sudo setcap cap_net_admin,cap_net_bind_service+ep "$mihomo"
+  # its TUN sets and reverts the Meta link's DNS in systemd-resolved, without a password prompt each time
+  put /etc/polkit-1/rules.d/50-resolved-links.rules
   link config/systemd/mihomo.service "$HOME/.config/systemd/user/mihomo.service"
   user_systemctl daemon-reload
 

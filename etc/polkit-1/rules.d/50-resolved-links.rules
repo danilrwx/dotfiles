@@ -1,0 +1,19 @@
+// dotfiles: the per-link DNS settings of systemd-resolved without a password, for a sudo-group user at
+// the machine (an active local session). mihomo in bin/vpn's TUN mode runs as that user and sets its Meta
+// link's DNS on start and reverts it on stop, which polkit would otherwise ask the password for each time.
+polkit.addRule(function(action, subject) {
+    var link = [
+        "org.freedesktop.resolve1.set-dns-servers",
+        "org.freedesktop.resolve1.set-domains",
+        "org.freedesktop.resolve1.set-default-route",
+        "org.freedesktop.resolve1.set-llmnr",
+        "org.freedesktop.resolve1.set-mdns",
+        "org.freedesktop.resolve1.set-dnssec",
+        "org.freedesktop.resolve1.set-dns-over-tls",
+        "org.freedesktop.resolve1.set-dnssec-negative-trust-anchors",
+        "org.freedesktop.resolve1.revert"
+    ];
+    if (link.indexOf(action.id) >= 0 && subject.local && subject.active && subject.isInGroup("sudo")) {
+        return polkit.Result.YES;
+    }
+});
