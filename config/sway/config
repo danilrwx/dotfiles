@@ -20,7 +20,7 @@ set $term kitty --single-instance
 set $menu $HOME/dotfiles/bin/wm-menu
 set $lock swaylock -f -c 000000
 
-font pango:Iosevka NF 12
+font pango:Iosevka 12
 
 # input ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 input type:keyboard {

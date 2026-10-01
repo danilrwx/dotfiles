@@ -246,25 +246,18 @@ EOT
     sudo usermod -aG libvirt $USER
   fi
 
-  # Fonts: Iosevka for kitty, st, the bars and the menus, Apple's emoji
-  if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
-    log "Downloading Iosevka nerd font"
-    mkdir -p $HOME/.local/share/fonts
-    # only IosevkaNerdFont-* ("Iosevka NF"); the zip also carries the Mono and Propo families, 700 MB
-    # nothing uses
+  # Fonts: Iosevka from the archive for kitty, st, the bars and the menus; the Nerd Font icons as their own
+  # single-width Symbols Nerd Font Mono, which fontconfig falls back to and dwm lists after Iosevka; Apple's
+  # emoji. The patched Iosevka Nerd Fonts from before go, their 700 MB zip with them
+  log "Installing Iosevka"; pkg fonts-iosevka
+  mkdir -p $HOME/.local/share/fonts
+  rm -f $HOME/.local/share/fonts/IosevkaNerdFont*.ttf
+  if [ ! -f $HOME/.local/share/fonts/SymbolsNerdFontMono-Regular.ttf ]; then
+    log "Downloading Symbols Nerd Font Mono"
     font_tmp=$(mktemp -d)
-    curl -fsSL -o "$font_tmp/Iosevka.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip \
-      && unzip -o -q "$font_tmp/Iosevka.zip" 'IosevkaNerdFont-*' -d $HOME/.local/share/fonts
-    rm -rf "$font_tmp"
-    fc-cache -f
-  fi
-  # "Iosevka NFM", the single-width icon family my dwm and st ask for: the four plain styles only
-  if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFontMono-Regular.ttf ]; then
-    log "Downloading Iosevka nerd font mono"
-    font_tmp=$(mktemp -d)
-    curl -fsSL -o "$font_tmp/Iosevka.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip \
-      && unzip -o -q "$font_tmp/Iosevka.zip" 'IosevkaNerdFontMono-Regular.ttf' 'IosevkaNerdFontMono-Bold.ttf' \
-        'IosevkaNerdFontMono-Italic.ttf' 'IosevkaNerdFontMono-BoldItalic.ttf' -d $HOME/.local/share/fonts
+    curl -fsSL -o "$font_tmp/symbols.zip" \
+      https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/NerdFontsSymbolsOnly.zip \
+      && unzip -o -q "$font_tmp/symbols.zip" 'SymbolsNerdFontMono-Regular.ttf' -d $HOME/.local/share/fonts
     rm -rf "$font_tmp"
     fc-cache -f
   fi

@@ -21,7 +21,7 @@ set $term st
 set $menu $HOME/dotfiles/bin/wm-menu
 set $lock i3lock -c 000000
 
-font pango:Iosevka NF 12
+font pango:Iosevka 12
 
 # autostart ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # once per session: keyboard, Xresources, background, notifications, polkit, idle/lock

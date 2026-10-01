@@ -1,5 +1,5 @@
 # mako, ported from the old dunstrc: white cards, black text, thin blue frame
-font=Iosevka NF 14
+font=Iosevka 14
 background-color=#ffffff
 text-color=#000000
 border-color=#83a598

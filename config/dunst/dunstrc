@@ -1,7 +1,7 @@
 # dunst under i3, the X11 twin of config/mako: white cards, black text, thin blue frame, top right.
 # bin/wm-fnkeys sends volume/brightness with a value hint, drawn as the progress bar.
 [global]
-    font = Iosevka NF 14
+    font = Iosevka 14
     format = "<b>%s</b>\n%b"
     width = 300
     origin = top-right

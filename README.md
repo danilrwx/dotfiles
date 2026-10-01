@@ -58,7 +58,7 @@ once a revision has been applied.
 - greetd with tuigreet as the login, offering sway, i3 and dwm and remembering the pick
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
   the wire; `$mod+x` picks impala or bluetui (Wi-Fi, Bluetooth), pavucontrol or the power profile
-- the Iosevka Nerd Font and Apple Color Emoji
+- Iosevka (fonts-iosevka), Symbols Nerd Font Mono and Apple Color Emoji
 - ssh through the plain `ssh-agent` with OpenSSH's GTK3 askpass
   (`ssh-askpass-gnome`, per-use confirm too) instead of gcr's agent
 - Google Chrome from Google's .deb (their apt repo comes with it), set as the default
