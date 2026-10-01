@@ -8,12 +8,13 @@ export LC_NUMERIC=C
 # Icons: Nerd Font glyphs (Symbols Nerd Font Mono) in the text's color, not emoji, which draw at their own
 # size and colors. WM_STATUS_ICONS=nerd (bin/dwm-session): plain glyphs, dwm sizes them by its font list.
 # WM_STATUS_ICONS=pango (config/i3/config): i3bar's JSON protocol with pango markup, each glyph a size
-# smaller than the text, as in dwm. Unset: the emoji.
+# smaller than the text, as in dwm. WM_STATUS_ICONS=markup (config/awesome/rc.lua): the same spans as plain
+# lines, for a pango textbox. Unset: the emoji.
 glyph() {
-  if [ "$WM_STATUS_ICONS" == pango ]; then printf "<span font='Symbols Nerd Font Mono 9'>%s</span>" "$1"
+  if [ "$WM_STATUS_ICONS" == pango ] || [ "$WM_STATUS_ICONS" == markup ]; then printf "<span font='Symbols Nerd Font Mono 9'>%s</span>" "$1"
   else printf '%s' "$1"; fi
 }
-if [ "$WM_STATUS_ICONS" == nerd ] || [ "$WM_STATUS_ICONS" == pango ]; then
+if [ "$WM_STATUS_ICONS" == nerd ] || [ "$WM_STATUS_ICONS" == pango ] || [ "$WM_STATUS_ICONS" == markup ]; then
   I_MEM="$(glyph $'\U000f035b') " I_VOL="$(glyph $'\U000f057e') " I_MUTE="$(glyph $'\U000f075f') "
   I_MIC="$(glyph $'\U000f036c') " I_MICOFF="$(glyph $'\U000f036d') " I_BRI="$(glyph $'\U000f00e0') "
   I_RU="$(glyph $'\U000f030c') " I_US="$(glyph $'\U000f030c') "
