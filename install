@@ -183,6 +183,11 @@ Section "InputClass"
     Option "ScrollPixelDistance" "50"
 EndSection
 EOT
+  # the layouts and Ctrl+Space between them for every keyboard X adds later as well: a hotplugged one (the
+  # headset's AVRCP buttons register as a keyboard) gets /etc/default/keyboard's options through udev and
+  # resets the keymap, bin/x-autostart's setxkbmap with it
+  sudo sed -i -e 's/^XKBLAYOUT=.*/XKBLAYOUT="us,ru"/' -e 's/^XKBVARIANT=.*/XKBVARIANT=","/' \
+    -e 's/^XKBOPTIONS=.*/XKBOPTIONS="grp:ctrl_space_toggle,grp_led:scroll"/' /etc/default/keyboard
 
   # st, the terminal, my own build (github.com/danilrwx/st, patched, config.def.h as config) into
   # /usr/local. A rerun pulls and rebuilds
