@@ -237,6 +237,18 @@ desktop_apps() {
     fi
   done
 
+  # mihomo, the VLESS client behind bin/vpn: the static build, not in the archive, with the capability its
+  # TUN mode needs to route the system's traffic, so it runs as a --user service (config/systemd/mihomo.service)
+  local mihomo=$HOME/.local/bin/mihomo ver=v1.19.32
+  if [ "$("$mihomo" -v 2>/dev/null | awk '{print $3}')" != "$ver" ]; then
+    log "Installing mihomo $ver"
+    curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/$ver/mihomo-linux-amd64-$ver.gz" \
+      | gunzip > "$mihomo.new" && chmod +x "$mihomo.new" && mv "$mihomo.new" "$mihomo"
+  fi
+  getcap "$mihomo" | grep -q cap_net_admin || sudo setcap cap_net_admin,cap_net_bind_service+ep "$mihomo"
+  link config/systemd/mihomo.service "$HOME/.config/systemd/user/mihomo.service"
+  user_systemctl daemon-reload
+
   join_group libvirt   # virt-manager (DESKTOP_PKGS)
 
   # Google Chrome from Google's .deb, which adds their apt repo, so updates come with apt upgrade; amd64 only

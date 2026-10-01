@@ -66,6 +66,18 @@ datef() {
   date +'%d/%m/%Y %H:%M'
 }
 
+# vpn: bin/vpn's state while on, nothing while off: 🛡️ TUN or 🔀 the system proxy, the profile, and
+# "global" in that mode. The profile's name escaped for the markup and the JSON line: a subscription's
+# names carry anything
+vpn() {
+  local how mode profile
+  read -r how mode profile < <("$HOME/dotfiles/bin/vpn" status)
+  [ "$how" = off ] && return
+  profile=$(printf %s "${profile:0:16}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/["\\]//g')
+  [ "$mode" = global ] && profile+=" global"
+  if [ "$how" = tun ]; then echo -e "$(glyph 🛡️)$profile$(del)"; else echo -e "$(glyph 🔀)$profile$(del)"; fi
+}
+
 mem() {
   echo -e "$I_MEM$(free -h | awk '/Mem/{print $3}')"
 }
@@ -81,7 +93,7 @@ keyboard() {
 echo '{"version":1}'
 echo '['
 while true; do
-  line="$(mem)$(del)$(vol)$(del)$(mic)$(bat 0)$(bat 1)$(bri)$(del)$(keyboard)$(del)$(datef)"
+  line="$(vpn)$(mem)$(del)$(vol)$(del)$(mic)$(bat 0)$(bat 1)$(bri)$(del)$(keyboard)$(del)$(datef)"
   printf '[{"full_text":"%s","markup":"pango"}],\n' "$line"
   sleep 1
 done

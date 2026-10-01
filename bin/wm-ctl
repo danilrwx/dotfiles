@@ -3,7 +3,8 @@
 # and Bluetooth are impala and bluetui in a floating st of class wm-ctl (for_window rule in
 # config/i3/config); output, input and power are a second pick, the current one first: PipeWire's sinks or
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between
-# headphones (A2DP, the good sound, no mic) and handsfree (HFP, with the mic).
+# headphones (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vpn drives bin/vpn: on through
+# TUN or as the system proxy, off, the rule or global mode, the profile.
 menu="$HOME/dotfiles/bin/wm-menu"
 # term TITLE CMD: st with class wm-ctl
 term() { exec st -c wm-ctl -t "$1" -e "$2"; }
@@ -57,7 +58,36 @@ headset() {
 	[ -n "$to" ] || { notify-send -a fnkeys -r 9912 -t 1500 "Headset" "$name has no $mode mode"; exit 0; }
 	wpctl set-profile "$id" "$to" && notify-send -a fnkeys -r 9912 -t 1500 "Headset" "$name: $mode"
 }
-choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\npower\n' | "$menu" pick ctl) || exit 0
+# vpn: the picks that change the state, bin/vpn's status as the prompt
+vpn() {
+	vpn=$HOME/dotfiles/bin/vpn
+	# off, or: tun|proxy rule|global PROFILE, the profile's name as it is, spaces and all
+	read -r how mode profile <<-EOF
+	$("$vpn" status)
+	EOF
+	if [ "$how" = off ]; then
+		pick=$(printf 'tun\nproxy\n' | "$menu" pick "vpn off") || exit 0
+	else
+		other=tun; [ "$how" = tun ] && other=proxy
+		flip=global; [ "$mode" = global ] && flip=rule
+		pick=$(printf 'profile\n%s\n%s\noff\n' "$flip" "$other" | "$menu" pick "vpn $how $mode $profile") || exit 0
+	fi
+	case "$pick" in
+	tun|proxy)   set -- on "$pick" ;;
+	rule|global) set -- mode "$pick" ;;
+	off)         set -- off ;;
+	profile)
+		pick=$("$vpn" profile | "$menu" pick profile) || exit 0
+		set -- profile "$pick" ;;
+	esac
+	# the outcome as a card: the new state, or bin/vpn's error
+	if err=$("$vpn" "$@" 2>&1); then
+		notify-send -a fnkeys -r 9912 -t 1500 "VPN" "$("$vpn" status)"
+	else
+		notify-send -a fnkeys -r 9912 -u critical "VPN" "$err"
+	fi
+}
+choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvpn\npower\n' | "$menu" pick ctl) || exit 0
 case "$choice" in
 power)
 	cur=$(powerprofilesctl get)
@@ -68,4 +98,5 @@ bluetooth) term Bluetooth "$HOME/.local/bin/bluetui" ;;
 output)    sound Sink output ;;
 input)     sound Source input ;;
 headset)   headset ;;
+vpn)       vpn ;;
 esac

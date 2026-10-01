@@ -51,7 +51,10 @@ once a revision has been applied.
   session environment comes from `.profile`
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
   the wire; `$mod+x` picks impala or bluetui (Wi-Fi, Bluetooth), the sound output or input,
-  the Bluetooth headset mode (headphones or handsfree) or the power profile
+  the Bluetooth headset mode (headphones or handsfree), the VPN or the power profile
+- mihomo as the VLESS client (`bin/vpn`, `config/mihomo`, the servers and subscriptions in `private`):
+  through TUN or as the system proxy, the rule mode (Russia direct) or global, the profile; its state
+  in the bar
 - fonts from the archive alone: Iosevka for the text, Noto Color Emoji for the bar's icons and the rest
 - ssh through the plain `ssh-agent` with OpenSSH's GTK3 askpass
   (`ssh-askpass-gnome`, per-use confirm too) instead of gcr's agent
@@ -80,6 +83,7 @@ anything; it refuses to run before greetd is enabled.
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
 | `bin/wm-fnkeys` | volume/brightness as a dunst card, HONOR Fn-key actions and cards |
 | `bin/wm-ctl` | `$mod+x`: Wi-Fi (impala), Bluetooth (bluetui), sound output and input, headset mode, power profile |
+| `bin/vpn` | the VLESS client: mihomo on through TUN or as the system proxy, off, rule/global, the profile |
 | `bin/wm-status` | i3bar's status line: memory, volume, mic, battery, brightness, layout, date |
 | `bin/wm-menu` | dmenu in the old colours: the launcher, and `pick` for the menus |
 | `bin/clip` | stdin to the clipboard through xclip (tmux, nvim, screenshots) |
