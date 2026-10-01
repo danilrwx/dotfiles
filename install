@@ -166,7 +166,8 @@ EOT
   # dark GTK3 and GTK4 (config/gtk-*); GTK keeps bookmarks next to them, so the files are linked, not the dirs
   for g in gtk-3.0 gtk-4.0; do mkdir -p "$HOME/.config/$g" && link "config/$g/settings.ini" "$HOME/.config/$g/settings.ini"; done
   link .Xresources $HOME/.Xresources
-  # tap to click, natural scrolling, a slower pointer, and scrolling at the driver's slowest: 50 px of
+  # clicks only by pressing the pad down, no tap: one, two or three fingers for left, right and middle
+  # (clickfinger); natural scrolling, a slower pointer, and scrolling at the driver's slowest: 50 px of
   # finger travel per wheel step, against the default 15 (the most xf86-input-libinput accepts)
   sudo install -D -m 644 /dev/stdin /etc/X11/xorg.conf.d/30-touchpad.conf <<'EOT'
 # install: the touchpad under i3 and dwm
@@ -174,7 +175,7 @@ Section "InputClass"
     Identifier "touchpad"
     MatchIsTouchpad "on"
     Driver "libinput"
-    Option "Tapping" "on"
+    Option "Tapping" "off"
     Option "NaturalScrolling" "true"
     Option "ClickMethod" "clickfinger"
     Option "DisableWhileTyping" "true"
