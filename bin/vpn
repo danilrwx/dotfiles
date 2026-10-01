@@ -18,6 +18,10 @@ call() { curl -fsS --max-time 2 -X "$1" "$api$2" ${3:+-H 'Content-Type: applicat
 # so it is pointed at PROXY, the group the profile is picked in
 global_via_profile() { call PUT /proxies/GLOBAL '{"name":"PROXY"}'; }
 
+# reroute: close the open connections, which keep the way they were opened on (a browser holds and reuses
+# them), so the apps reconnect by the new mode, profile or TUN
+reroute() { call DELETE /connections; }
+
 # up: start the service and wait for its API, which the first start's geodata download can delay
 up() {
 	systemctl --user start mihomo.service || exit 1
@@ -56,8 +60,8 @@ on)
 			echo "sudo setcap cap_net_admin,cap_net_bind_service+ep ~/.local/bin/mihomo" >&2
 			exit 1
 		fi
-		system_proxy off ;;
-	proxy) up; call PATCH /configs '{"tun":{"enable":false}}' && system_proxy on ;;
+		system_proxy off; reroute ;;
+	proxy) up; call PATCH /configs '{"tun":{"enable":false}}' && system_proxy on && reroute ;;
 	*)     echo "usage: vpn on tun|proxy" >&2; exit 1 ;;
 	esac ;;
 off)
@@ -65,12 +69,12 @@ off)
 	systemctl --user stop mihomo.service ;;
 mode)
 	case "${2:-}" in
-	rule|global) global_via_profile && call PATCH /configs "{\"mode\":\"$2\"}" ;;
+	rule|global) global_via_profile && call PATCH /configs "{\"mode\":\"$2\"}" && reroute ;;
 	*) echo "usage: vpn mode rule|global" >&2; exit 1 ;;
 	esac ;;
 profile)
 	if [ -n "${2:-}" ]; then
-		call PUT /proxies/PROXY "$(jq -nc --arg n "$2" '{name: $n}')"
+		call PUT /proxies/PROXY "$(jq -nc --arg n "$2" '{name: $n}')" && reroute
 	else
 		call GET /proxies/PROXY | jq -r '.now as $now | ([$now] + (.all - [$now]))[]'
 	fi ;;
