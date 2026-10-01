@@ -7,9 +7,22 @@
 menu="$HOME/dotfiles/bin/wm-menu"
 # term TITLE CMD: st with class wm-ctl
 term() { exec st -c wm-ctl -t "$1" -e "$2"; }
-# devices Sinks|Sources: "ID<tab>NAME" per device of wpctl's Audio section, the default one first
+# unplugged: the ids of the sinks and sources whose every port the card reports as unplugged ("available":
+# "no"), the HDMI outputs with no display on them; a port ALSA cannot sense (speaker, mic) says "unknown"
+unplugged() {
+	pw-dump | jq -r '
+		(map(select(.type == "PipeWire:Interface:Device"))
+			| map({key: (.id | tostring), value: [.info.params.EnumRoute[]?]}) | from_entries) as $routes
+		| .[] | select(.type == "PipeWire:Interface:Node"
+			and ((.info.props["media.class"] // "") | test("^Audio/(Sink|Source)$")))
+		| .info.props["card.profile.device"] as $pd
+		| (($routes[.info.props["device.id"] | tostring] // []) | map(select(.devices | index($pd)))) as $r
+		| select(($r | length) > 0 and all($r[]; .available == "no")) | .id'
+}
+# devices Sinks|Sources: "ID<tab>NAME" per device of wpctl's Audio section, the default one first, the
+# unplugged ones left out unless the default
 devices() {
-	wpctl status | awk -v want="$1:" '
+	wpctl status | awk -v want="$1:" -v skip=" $(unplugged | tr '\n' ' ') " '
 		/^Audio/ { audio = 1 } /^Video/ { audio = 0 }
 		audio && index($0, want) { in_list = 1; next }
 		in_list && /^ │[[:space:]]*$/ { exit }
@@ -17,6 +30,7 @@ devices() {
 			line = $0; sub(/^ │[[:space:]]*/, "", line)
 			def = sub(/^\*[[:space:]]*/, "", line)
 			id = line; sub(/\..*/, "", id)
+			if (!def && index(skip, " " id " ")) next
 			name = line; sub(/^[0-9]+\.[[:space:]]*/, "", name); sub(/[[:space:]]*\[vol:.*$/, "", name)
 			print (def ? 0 : 1) "\t" id "\t" name
 		}' | sort -s -k1,1 | cut -f2-
