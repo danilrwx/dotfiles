@@ -90,7 +90,7 @@ if [ "$DESKTOP" == 1 ]; then
   # autoremove keeps them when the desktop metapackages go
   log "Installing the desktop base"
   pkg iwd bluez rfkill \
-    pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf sof-firmware \
+    pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed \
     fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower \
     udisks2 fwupd systemd-oomd accountsservice polkitd xwayland xdg-desktop-portal-gtk xdg-utils xdg-user-dirs \
     gnome-keyring libpam-gnome-keyring fonts-noto-color-emoji fonts-noto-cjk cups
