@@ -62,6 +62,7 @@ for c in k9s htop lazygit nvim; do
   link config/$c $HOME/.config/$c
 done
 link config/ghostty $HOME/.config/ghostty
+link config/xkb $HOME/.config/xkb
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
 # which also keeps those paths out of this public repo.
 if [ -f $HOME/dotfiles/private/install ]; then
@@ -183,6 +184,11 @@ if command -v gsettings &> /dev/null && [ -n "${WAYLAND_DISPLAY:-$DISPLAY}" ]; t
   gsettings set org.gnome.shell.keybindings show-screenshot-ui "['Print', '<Super><Shift>s']"
   # mic mute on Super+Shift+M, as in i3 (GNOME leaves it unbound)
   gsettings set org.gnome.settings-daemon.plugins.media-keys mic-mute "['<Super><Shift>m']"
+  # us + ru, with the Latin letter under Ctrl on ru (config/xkb, read by mutter from ~/.config/xkb), so
+  # Ctrl+C and friends work in GTK4, the shell and ghostty on the Russian layout. The option lays over
+  # group 2, hence the fixed order. X11 apps under Xwayland do not see it, xkbcomp reads no user dir
+  gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'ru')]"
+  gsettings set org.gnome.desktop.input-sources xkb-options "['grp_led:scroll', 'ructrl:latin']"
   if [ "$DESKTOP" == 1 ]; then
     gsettings set org.gnome.desktop.interface color-scheme prefer-dark
     gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark

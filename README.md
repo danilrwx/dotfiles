@@ -39,6 +39,10 @@ which is a no-op once a revision has been applied, and installs
 for the touchpad scroll speed (`wsf set`, active after the next login). From a running GNOME session
 it also sets two-finger click as right click on the touchpad and `Super+Shift+S`
 for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
+It also sets the `us` + `ru` input sources with the `ructrl:latin` option from
+`config/xkb` (linked to `~/.config/xkb`): on the Russian layout the letter keys give
+the Latin letter under Ctrl, so `Ctrl+C`, `Ctrl+A` and the rest work in GTK4 apps, the
+shell search and the terminal, which otherwise see `Ctrl+с` ([mutter#682](https://gitlab.gnome.org/GNOME/mutter/-/work_items/682)).
 
 `./install --desktop` adds:
 

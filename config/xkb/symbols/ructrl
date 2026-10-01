@@ -1,0 +1,42 @@
+// Letter keys of the Russian layout that give the Latin letter of the same key under Ctrl, so Ctrl+С is
+// Ctrl+C for every Wayland client: GTK4, Clutter (gnome-shell search) and ghostty match shortcuts by
+// keysym and do not fall back to the Latin layout, mutter#682. Laid over the stock `ru` group by the
+// ructrl:latin option (rules/evdev), since GNOME ignores layouts missing from the system evdev.xml.
+// Type CTRL_LATIN is in types/ructrl.
+default partial alphanumeric_keys
+xkb_symbols "latin" {
+
+    key <TLDE> { type[Group1] = "CTRL_LATIN", [ Cyrillic_io, Cyrillic_IO, grave, asciitilde ] };
+    key <AD01> { type[Group1] = "CTRL_LATIN", [ Cyrillic_shorti, Cyrillic_SHORTI, q, Q ] };
+    key <AD02> { type[Group1] = "CTRL_LATIN", [ Cyrillic_tse, Cyrillic_TSE, w, W ] };
+    key <AD03> { type[Group1] = "CTRL_LATIN", [ Cyrillic_u, Cyrillic_U, e, E ] };
+    key <AD04> { type[Group1] = "CTRL_LATIN", [ Cyrillic_ka, Cyrillic_KA, r, R ] };
+    key <AD05> { type[Group1] = "CTRL_LATIN", [ Cyrillic_ie, Cyrillic_IE, t, T ] };
+    key <AD06> { type[Group1] = "CTRL_LATIN", [ Cyrillic_en, Cyrillic_EN, y, Y ] };
+    key <AD07> { type[Group1] = "CTRL_LATIN", [ Cyrillic_ghe, Cyrillic_GHE, u, U ] };
+    key <AD08> { type[Group1] = "CTRL_LATIN", [ Cyrillic_sha, Cyrillic_SHA, i, I ] };
+    key <AD09> { type[Group1] = "CTRL_LATIN", [ Cyrillic_shcha, Cyrillic_SHCHA, o, O ] };
+    key <AD10> { type[Group1] = "CTRL_LATIN", [ Cyrillic_ze, Cyrillic_ZE, p, P ] };
+    key <AD11> { type[Group1] = "CTRL_LATIN", [ Cyrillic_ha, Cyrillic_HA, bracketleft, braceleft ] };
+    key <AD12> { type[Group1] = "CTRL_LATIN", [ Cyrillic_hardsign, Cyrillic_HARDSIGN, bracketright, braceright ] };
+    key <AC01> { type[Group1] = "CTRL_LATIN", [ Cyrillic_ef, Cyrillic_EF, a, A ] };
+    key <AC02> { type[Group1] = "CTRL_LATIN", [ Cyrillic_yeru, Cyrillic_YERU, s, S ] };
+    key <AC03> { type[Group1] = "CTRL_LATIN", [ Cyrillic_ve, Cyrillic_VE, d, D ] };
+    key <AC04> { type[Group1] = "CTRL_LATIN", [ Cyrillic_a, Cyrillic_A, f, F ] };
+    key <AC05> { type[Group1] = "CTRL_LATIN", [ Cyrillic_pe, Cyrillic_PE, g, G ] };
+    key <AC06> { type[Group1] = "CTRL_LATIN", [ Cyrillic_er, Cyrillic_ER, h, H ] };
+    key <AC07> { type[Group1] = "CTRL_LATIN", [ Cyrillic_o, Cyrillic_O, j, J ] };
+    key <AC08> { type[Group1] = "CTRL_LATIN", [ Cyrillic_el, Cyrillic_EL, k, K ] };
+    key <AC09> { type[Group1] = "CTRL_LATIN", [ Cyrillic_de, Cyrillic_DE, l, L ] };
+    key <AC10> { type[Group1] = "CTRL_LATIN", [ Cyrillic_zhe, Cyrillic_ZHE, semicolon, colon ] };
+    key <AC11> { type[Group1] = "CTRL_LATIN", [ Cyrillic_e, Cyrillic_E, apostrophe, quotedbl ] };
+    key <AB01> { type[Group1] = "CTRL_LATIN", [ Cyrillic_ya, Cyrillic_YA, z, Z ] };
+    key <AB02> { type[Group1] = "CTRL_LATIN", [ Cyrillic_che, Cyrillic_CHE, x, X ] };
+    key <AB03> { type[Group1] = "CTRL_LATIN", [ Cyrillic_es, Cyrillic_ES, c, C ] };
+    key <AB04> { type[Group1] = "CTRL_LATIN", [ Cyrillic_em, Cyrillic_EM, v, V ] };
+    key <AB05> { type[Group1] = "CTRL_LATIN", [ Cyrillic_i, Cyrillic_I, b, B ] };
+    key <AB06> { type[Group1] = "CTRL_LATIN", [ Cyrillic_te, Cyrillic_TE, n, N ] };
+    key <AB07> { type[Group1] = "CTRL_LATIN", [ Cyrillic_softsign, Cyrillic_SOFTSIGN, m, M ] };
+    key <AB08> { type[Group1] = "CTRL_LATIN", [ Cyrillic_be, Cyrillic_BE, comma, less ] };
+    key <AB09> { type[Group1] = "CTRL_LATIN", [ Cyrillic_yu, Cyrillic_YU, period, greater ] };
+};
