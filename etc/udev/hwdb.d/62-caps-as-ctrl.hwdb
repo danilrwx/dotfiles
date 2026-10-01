@@ -4,9 +4,13 @@
 # Caps Lock, so the OSD kept saying "caps" and games saw no Ctrl. `install`
 # copies this into /etc/udev/hwdb.d/.
 #
-# Internal keyboard of the HONOR MagicBook (AT scancode 3a is Caps Lock).
-evdev:atkbd:dmi:bvn*:bvr*:bd*:svnHONOR*:pn*
+# Any laptop's internal keyboard behind the i8042 controller (AT scancode 3a is Caps Lock on all of them).
+evdev:atkbd:*
  KEYBOARD_KEY_3a=leftctrl
+
+# Internal keyboards on I2C HID, as some newer laptops have (HID usage 0x70039 is Caps Lock).
+evdev:input:b0018v*p*
+ KEYBOARD_KEY_70039=leftctrl
 
 # Any USB keyboard (HID usage 0x70039 is Caps Lock).
 evdev:input:b0003v*p*
