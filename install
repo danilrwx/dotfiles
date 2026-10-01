@@ -287,6 +287,7 @@ EOT
   # without them, and Chrome, Telegram and the file dialogs wait on it; unmasked for a host an older
   # install masked them on
   link config/environment.d/no-at-bridge.conf "$HOME/.config/environment.d/no-at-bridge.conf"
+  link config/environment.d/gdk-scale.conf "$HOME/.config/environment.d/gdk-scale.conf"
   if [ -n "${XDG_RUNTIME_DIR:-}" ]; then
     systemctl --user mask --now filter-chain.service at-spi-dbus-bus.service
     systemctl --user unmask xdg-document-portal.service xdg-permission-store.service
