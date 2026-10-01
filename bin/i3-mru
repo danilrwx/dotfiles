@@ -1,0 +1,43 @@
+#!/bin/bash
+# Alt+Tab for i3, which keeps no focus history of its own. Over i3's IPC (i3-msg, jq):
+#   i3-mru daemon  follow the focus events and keep the windows most recent first, one con_id a line in
+#                  $XDG_RUNTIME_DIR/i3-mru (config/i3/config starts it once a session)
+#   i3-mru last    Alt+Tab: back to the window focused before this one, on whatever workspace, the closed
+#                  ones skipped; pressed again it comes back
+#   i3-mru pick    Alt+Shift+Tab: every window in a dmenu pick (bin/wm-menu), the recent ones first
+mru="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/i3-mru"
+[ -f "$mru" ] || : > "$mru"
+
+# windows: "ID<tab>CLASS  TITLE" per window i3 manages, in tree order, its own bar left out
+windows() {
+	i3-msg -t get_tree | jq -r '.. | objects | select(.window != null and .type == "con" and .window_properties.class != "i3bar")
+		| "\(.id)\t\(.window_properties.class // "?")  \(.name // "")"'
+}
+
+# recent: the windows as windows() prints them, the MRU file's order first, the rest after
+recent() {
+	awk -F '\t' 'NR == FNR { rank[$1] = FNR; next } { print (($1 in rank) ? rank[$1] : 100000 + FNR) "\t" $0 }' \
+		"$mru" <(windows) | sort -n -k1,1 | cut -f2-
+}
+
+case "${1:-}" in
+daemon)
+	: > "$mru"
+	i3-msg -t subscribe -m '["window"]' \
+		| jq --unbuffered -r 'select(.change == "focus") | .container.id' \
+		| while read -r id; do
+			{ echo "$id"; grep -vx "$id" "$mru" | head -n 49; } > "$mru.new" && mv "$mru.new" "$mru"
+		done ;;
+last)
+	# the second most recent window that still exists
+	id=$(recent | sed -n 2p | cut -f1)
+	[ -n "$id" ] && i3-msg -q "[con_id=$id] focus" ;;
+pick)
+	list=$(recent)
+	choice=$(printf '%s\n' "$list" | cut -f2- | "$HOME/dotfiles/bin/wm-menu" pick windows) || exit 0
+	id=$(printf '%s\n' "$list" | awk -F '\t' -v c="$choice" '$2 == c { print $1; exit }')
+	[ -n "$id" ] && i3-msg -q "[con_id=$id] focus" ;;
+*)
+	echo "usage: i3-mru daemon|last|pick" >&2
+	exit 1 ;;
+esac
