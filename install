@@ -163,6 +163,8 @@ EOT
     brightnessctl playerctl lxpolkit libnotify-bin jq
   link config/i3 $HOME/.config/i3
   link config/dunst $HOME/.config/dunst
+  # dark GTK3 and GTK4 (config/gtk-*); GTK keeps bookmarks next to them, so the files are linked, not the dirs
+  for g in gtk-3.0 gtk-4.0; do mkdir -p "$HOME/.config/$g" && link "config/$g/settings.ini" "$HOME/.config/$g/settings.ini"; done
   link .Xresources $HOME/.Xresources
   # tap to click, natural scrolling, a slower pointer
   sudo install -D -m 644 /dev/stdin /etc/X11/xorg.conf.d/30-touchpad.conf <<'EOT'
