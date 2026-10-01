@@ -47,7 +47,9 @@ on)
 		up; call PATCH /configs '{"tun":{"enable":true}}' || exit 1
 		# mihomo takes the patch even when the TUN device fails to come up, so check it did
 		if [ "$(call GET /configs | jq -r .tun.enable)" != true ]; then
-			echo "vpn: TUN did not come up; mihomo lacks cap_net_admin? (install sets it)" >&2
+			systemctl --user stop mihomo.service; system_proxy off   # back to off, not a half-on proxy
+			echo "vpn: TUN did not come up, so off. mihomo lacks cap_net_admin? Run:" >&2
+			echo "sudo setcap cap_net_admin,cap_net_bind_service+ep ~/.local/bin/mihomo" >&2
 			exit 1
 		fi
 		system_proxy off ;;
