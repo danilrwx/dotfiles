@@ -1,0 +1,21 @@
+# mako, ported from the old dunstrc: white cards, black text, thin blue frame
+font=Iosevka NF 14
+background-color=#ffffff
+text-color=#000000
+border-color=#83a598
+border-size=1
+padding=8
+width=300
+anchor=top-right
+margin=30,6,0,6
+default-timeout=20000
+ignore-timeout=0
+format=<b>%s</b>\n%b
+sort=-time
+max-visible=5
+
+[urgency=low]
+default-timeout=5000
+
+[urgency=critical]
+default-timeout=0

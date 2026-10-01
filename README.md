@@ -13,7 +13,9 @@ Personal dotfiles for Ubuntu.
 
 ```sh
 git clone https://github.com/danilrwx/dotfiles ~/dotfiles
-cd ~/dotfiles && ./install
+cd ~/dotfiles && ./install            # CLI tools only
+cd ~/dotfiles && ./install --desktop  # plus the sway desktop and GUI apps
+./debloat -n && ./debloat             # once, after --desktop: drop GNOME and snapd
 ```
 
 `./install` can be run from any directory and again at any time; it symlinks
@@ -33,36 +35,42 @@ hwdb rule (`config/hwdb`).
 
 On a HONOR MagicBook Pro 14 2026 (`ZQC-P`) it also clones
 [honor-magicbook-pro-14-2026-ubuntu](https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu)
-into `~/w` and runs its `apply_patch.sh` without the DSC fix,
-which is a no-op once a revision has been applied, and installs
-[wayland-scroll-factor](https://github.com/daniel-g-carrasco/wayland-scroll-factor)
-for the touchpad scroll speed (`wsf set`, active after the next login). From a running GNOME session
-it also sets two-finger click as right click on the touchpad and `Super+Shift+S`
-for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
-It also sets the `us` + `ru` input sources with the `ructrl:latin` option from
-`config/xkb` (linked to `~/.config/xkb`): on the Russian layout the letter keys give
-the Latin letter under Ctrl, so `Ctrl+C`, `Ctrl+A` and the rest work in GTK4 apps, the
-shell search and the terminal, which otherwise see `Ctrl+с` ([mutter#682](https://gitlab.gnome.org/GNOME/mutter/-/work_items/682)).
+into `~/w` and runs its `apply_patch.sh` without the DSC fix, which is a no-op
+once a revision has been applied.
 
 `./install --desktop` adds:
 
-- Ghostty as the default terminal (`config/ghostty`), with the Iosevka Nerd Font
-  and Apple Color Emoji; wl-clipboard for tmux and nvim copies
+- sway with the old i3 config ported to Wayland (`config/sway`): swaybar with
+  `bin/swaybar-status`, wmenu, mako (`config/mako`), swaylock/swayidle, wob as
+  the volume/brightness bar and the HONOR Fn keys through `bin/sway-fnkeys`,
+  grim+slurp screenshots, foot as the terminal (`config/foot`, one server)
+- greetd with tuigreet as the login, starting sway
+- the Iosevka Nerd Font and Apple Color Emoji
+- ssh through the plain `ssh-agent` with OpenSSH's GTK3 askpass
+  (`ssh-askpass-gnome`, per-use confirm too) instead of gcr's agent
 - Google Chrome from Google's .deb (their apt repo comes with it), set as the default
-  browser
-- virt-manager (and the `libvirt` group), Telegram and Discord from snap, Steam
-  from multiverse's `steam-installer`
-- the vanilla "GNOME" session with the stock Adwaita look and a dark theme
-  (pick it in the GDM gear once); the tray extension is added to the enabled ones
-- ssh through the plain `ssh-agent` with an askpass on the GNOME Shell system prompt (`bin/askpass`, gcr 4) instead of gcr's agent
+  browser; Telegram from its self-updating tarball in `~/.local/opt`, Discord from
+  its .deb (a rerun updates it), virt-manager (and the `libvirt` group), Steam from
+  multiverse's `steam-installer`
+
+`./debloat` then removes every snap and snapd (pinned out of apt), GNOME, GDM and
+the ~350 packages only the Ubuntu desktop metapackages pulled in, keeping what
+the sway session needs (network, Bluetooth, sound, fingerprint, power profiles,
+Xwayland, the keyring). `-n` shows the list without changing
+anything; it refuses to run before greetd is enabled.
 
 ## Layout
 
 | Path | What |
 |---|---|
-| `install` | host setup (symlinks, packages, go tools); `bin/dotfiles-update` is the same script on PATH |
+| `install` | host setup (symlinks, packages, go tools, the sway desktop); `bin/dotfiles-update` is the same script on PATH |
+| `debloat` | one-off: strip GNOME and snapd from a stock Ubuntu desktop |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
-| `bin/askpass` | ssh-askpass on the GNOME Shell system prompt (modal, dims the screen): passphrase, per-use confirm, security-key notice |
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
-| `bin/sway-fnkeys` | HONOR Fn-key actions and OSD under sway |
+| `bin/sway-fnkeys` | volume/brightness to wob, HONOR Fn-key actions and mako cards under sway |
+| `bin/sway-autostart` | sway session daemons: mako, foot server, wob, polkit agent, nm-applet, swayidle |
+| `bin/swaybar-status` | swaybar line: memory, volume, mic, battery, brightness, layout, date |
+| `bin/sway-menu` | wmenu-run with the dmenu colours and the full PATH |
+| `bin/screenshot-select` | region screenshot into the clipboard |
+| `bin/sys-notify`, `bin/cal-notify` | load/memory/battery and a calendar as a notification |

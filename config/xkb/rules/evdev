@@ -1,9 +1,0 @@
-// The stock rules plus one option, ructrl:latin: the Latin letter under Ctrl on the Russian layout.
-// It lays symbols/ructrl over group 2, so ru has to be the second input source (us, ru).
-! include %S/evdev
-
-! option = types
-  ructrl:latin = +ructrl
-
-! option = symbols
-  ructrl:latin = +ructrl(latin):2

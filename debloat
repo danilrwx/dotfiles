@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# ./debloat [-n]
+#   Strip a stock Ubuntu desktop down to what the sway session from `./install --desktop` runs on: every
+#   snap and snapd itself (blocked from coming back), then GNOME, GDM and the Ubuntu desktop extras.
+#   Run `./install --desktop` first, so greetd is there to log in with once GDM is gone.
+#   -n  dry run: show what apt would remove, change nothing
+set -euo pipefail
+
+log() { echo -e "\033[0;31m$1\033[0m"; }
+
+DRY=0
+case "${1:-}" in
+  -n|--dry-run) DRY=1 ;;
+  -h|--help) sed -n '/^# \.\/debloat/,/^[^#]/{s/^# \{0,1\}//p;}' "$0"; exit 0 ;;
+  "") ;;
+  *) log "Unknown option: $1"; exit 1 ;;
+esac
+
+[ -f /etc/os-release ] && . /etc/os-release
+[ "${ID:-}" == ubuntu ] || { log "Ubuntu only"; exit 1; }
+
+# Without a greeter, removing gdm3 leaves the next boot at a console login
+if [ "$DRY" == 0 ] && ! systemctl is-enabled -q greetd 2>/dev/null; then
+  log "greetd is not enabled: run ./install --desktop first"; exit 1
+fi
+
+# What goes. The metapackages and session first; `--autoremove` then takes the ~350 packages only they
+# pulled in (GNOME apps, tracker, evolution-data-server, ibus, cloud-init, sssd, apport, printer drivers...)
+REMOVE=(
+  ubuntu-desktop ubuntu-desktop-minimal ubuntu-session ubuntu-settings gdm3
+  gnome-shell gnome-shell-common gnome-session gnome-settings-daemon gnome-control-center
+  nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
+  xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
+  firefox snapd wayland-scroll-factor ghostty
+)
+# What stays although the metapackages above are what pulled it in: marked manual first, so
+# autoremove keeps it. Network, Bluetooth, sound, fingerprint (the HONOR fork's patched libfprint),
+# power profiles (bin/sway-fnkeys), firmware updates, Xwayland (Steam), the keyring Chrome keeps
+# passwords in, the askpass, the GTK portal for file dialogs, printing.
+KEEP=(
+  network-manager wpasupplicant bluez rfkill
+  pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf sof-firmware
+  fprintd libpam-fprintd libfprint-2-2 libfprint-2-tod1
+  power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower udisks2 fwupd
+  systemd-oomd accountsservice polkitd
+  xwayland xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
+  gnome-keyring libpam-gnome-keyring ssh-askpass-gnome
+  fonts-noto-color-emoji fonts-noto-cjk cups
+  software-properties-common ubuntu-drivers-common
+)
+
+installed() { dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null | grep -qx installed; }
+remove=(); for p in "${REMOVE[@]}"; do installed "$p" && remove+=("$p"); done
+keep=();   for p in "${KEEP[@]}";   do installed "$p" && keep+=("$p");   done
+
+if [ "$DRY" == 1 ]; then
+  log "Snaps that would go:"
+  command -v snap > /dev/null && snap list 2>/dev/null | awk 'NR > 1 {print "  " $1}'
+  log "apt would remove:"
+  # install keep + remove-, the way apt-mark manual followed by purge --autoremove resolves
+  LC_ALL=C apt-get -s --autoremove install "${keep[@]}" "${remove[@]/%/-}" | awk '/^Remv/ {print "  " $2}'
+  exit 0
+fi
+
+# Snaps ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# apps before the bases and snapd they run on; snapd's own purge then drops /snap and its state
+if command -v snap > /dev/null; then
+  log "Removing snaps"
+  # `snap list` notes: base for the bases, snapd for snapd; content snaps (gnome-46-2404, mesa-2404) only
+  # go once nothing uses them, hence the rounds
+  snaps() { snap list 2>/dev/null | awk -v base="$1" 'NR > 1 && $NF != "snapd" && ($NF == "base") == base {print $1}'; }
+  for _ in 1 2 3; do
+    for s in $(snaps 0); do sudo snap remove --purge "$s" || true; done
+  done
+  for s in $(snaps 1); do sudo snap remove --purge "$s" || true; done
+fi
+# Ubuntu's firefox and chromium debs are snap installers that pull snapd back in; pin it out
+log "Blocking snapd"
+sudo tee /etc/apt/preferences.d/no-snapd.pref > /dev/null <<'EOF'
+# debloat: no snapd, nor the transitional debs that install a snap
+Package: snapd
+Pin: release a=*
+Pin-Priority: -10
+EOF
+
+# GNOME ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+log "Keeping ${#keep[@]} packages the desktop metapackages pulled in"
+sudo apt-mark manual "${keep[@]}" > /dev/null
+log "Removing GNOME, GDM and snapd"
+sudo apt purge -y --autoremove "${remove[@]}"
+rm -rf "$HOME/snap"
+sudo rm -rf /snap /var/snap /var/lib/snapd /var/cache/snapd
+
+log "Done. Reboot: greetd takes over the login."

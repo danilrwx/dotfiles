@@ -1,0 +1,121 @@
+#!/bin/bash
+# swaybar status line, ported from the i3 baraction: memory, volume, mic,
+# battery, brightness, keyboard layout, date. Plain text protocol, once a second.
+
+# wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0
+export LC_NUMERIC=C
+
+vol() {
+  local icon="🔊" out
+  out=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)   # "Volume: 0.45 [MUTED]"
+  [[ $out == *MUTED* ]] && icon="🔇"
+  echo -e " $icon$(awk '{printf "%d%%", $2*100}' <<<"$out")"
+}
+
+mic() {
+  local icon="🎙️" out
+  out=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null)
+  [[ $out == *MUTED* ]] && icon="🙊"
+  echo -e " $icon$(awk '{printf "%d%%", $2*100}' <<<"$out")"
+}
+
+bat_icon() {
+  local bat="/sys/class/power_supply/BAT$1"
+  local vol="$(cat "$bat/capacity")"
+  local status="$(cat "$bat/status")"
+
+  local result="󰁹"
+  [[ $status = "Charging" ]] && result="󰂅"
+
+  if [[ $vol -lt 90 ]]; then
+    result="󰂂"
+    [[ $status = "Charging" ]] && result="󰂋"
+  fi
+
+  if [[ $vol -lt 80 ]]; then
+    result="󰂁"
+    [[ $status = "Charging" ]] && result="󰂊"
+  fi
+
+  if [[ $vol -lt 70 ]]; then
+    result="󰂀"
+    [[ $status = "Charging" ]] && result="󰢞"
+  fi
+
+  if [[ $vol -lt 60 ]]; then
+    result="󰁿"
+    [[ $status = "Charging" ]] && result="󰂉"
+  fi
+
+  if [[ $vol -lt 50 ]]; then
+    result="󰁾"
+    [[ $status = "Charging" ]] && result="󰢝"
+  fi
+
+  if [[ $vol -lt 40 ]]; then
+    result="󰁽"
+    [[ $status = "Charging" ]] && result="󰂈"
+  fi
+
+  if [[ $vol -lt 30 ]]; then
+    result="󰁼"
+    [[ $status = "Charging" ]] && result="󰂇"
+  fi
+
+  if [[ $vol -lt 20 ]]; then
+    result="󰁻"
+    [[ $status = "Charging" ]] && result="󰂆"
+  fi
+
+  if [[ $vol -lt 10 ]]; then
+    result="󰁺"
+    [[ $status = "Charging" ]] && result="󰢜"
+  fi
+
+  echo "$result"
+}
+
+bat() {
+  local n=$1
+  if [[ -d /sys/class/power_supply/BAT$n/ ]]; then
+    echo -e " $(del)$(bat_icon $n) $(cat /sys/class/power_supply/BAT$n/capacity)%"
+  fi
+}
+
+bri() {
+  if command -v brightnessctl &>/dev/null; then
+    local c m
+    c=$(brightnessctl get)
+    m=$(brightnessctl max)
+    echo -e "$(del) 🌞$(( c * 100 / m ))%"
+  fi
+}
+
+del() {
+  echo -e " "
+}
+
+datef() {
+  date +'%d/%m/%Y %H:%M'
+}
+
+mem() {
+  echo -e " 🧠$(free -h | awk '/Mem/{print $3}')"
+}
+
+keyboard() {
+  # sway reports the active layout name per keyboard; take the first keyboard that has one
+  local name icon="󰌌" text=US
+  name=$(swaymsg -t get_inputs -r 2>/dev/null \
+    | jq -r '[.[] | select(.type=="keyboard") | .xkb_active_layout_name | select(. != null)] | first // ""')
+  case "$name" in
+    Russian*) icon="🇷🇺"; text=RU ;;
+    *)        icon="🇺🇸"; text=US ;;
+  esac
+  echo -e " $icon$text"
+}
+
+while true; do
+  echo "$(mem)$(del)$(vol)$(del)$(mic)$(bat 0)$(bat 1)$(bri)$(del)$(keyboard)$(del)$(datef)"
+  sleep 1
+done
