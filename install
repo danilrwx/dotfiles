@@ -17,30 +17,16 @@ for arg in "$@"; do
   esac
 done
 
-# Everything below (git remote/submodules, `link`, the ghostty `os` link, config/hwdb) is relative to the repo, and
+# Everything below (git remote/submodules, `link`, config/hwdb) is relative to the repo, and
 # bin/dotfiles-update is this script on PATH, so it may be started from any directory
 cd "$HOME/dotfiles" || { log "No $HOME/dotfiles"; exit 1; }
 
-# Detect OS / package manager ───────────────────────────────────────────────────────────────────────────────────────────
-OS=$(uname -s)
-PM=brew
-if [ -f /etc/os-release ]; then
-  . /etc/os-release
-  [ "$ID" == ubuntu ] || { log "Unsupported distro: $ID"; exit 1; }
-  PM=apt
-  log "This is an Ubuntu $VERSION_ID system."
-fi
+# Ubuntu only ─────────────────────────────────────────────────────────────────────────────────────────────────────────
+[ -f /etc/os-release ] && . /etc/os-release
+[ "${ID:-}" == ubuntu ] || { log "Unsupported system: ${ID:-$(uname -s)}, Ubuntu only"; exit 1; }
+log "This is an Ubuntu $VERSION_ID system."
 
-if [ "$DESKTOP" == 1 ] && [ "$PM" != apt ]; then
-  log "--desktop is Ubuntu-only"; exit 1
-fi
-
-pkg() {
-  case "$PM" in
-    apt)  sudo apt install -y "$@" ;;
-    brew) brew install "$@" ;;
-  esac
-}
+pkg() { sudo apt install -y "$@"; }
 
 # SSH remote and private submodules (need an ssh key) ─────────────────────────────────────────────────────────────────
 if compgen -G "$HOME/.ssh/id_*" | grep -qv '\.pub$'; then
@@ -76,8 +62,6 @@ for c in k9s htop lazygit nvim; do
   link config/$c $HOME/.config/$c
 done
 link config/ghostty $HOME/.config/ghostty
-# ghostty reads `os` for the per-OS bits (config-file = ?os), point it at the right one
-if [[ "$OS" == "Darwin" ]]; then ln -snf os-macos config/ghostty/os; else ln -snf os-linux config/ghostty/os; fi
 # Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
 # which also keeps those paths out of this public repo.
 if [ -f $HOME/dotfiles/private/install ]; then
@@ -85,32 +69,18 @@ if [ -f $HOME/dotfiles/private/install ]; then
   "$HOME/dotfiles/private/install" || log "Failed to run private install. Continue installation."
 fi
 
-# Base CLI packages from apt / brew. Everything Go-based comes from
-# `go install` below so the versions match across OSes ─────────────────────────────────────────────────────────────────
-log "Installing base packages ($PM)"
-case "$PM" in
-  apt)
-    if [ "$RU_MIRROR" == 1 ]; then
-      log "Pinning apt repos to mirror.yandex.ru"
-      sudo sed -i -E 's|https?://([a-z]{2}\.)?archive\.ubuntu\.com/|https://mirror.yandex.ru/|' \
-        /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null
-    fi
-    sudo apt update -y
-    pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd \
-      golang-go neovim nodejs npm fd-find fastfetch
-    # Ubuntu ships fd as fdfind; nvim's :find and file picker look for fd
-    ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
-    ;;
-  brew)
-    if [ ! -x /opt/homebrew/bin/brew ]; then
-      log "Installing homebrew"
-      NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    fi
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-    # clangd comes with the Xcode CLT
-    pkg tmux gnupg pinentry-mac watch htop ugrep ripgrep fzf jq go kubectl neovim node fd fastfetch
-    ;;
-esac
+# Base CLI packages from apt. Everything Go-based comes from `go install` below ───────────────────────────────────────
+log "Installing base packages"
+if [ "$RU_MIRROR" == 1 ]; then
+  log "Pinning apt repos to mirror.yandex.ru"
+  sudo sed -i -E 's|https?://([a-z]{2}\.)?archive\.ubuntu\.com/|https://mirror.yandex.ru/|' \
+    /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null
+fi
+sudo apt update -y
+pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd \
+  golang-go neovim nodejs npm fd-find fastfetch
+# Ubuntu ships fd as fdfind; nvim's :find and file picker look for fd
+ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
 
 # GUI apps for any desktop (--desktop) ─────────────────────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
@@ -214,7 +184,7 @@ EOT
 fi
 
 # GNOME session settings: only from a running desktop session, gsettings needs dconf on the bus ────────────────────
-if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAND_DISPLAY:-$DISPLAY}" ]; then
+if command -v gsettings &> /dev/null && [ -n "${WAYLAND_DISPLAY:-$DISPLAY}" ]; then
   log "Applying GNOME settings"
   gsettings set org.gnome.desktop.peripherals.touchpad click-method fingers
   # screenshots without PrtSc, as in the old i3 config: Super+Shift+S opens the screenshot UI (area by
@@ -239,7 +209,7 @@ if [[ "$OS" == "Linux" ]] && command -v gsettings &> /dev/null && [ -n "${WAYLAN
 fi
 
 # kubectl: one static binary from dl.k8s.io ───────────────────────────────────────────────────────────────────────────
-if [[ "$OS" == "Linux" ]] && ! command -v kubectl &> /dev/null; then
+if ! command -v kubectl &> /dev/null; then
   log "Installing kubectl"
   arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
   # into a temp file and checked against the published sha256: a failed download must not leave an
@@ -256,15 +226,15 @@ fi
 
 # neovim: the config needs 0.11+ (vim.lsp.config); older Ubuntu LTS ship less ──────────────────────────────────────────
 nvim_ok() { command -v nvim &> /dev/null && nvim --version | head -1 | grep -qE 'v0\.(1[1-9]|[2-9][0-9])|v[1-9]'; }
-if [[ "$OS" == "Linux" ]] && ! nvim_ok; then
+if ! nvim_ok; then
   log "Installing neovim from github"
   nvim_arch=$(uname -m | sed 's/aarch64/arm64/')
   curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${nvim_arch}.tar.gz" \
     | sudo tar -xzf - -C /usr/local --strip-components=1
 fi
 
-# Go-based CLIs and dev tools into ~/go/bin: same modules, same versions on
-# every OS; fetched through proxy.golang.org, no GitHub involved ─────────────────────────────────────────────────────
+# Go-based CLIs and dev tools into ~/go/bin, newer than the archive's; fetched through
+# proxy.golang.org, no GitHub involved ─────────────────────────────────────────────────────
 export PATH="$HOME/go/bin:$HOME/.local/bin:$PATH"
 log "Installing go tools"
 for mod in \
@@ -314,111 +284,106 @@ if ! command -v claude &> /dev/null; then
   curl -fsSL https://claude.ai/install.sh | bash
 fi
 
-# Use zsh as the login shell (macOS already defaults to it; install + chsh on
-# Linux) ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-if [[ "$OS" == "Linux" ]]; then
-  zsh_bin="$(command -v zsh || true)"
-  # passwd, not $SHELL: $SHELL stays stale until the next login, so chsh would ask on every run
-  if [ -n "$zsh_bin" ] && [ "$(getent passwd "$USER" | cut -d: -f7)" != "$zsh_bin" ]; then
-    grep -qxF "$zsh_bin" /etc/shells || echo "$zsh_bin" | sudo tee -a /etc/shells
-    log "Setting zsh as default shell"
-    chsh -s "$zsh_bin"
+# Use zsh as the login shell ──────────────────────────────────────────────────────────────────────────────────────────
+zsh_bin="$(command -v zsh || true)"
+# passwd, not $SHELL: $SHELL stays stale until the next login, so chsh would ask on every run
+if [ -n "$zsh_bin" ] && [ "$(getent passwd "$USER" | cut -d: -f7)" != "$zsh_bin" ]; then
+  grep -qxF "$zsh_bin" /etc/shells || echo "$zsh_bin" | sudo tee -a /etc/shells
+  log "Setting zsh as default shell"
+  chsh -s "$zsh_bin"
+fi
+
+# Docker, HONOR MagicBook fixes; then (--desktop only) libvirt group and fonts ────────────────────────────────────────
+if [ ! -f /usr/bin/docker ]; then
+  log "Installing docker"
+  curl -fsSL https://get.docker.com | bash
+  log "Enabling docker"
+  sudo systemctl enable --now docker.socket
+fi
+
+# id -nG USER reads the group db; bare `groups` is this process, stale until relogin
+if ! id -nG "$USER" | grep -qw docker; then
+  log "Adding user to docker group"
+  sudo usermod -aG docker $USER
+fi
+
+# Caps Lock as Left Ctrl at the evdev level (config/hwdb), so xkb, GNOME and games reading raw
+# scancodes all agree; replaces the old caps:ctrl_modifier xkb option. Rebuilt only on change
+hwdb=/etc/udev/hwdb.d/62-caps-as-ctrl.hwdb
+if ! cmp -s config/hwdb/62-caps-as-ctrl.hwdb "$hwdb"; then
+  log "Installing the Caps as Ctrl hwdb rule"
+  sudo install -D -m 644 config/hwdb/62-caps-as-ctrl.hwdb "$hwdb"
+  sudo systemd-hwdb update && sudo udevadm trigger --subsystem-match=input --action=change
+fi
+
+# HONOR MagicBook Pro 14 2026 (ZQC-P): firmware and driver fixes from the
+# fork. apply_patch.sh skips a revision it has already applied, so this is
+# cheap on every run; kernel updates are handled by its own hook
+HONOR=$HOME/w/honor-magicbook-pro-14-2026-ubuntu
+if [ "$(cat /sys/class/dmi/id/product_name 2>/dev/null)" == "ZQC-P" ]; then
+  if [ -d "$HONOR/.git" ]; then
+    git -C "$HONOR" pull -q --ff-only || log "Failed to update $HONOR. Continue installation."
+  else
+    log "Cloning the HONOR MagicBook fixes"
+    mkdir -p "$HOME/w"
+    git clone -q https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu "$HONOR"
+  fi
+  # No pipe around it: under sudo's pty a piped apt stops on SIGTTOU.
+  # The DSC colour-depth preference is not worth an xe.ko rebuild on every kernel.
+  log "Applying the HONOR MagicBook fixes"
+  sudo SKIP_DSC=1 "$HONOR/apply_patch.sh" \
+    || log "HONOR fixes reported problems, see above. Continue installation."
+
+  # Touchpad scroll speed: GNOME has no setting for it. wayland-scroll-factor scales libinput's
+  # continuous scroll inside gnome-shell (an LD_PRELOAD in environment.d that loads only there and
+  # drops itself from child processes); the mouse wheel stays as is. Pinned release, checked
+  # against its SHA256SUMS. Takes effect at the next login; tune with `wsf set` or wsf-gui
+  WSF_VERSION=1.0.0
+  if ! dpkg -s wayland-scroll-factor &> /dev/null; then
+    log "Installing wayland-scroll-factor $WSF_VERSION"
+    wsf_url=https://github.com/daniel-g-carrasco/wayland-scroll-factor/releases/download/v$WSF_VERSION
+    wsf_deb=wayland-scroll-factor_${WSF_VERSION}-1_amd64.deb
+    wsf_tmp=$(mktemp -d)
+    if curl -fsSL -o "$wsf_tmp/$wsf_deb" "$wsf_url/$wsf_deb" \
+      && curl -fsSL -o "$wsf_tmp/SHA256SUMS" "$wsf_url/SHA256SUMS" \
+      && (cd "$wsf_tmp" && grep "  $wsf_deb\$" SHA256SUMS | sha256sum -c --quiet); then
+      sudo apt install -y "$wsf_tmp/$wsf_deb"
+    else
+      log "wayland-scroll-factor download failed. Continue installation."
+    fi
+    rm -rf "$wsf_tmp"
+  fi
+  if command -v wsf &> /dev/null; then
+    # upstream's suggested factor on first install only, a later `wsf set` is kept
+    [ -f "$HOME/.config/wayland-scroll-factor/config" ] || wsf set 0.35
+    wsf enable
+    # the per-app scroll extension would scale on top of it
+    gnome-extensions disable touchpad-speed-control@ritesh 2> /dev/null || true
   fi
 fi
 
-# Linux: docker, HONOR MagicBook fixes; then (--desktop only) libvirt group and fonts ─────────────────────────────────────────────────────────
-if [[ "$OS" == "Linux" ]]; then
-  if [ ! -f /usr/bin/docker ]; then
-    log "Installing docker"
-    curl -fsSL https://get.docker.com | bash
-    log "Enabling docker"
-    sudo systemctl enable --now docker.socket
-  fi
+[ "$DESKTOP" == 1 ] || exit 0
 
-  # id -nG USER reads the group db; bare `groups` is this process, stale until relogin
-  if ! id -nG "$USER" | grep -qw docker; then
-    log "Adding user to docker group"
-    sudo usermod -aG docker $USER
-  fi
+if ! id -nG "$USER" | grep -qw libvirt; then
+  log "Adding user to libvirt group"
+  sudo usermod -aG libvirt $USER
+fi
 
-  # Caps Lock as Left Ctrl at the evdev level (config/hwdb), so xkb, GNOME and games reading raw
-  # scancodes all agree; replaces the old caps:ctrl_modifier xkb option. Rebuilt only on change
-  hwdb=/etc/udev/hwdb.d/62-caps-as-ctrl.hwdb
-  if ! cmp -s config/hwdb/62-caps-as-ctrl.hwdb "$hwdb"; then
-    log "Installing the Caps as Ctrl hwdb rule"
-    sudo install -D -m 644 config/hwdb/62-caps-as-ctrl.hwdb "$hwdb"
-    sudo systemd-hwdb update && sudo udevadm trigger --subsystem-match=input --action=change
-  fi
+if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
+  log "Downloading Iosevka nerd font"
+  mkdir -p $HOME/.local/share/fonts
+  # only IosevkaNerdFont-* ("Iosevka NF" in ghostty); the zip also carries the Mono and Propo
+  # families, 700 MB nothing uses
+  font_tmp=$(mktemp -d)
+  curl -fsSL -o "$font_tmp/Iosevka.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip \
+    && unzip -o -q "$font_tmp/Iosevka.zip" 'IosevkaNerdFont-*' -d $HOME/.local/share/fonts
+  rm -rf "$font_tmp"
+  fc-cache -f
+fi
 
-  # HONOR MagicBook Pro 14 2026 (ZQC-P): firmware and driver fixes from the
-  # fork. apply_patch.sh skips a revision it has already applied, so this is
-  # cheap on every run; kernel updates are handled by its own hook
-  HONOR=$HOME/w/honor-magicbook-pro-14-2026-ubuntu
-  if [ "$(cat /sys/class/dmi/id/product_name 2>/dev/null)" == "ZQC-P" ]; then
-    if [ -d "$HONOR/.git" ]; then
-      git -C "$HONOR" pull -q --ff-only || log "Failed to update $HONOR. Continue installation."
-    else
-      log "Cloning the HONOR MagicBook fixes"
-      mkdir -p "$HOME/w"
-      git clone -q https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu "$HONOR"
-    fi
-    # No pipe around it: under sudo's pty a piped apt stops on SIGTTOU.
-    # The DSC colour-depth preference is not worth an xe.ko rebuild on every kernel.
-    log "Applying the HONOR MagicBook fixes"
-    sudo SKIP_DSC=1 "$HONOR/apply_patch.sh" \
-      || log "HONOR fixes reported problems, see above. Continue installation."
-
-    # Touchpad scroll speed: GNOME has no setting for it. wayland-scroll-factor scales libinput's
-    # continuous scroll inside gnome-shell (an LD_PRELOAD in environment.d that loads only there and
-    # drops itself from child processes); the mouse wheel stays as is. Pinned release, checked
-    # against its SHA256SUMS. Takes effect at the next login; tune with `wsf set` or wsf-gui
-    WSF_VERSION=1.0.0
-    if ! dpkg -s wayland-scroll-factor &> /dev/null; then
-      log "Installing wayland-scroll-factor $WSF_VERSION"
-      wsf_url=https://github.com/daniel-g-carrasco/wayland-scroll-factor/releases/download/v$WSF_VERSION
-      wsf_deb=wayland-scroll-factor_${WSF_VERSION}-1_amd64.deb
-      wsf_tmp=$(mktemp -d)
-      if curl -fsSL -o "$wsf_tmp/$wsf_deb" "$wsf_url/$wsf_deb" \
-        && curl -fsSL -o "$wsf_tmp/SHA256SUMS" "$wsf_url/SHA256SUMS" \
-        && (cd "$wsf_tmp" && grep "  $wsf_deb\$" SHA256SUMS | sha256sum -c --quiet); then
-        sudo apt install -y "$wsf_tmp/$wsf_deb"
-      else
-        log "wayland-scroll-factor download failed. Continue installation."
-      fi
-      rm -rf "$wsf_tmp"
-    fi
-    if command -v wsf &> /dev/null; then
-      # upstream's suggested factor on first install only, a later `wsf set` is kept
-      [ -f "$HOME/.config/wayland-scroll-factor/config" ] || wsf set 0.35
-      wsf enable
-      # the per-app scroll extension would scale on top of it
-      gnome-extensions disable touchpad-speed-control@ritesh 2> /dev/null || true
-    fi
-  fi
-
-  [ "$DESKTOP" == 1 ] || exit 0
-
-  if ! id -nG "$USER" | grep -qw libvirt; then
-    log "Adding user to libvirt group"
-    sudo usermod -aG libvirt $USER
-  fi
-
-  if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
-    log "Downloading Iosevka nerd font"
-    mkdir -p $HOME/.local/share/fonts
-    # only IosevkaNerdFont-* ("Iosevka NF" in ghostty); the zip also carries the Mono and Propo
-    # families, 700 MB nothing uses
-    font_tmp=$(mktemp -d)
-    curl -fsSL -o "$font_tmp/Iosevka.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip \
-      && unzip -o -q "$font_tmp/Iosevka.zip" 'IosevkaNerdFont-*' -d $HOME/.local/share/fonts
-    rm -rf "$font_tmp"
-    fc-cache -f
-  fi
-
-  if [ ! -f $HOME/.local/share/fonts/AppleColorEmoji.ttf ]; then
-    log "Downloading Apple Emoji font"
-    curl -fsSL -o $HOME/.local/share/fonts/AppleColorEmoji.ttf \
-      https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
-    fc-cache -f
-  fi
+if [ ! -f $HOME/.local/share/fonts/AppleColorEmoji.ttf ]; then
+  log "Downloading Apple Emoji font"
+  curl -fsSL -o $HOME/.local/share/fonts/AppleColorEmoji.ttf \
+    https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
+  fc-cache -f
 fi

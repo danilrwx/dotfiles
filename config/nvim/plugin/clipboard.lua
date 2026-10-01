@@ -1,19 +1,13 @@
 -- Every plain yank is mirrored to the desktop clipboard, so there is no
--- <leader>y: wl-copy on Wayland, pbcopy on macOS. Without either (a server over
--- ssh) yanks stay in nvim's registers.
-local tool
-if vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") == 1 then
-  tool = "wl-copy"
-elseif vim.fn.executable("pbcopy") == 1 then
-  tool = "pbcopy"
-end
-if not tool then
+-- <leader>y: wl-copy on Wayland. Without it (a server over ssh) yanks stay in
+-- nvim's registers.
+if not (vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") == 1) then
   return
 end
 
 local function copy(lines, regtype)
   local text = table.concat(lines, "\n") .. (regtype == "V" and "\n" or "")
-  vim.system({ tool }, { stdin = text, detach = true })
+  vim.system({ "wl-copy" }, { stdin = text, detach = true })
 end
 
 -- only real yanks (not deletes) to the unnamed or clipboard registers

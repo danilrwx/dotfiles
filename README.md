@@ -1,12 +1,11 @@
 # dotfiles
 
-Personal dotfiles for macOS and Ubuntu.
+Personal dotfiles for Ubuntu.
 
 ## Requirements
 
-- **macOS**, or **Ubuntu** (`install` exits on other distros)
-- `git`, `curl`, and `sudo` on Linux
-- macOS: Homebrew is bootstrapped by `install` if missing
+- **Ubuntu** (`install` exits on anything else)
+- `git`, `curl`, and `sudo`
 - Optional: an SSH key in `~/.ssh` — with one, `install` switches the repo
   remote to SSH and pulls the private submodule; without one both are skipped
 
@@ -20,30 +19,29 @@ cd ~/dotfiles && ./install
 `./install` can be run from any directory and again at any time; it symlinks
 the configs and installs the tool set:
 
-- system CLIs from `apt` on Ubuntu or `brew` on macOS: `tmux`, `gnupg`, `fzf`,
-  `jq`, `ripgrep`, `ugrep`, `fd`, `htop`, `fastfetch`, `go`, `neovim`, `nodejs`/`npm`; on
-  Ubuntu also `zsh`, `git`, `clangd` (macOS has them), and `neovim` from a
-  GitHub tarball when the archive's build is older than 0.11
+- system CLIs from `apt`: `zsh`, `git`, `tmux`, `gnupg`, `fzf`, `jq`, `ripgrep`,
+  `ugrep`, `fd`, `htop`, `fastfetch`, `go`, `clangd`, `neovim`, `nodejs`/`npm`,
+  and `neovim` from a GitHub tarball when the archive's build is older than 0.11
 - Go-based CLIs and dev tools via `go install` through proxy.golang.org:
   `gh`, `glab`, `helm`, `k9s`, `yq`, `lazygit`, `crane`, `task`,
   `golangci-lint`, `gopls`, `gofumpt`, `goimports`, `dlv`, `moq`, `ginkgo`,
   `helm-ls`, `golangci-lint-langserver`
 
-`kubectl` comes from dl.k8s.io on Linux (checked against its sha256), brew on
-macOS; `d8` and `claude` use their own installers. On Linux it also installs
-Docker (get.docker.com) and joins the `docker` group, sets `zsh` as the login
-shell, and installs the Caps Lock as Ctrl hwdb rule (`config/hwdb`).
+`kubectl` comes from dl.k8s.io (checked against its sha256); `d8` and `claude`
+use their own installers. It also installs Docker (get.docker.com) and joins the
+`docker` group, sets `zsh` as the login shell, and installs the Caps Lock as Ctrl
+hwdb rule (`config/hwdb`).
 
 On a HONOR MagicBook Pro 14 2026 (`ZQC-P`) it also clones
 [honor-magicbook-pro-14-2026-ubuntu](https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu)
-into `~/w` and runs its `apply_patch.sh` without the headset-mic and DSC fixes,
+into `~/w` and runs its `apply_patch.sh` without the DSC fix,
 which is a no-op once a revision has been applied, and installs
 [wayland-scroll-factor](https://github.com/daniel-g-carrasco/wayland-scroll-factor)
 for the touchpad scroll speed (`wsf set`, active after the next login). From a running GNOME session
 it also sets two-finger click as right click on the touchpad and `Super+Shift+S`
 for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
 
-`./install --desktop` is Ubuntu-only and adds:
+`./install --desktop` adds:
 
 - Ghostty as the default terminal (`config/ghostty`), with the Iosevka Nerd Font
   and Apple Color Emoji; wl-clipboard for tmux and nvim copies

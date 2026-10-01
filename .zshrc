@@ -1,10 +1,5 @@
 export GPG_TTY=$(tty)
 
-# brew zsh completions on fpath (must precede compinit)
-if [ -n "$HOMEBREW_PREFIX" ]; then
-  fpath=("$HOMEBREW_PREFIX/share/zsh/site-functions" $fpath)
-fi
-
 autoload -Uz compinit && compinit -u
 
 # EDITOR=nvim contains "vi", which makes zsh pick vi keymap; force emacs (ctrl-f/ctrl-b).

@@ -48,7 +48,6 @@ end
 
 local function build()
   local parser_dir = vim.fs.joinpath(vim.fn.stdpath("data"), "site", "parser")
-  local cxxlib = vim.uv.os_uname().sysname == "Darwin" and "-lc++" or "-lstdc++"
   vim.fn.mkdir(parser_dir, "p")
   local tmp = vim.fn.tempname()
   vim.fn.mkdir(tmp, "p")
@@ -78,7 +77,7 @@ local function build()
       end
       if vim.fn.filereadable(vim.fs.joinpath(src, "scanner.cc")) == 1 then
         table.insert(args, vim.fs.joinpath(src, "scanner.cc"))
-        table.insert(args, cxxlib)
+        table.insert(args, "-lstdc++")
       end
       vim.list_extend(args, { "-o", vim.fs.joinpath(parser_dir, lang .. ".so") })
       run(args)
