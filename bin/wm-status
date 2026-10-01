@@ -5,17 +5,26 @@
 # wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0
 export LC_NUMERIC=C
 
+# Icons: emoji for swaybar and i3bar; WM_STATUS_ICONS=nerd (bin/dwm-session) for dwm, whose Xft draws emoji
+# at their own size and colors, so Nerd Font glyphs (Symbols Nerd Font Mono) there, in the text's color and size
+if [ "$WM_STATUS_ICONS" == nerd ]; then
+  I_MEM=$'\U000f035b ' I_VOL=$'\U000f057e ' I_MUTE=$'\U000f075f ' I_MIC=$'\U000f036c ' I_MICOFF=$'\U000f036d '
+  I_BRI=$'\U000f00e0 ' I_RU=$'\U000f030c ' I_US=$'\U000f030c '
+else
+  I_MEM="🧠" I_VOL="🔊" I_MUTE="🔇" I_MIC="🎙️" I_MICOFF="🙊" I_BRI="🌞" I_RU="🇷🇺" I_US="🇺🇸"
+fi
+
 vol() {
-  local icon="🔊" out
+  local icon=$I_VOL out
   out=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)   # "Volume: 0.45 [MUTED]"
-  [[ $out == *MUTED* ]] && icon="🔇"
+  [[ $out == *MUTED* ]] && icon=$I_MUTE
   echo -e " $icon$(awk '{printf "%d%%", $2*100}' <<<"$out")"
 }
 
 mic() {
-  local icon="🎙️" out
+  local icon=$I_MIC out
   out=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null)
-  [[ $out == *MUTED* ]] && icon="🙊"
+  [[ $out == *MUTED* ]] && icon=$I_MICOFF
   echo -e " $icon$(awk '{printf "%d%%", $2*100}' <<<"$out")"
 }
 
@@ -88,7 +97,7 @@ bri() {
     local c m
     c=$(brightnessctl get)
     m=$(brightnessctl max)
-    echo -e "$(del) 🌞$(( c * 100 / m ))%"
+    echo -e "$(del) $I_BRI$(( c * 100 / m ))%"
   fi
 }
 
@@ -101,7 +110,7 @@ datef() {
 }
 
 mem() {
-  echo -e " 🧠$(free -h | awk '/Mem/{print $3}')"
+  echo -e " $I_MEM$(free -h | awk '/Mem/{print $3}')"
 }
 
 keyboard() {
@@ -115,7 +124,7 @@ keyboard() {
   else
     (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && ru=1
   fi
-  (( ru )) && echo -e " 🇷🇺RU" || echo -e " 🇺🇸US"
+  (( ru )) && echo -e " ${I_RU}RU" || echo -e " ${I_US}US"
 }
 
 while true; do
