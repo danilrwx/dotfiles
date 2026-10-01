@@ -18,7 +18,9 @@ export PI_OFFLINE=1
 # systemd alone.
 export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/openssh_agent"
 set -a
+# gdk-scale.conf is systemd's only: Chrome and Electron count GDK_SCALE on top of Xft.dpi and come out at 4x
 for f in "$HOME"/dotfiles/config/environment.d/*.conf; do
+  [ "${f##*/}" = gdk-scale.conf ] && continue
   [ -e "$HOME/.config/environment.d/${f##*/}" ] && . "$f"
 done
 set +a
