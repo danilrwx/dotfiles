@@ -12,7 +12,7 @@ set $right l
 set $bg       #000000
 set $fg       #ffffff
 set $accent   #00cd00
-set $darkgray #7f849c
+set $darkgray #888888
 
 # kitty (config/kitty), one instance for every window
 set $term kitty --single-instance

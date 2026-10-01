@@ -13,7 +13,7 @@ set $right l
 set $bg       #000000
 set $fg       #ffffff
 set $accent   #00cd00
-set $darkgray #7f849c
+set $darkgray #888888
 
 # st, my own build (github.com/danilrwx/st) as under dwm; kitty's touchpad multiplier does nothing on X11
 set $term st
