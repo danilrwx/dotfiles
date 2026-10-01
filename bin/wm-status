@@ -6,10 +6,17 @@
 export LC_NUMERIC=C
 
 # Icons: emoji for i3bar; WM_STATUS_ICONS=nerd (bin/dwm-session) for dwm, whose Xft draws emoji
-# at their own size and colors, so Nerd Font glyphs (Symbols Nerd Font Mono) there, in the text's color and size
-if [ "$WM_STATUS_ICONS" == nerd ]; then
-  I_MEM=$'\U000f035b ' I_VOL=$'\U000f057e ' I_MUTE=$'\U000f075f ' I_MIC=$'\U000f036c ' I_MICOFF=$'\U000f036d '
-  I_BRI=$'\U000f00e0 ' I_RU=$'\U000f030c ' I_US=$'\U000f030c '
+# at their own size and colors, so Nerd Font glyphs (Symbols Nerd Font Mono) there, in the text's color and size;
+# WM_STATUS_ICONS=dzen (bin/ob-bar) the same glyphs, each in ^fn() since dzen2 falls back to no other font
+# glyph: an icon as the mode draws it
+glyph() {
+  if [ "$WM_STATUS_ICONS" == dzen ]; then printf '^fn(Symbols Nerd Font Mono:size=9)%s^fn()' "$1"
+  else printf '%s' "$1"; fi
+}
+if [ "$WM_STATUS_ICONS" == nerd ] || [ "$WM_STATUS_ICONS" == dzen ]; then
+  I_MEM="$(glyph $'\U000f035b') " I_VOL="$(glyph $'\U000f057e') " I_MUTE="$(glyph $'\U000f075f') "
+  I_MIC="$(glyph $'\U000f036c') " I_MICOFF="$(glyph $'\U000f036d') " I_BRI="$(glyph $'\U000f00e0') "
+  I_RU="$(glyph $'\U000f030c') " I_US="$(glyph $'\U000f030c') "
 else
   I_MEM="🧠" I_VOL="🔊" I_MUTE="🔇" I_MIC="🎙️" I_MICOFF="🙊" I_BRI="🌞" I_RU="🇷🇺" I_US="🇺🇸"
 fi
@@ -88,7 +95,7 @@ bat_icon() {
 bat() {
   local n=$1
   if [[ -d /sys/class/power_supply/BAT$n/ ]]; then
-    echo -e " $(del)$(bat_icon $n) $(cat /sys/class/power_supply/BAT$n/capacity)%"
+    echo -e " $(del)$(glyph "$(bat_icon $n)") $(cat /sys/class/power_supply/BAT$n/capacity)%"
   fi
 }
 

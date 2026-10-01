@@ -1,0 +1,38 @@
+#!/bin/bash
+# The Openbox bar (config/openbox/autostart): two dzen2 strips at the top, a few MB together. Left, the
+# desktops, redrawn whenever the root window's EWMH properties change (xprop -spy): the current one white,
+# those with windows gray, the empty ones dark, each a click away (wmctrl -s). Right, bin/wm-status in its
+# dzen mode. The strips leave sidepad px at the screen's edges for the rounded corners, as dwm's bar does,
+# and Openbox keeps the windows below them through the margins in config/openbox/rc.xml.
+
+font='Iosevka:size=11'
+height=40
+sidepad=24
+width=$(xwininfo -root | awk '/^  Width:/ {print $2}')
+half=$(( width / 2 ))
+dzen() { dzen2 -dock -fn "$font" -h "$height" -bg '#000000' -fg '#888888' "$@"; }
+
+desktops() {
+	local cur n i occ line color
+	cur=$(xprop -root -notype _NET_CURRENT_DESKTOP | awk '{print $NF}')
+	n=$(xprop -root -notype _NET_NUMBER_OF_DESKTOPS | awk '{print $NF}')
+	# the desktops some window is on, as " 0 3 " ("-1" is sticky)
+	occ=" $(wmctrl -l | awk '{print $2}' | sort -u | tr '\n' ' ')"
+	line=''
+	for (( i = 0; i < n; i++ )); do
+		if [ "$i" = "$cur" ]; then color='#ffffff'
+		elif [[ $occ == *" $i "* ]]; then color='#888888'
+		else color='#444444'; fi
+		line+="^ca(1,wmctrl -s $i)^fg($color) $(( i + 1 )) ^fg()^ca()"
+	done
+	echo "$line"
+}
+
+trap 'kill 0' EXIT
+WM_STATUS_ICONS=dzen "$HOME/dotfiles/bin/wm-status" \
+	| dzen -ta r -x "$half" -w "$(( width - half - sidepad ))" &
+{
+	desktops
+	xprop -root -spy _NET_CURRENT_DESKTOP _NET_NUMBER_OF_DESKTOPS _NET_CLIENT_LIST _NET_ACTIVE_WINDOW \
+		| while read -r _; do desktops; done
+} | dzen -ta l -x "$sidepad" -w "$(( half - sidepad ))"
