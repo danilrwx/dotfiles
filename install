@@ -117,8 +117,8 @@ if [ "$DESKTOP" == 1 ]; then
   log "Installing virtualization"; pkg virt-manager tigervnc-viewer
 
   # Terminal: Ghostty from universe instead of Ubuntu's Ptyxis, for a config file (config/ghostty) instead of
-  # dconf profiles. Ptyxis stays installed: purging it drags ubuntu-desktop-minimal along. xdg-terminal-exec (Ctrl+Alt+T, nautilus "Open in Terminal") picks the first
-  # entry of xdg-terminals.list
+  # dconf profiles. Ptyxis stays installed: purging it drags ubuntu-desktop-minimal along. xdg-terminal-exec
+  # (Ctrl+Alt+T, nautilus "Open in Terminal") picks the first entry of xdg-terminals.list
   log "Installing ghostty"; pkg ghostty
   echo com.mitchellh.ghostty.desktop > $HOME/.config/xdg-terminals.list
   # the ghostty package does not register itself as x-terminal-emulator, so add it first
@@ -142,6 +142,9 @@ if [ "$DESKTOP" == 1 ]; then
   log "Setting up ssh-agent with the GNOME Shell askpass"; pkg python3-gi gir1.2-gcr-4
   mkdir -p "$HOME/.config/systemd/user/ssh-agent.service.d"
   link config/systemd/ssh-agent-askpass.conf "$HOME/.config/systemd/user/ssh-agent.service.d/askpass.conf"
+  # the same askpass for ssh clients started without a terminal, for the key passphrase
+  mkdir -p "$HOME/.config/environment.d"
+  link config/environment.d/ssh-askpass.conf "$HOME/.config/environment.d/ssh-askpass.conf"
   if command -v systemctl &> /dev/null && [ -n "${XDG_RUNTIME_DIR:-}" ]; then
     systemctl --user daemon-reload
     systemctl --user mask --now gcr-ssh-agent.socket gcr-ssh-agent.service
