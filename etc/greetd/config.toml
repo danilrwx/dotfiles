@@ -1,0 +1,7 @@
+# dotfiles: tuigreet on vt 7 with the i3 session, remembering the last user and session
+[terminal]
+vt = 7
+
+[default_session]
+command = "tuigreet --time --remember --remember-session --asterisks --xsessions /usr/share/xsessions --xsession-wrapper 'startx /usr/bin/env' --cmd 'startx /usr/bin/env i3'"
+user = "_greetd"

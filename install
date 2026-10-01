@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-
-log() {
-  echo -e "\033[0;31m$1\033[0m"
-}
-
 # ./install [--desktop] [--ru-mirror] [--skip-go] [--skip-ts]
 #   --desktop    the i3 session with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
 #                Discord, Steam.
@@ -11,6 +6,11 @@ log() {
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
 #   --skip-go    keep the Go tools in ~/go/bin as they are, no `go install`
 #   --skip-ts    keep the built treesitter parsers, no TSBuild
+#
+# Safe to rerun: every step checks before it changes anything. bin/dotfiles-update is this script on PATH.
+
+log() { echo -e "\033[0;31m$1\033[0m"; }
+
 DESKTOP=0; RU_MIRROR=0; SKIP_GO=0; SKIP_TS=0
 for arg in "$@"; do
   case "$arg" in
@@ -23,33 +23,41 @@ for arg in "$@"; do
   esac
 done
 
-# Everything below (git remote/submodules, `link`, config/hwdb) is relative to the repo, and
-# bin/dotfiles-update is this script on PATH, so it may be started from any directory
+# the paths below (link, put, the submodules) are the repo's, whatever directory this is started from
 cd "$HOME/dotfiles" || { log "No $HOME/dotfiles"; exit 1; }
-
-# Ubuntu only ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 [ -f /etc/os-release ] && . /etc/os-release
 [ "${ID:-}" == ubuntu ] || { log "Unsupported system: ${ID:-$(uname -s)}, Ubuntu only"; exit 1; }
 log "This is an Ubuntu $VERSION_ID system."
 
+# Packages ────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# the CLI set; everything Go-based comes from `go install` in dev_tools
+BASE_PKGS=(build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd
+  golang-go neovim nodejs npm fd-find fastfetch)
+# the desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop (installed by hand, so
+# debloat's autoremove keeps it): Wi-Fi by iwd, Bluetooth, sound, fingerprint, power profiles, firmware
+# updates, the file dialogs' portal, the keyring Chrome keeps passwords in, fonts, printing; then the login,
+# virtualization, ssh's askpass and st's build headers
+DESKTOP_PKGS=(iwd bluez rfkill
+  pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
+  fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
+  udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
+  gnome-keyring libpam-gnome-keyring fonts-noto-color-emoji fonts-noto-cjk fonts-iosevka cups
+  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome libx11-dev libxft-dev)
+# X11 and i3 without their recommends: dmenu, dunst, i3lock/xss-lock, maim and xclip for screenshots, the
+# media keys (bin/wm-fnkeys), the polkit agent
+X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit x11-xserver-utils xinput
+  i3-wm i3lock xss-lock dunst suckless-tools maim xclip hsetroot brightnessctl playerctl lxpolkit libnotify-bin)
+DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
+
+# Helpers ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 pkg() { sudo apt install -y "$@"; }
+installed() { dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null | grep -qx installed; }
 
-# SSH remote and private submodules (need an ssh key) ─────────────────────────────────────────────────────────────────
-if compgen -G "$HOME/.ssh/id_*" | grep -qv '\.pub$'; then
-  log "Switching origin to ssh and updating submodules"
-  git remote set-url origin git@github.com:danilrwx/dotfiles.git
-
-  if ! git submodule update --init --recursive; then
-    log "Failed to update submodules. Continue installation."
-  fi
-else
-  log "No ssh key in ~/.ssh. Skip ssh remote and private submodules."
-fi
-
-# Symlink configs. A real file/dir already at the target is moved aside,
-# otherwise ln would put the link inside that dir ──────────────────────────────────────────────────────────────────────
+# link SRC DST: DST a symlink to the repo's SRC; a real file or dir in the way is moved to DST.bak, else ln
+# would put the link inside that dir
 link() {
   local src=$HOME/dotfiles/$1 dst=$2
+  mkdir -p "$(dirname "$dst")"
   if [ -e "$dst" ] && [ ! -L "$dst" ]; then
     log "Backing up $dst to $dst.bak"
     rm -rf "$dst.bak" && mv "$dst" "$dst.bak"
@@ -57,71 +65,83 @@ link() {
   ln -snf "$src" "$dst"
 }
 
-log "Linking configs"
-mkdir -p $HOME/.config
-mkdir -p $HOME/.local/bin $HOME/.local/share
+# put DST [MODE]: the repo's etc/… copy of DST installed as root; false when DST already matches
+put() {
+  local src=etc/${1#/etc/} dst=$1
+  sudo cmp -s "$src" "$dst" && return 1
+  sudo install -D -m "${2:-644}" "$src" "$dst"
+}
 
-for f in .gitconfig .gitignore_global .profile .tmux.conf .zprofile .zshrc; do
-  link $f $HOME/$f
-done
-for c in k9s htop lazygit nvim; do
-  link config/$c $HOME/.config/$c
-done
-# Private CLI configs (claude, pi, CLAUDE.md) are symlinked by private/install,
-# which also keeps those paths out of this public repo.
-if [ -f $HOME/dotfiles/private/install ]; then
-  log "Running private install"
-  "$HOME/dotfiles/private/install" || log "Failed to run private install. Continue installation."
-fi
+join_group() {
+  # id -nG USER reads the group db; bare `groups` is this process, stale until relogin
+  id -nG "$USER" | grep -qw "$1" && return
+  log "Adding user to $1 group"
+  sudo usermod -aG "$1" "$USER"
+}
 
-# Base CLI packages from apt. Everything Go-based comes from `go install` below ───────────────────────────────────────
-log "Installing base packages"
-if [ "$RU_MIRROR" == 1 ]; then
-  log "Pinning apt repos to mirror.yandex.ru"
-  sudo sed -i -E 's|https?://([a-z]{2}\.)?archive\.ubuntu\.com/|https://mirror.yandex.ru/|' \
-    /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null
-fi
-sudo apt update -y
-pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd \
-  golang-go neovim nodejs npm fd-find fastfetch
-# Ubuntu ships fd as fdfind; nvim's :find and file picker look for fd
-ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
+# git_sync DIR URL: clone, or pull a clone already there
+git_sync() {
+  if [ -d "$1/.git" ]; then
+    git -C "$1" pull -q --ff-only || log "Failed to update $1. Continue installation."
+  else
+    mkdir -p "$(dirname "$1")" && git clone -q "$2" "$1"
+  fi
+}
 
-# Desktop (--desktop): i3, greetd, GUI apps ─────────────────────────────────────────────────────────────────────
-if [ "$DESKTOP" == 1 ]; then
-  # The desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop: iwd for Wi-Fi, Bluetooth,
-  # sound, fingerprint, power profiles (bin/wm-fnkeys), firmware updates, the portal for
-  # file dialogs, the keyring Chrome keeps passwords in, fonts, printing. Installed by hand, so debloat's
-  # autoremove keeps them when the desktop metapackages go
+# deb_from URL: download a .deb and install it with its dependencies
+deb_from() {
+  local deb
+  deb=$(mktemp --suffix .deb)
+  curl -fsSL -o "$deb" "$1" && sudo apt install -y "$deb"
+  rm -f "$deb"
+}
+
+# systemctl --user, only with a user session to talk to (not over a bare ssh or sudo -i)
+user_systemctl() { [ -n "${XDG_RUNTIME_DIR:-}" ] && systemctl --user "$@"; }
+
+# Base: the repo, the CLI configs and packages ────────────────────────────────────────────────────────────────────────
+base() {
+  # the ssh remote and the private submodule, with a key to reach them
+  if compgen -G "$HOME/.ssh/id_*" | grep -qv '\.pub$'; then
+    log "Switching origin to ssh and updating submodules"
+    git remote set-url origin git@github.com:danilrwx/dotfiles.git
+    git submodule update --init --recursive || log "Failed to update submodules. Continue installation."
+  else
+    log "No ssh key in ~/.ssh. Skip ssh remote and private submodules."
+  fi
+
+  log "Linking configs"
+  mkdir -p "$HOME/.local/bin" "$HOME/.local/share"
+  for f in .gitconfig .gitignore_global .profile .tmux.conf .zprofile .zshrc; do link "$f" "$HOME/$f"; done
+  for c in k9s htop lazygit nvim; do link "config/$c" "$HOME/.config/$c"; done
+  # the private CLI configs (claude, pi, CLAUDE.md), kept out of this public repo
+  if [ -f private/install ]; then
+    log "Running private install"
+    private/install || log "Failed to run private install. Continue installation."
+  fi
+
+  log "Installing base packages"
+  if [ "$RU_MIRROR" == 1 ]; then
+    log "Pinning apt repos to mirror.yandex.ru"
+    sudo sed -i -E 's|https?://([a-z]{2}\.)?archive\.ubuntu\.com/|https://mirror.yandex.ru/|' \
+      /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null
+  fi
+  sudo apt update -y
+  pkg "${BASE_PKGS[@]}"
+  # Ubuntu ships fd as fdfind; nvim's :find and file picker look for fd
+  ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
+}
+
+# Desktop, system side: network, X11, input, login ────────────────────────────────────────────────────────────────────
+desktop_system() {
   log "Installing the desktop base"
-  pkg iwd bluez rfkill \
-    pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed \
-    fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower \
-    udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs \
-    gnome-keyring libpam-gnome-keyring fonts-noto-color-emoji fonts-noto-cjk cups
-  # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
-  # netplan, DNS through systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
-  sudo install -D -m 644 /dev/stdin /etc/iwd/main.conf <<'EOT'
-# install: iwd configures the address itself, DNS goes to systemd-resolved
-[General]
-EnableNetworkConfiguration=true
+  pkg "${DESKTOP_PKGS[@]}"
+  sudo apt install -y --no-install-recommends "${X11_PKGS[@]}"
 
-[Network]
-NameResolvingService=systemd
-EOT
-  sudo install -m 600 /dev/stdin /etc/netplan/01-wired.yaml <<'EOT'
-# install: the wire by systemd-networkd; Wi-Fi is iwd's, outside netplan
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    wired:
-      match:
-        name: "en*"
-      dhcp4: true
-      dhcp6: true
-      optional: true
-EOT
+  # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
+  # netplan, DNS by systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
+  put /etc/iwd/main.conf
+  put /etc/netplan/01-wired.yaml 600
   if systemctl is-active -q NetworkManager; then
     # NM's saved Wi-Fi networks to iwd profiles while NM still runs; iwd names a file after the SSID
     # when it is plain [A-Za-z0-9 _-], else "=" and its hex
@@ -144,7 +164,89 @@ EOT
   fi
   sudo systemctl enable iwd systemd-networkd
 
+  # the touchpad: clicks by pressing it down only (one, two, three fingers for left, right, middle),
+  # natural scrolling at libinput's slowest, a slower pointer
+  put /etc/X11/xorg.conf.d/30-touchpad.conf
+  # the layouts and Ctrl+Space between them for keyboards plugged in later too: one that appears (the
+  # headset's AVRCP buttons are a keyboard) resets the keymap to /etc/default/keyboard, bin/x-autostart's
+  # setxkbmap with it
+  sudo sed -i -e 's/^XKBLAYOUT=.*/XKBLAYOUT="us,ru"/' -e 's/^XKBVARIANT=.*/XKBVARIANT=","/' \
+    -e 's/^XKBOPTIONS=.*/XKBOPTIONS="grp:ctrl_space_toggle,grp_led:scroll"/' /etc/default/keyboard
+
+  # Login: greetd with tuigreet, starting i3 through startx; GDM goes with GNOME in ./debloat. It takes
+  # over the display-manager alias at the next boot, the running session is left alone
+  put /etc/greetd/config.toml
+  # display-manager.service points at gdm3.service, itself an alias of gdm.service, so disabling gdm3 keeps
+  # the link and a plain enable (greetd's postinst too) fails on it quietly; --force replaces it
+  if [ "$(readlink -f /etc/systemd/system/display-manager.service)" != /usr/lib/systemd/system/greetd.service ]; then
+    sudo systemctl enable --force greetd
+    echo /usr/sbin/greetd | sudo tee /etc/X11/default-display-manager > /dev/null
+  fi
+  # tuigreet draws on the console, so its scale is the console font: Terminus 16x32, twice the 8x16
+  # default, on vt 7 as well, which the default ACTIVE_CONSOLES leaves out
+  sudo sed -i -e 's|^ACTIVE_CONSOLES=.*|ACTIVE_CONSOLES="/dev/tty[1-7]"|' -e 's|^FONTFACE=.*|FONTFACE="Terminus"|' \
+    -e 's|^FONTSIZE=.*|FONTSIZE="16x32"|' /etc/default/console-setup
+}
+
+# Desktop, user side: the session's configs, st, fonts, ssh-agent ─────────────────────────────────────────────────────
+desktop_session() {
+  link config/i3 "$HOME/.config/i3"
+  link config/dunst "$HOME/.config/dunst"
+  link .Xresources "$HOME/.Xresources"
+  # dark GTK3 and GTK4; GTK keeps bookmarks next to them, so the files are linked, not the dirs
+  for g in gtk-3.0 gtk-4.0; do link "config/$g/settings.ini" "$HOME/.config/$g/settings.ini"; done
+  # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE, GDK_SCALE), and .profile the session
+  for e in config/environment.d/*.conf; do link "$e" "$HOME/.config/environment.d/${e##*/}"; done
+
+  # st, the terminal, my own build (github.com/danilrwx/st, patched, config.def.h as config) into
+  # /usr/local; a rerun pulls and rebuilds
+  log "Installing st"
+  git_sync "$HOME/w/st" https://github.com/danilrwx/st
+  # make copies config.def.h to config.h only while there is none, so a stale one would win
+  rm -f "$HOME/w/st/config.h"
+  make -s -C "$HOME/w/st" && sudo make -s -C "$HOME/w/st" install || log "Failed to build st. Continue installation."
+  # st as x-terminal-emulator, for whatever opens "a terminal"
+  if [ -x /usr/local/bin/st ]; then
+    sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/local/bin/st 60
+    sudo update-alternatives --set x-terminal-emulator /usr/local/bin/st
+  fi
+
+  # Fonts: Iosevka (DESKTOP_PKGS) for st, the bar and the menus; the Nerd Font icons as the single-width
+  # Symbols Nerd Font Mono, which fontconfig falls back to; Apple's emoji
+  local fonts=$HOME/.local/share/fonts tmp
+  mkdir -p "$fonts"
+  if [ ! -f "$fonts/SymbolsNerdFontMono-Regular.ttf" ]; then
+    log "Downloading Symbols Nerd Font Mono"
+    tmp=$(mktemp -d)
+    curl -fsSL -o "$tmp/symbols.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/NerdFontsSymbolsOnly.zip \
+      && unzip -o -q "$tmp/symbols.zip" SymbolsNerdFontMono-Regular.ttf -d "$fonts"
+    rm -rf "$tmp"
+    fc-cache -f
+  fi
+  if [ ! -f "$fonts/AppleColorEmoji.ttf" ]; then
+    log "Downloading Apple Emoji font"
+    curl -fsSL -o "$fonts/AppleColorEmoji.ttf" \
+      https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
+    fc-cache -f
+  fi
+
+  # ssh: the plain ssh-agent with OpenSSH's GTK3 askpass, so AddKeysToAgent confirm shows a dialog per key
+  # use. gcr4's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh never loads the
+  # key file itself and the confirm constraint never applies; mask it, ssh-agent.socket owns SSH_AUTH_SOCK
+  log "Setting up ssh-agent with ssh-askpass-gnome"
+  link config/systemd/ssh-agent-askpass.conf "$HOME/.config/systemd/user/ssh-agent.service.d/askpass.conf"
+  user_systemctl daemon-reload
+  user_systemctl mask --now gcr-ssh-agent.socket gcr-ssh-agent.service
+  user_systemctl enable --now ssh-agent.socket
+  # user daemons the session has no use for: filter-chain runs with no filter configured, the at-spi bus
+  # serves screen readers (not the portals: xdg-desktop-portal exits without them)
+  user_systemctl mask --now filter-chain.service at-spi-dbus-bus.service
+}
+
+# Desktop apps ────────────────────────────────────────────────────────────────────────────────────────────────────────
+desktop_apps() {
   # Wi-Fi and Bluetooth TUIs (impala, bluetui), one author, static builds; not in the archive
+  local t name ver asset
   for t in impala:v0.9.0:impala-x86_64-unknown-linux-musl bluetui:v0.8.1:bluetui-x86_64-linux-musl; do
     IFS=: read -r name ver asset <<< "$t"
     if [ "$("$HOME/.local/bin/$name" --version 2>/dev/null | awk '{print "v" $2}')" != "$ver" ]; then
@@ -154,153 +256,16 @@ EOT
     fi
   done
 
-  # X11 and i3 (config/i3): dmenu, dunst (config/dunst), i3lock/xss-lock, maim
-  # screenshots, xclip, the media keys (bin/wm-fnkeys), lxpolkit; Xft.dpi for the scale (.Xresources).
-  # Started by tuigreet through startx
-  log "Installing i3"
-  sudo apt install -y --no-install-recommends xserver-xorg-core xserver-xorg-input-libinput xinit \
-    x11-xserver-utils xinput i3-wm i3lock xss-lock dunst suckless-tools maim xclip hsetroot \
-    brightnessctl playerctl lxpolkit libnotify-bin jq
-  link config/i3 $HOME/.config/i3
-  link config/dunst $HOME/.config/dunst
-  # dark GTK3 and GTK4 (config/gtk-*); GTK keeps bookmarks next to them, so the files are linked, not the dirs
-  for g in gtk-3.0 gtk-4.0; do mkdir -p "$HOME/.config/$g" && link "config/$g/settings.ini" "$HOME/.config/$g/settings.ini"; done
-  link .Xresources $HOME/.Xresources
-  # clicks only by pressing the pad down, no tap: one, two or three fingers for left, right and middle
-  # (clickfinger); natural scrolling, a slower pointer, and scrolling at the driver's slowest: 50 px of
-  # finger travel per wheel step, against the default 15 (the most xf86-input-libinput accepts)
-  sudo install -D -m 644 /dev/stdin /etc/X11/xorg.conf.d/30-touchpad.conf <<'EOT'
-# install: the touchpad under i3
-Section "InputClass"
-    Identifier "touchpad"
-    MatchIsTouchpad "on"
-    Driver "libinput"
-    Option "Tapping" "off"
-    Option "NaturalScrolling" "true"
-    Option "ClickMethod" "clickfinger"
-    Option "DisableWhileTyping" "true"
-    Option "AccelSpeed" "-0.25"
-    Option "ScrollPixelDistance" "50"
-EndSection
-EOT
-  # the layouts and Ctrl+Space between them for every keyboard X adds later as well: a hotplugged one (the
-  # headset's AVRCP buttons register as a keyboard) gets /etc/default/keyboard's options through udev and
-  # resets the keymap, bin/x-autostart's setxkbmap with it
-  sudo sed -i -e 's/^XKBLAYOUT=.*/XKBLAYOUT="us,ru"/' -e 's/^XKBVARIANT=.*/XKBVARIANT=","/' \
-    -e 's/^XKBOPTIONS=.*/XKBOPTIONS="grp:ctrl_space_toggle,grp_led:scroll"/' /etc/default/keyboard
+  join_group libvirt   # virt-manager (DESKTOP_PKGS)
 
-  # st, the terminal, my own build (github.com/danilrwx/st, patched, config.def.h as config) into
-  # /usr/local. A rerun pulls and rebuilds
-  log "Installing st"
-  pkg libx11-dev libxft-dev
-  if [ -d "$HOME/w/st/.git" ]; then
-    git -C "$HOME/w/st" pull -q --ff-only || log "Failed to update ~/w/st. Continue installation."
-  else
-    mkdir -p "$HOME/w" && git clone -q "https://github.com/danilrwx/st" "$HOME/w/st"
-  fi
-  # make copies config.def.h to config.h only while there is none, so a stale one would win
-  rm -f "$HOME/w/st/config.h"
-  make -s -C "$HOME/w/st" && sudo make -s -C "$HOME/w/st" install || log "Failed to build st. Continue installation."
-  # st as x-terminal-emulator, for whatever opens "a terminal"; debloat takes the rest
-  if [ -x /usr/local/bin/st ]; then
-    sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/local/bin/st 60
-    sudo update-alternatives --set x-terminal-emulator /usr/local/bin/st
-  fi
-
-  # Login: greetd with tuigreet, starting i3 through startx, remembering the user; GDM goes
-  # with GNOME in ./debloat. Takes over the display-manager alias at the next boot, the running session is
-  # left alone
-  log "Installing greetd"
-  pkg greetd tuigreet
-  sudo tee /etc/greetd/config.toml > /dev/null <<'EOT'
-# install: tuigreet on vt 7 with the i3 session, remembering the last user and session
-[terminal]
-vt = 7
-
-[default_session]
-command = "tuigreet --time --remember --remember-session --asterisks --xsessions /usr/share/xsessions --xsession-wrapper 'startx /usr/bin/env' --cmd 'startx /usr/bin/env i3'"
-user = "_greetd"
-EOT
-  # display-manager.service points at gdm3.service, itself an alias of gdm.service, so disabling gdm3 keeps
-  # the link and a plain enable (greetd's postinst too) fails on it quietly; --force replaces it
-  if [ "$(readlink -f /etc/systemd/system/display-manager.service)" != /usr/lib/systemd/system/greetd.service ]; then
-    sudo systemctl enable --force greetd
-    echo /usr/sbin/greetd | sudo tee /etc/X11/default-display-manager > /dev/null
-  fi
-  # tuigreet draws on the console, so its scale is the console font: Terminus 16x32, twice the 8x16 default
-  # as Xft.dpi 192 is for the sessions, on vt 7 as well, which the default ACTIVE_CONSOLES leaves out
-  sudo sed -i -e 's|^ACTIVE_CONSOLES=.*|ACTIVE_CONSOLES="/dev/tty[1-7]"|' -e 's|^FONTFACE=.*|FONTFACE="Terminus"|' \
-    -e 's|^FONTSIZE=.*|FONTSIZE="16x32"|' /etc/default/console-setup
-
-  log "Installing virtualization"; pkg virt-manager tigervnc-viewer
-  # id -nG USER reads the group db, as for docker below
-  if ! id -nG "$USER" | grep -qw libvirt; then
-    log "Adding user to libvirt group"
-    sudo usermod -aG libvirt $USER
-  fi
-
-  # Fonts: Iosevka from the archive for st, the bars and the menus; the Nerd Font icons as their own
-  # single-width Symbols Nerd Font Mono, which fontconfig falls back to; Apple's
-  # emoji. The patched Iosevka Nerd Fonts from before go, their 700 MB zip with them
-  log "Installing Iosevka"; pkg fonts-iosevka
-  mkdir -p $HOME/.local/share/fonts
-  rm -f $HOME/.local/share/fonts/IosevkaNerdFont*.ttf
-  if [ ! -f $HOME/.local/share/fonts/SymbolsNerdFontMono-Regular.ttf ]; then
-    log "Downloading Symbols Nerd Font Mono"
-    font_tmp=$(mktemp -d)
-    curl -fsSL -o "$font_tmp/symbols.zip" \
-      https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/NerdFontsSymbolsOnly.zip \
-      && unzip -o -q "$font_tmp/symbols.zip" 'SymbolsNerdFontMono-Regular.ttf' -d $HOME/.local/share/fonts
-    rm -rf "$font_tmp"
-    fc-cache -f
-  fi
-  if [ ! -f $HOME/.local/share/fonts/AppleColorEmoji.ttf ]; then
-    log "Downloading Apple Emoji font"
-    curl -fsSL -o $HOME/.local/share/fonts/AppleColorEmoji.ttf \
-      https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
-    fc-cache -f
-  fi
-
-  # ssh: the plain ssh-agent with OpenSSH's GTK3 askpass, so AddKeysToAgent confirm shows a dialog per key
-  # use. gcr4's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh never loads the
-  # key file itself and the confirm constraint never applies (its gcr4-ssh-askpass has no confirm mode
-  # either); mask it and let ssh-agent.socket own SSH_AUTH_SOCK
-  log "Setting up ssh-agent with ssh-askpass-gnome"; pkg ssh-askpass-gnome
-  mkdir -p "$HOME/.config/systemd/user/ssh-agent.service.d"
-  link config/systemd/ssh-agent-askpass.conf "$HOME/.config/systemd/user/ssh-agent.service.d/askpass.conf"
-  # the same askpass for ssh clients started without a terminal, for the key passphrase
-  mkdir -p "$HOME/.config/environment.d"
-  link config/environment.d/ssh-askpass.conf "$HOME/.config/environment.d/ssh-askpass.conf"
-  if [ -n "${XDG_RUNTIME_DIR:-}" ]; then
-    systemctl --user daemon-reload
-    systemctl --user mask --now gcr-ssh-agent.socket gcr-ssh-agent.service
-    systemctl --user enable --now ssh-agent.socket
-  fi
-
-  # User daemons the session has no use for: filter-chain runs with no filter configured, the at-spi bus
-  # serves screen readers. Not the document portal and its permission store: xdg-desktop-portal exits
-  # without them, and Chrome, Telegram and the file dialogs wait on it; unmasked for a host an older
-  # install masked them on
-  link config/environment.d/no-at-bridge.conf "$HOME/.config/environment.d/no-at-bridge.conf"
-  link config/environment.d/gdk-scale.conf "$HOME/.config/environment.d/gdk-scale.conf"
-  if [ -n "${XDG_RUNTIME_DIR:-}" ]; then
-    systemctl --user mask --now filter-chain.service at-spi-dbus-bus.service
-    systemctl --user unmask xdg-document-portal.service xdg-permission-store.service
-  fi
-
-  # Google Chrome from Google's own .deb, which adds their apt repo and key, so later updates come with
-  # apt upgrade. Only amd64, Google ships no Linux arm64 build
-  if [ "$(dpkg --print-architecture)" == amd64 ] && ! dpkg -s google-chrome-stable &> /dev/null; then
+  # Google Chrome from Google's .deb, which adds their apt repo, so updates come with apt upgrade; amd64 only
+  if [ "$(dpkg --print-architecture)" == amd64 ] && ! installed google-chrome-stable; then
     log "Installing Google Chrome"
-    chrome_deb=$(mktemp --suffix .deb)
-    curl -fsSL -o "$chrome_deb" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-      && sudo apt install -y "$chrome_deb"
-    rm -f "$chrome_deb"
+    deb_from https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   fi
   command -v google-chrome &> /dev/null && xdg-settings set default-web-browser google-chrome.desktop
 
-  # Telegram: the official tarball in ~/.local/opt, which updates itself and writes its own .desktop
-  # file on the first start
+  # Telegram: the official tarball in ~/.local/opt, which updates itself and writes its own .desktop file
   if [ ! -x "$HOME/.local/opt/Telegram/Telegram" ]; then
     log "Installing Telegram"
     mkdir -p "$HOME/.local/opt"
@@ -308,155 +273,140 @@ EOT
       && ln -sf "$HOME/.local/opt/Telegram/Telegram" "$HOME/.local/bin/telegram"
   fi
 
-  # Discord: the official .deb (Ubuntu's AppArmor ships a profile for its sandbox). It does not update
-  # itself; a rerun installs the current one when Discord says it is outdated
+  # Discord: the official .deb, which does not update itself; a rerun installs the current one
+  local discord_url
   discord_url=$(curl -fsS -o /dev/null -w '%{redirect_url}' "https://discord.com/api/download?platform=linux&format=deb")
   if [ -n "$discord_url" ] && [ "$(dpkg-query -W -f='${Version}' discord 2>/dev/null)" != "$(basename "$discord_url" .deb | sed 's/^discord-//')" ]; then
     log "Installing Discord"
-    discord_deb=$(mktemp --suffix .deb)
-    curl -fsSL -o "$discord_deb" "$discord_url" && sudo apt install -y "$discord_deb"
-    rm -f "$discord_deb"
+    deb_from "$discord_url"
   fi
 
-  # Steam: multiverse's steam-installer, which fetches and updates Valve's client; needs i386 enabled
+  # Steam: multiverse's steam-installer, which fetches and updates Valve's client; needs i386
   log "Installing Steam"
   if ! dpkg --print-foreign-architectures | grep -qx i386; then
     sudo dpkg --add-architecture i386
     sudo apt update -y
   fi
   pkg steam-installer
-fi
+}
 
-# kubectl: one static binary from dl.k8s.io ───────────────────────────────────────────────────────────────────────────
-if ! command -v kubectl &> /dev/null; then
-  log "Installing kubectl"
-  arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
-  # into a temp file and checked against the published sha256: a failed download must not leave an
-  # empty /usr/local/bin/kubectl that `command -v` then takes as installed on every later run
-  url="https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/${arch}/kubectl"
-  tmp=$(mktemp)
-  if curl -fsSL -o "$tmp" "$url" && echo "$(curl -fsSL "$url.sha256")  $tmp" | sha256sum -c --quiet; then
-    sudo install -m 755 "$tmp" /usr/local/bin/kubectl
-  else
-    log "kubectl download failed. Continue installation."
+# Dev tools ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+dev_tools() {
+  # kubectl, one static binary from dl.k8s.io, checked against its sha256: a failed download must not
+  # leave an empty /usr/local/bin/kubectl that `command -v` takes as installed on every later run
+  if ! command -v kubectl &> /dev/null; then
+    log "Installing kubectl"
+    local arch url tmp
+    arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+    url="https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/${arch}/kubectl"
+    tmp=$(mktemp)
+    if curl -fsSL -o "$tmp" "$url" && echo "$(curl -fsSL "$url.sha256")  $tmp" | sha256sum -c --quiet; then
+      sudo install -m 755 "$tmp" /usr/local/bin/kubectl
+    else
+      log "kubectl download failed. Continue installation."
+    fi
+    rm -f "$tmp"
   fi
-  rm -f "$tmp"
-fi
 
-# Go-based CLIs and dev tools into ~/go/bin, newer than the archive's; fetched through
-# proxy.golang.org, no GitHub involved ─────────────────────────────────────────────────────
-export PATH="$HOME/go/bin:$HOME/.local/bin:$PATH"
-if [ "$SKIP_GO" == 1 ]; then
-  log "Skipping go tools"
-else
-  log "Installing go tools"
-  for mod in \
-    github.com/cli/cli/v2/cmd/gh@latest \
-    gitlab.com/gitlab-org/cli/cmd/glab@latest \
-    helm.sh/helm/v3/cmd/helm@latest \
-    github.com/derailed/k9s@latest \
-    github.com/mikefarah/yq/v4@latest \
-    github.com/jesseduffield/lazygit@latest \
-    github.com/google/go-containerregistry/cmd/crane@latest \
-    github.com/go-task/task/v3/cmd/task@latest \
-    github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest \
-    golang.org/x/tools/gopls@latest \
-    golang.org/x/tools/cmd/goimports@latest \
-    mvdan.cc/gofumpt@latest \
-    github.com/go-delve/delve/cmd/dlv@latest \
-    github.com/matryer/moq@latest \
-    github.com/onsi/ginkgo/v2/ginkgo@v2.14.0 \
-    github.com/mrjosh/helm-ls@latest \
-    github.com/nametake/golangci-lint-langserver@latest
-  do
-    go install "$mod" || log "go install $mod failed. Continue installation."
-  done
-fi
-
-# Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
-# plugin. Queries are vendored in the repo; parsers are compiled here.
-if [ "$SKIP_TS" == 1 ]; then
-  log "Skipping treesitter parsers"
-else
-  log "Building treesitter parsers"
-  nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
-fi
-
-# zsh completions (sourced from .zshrc)
-log "Generating zsh completions"
-mkdir -p $HOME/.local/share/completions
-fzf --zsh              > $HOME/.local/share/completions/fzf.zsh     2>/dev/null || true
-kubectl completion zsh > $HOME/.local/share/completions/kubectl.zsh 2>/dev/null || true
-
-# d8 / deckhouse-cli (official installer; default INSTALL_DIR is /opt not on PATH)
-if ! command -v d8 &> /dev/null; then
-  log "Installing d8"
-  INSTALL_DIR=/usr/local/bin UNATTENDED=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/deckhouse/deckhouse-cli/main/tools/install.sh)"
-fi
-
-# claude-code via the native installer (self-updating, no node needed)
-if ! command -v claude &> /dev/null; then
-  log "Installing claude-code"
-  curl -fsSL https://claude.ai/install.sh | bash
-fi
-
-# Use zsh as the login shell ──────────────────────────────────────────────────────────────────────────────────────────
-zsh_bin="$(command -v zsh || true)"
-# passwd, not $SHELL: $SHELL stays stale until the next login, so chsh would ask on every run
-if [ -n "$zsh_bin" ] && [ "$(getent passwd "$USER" | cut -d: -f7)" != "$zsh_bin" ]; then
-  grep -qxF "$zsh_bin" /etc/shells || echo "$zsh_bin" | sudo tee -a /etc/shells
-  log "Setting zsh as default shell"
-  chsh -s "$zsh_bin"
-fi
-
-# Docker and the HONOR MagicBook fixes ────────────────────────────────────────
-# Docker from the Ubuntu archive (docker.io, compose and buildx as their own packages), updated with the
-# rest by apt. A host that has Docker Inc's docker-ce from an older install (get.docker.com) drops it and
-# its apt repo first; /var/lib/docker, the images and containers, stays for docker.io to take over
-if dpkg-query -W -f='${db:Status-Status}' docker-ce 2>/dev/null | grep -qx installed; then
-  log "Moving from Docker Inc's docker-ce to the archive's docker.io"
-  sudo apt remove -y docker-ce docker-ce-cli docker-ce-rootless-extras containerd.io docker-buildx-plugin \
-    docker-compose-plugin docker-model-plugin
-  sudo rm -f /etc/apt/sources.list.d/docker.list /etc/apt/sources.list.d/docker.sources /etc/apt/keyrings/docker.asc
-  sudo apt update -y
-fi
-if ! dpkg-query -W -f='${db:Status-Status}' docker.io 2>/dev/null | grep -qx installed; then
-  log "Installing docker"
-  pkg docker.io docker-compose-v2 docker-buildx
-  log "Enabling docker"
-  sudo systemctl enable --now docker.socket
-fi
-
-# id -nG USER reads the group db; bare `groups` is this process, stale until relogin
-if ! id -nG "$USER" | grep -qw docker; then
-  log "Adding user to docker group"
-  sudo usermod -aG docker $USER
-fi
-
-# Caps Lock as Left Ctrl at the evdev level (config/hwdb), so xkb and games reading raw
-# scancodes all agree; replaces the old caps:ctrl_modifier xkb option. Rebuilt only on change
-hwdb=/etc/udev/hwdb.d/62-caps-as-ctrl.hwdb
-if ! cmp -s config/hwdb/62-caps-as-ctrl.hwdb "$hwdb"; then
-  log "Installing the Caps as Ctrl hwdb rule"
-  sudo install -D -m 644 config/hwdb/62-caps-as-ctrl.hwdb "$hwdb"
-  sudo systemd-hwdb update && sudo udevadm trigger --subsystem-match=input --action=change
-fi
-
-# HONOR MagicBook Pro 14 2026 (ZQC-P): firmware and driver fixes from the
-# fork. apply_patch.sh skips a revision it has already applied, so this is
-# cheap on every run; kernel updates are handled by its own hook
-HONOR=$HOME/w/honor-magicbook-pro-14-2026-ubuntu
-if [ "$(cat /sys/class/dmi/id/product_name 2>/dev/null)" == "ZQC-P" ]; then
-  if [ -d "$HONOR/.git" ]; then
-    git -C "$HONOR" pull -q --ff-only || log "Failed to update $HONOR. Continue installation."
+  # Go-based CLIs and dev tools into ~/go/bin, newer than the archive's, through proxy.golang.org
+  export PATH="$HOME/go/bin:$HOME/.local/bin:$PATH"
+  if [ "$SKIP_GO" == 1 ]; then
+    log "Skipping go tools"
   else
-    log "Cloning the HONOR MagicBook fixes"
-    mkdir -p "$HOME/w"
-    git clone -q https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu "$HONOR"
+    log "Installing go tools"
+    local mod
+    for mod in \
+      github.com/cli/cli/v2/cmd/gh@latest \
+      gitlab.com/gitlab-org/cli/cmd/glab@latest \
+      helm.sh/helm/v3/cmd/helm@latest \
+      github.com/derailed/k9s@latest \
+      github.com/mikefarah/yq/v4@latest \
+      github.com/jesseduffield/lazygit@latest \
+      github.com/google/go-containerregistry/cmd/crane@latest \
+      github.com/go-task/task/v3/cmd/task@latest \
+      github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest \
+      golang.org/x/tools/gopls@latest \
+      golang.org/x/tools/cmd/goimports@latest \
+      mvdan.cc/gofumpt@latest \
+      github.com/go-delve/delve/cmd/dlv@latest \
+      github.com/matryer/moq@latest \
+      github.com/onsi/ginkgo/v2/ginkgo@v2.14.0 \
+      github.com/mrjosh/helm-ls@latest \
+      github.com/nametake/golangci-lint-langserver@latest
+    do
+      go install "$mod" || log "go install $mod failed. Continue installation."
+    done
   fi
-  # No pipe around it: under sudo's pty a piped apt stops on SIGTTOU.
-  # The DSC colour-depth preference is not worth an xe.ko rebuild on every kernel.
-  log "Applying the HONOR MagicBook fixes"
-  sudo SKIP_DSC=1 "$HONOR/apply_patch.sh" \
-    || log "HONOR fixes reported problems, see above. Continue installation."
+
+  # treesitter parsers (.so, per machine) for the queries vendored in config/nvim, without the plugin
+  if [ "$SKIP_TS" == 1 ]; then
+    log "Skipping treesitter parsers"
+  else
+    log "Building treesitter parsers"
+    nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
+  fi
+
+  log "Generating zsh completions"   # sourced by .zshrc
+  mkdir -p "$HOME/.local/share/completions"
+  fzf --zsh              > "$HOME/.local/share/completions/fzf.zsh"     2>/dev/null || true
+  kubectl completion zsh > "$HOME/.local/share/completions/kubectl.zsh" 2>/dev/null || true
+
+  # d8 (deckhouse-cli) and claude-code by their own installers; d8's default INSTALL_DIR, /opt, is off PATH
+  if ! command -v d8 &> /dev/null; then
+    log "Installing d8"
+    INSTALL_DIR=/usr/local/bin UNATTENDED=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/deckhouse/deckhouse-cli/main/tools/install.sh)"
+  fi
+  if ! command -v claude &> /dev/null; then
+    log "Installing claude-code"
+    curl -fsSL https://claude.ai/install.sh | bash
+  fi
+}
+
+# System: login shell, Docker, Caps as Ctrl, the HONOR fixes ──────────────────────────────────────────────────────────
+system() {
+  # zsh as the login shell; passwd, not $SHELL, which stays stale until the next login
+  local zsh_bin
+  zsh_bin=$(command -v zsh || true)
+  if [ -n "$zsh_bin" ] && [ "$(getent passwd "$USER" | cut -d: -f7)" != "$zsh_bin" ]; then
+    grep -qxF "$zsh_bin" /etc/shells || echo "$zsh_bin" | sudo tee -a /etc/shells
+    log "Setting zsh as default shell"
+    chsh -s "$zsh_bin"
+  fi
+
+  # Docker from the Ubuntu archive, updated with the rest by apt; a host with Docker Inc's docker-ce from
+  # an older install moves over in ./debloat
+  if installed docker-ce; then
+    log "Docker Inc's docker-ce is installed: ./debloat moves it to the archive's docker.io"
+  elif ! installed docker.io; then
+    log "Installing docker"
+    pkg "${DOCKER_PKGS[@]}"
+    sudo systemctl enable --now docker.socket
+  fi
+  join_group docker
+
+  # Caps Lock as Left Ctrl at the evdev level, so xkb and games reading raw scancodes all agree
+  if put /etc/udev/hwdb.d/62-caps-as-ctrl.hwdb; then
+    log "Installed the Caps as Ctrl hwdb rule"
+    sudo systemd-hwdb update && sudo udevadm trigger --subsystem-match=input --action=change
+  fi
+
+  # HONOR MagicBook Pro 14 2026 (ZQC-P): firmware and driver fixes from my fork. apply_patch.sh skips a
+  # revision it has applied, so this is cheap on every run; kernel updates are handled by its own hook
+  if [ "$(cat /sys/class/dmi/id/product_name 2>/dev/null)" == "ZQC-P" ]; then
+    local honor=$HOME/w/honor-magicbook-pro-14-2026-ubuntu
+    git_sync "$honor" https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu
+    # no pipe around it: under sudo's pty a piped apt stops on SIGTTOU. The DSC colour-depth preference
+    # is not worth an xe.ko rebuild on every kernel
+    log "Applying the HONOR MagicBook fixes"
+    sudo SKIP_DSC=1 "$honor/apply_patch.sh" || log "HONOR fixes reported problems, see above. Continue installation."
+  fi
+}
+
+base
+if [ "$DESKTOP" == 1 ]; then
+  desktop_system
+  desktop_session
+  desktop_apps
 fi
+dev_tools
+system

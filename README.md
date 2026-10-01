@@ -34,7 +34,7 @@ the configs and installs the tool set:
 `kubectl` comes from dl.k8s.io (checked against its sha256); `d8` and `claude`
 use their own installers. It also installs Docker from the archive (`docker.io`, compose, buildx) and joins the
 `docker` group, sets `zsh` as the login shell, and installs the Caps Lock as Ctrl
-hwdb rule (`config/hwdb`).
+hwdb rule (`etc/udev/hwdb.d`).
 
 On a HONOR MagicBook Pro 14 2026 (`ZQC-P`) it also clones
 [honor-magicbook-pro-14-2026-ubuntu](https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu)
@@ -73,6 +73,7 @@ anything; it refuses to run before greetd is enabled.
 | Path | What |
 |---|---|
 | `install` | host setup (symlinks, packages, go tools, the i3 desktop); `bin/dotfiles-update` is the same script on PATH |
+| `etc/` | files `install` puts into `/etc` as they are: iwd, netplan, the touchpad, greetd, the Caps as Ctrl hwdb rule |
 | `debloat` | one-off: strip GNOME, snapd and the unused rest from a stock Ubuntu desktop |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
