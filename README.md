@@ -49,10 +49,7 @@ once a revision has been applied.
 - dwm and st, my own builds from github.com/danilrwx/{dwm,st} in `~/w`, as the second
   session: the X11 setup of i3 and `bin/wm-status` as the status text; dwm's own
   config binds the media, Fn and menu keys to the same `bin/` scripts. st is the terminal in both
-- Openbox (`config/openbox`) as a stacking third session: dwm's keys, `$mod+h/l` for the screen
-  halves, no titlebars (theme in `config/openbox-theme`) and a dzen2 bar (`bin/ob-bar`) with the
-  desktops, `bin/wm-status` and stalonetray
-- greetd with tuigreet as the login, offering i3, dwm and Openbox and remembering the pick; the
+- greetd with tuigreet as the login, offering i3 and dwm and remembering the pick; the
   session environment comes from `.profile`
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
   the wire; `$mod+x` picks impala or bluetui (Wi-Fi, Bluetooth), the sound output or input,
@@ -88,7 +85,6 @@ anything; it refuses to run before greetd is enabled.
 | `bin/wm-menu` | dmenu in the old colours: the launcher, and `pick` for the menus |
 | `bin/clip` | stdin to the clipboard through xclip (tmux, nvim, screenshots) |
 | `bin/x-autostart` | the X11 session setup: keyboard, Xresources, notifications, polkit agent, idle/lock |
-| `bin/ob-bar` | the Openbox bar: dzen2 with the desktops and `wm-status`, stalonetray as the tray |
 | `bin/dwm-session` | the dwm session: `x-autostart`, `wm-status` as the status text, dwm |
 | `bin/screenshot-select` | region screenshot into the clipboard |
 | `bin/sys-notify`, `bin/cal-notify` | load/memory/battery and a calendar as a notification |

@@ -1,4 +1,0 @@
-# Openbox's session autostart (openbox-session runs it once): the X11 setup and daemons shared with i3 and
-# dwm, then the bar. Linked to ~/.config/openbox by install.
-"$HOME/dotfiles/bin/x-autostart"
-"$HOME/dotfiles/bin/ob-bar" &
