@@ -20,7 +20,7 @@ set $term st
 set $menu $HOME/dotfiles/bin/wm-menu
 set $lock i3lock -c 000000
 
-font pango:Iosevka 12
+font pango:Iosevka 11
 
 # autostart ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # once per session: keyboard, Xresources, background, notifications, polkit, idle/lock
@@ -166,12 +166,15 @@ client.unfocused               $bg        $bg       $darkgray      $bg          
 client.urgent                  $accent    $bg       $accent        $accent      $accent
 
 bar {
-  status_command $HOME/dotfiles/bin/wm-status
+  # as dwm's bar: Nerd Font icons a size below the text (wm-status' pango mode), 24px clear of the panel's
+  # rounded corners at either end (12 logical px, i3 doubles them at Xft.dpi 192)
+  status_command WM_STATUS_ICONS=pango $HOME/dotfiles/bin/wm-status
+  padding 0 12px
   tray_padding 5
   position top
   colors {
      background $bg
-     statusline $fg
+     statusline $darkgray
      #class               border  backgr. text
      focused_workspace    $bg     $bg     $fg
      inactive_workspace   $bg     $bg     $darkgray
