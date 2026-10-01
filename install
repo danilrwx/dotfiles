@@ -278,11 +278,13 @@ EOT
   fi
 
   # User daemons the session has no use for: filter-chain runs with no filter configured, the at-spi bus
-  # serves screen readers, the document portal and its permission store serve flatpak, which is not here
+  # serves screen readers. Not the document portal and its permission store: xdg-desktop-portal exits
+  # without them, and Chrome, Telegram and the file dialogs wait on it; unmasked for a host an older
+  # install masked them on
   link config/environment.d/no-at-bridge.conf "$HOME/.config/environment.d/no-at-bridge.conf"
   if [ -n "${XDG_RUNTIME_DIR:-}" ]; then
-    systemctl --user mask --now filter-chain.service at-spi-dbus-bus.service \
-      xdg-document-portal.service xdg-permission-store.service
+    systemctl --user mask --now filter-chain.service at-spi-dbus-bus.service
+    systemctl --user unmask xdg-document-portal.service xdg-permission-store.service
   fi
 
   # Google Chrome from Google's own .deb, which adds their apt repo and key, so later updates come with
