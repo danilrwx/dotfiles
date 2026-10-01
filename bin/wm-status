@@ -1,11 +1,11 @@
 #!/bin/bash
-# swaybar/i3bar status line, ported from the old i3 baraction: memory, volume, mic,
+# i3bar and dwm status line, ported from the old i3 baraction: memory, volume, mic,
 # battery, brightness, keyboard layout, date. Plain text protocol, once a second.
 
 # wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0
 export LC_NUMERIC=C
 
-# Icons: emoji for swaybar and i3bar; WM_STATUS_ICONS=nerd (bin/dwm-session) for dwm, whose Xft draws emoji
+# Icons: emoji for i3bar; WM_STATUS_ICONS=nerd (bin/dwm-session) for dwm, whose Xft draws emoji
 # at their own size and colors, so Nerd Font glyphs (Symbols Nerd Font Mono) there, in the text's color and size
 if [ "$WM_STATUS_ICONS" == nerd ]; then
   I_MEM=$'\U000f035b ' I_VOL=$'\U000f057e ' I_MUTE=$'\U000f075f ' I_MIC=$'\U000f036c ' I_MICOFF=$'\U000f036d '
@@ -114,16 +114,9 @@ mem() {
 }
 
 keyboard() {
-  # sway names the active layout per keyboard; under i3, grp_led:scroll lights Scroll Lock (bit 2 of xset's
-  # LED mask) while the second layout is on
+  # grp_led:scroll lights Scroll Lock (bit 2 of xset's LED mask) while the second layout is on
   local ru=0
-  if [ -n "$WAYLAND_DISPLAY" ]; then
-    swaymsg -t get_inputs -r 2>/dev/null \
-      | jq -r '[.[] | select(.type=="keyboard") | .xkb_active_layout_name | select(. != null)] | first // ""' \
-      | grep -q '^Russian' && ru=1
-  else
-    (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && ru=1
-  fi
+  (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && ru=1
   (( ru )) && echo -e " ${I_RU}RU" || echo -e " ${I_US}US"
 }
 

@@ -1,5 +1,4 @@
 #!/bin/sh
-# stdin to the desktop clipboard in either session: wl-copy under sway, xclip under i3. Extra args go to
-# the tool, e.g. `clip -t image/png`. tmux's copy-command, nvim's yank mirror and screenshots use it.
-if [ -n "$WAYLAND_DISPLAY" ]; then exec wl-copy "$@"; fi
+# stdin to the desktop clipboard through xclip. Extra args go to it, e.g. `clip -t image/png`. tmux's
+# copy-command, nvim's yank mirror and screenshots use it.
 exec xclip -selection clipboard "$@"

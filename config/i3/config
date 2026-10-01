@@ -1,6 +1,5 @@
-# i3, the X11 twin of config/sway/config: same keys, rules and bar, keep the two in step. What differs is
-# X11's: no input/output blocks (bin/x-autostart sets the keyboard, the touchpad is
-# /etc/X11/xorg.conf.d/30-touchpad.conf from install), window classes, i3-nagbar, i3lock.
+# i3, with the same keys and bin/ scripts as dwm (~/w/dwm config.def.h). bin/x-autostart sets the keyboard
+# and the daemons, the touchpad is /etc/X11/xorg.conf.d/30-touchpad.conf from install.
 
 set $mod Mod4
 
@@ -15,7 +14,7 @@ set $fg       #ffffff
 set $accent   #00cd00
 set $darkgray #888888
 
-# st, my own build (github.com/danilrwx/st) as under dwm; kitty's touchpad multiplier does nothing on X11
+# st, my own build (github.com/danilrwx/st) as under dwm
 set $term st
 # dmenu-like launcher with the old dmenu colours, PATH fixed up for ~/.local/bin (bin/wm-menu)
 set $menu $HOME/dotfiles/bin/wm-menu
@@ -60,13 +59,13 @@ bindsym XF86AudioPrev             exec --no-startup-id playerctl previous
 bindsym $mod+Shift+s exec --no-startup-id $HOME/dotfiles/bin/screenshot-select
 bindsym $mod+d       exec --no-startup-id $menu
 bindsym $mod+Shift+x exec --no-startup-id $lock
-# Wi-Fi, Bluetooth, sound: a wmenu pick, then impala, bluetui or pavucontrol (bin/wm-ctl)
+# Wi-Fi, Bluetooth, sound output and input, power profile: a dmenu pick (bin/wm-ctl)
 bindsym $mod+x       exec --no-startup-id $HOME/dotfiles/bin/wm-ctl
 
 bindsym Control+Mod1+s exec --no-startup-id $HOME/dotfiles/bin/sys-notify
 bindsym Control+Mod1+c exec --no-startup-id $HOME/dotfiles/bin/cal-notify
-bindsym $mod+n         exec --no-startup-id makoctl dismiss
-bindsym $mod+Shift+n   exec --no-startup-id makoctl dismiss --all
+bindsym $mod+n         exec --no-startup-id dunstctl close
+bindsym $mod+Shift+n   exec --no-startup-id dunstctl close-all
 
 floating_modifier $mod
 
@@ -156,7 +155,6 @@ bindsym $mod+r mode "resize"
 # window rules ────────────────────────────────────────────
 for_window [class="steam"]                  floating enable
 for_window [class="steam" title="^Steam$"]  floating disable
-for_window [class="(?i)pavucontrol"]        floating enable, border normal
 for_window [class="(?i).*telegram.*"]       floating enable, border none
 for_window [title="^SSH Askpass$"]          floating enable
 for_window [class="wm-ctl"]                 floating enable, resize set 900 600

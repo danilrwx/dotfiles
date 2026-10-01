@@ -5,7 +5,7 @@ log() {
 }
 
 # ./install [--desktop] [--ru-mirror] [--skip-go] [--skip-ts]
-#   --desktop    the sway, i3 and dwm sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
+#   --desktop    the i3 and dwm sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
 #                Discord, Steam.
 #                Then ./debloat strips GNOME and snapd
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
@@ -87,17 +87,17 @@ pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugr
 # Ubuntu ships fd as fdfind; nvim's :find and file picker look for fd
 ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
 
-# Desktop (--desktop): sway, greetd, GUI apps ───────────────────────────────────────────────────────────────────────
+# Desktop (--desktop): i3, dwm, greetd, GUI apps ────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
   # The desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop: iwd for Wi-Fi, Bluetooth,
-  # sound, fingerprint, power profiles (bin/wm-fnkeys), firmware updates, Xwayland (Steam), the portal for
+  # sound, fingerprint, power profiles (bin/wm-fnkeys), firmware updates, the portal for
   # file dialogs, the keyring Chrome keeps passwords in, fonts, printing. Installed by hand, so debloat's
   # autoremove keeps them when the desktop metapackages go
   log "Installing the desktop base"
   pkg iwd bluez rfkill \
     pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed \
     fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower \
-    udisks2 fwupd systemd-oomd accountsservice polkitd xwayland xdg-desktop-portal-gtk xdg-utils xdg-user-dirs \
+    udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs \
     gnome-keyring libpam-gnome-keyring fonts-noto-color-emoji fonts-noto-cjk cups
   # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
   # netplan, DNS through systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
@@ -154,26 +154,19 @@ EOT
     fi
   done
 
-  # sway: the i3 config ported to Wayland (config/sway), swaybar with bin/wm-status, wmenu as dmenu, mako as
-  # dunst, swaylock/swayidle, grim+slurp screenshots, wob as the OSD bar
-  log "Installing sway"
-  sudo apt install -y --no-install-recommends sway swaybg swayidle swaylock wmenu mako-notifier grim slurp \
-    wl-clipboard xdg-desktop-portal-wlr xdg-desktop-portal-gtk brightnessctl playerctl lxpolkit \
-    pavucontrol libnotify-bin jq wob
-  link config/sway $HOME/.config/sway
-  link config/mako $HOME/.config/mako
-
-  # i3, its X11 twin (config/i3) with the same keys and bar: dmenu, dunst (config/dunst), i3lock/xss-lock,
-  # maim screenshots, xclip; Xft.dpi for the scale (.Xresources). Started by tuigreet through startx
+  # X11 and i3 (config/i3), the base dwm shares: dmenu, dunst (config/dunst), i3lock/xss-lock, maim
+  # screenshots, xclip, the media keys (bin/wm-fnkeys), lxpolkit; Xft.dpi for the scale (.Xresources).
+  # Started by tuigreet through startx
   log "Installing i3"
   sudo apt install -y --no-install-recommends xserver-xorg-core xserver-xorg-input-libinput xinit \
-    x11-xserver-utils xinput i3-wm i3lock xss-lock dunst suckless-tools maim xclip hsetroot
+    x11-xserver-utils xinput i3-wm i3lock xss-lock dunst suckless-tools maim xclip hsetroot \
+    brightnessctl playerctl lxpolkit libnotify-bin jq
   link config/i3 $HOME/.config/i3
   link config/dunst $HOME/.config/dunst
   link .Xresources $HOME/.Xresources
-  # the touchpad as sway's input block
+  # tap to click, natural scrolling, a slower pointer
   sudo install -D -m 644 /dev/stdin /etc/X11/xorg.conf.d/30-touchpad.conf <<'EOT'
-# install: the touchpad under i3 as under sway (config/sway/config, input type:touchpad)
+# install: the touchpad under i3 and dwm
 Section "InputClass"
     Identifier "touchpad"
     MatchIsTouchpad "on"
@@ -201,6 +194,11 @@ EOT
     rm -f "$HOME/w/$r/config.h"
     make -s -C "$HOME/w/$r" && sudo make -s -C "$HOME/w/$r" install || log "Failed to build $r. Continue installation."
   done
+  # st as x-terminal-emulator, for whatever opens "a terminal"; debloat takes the rest
+  if [ -x /usr/local/bin/st ]; then
+    sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/local/bin/st 60
+    sudo update-alternatives --set x-terminal-emulator /usr/local/bin/st
+  fi
   sudo install -D -m 644 /dev/stdin /usr/share/xsessions/dwm.desktop <<EOT
 [Desktop Entry]
 Name=dwm
@@ -209,23 +207,18 @@ Exec=$HOME/dotfiles/bin/dwm-session
 Type=Application
 EOT
 
-  # Terminal under sway: kitty (config/kitty), whose touch_scroll_multiplier makes up for sway's
-  # slow touchpad scroll_factor in the terminal and tmux
-  log "Installing kitty"; pkg kitty
-  link config/kitty $HOME/.config/kitty
-
-  # Login: greetd with tuigreet, offering sway, i3 and dwm (through startx), remembering the pick; GDM goes
+  # Login: greetd with tuigreet, offering i3 and dwm (through startx), remembering the pick; GDM goes
   # with GNOME in ./debloat. Takes over the display-manager alias at the next boot, the running session is
   # left alone
   log "Installing greetd"
   pkg greetd tuigreet
   sudo tee /etc/greetd/config.toml > /dev/null <<'EOT'
-# install: tuigreet on vt 7 with the sway and i3 sessions, remembering the last user and session
+# install: tuigreet on vt 7 with the i3 and dwm sessions, remembering the last user and session
 [terminal]
 vt = 7
 
 [default_session]
-command = "tuigreet --time --remember --remember-session --asterisks --sessions /usr/share/wayland-sessions --xsessions /usr/share/xsessions --xsession-wrapper 'startx /usr/bin/env' --cmd sway"
+command = "tuigreet --time --remember --remember-session --asterisks --xsessions /usr/share/xsessions --xsession-wrapper 'startx /usr/bin/env' --cmd 'startx /usr/bin/env i3'"
 user = "_greetd"
 EOT
   # display-manager.service points at gdm3.service, itself an alias of gdm.service, so disabling gdm3 keeps
@@ -246,7 +239,7 @@ EOT
     sudo usermod -aG libvirt $USER
   fi
 
-  # Fonts: Iosevka from the archive for kitty, st, the bars and the menus; the Nerd Font icons as their own
+  # Fonts: Iosevka from the archive for st, the bars and the menus; the Nerd Font icons as their own
   # single-width Symbols Nerd Font Mono, which fontconfig falls back to and dwm lists after Iosevka; Apple's
   # emoji. The patched Iosevka Nerd Fonts from before go, their 700 MB zip with them
   log "Installing Iosevka"; pkg fonts-iosevka
@@ -427,7 +420,7 @@ if ! id -nG "$USER" | grep -qw docker; then
   sudo usermod -aG docker $USER
 fi
 
-# Caps Lock as Left Ctrl at the evdev level (config/hwdb), so xkb, sway and games reading raw
+# Caps Lock as Left Ctrl at the evdev level (config/hwdb), so xkb and games reading raw
 # scancodes all agree; replaces the old caps:ctrl_modifier xkb option. Rebuilt only on change
 hwdb=/etc/udev/hwdb.d/62-caps-as-ctrl.hwdb
 if ! cmp -s config/hwdb/62-caps-as-ctrl.hwdb "$hwdb"; then

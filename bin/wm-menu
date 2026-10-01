@@ -1,11 +1,7 @@
 #!/bin/sh
-# dmenu for both sessions, in the old dmenu colours: wmenu under sway, dmenu under i3.
+# dmenu for i3 and dwm, in the old dmenu colours.
 #   wm-menu             run a program; the session PATH lacks the user dirs, so they are added first
 #   wm-menu pick PROMPT choose a line of stdin, print it
 export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
-if [ -n "$WAYLAND_DISPLAY" ]; then
-	[ "${1:-}" = pick ] && exec wmenu -p "$2" -f 'Iosevka 14' -N 000000 -n ffffff -M 000000 -m ffffff -S ffffff -s 000000
-	exec wmenu-run -f 'Iosevka 14' -N 000000 -n ffffff -M 000000 -m ffffff -S ffffff -s 000000
-fi
-[ "${1:-}" = pick ] && exec dmenu -p "$2" -fn 'Iosevka-12' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'
-exec dmenu_run -fn 'Iosevka-12' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'
+[ "${1:-}" = pick ] && exec dmenu -p "$2" -fn 'Iosevka-11' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'
+exec dmenu_run -fn 'Iosevka-11' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'

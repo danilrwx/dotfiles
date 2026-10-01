@@ -1,7 +1,3 @@
 #!/bin/sh
-# region screenshot into the clipboard: grim + slurp under sway, maim under i3
-if [ -n "$WAYLAND_DISPLAY" ]; then
-	grim -g "$(slurp)" - | "$HOME/dotfiles/bin/clip" -t image/png
-else
-	maim -s | "$HOME/dotfiles/bin/clip" -t image/png
-fi
+# region screenshot into the clipboard: maim's selection through bin/clip
+maim -s | "$HOME/dotfiles/bin/clip" -t image/png
