@@ -7,5 +7,5 @@ if [ -n "$WAYLAND_DISPLAY" ]; then
 	[ "${1:-}" = pick ] && exec wmenu -p "$2" -f 'Iosevka 14' -N 000000 -n ffffff -M 000000 -m ffffff -S ffffff -s 000000
 	exec wmenu-run -f 'Iosevka 14' -N 000000 -n ffffff -M 000000 -m ffffff -S ffffff -s 000000
 fi
-[ "${1:-}" = pick ] && exec dmenu -p "$2" -fn 'Iosevka-14' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'
-exec dmenu_run -fn 'Iosevka-14' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'
+[ "${1:-}" = pick ] && exec dmenu -p "$2" -fn 'Iosevka-12' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'
+exec dmenu_run -fn 'Iosevka-12' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'
