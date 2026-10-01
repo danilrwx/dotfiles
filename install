@@ -212,12 +212,12 @@ Exec=$HOME/dotfiles/bin/dwm-session
 Type=Application
 EOT
 
-  # Openbox, a stacking third session (config/openbox) with dwm's keys and a dzen2 bar (bin/ob-bar, wmctrl
-  # for its desktops); the package's own openbox.desktop starts it through openbox-session, which runs
-  # config/openbox/autostart. No recommends: obconf and python3-xdg, whose xdg autostart would start what
-  # /etc/xdg/autostart lists
+  # Openbox, a stacking third session (config/openbox) with dwm's keys, a dzen2 bar and stalonetray as its
+  # tray (bin/ob-bar, wmctrl for the desktops); the package's own openbox.desktop starts it through
+  # openbox-session, which runs config/openbox/autostart. No recommends: obconf, and python3-xdg, whose xdg
+  # autostart would start all /etc/xdg/autostart lists
   log "Installing Openbox"
-  sudo apt install -y --no-install-recommends openbox dzen2 wmctrl
+  sudo apt install -y --no-install-recommends openbox dzen2 wmctrl stalonetray
   link config/openbox $HOME/.config/openbox
   mkdir -p $HOME/.local/share/themes
   link config/openbox-theme $HOME/.local/share/themes/dots

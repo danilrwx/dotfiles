@@ -2,14 +2,18 @@
 # The Openbox bar (config/openbox/autostart): two dzen2 strips at the top, a few MB together. Left, the
 # desktops, redrawn whenever the root window's EWMH properties change (xprop -spy): the current one white,
 # those with windows gray, the empty ones dark, each a click away (wmctrl -s). Right, bin/wm-status in its
-# dzen mode. The strips leave sidepad px at the screen's edges for the rounded corners, as dwm's bar does,
-# and Openbox keeps the windows below them through the margins in config/openbox/rc.xml.
+# dzen mode, then the tray: stalonetray, a fixed slot of tray_icons icons at the right edge, the icons
+# kept to its right end, since the dzen strip beside it cannot follow a tray that grows. The bar leaves
+# sidepad px at the screen's edges for the rounded corners, as dwm's does, and Openbox keeps the windows
+# below it through the margins in config/openbox/rc.xml.
 
 font='Iosevka:size=11'
 height=40
 sidepad=24
 width=$(xwininfo -root | awk '/^  Width:/ {print $2}')
 half=$(( width / 2 ))
+tray_icons=5
+tray_w=$(( tray_icons * height ))
 dzen() { dzen2 -dock -fn "$font" -h "$height" -bg '#000000' -fg '#888888' "$@"; }
 
 desktops() {
@@ -29,8 +33,11 @@ desktops() {
 }
 
 trap 'kill 0' EXIT
+stalonetray --geometry "${tray_icons}x1-${sidepad}+0" --slot-size "$height" --icon-size 32 --icon-gravity NE \
+	--kludges force_icons_size --background '#000000' --window-type dock --window-strut none \
+	--skip-taskbar --sticky --log-level err &
 WM_STATUS_ICONS=dzen "$HOME/dotfiles/bin/wm-status" \
-	| dzen -ta r -x "$half" -w "$(( width - half - sidepad ))" &
+	| dzen -ta r -x "$half" -w "$(( width - half - sidepad - tray_w ))" &
 {
 	desktops
 	xprop -root -spy _NET_CURRENT_DESKTOP _NET_NUMBER_OF_DESKTOPS _NET_CLIENT_LIST _NET_ACTIVE_WINDOW \
