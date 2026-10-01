@@ -1,0 +1,16 @@
+#!/bin/bash
+# Started once by i3 (`exec` in config/i3/config): what sway does in its config and bin/sway-autostart. The
+# keyboard as sway's input block (Caps as Ctrl is config/hwdb, below the keymap), Xresources for the scale,
+# a black root, then the daemons, each detached.
+
+xrdb -merge "$HOME/.Xresources"
+setxkbmap -layout us,ru -option '' -option grp:ctrl_space_toggle,grp_led:scroll
+hsetroot -solid '#000000'
+# portals and systemd user units see this session
+dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP 2>/dev/null
+
+dunst &                    # notifications (config/dunst)
+lxpolkit &                 # polkit agent: virt-manager, udisks, ...
+# lock at 10 min idle and before sleep, as swayidle; screens off at 15 min through DPMS
+xset s 600 600 dpms 900 900 900
+xss-lock --transfer-sleep-lock -- i3lock -n -c 000000 &

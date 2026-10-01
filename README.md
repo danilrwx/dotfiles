@@ -41,12 +41,17 @@ once a revision has been applied.
 `./install --desktop` adds:
 
 - sway with the old i3 config ported to Wayland (`config/sway`): swaybar with
-  `bin/swaybar-status`, wmenu, mako (`config/mako`), swaylock/swayidle, wob as
-  the volume/brightness bar and the HONOR Fn keys through `bin/sway-fnkeys`,
-  grim+slurp screenshots, foot as the terminal (`config/foot`, one server)
-- greetd with tuigreet as the login, starting sway
+  `bin/wm-status`, wmenu, mako (`config/mako`), swaylock/swayidle, wob as the
+  volume/brightness bar and the HONOR Fn keys through `bin/wm-fnkeys`, grim+slurp
+  screenshots
+- i3, its X11 twin (`config/i3`) with the same keys, rules and bar: dmenu, dunst
+  (`config/dunst`), i3lock/xss-lock, maim, xclip, `Xft.dpi` for the scale
+  (`.Xresources`), the touchpad set as under sway
+- kitty as the terminal in both (`config/kitty`): its `touch_scroll_multiplier`
+  makes up for sway's slow touchpad `scroll_factor` in the terminal and tmux
+- greetd with tuigreet as the login, offering sway and i3 and remembering the pick
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
-  the wire, impala and bluetui as the Wi-Fi and Bluetooth TUIs behind `$mod+x`
+  the wire; `$mod+x` picks impala or bluetui (Wi-Fi, Bluetooth), pavucontrol or the power profile
 - the Iosevka Nerd Font and Apple Color Emoji
 - ssh through the plain `ssh-agent` with OpenSSH's GTK3 askpass
   (`ssh-askpass-gnome`, per-use confirm too) instead of gcr's agent
@@ -70,10 +75,11 @@ anything; it refuses to run before greetd is enabled.
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
-| `bin/sway-fnkeys` | volume/brightness to wob, HONOR Fn-key actions and mako cards under sway |
-| `bin/sway-autostart` | sway session daemons: mako, foot server, wob, polkit agent, swayidle |
-| `bin/sway-ctl` | `$mod+x`: Wi-Fi (impala), Bluetooth (bluetui) or sound (pavucontrol) |
-| `bin/swaybar-status` | swaybar line: memory, volume, mic, battery, brightness, layout, date |
-| `bin/sway-menu` | wmenu-run with the dmenu colours and the full PATH |
+| `bin/wm-fnkeys` | volume/brightness as a bar (wob or a dunst card), HONOR Fn-key actions and cards; sway and i3 |
+| `bin/wm-ctl` | `$mod+x`: Wi-Fi (impala), Bluetooth (bluetui), sound (pavucontrol) or the power profile |
+| `bin/wm-status` | swaybar/i3bar line: memory, volume, mic, battery, brightness, layout, date |
+| `bin/wm-menu` | wmenu or dmenu in the dmenu colours: the launcher, and `pick` for the menus |
+| `bin/clip` | stdin to the clipboard: wl-copy under sway, xclip under i3 (tmux, nvim, screenshots) |
+| `bin/sway-autostart`, `bin/i3-autostart` | the session daemons: notifications, polkit agent, idle/lock (and wob, the keyboard, Xresources) |
 | `bin/screenshot-select` | region screenshot into the clipboard |
 | `bin/sys-notify`, `bin/cal-notify` | load/memory/battery and a calendar as a notification |

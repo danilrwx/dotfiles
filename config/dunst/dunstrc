@@ -1,0 +1,33 @@
+# dunst under i3, the X11 twin of config/mako: white cards, black text, thin blue frame, top right.
+# bin/wm-fnkeys sends volume/brightness with a value hint, drawn as the progress bar.
+[global]
+    font = Iosevka NF 14
+    format = "<b>%s</b>\n%b"
+    width = 300
+    origin = top-right
+    offset = (6, 30)
+    padding = 8
+    horizontal_padding = 8
+    frame_width = 1
+    frame_color = "#83a598"
+    separator_height = 2
+    separator_color = frame
+    background = "#ffffff"
+    foreground = "#000000"
+    notification_limit = 5
+    sort = update
+    idle_threshold = 120
+    follow = mouse
+    progress_bar = true
+    progress_bar_frame_width = 1
+    highlight = "#000000"
+    mouse_left_click = close_current
+
+[urgency_low]
+    timeout = 5
+
+[urgency_normal]
+    timeout = 20
+
+[urgency_critical]
+    timeout = 0

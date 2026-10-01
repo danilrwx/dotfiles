@@ -1,0 +1,70 @@
+#!/bin/sh
+# Media and HONOR Fn keys under sway and i3. Levels (volume, mic, brightness)
+# are a bar: wob under sway, through the FIFO bin/sway-autostart feeds it from,
+# a dunst progress card under i3. States (mute, touchpad, profile, camera) are a
+# notification card. The performance and camera keys are acted on by
+# honor-hotkey-actions.service; here we only show what it did.
+# wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0
+export LC_NUMERIC=C
+
+osd() { notify-send -a fnkeys -r 9912 -t 1500 "$1" "${2:-}"; }
+WOB="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/wob.fifo"
+bar() {
+	if [ -n "$WAYLAND_DISPLAY" ]; then [ -p "$WOB" ] && echo "$1" > "$WOB"
+	else notify-send -a fnkeys -r 9913 -t 1000 -h "int:value:$1" "$1%"; fi
+}
+# "Volume: 0.45 [MUTED]" -> 45, or 0 while muted
+level() { wpctl get-volume "$1" | awk '{print /MUTED/ ? 0 : int($2 * 100 + 0.5)}'; }
+vol() { wpctl set-volume -l 1.0 "$1" "$2" && bar "$(level "$1")"; }
+mute() {
+	wpctl set-mute "$1" toggle
+	wpctl get-volume "$1" | grep -q MUTED && osd "$2" "muted" || { osd "$2" "on"; bar "$(level "$1")"; }
+}
+light() { brightnessctl -q set "$1" && bar "$(brightnessctl -m | cut -d, -f4 | tr -d %)"; }
+
+# on, off or toggle; swaymsg under sway, xinput under i3
+touchpad() {
+	if [ -n "$WAYLAND_DISPLAY" ]; then
+		case $1 in
+		on)     swaymsg -q input type:touchpad events enabled ;;
+		off)    swaymsg -q input type:touchpad events disabled ;;
+		toggle) swaymsg -q input type:touchpad events toggle enabled disabled ;;
+		esac
+		state=$(swaymsg -t get_inputs | jq -r '[.[] | select(.type == "touchpad")][0].libinput.send_events')
+		[ "$state" = enabled ] && state=on || state=off
+	else
+		dev=$(xinput list --name-only | grep -i -m1 touchpad)
+		state=$(xinput list-props "$dev" | awk '/Device Enabled/ {print $NF == 1 ? "on" : "off"}')
+		case $1 in
+		toggle) [ "$state" = on ] && state=off || state=on ;;
+		*)      state=$1 ;;
+		esac
+		[ "$state" = on ] && xinput enable "$dev" || xinput disable "$dev"
+	fi
+	osd "Touchpad" "$state"
+}
+
+SINK=@DEFAULT_AUDIO_SINK@ SOURCE=@DEFAULT_AUDIO_SOURCE@
+case ${1:-} in
+vol-up)      vol $SINK 10%+ ;;
+vol-down)    vol $SINK 10%- ;;
+vol-mute)    mute $SINK "Volume" ;;
+mic-up)      vol $SOURCE 10%+ ;;
+mic-down)    vol $SOURCE 10%- ;;
+mic)         mute $SOURCE "Microphone" ;;
+bright-up)   light 10%+ ;;
+bright-down) light 10%- ;;
+touchpad-on)     touchpad on ;;
+touchpad-off)    touchpad off ;;
+touchpad-toggle) touchpad toggle ;;
+profile)
+	sleep 0.3
+	osd "Power profile" "$(powerprofilesctl get)" ;;
+camera)
+	sleep 0.5
+	[ -e /dev/video0 ] && osd "Camera" "on" || osd "Camera" "off" ;;
+*)
+	echo "usage: wm-fnkeys vol-up|vol-down|vol-mute|mic-up|mic-down|mic|bright-up|bright-down|" >&2
+	echo "       touchpad-on|touchpad-off|touchpad-toggle|profile|camera" >&2
+	exit 1 ;;
+esac

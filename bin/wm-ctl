@@ -1,0 +1,15 @@
+#!/bin/sh
+# $mod+x: pick Wi-Fi, Bluetooth, sound or the power profile. Wi-Fi and Bluetooth are impala and bluetui in
+# a floating kitty window of class wm-ctl (for_window rules in config/sway/config and config/i3/config),
+# sound is pavucontrol, power a second pick among power-profiles-daemon's profiles, the current one first.
+menu="$HOME/dotfiles/bin/wm-menu"
+choice=$(printf 'wifi\nbluetooth\nsound\npower\n' | "$menu" pick ctl) || exit 0
+case "$choice" in
+power)
+	cur=$(powerprofilesctl get)
+	profile=$({ echo "$cur"; powerprofilesctl list | sed -n 's/^[* ] *\([a-z-]*\):$/\1/p' | grep -vx "$cur"; } | "$menu" pick power) || exit 0
+	powerprofilesctl set "$profile" && notify-send -a fnkeys -r 9912 -t 1500 "Power profile" "$profile" ;;
+wifi)      exec kitty --class wm-ctl -T Wi-Fi "$HOME/.local/bin/impala" ;;
+bluetooth) exec kitty --class wm-ctl -T Bluetooth "$HOME/.local/bin/bluetui" ;;
+sound)     exec pavucontrol ;;
+esac

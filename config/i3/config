@@ -1,5 +1,6 @@
-# sway, ported from the old i3 config (git 7ab1a94^:config/i3/config); config/i3/config is its X11 twin,
-# keep the two in step. tuigreet offers both sessions.
+# i3, the X11 twin of config/sway/config: same keys, rules and bar, keep the two in step. What differs is
+# X11's: no input/output blocks (bin/i3-autostart sets the keyboard, the touchpad is
+# /etc/X11/xorg.conf.d/30-touchpad.conf from install), window classes, i3-nagbar, i3lock.
 
 set $mod Mod4
 
@@ -18,74 +19,54 @@ set $darkgray #7f849c
 set $term kitty --single-instance
 # dmenu-like launcher with the old dmenu colours, PATH fixed up for ~/.local/bin (bin/wm-menu)
 set $menu $HOME/dotfiles/bin/wm-menu
-set $lock swaylock -f -c 000000
+set $lock i3lock -c 000000
 
 font pango:Iosevka NF 12
 
-# input ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-input type:keyboard {
-  xkb_layout  us,ru
-  # Caps Lock is remapped to Ctrl below the keymap, in config/hwdb (udev hwdb)
-  xkb_options grp:ctrl_space_toggle,grp_led:scroll
-}
-
-input type:touchpad {
-  tap            enabled
-  natural_scroll enabled
-  click_method   clickfinger
-  dwt            enabled
-  pointer_accel  -0.25
-  # slow for Chrome and the rest; kitty scales it back up for itself and tmux (touch_scroll_multiplier in
-  # config/kitty), foot could not
-  scroll_factor  0.15
-}
-
 # autostart ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# once per session: env for portals, notifications, polkit, tray applets, idle/lock
-exec        $HOME/dotfiles/bin/sway-autostart
-# plain black background, no wallpaper
-output * bg #000000 solid_color
+# once per session: keyboard, Xresources, background, notifications, polkit, idle/lock
+exec --no-startup-id $HOME/dotfiles/bin/i3-autostart
 
 default_border pixel 1
 smart_borders  on
 
 # keys ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# levels as a wob bar, mute and the HONOR Fn keys as a mako card (bin/wm-fnkeys; wob in bin/sway-autostart)
+# levels as a dunst progress card, mute and the HONOR Fn keys as a card (bin/wm-fnkeys)
 set $fn $HOME/dotfiles/bin/wm-fnkeys
-bindsym --locked XF86AudioRaiseVolume      exec $fn vol-up
-bindsym --locked XF86AudioLowerVolume      exec $fn vol-down
-bindsym --locked XF86AudioMute             exec $fn vol-mute
+bindsym XF86AudioRaiseVolume      exec --no-startup-id $fn vol-up
+bindsym XF86AudioLowerVolume      exec --no-startup-id $fn vol-down
+bindsym XF86AudioMute             exec --no-startup-id $fn vol-mute
 
-bindsym --locked $mod+XF86AudioRaiseVolume exec $fn mic-up
-bindsym --locked $mod+XF86AudioLowerVolume exec $fn mic-down
-bindsym          $mod+Shift+m              exec $fn mic
-bindsym --locked XF86AudioMicMute          exec $fn mic
+bindsym $mod+XF86AudioRaiseVolume exec --no-startup-id $fn mic-up
+bindsym $mod+XF86AudioLowerVolume exec --no-startup-id $fn mic-down
+bindsym $mod+Shift+m              exec --no-startup-id $fn mic
+bindsym XF86AudioMicMute          exec --no-startup-id $fn mic
 
-bindsym --locked XF86MonBrightnessDown     exec $fn bright-down
-bindsym --locked XF86MonBrightnessUp       exec $fn bright-up
+bindsym XF86MonBrightnessDown     exec --no-startup-id $fn bright-down
+bindsym XF86MonBrightnessUp       exec --no-startup-id $fn bright-up
 
 # HONOR Fn keys (patch/hotkeys of the HONOR fork maps them)
-bindsym --locked XF86TouchpadOn            exec $fn touchpad-on
-bindsym --locked XF86TouchpadOff           exec $fn touchpad-off
-bindsym --locked XF86TouchpadToggle        exec $fn touchpad-toggle
-bindsym --locked XF86Launch1               exec $fn profile
-bindsym --locked XF86CameraAccessToggle    exec $fn camera
-bindsym          Print                     exec $HOME/dotfiles/bin/screenshot-select
+bindsym XF86TouchpadOn            exec --no-startup-id $fn touchpad-on
+bindsym XF86TouchpadOff           exec --no-startup-id $fn touchpad-off
+bindsym XF86TouchpadToggle        exec --no-startup-id $fn touchpad-toggle
+bindsym XF86Launch1               exec --no-startup-id $fn profile
+bindsym XF86CameraAccessToggle    exec --no-startup-id $fn camera
+bindsym Print                     exec --no-startup-id $HOME/dotfiles/bin/screenshot-select
 
-bindsym --locked XF86AudioPlay             exec playerctl play-pause
-bindsym --locked XF86AudioNext             exec playerctl next
-bindsym --locked XF86AudioPrev             exec playerctl previous
+bindsym XF86AudioPlay             exec --no-startup-id playerctl play-pause
+bindsym XF86AudioNext             exec --no-startup-id playerctl next
+bindsym XF86AudioPrev             exec --no-startup-id playerctl previous
 
-bindsym $mod+Shift+s exec $HOME/dotfiles/bin/screenshot-select
-bindsym $mod+d       exec $menu
-bindsym $mod+Shift+x exec $lock
+bindsym $mod+Shift+s exec --no-startup-id $HOME/dotfiles/bin/screenshot-select
+bindsym $mod+d       exec --no-startup-id $menu
+bindsym $mod+Shift+x exec --no-startup-id $lock
 # Wi-Fi, Bluetooth, sound: a wmenu pick, then impala, bluetui or pavucontrol (bin/wm-ctl)
-bindsym $mod+x       exec $HOME/dotfiles/bin/wm-ctl
+bindsym $mod+x       exec --no-startup-id $HOME/dotfiles/bin/wm-ctl
 
-bindsym Control+Mod1+s exec $HOME/dotfiles/bin/sys-notify
-bindsym Control+Mod1+c exec $HOME/dotfiles/bin/cal-notify
-bindsym $mod+n         exec makoctl dismiss
-bindsym $mod+Shift+n   exec makoctl dismiss --all
+bindsym Control+Mod1+s exec --no-startup-id $HOME/dotfiles/bin/sys-notify
+bindsym Control+Mod1+c exec --no-startup-id $HOME/dotfiles/bin/cal-notify
+bindsym $mod+n         exec --no-startup-id makoctl dismiss
+bindsym $mod+Shift+n   exec --no-startup-id makoctl dismiss --all
 
 floating_modifier $mod
 
@@ -156,8 +137,8 @@ bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
 
 bindsym $mod+Shift+c reload
-bindsym $mod+Shift+r reload
-bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+bindsym $mod+Shift+r restart
+bindsym $mod+Shift+e exec --no-startup-id i3-nagbar -t warning -m 'Exit i3? This ends the X session.' -B 'Yes, exit i3' 'i3-msg exit'
 
 mode "resize" {
   bindsym $left  resize shrink width  5 px or 5 ppt
@@ -172,14 +153,13 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
-# window rules: app_id for Wayland apps, class for the Xwayland ones (Steam) ────────────────────────────────────────────
-for_window [app_id="firefox" title="^(Open|Save|Print|Choose).*"]  floating enable
-for_window [class="steam"]                                         floating enable
-for_window [class="steam" title="^Steam$"]                         floating disable
-for_window [app_id="org.pulseaudio.pavucontrol"]                   floating enable, border normal
-for_window [app_id="(?i).*telegram.*"]                             floating enable, border none
-for_window [title="^SSH Askpass$"]                                 floating enable
-for_window [app_id="wm-ctl"]                                       floating enable, resize set 900 600
+# window rules ────────────────────────────────────────────
+for_window [class="steam"]                  floating enable
+for_window [class="steam" title="^Steam$"]  floating disable
+for_window [class="(?i)pavucontrol"]        floating enable, border normal
+for_window [class="(?i).*telegram.*"]       floating enable, border none
+for_window [title="^SSH Askpass$"]          floating enable
+for_window [class="wm-ctl"]                 floating enable, resize set 900 600
 
 
 client.focused                 $bg        $bg       $fg            $accent      $accent
@@ -202,5 +182,3 @@ bar {
   }
 }
 
-# distro snippets (Debian/Ubuntu ship the systemd/dbus env import here)
-include /etc/sway/config.d/*

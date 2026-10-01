@@ -1,13 +1,13 @@
 -- Every plain yank is mirrored to the desktop clipboard, so there is no
--- <leader>y: wl-copy on Wayland. Without it (a server over ssh) yanks stay in
--- nvim's registers.
-if not (vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") == 1) then
+-- <leader>y: bin/clip (wl-copy under sway, xclip under i3). Without a display
+-- (a server over ssh) yanks stay in nvim's registers.
+if not ((vim.env.WAYLAND_DISPLAY or vim.env.DISPLAY) and vim.fn.executable("clip") == 1) then
   return
 end
 
 local function copy(lines, regtype)
   local text = table.concat(lines, "\n") .. (regtype == "V" and "\n" or "")
-  vim.system({ "wl-copy" }, { stdin = text, detach = true })
+  vim.system({ "clip" }, { stdin = text, detach = true })
 end
 
 -- only real yanks (not deletes) to the unnamed or clipboard registers

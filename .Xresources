@@ -1,0 +1,9 @@
+! i3's X11 session (bin/i3-autostart loads it): the HONOR's 3120x2080 panel at 2x, as sway's scale 2.0.
+! Xft.dpi scales text and the toolkits that follow it (GTK, Qt, Chrome, kitty) natively, no blur
+Xft.dpi: 192
+Xft.antialias: 1
+Xft.hinting: 1
+Xft.hintstyle: hintslight
+Xft.rgba: rgb
+Xft.lcdfilter: lcddefault
+Xcursor.size: 48

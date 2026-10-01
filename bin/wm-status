@@ -1,5 +1,5 @@
 #!/bin/bash
-# swaybar status line, ported from the i3 baraction: memory, volume, mic,
+# swaybar/i3bar status line, ported from the old i3 baraction: memory, volume, mic,
 # battery, brightness, keyboard layout, date. Plain text protocol, once a second.
 
 # wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0
@@ -21,8 +21,9 @@ mic() {
 
 bat_icon() {
   local bat="/sys/class/power_supply/BAT$1"
-  local vol="$(cat "$bat/capacity")"
-  local status="$(cat "$bat/status")"
+  local vol status
+  vol="$(cat "$bat/capacity")"
+  status="$(cat "$bat/status")"
 
   local result="󰁹"
   [[ $status = "Charging" ]] && result="󰂅"
@@ -104,15 +105,17 @@ mem() {
 }
 
 keyboard() {
-  # sway reports the active layout name per keyboard; take the first keyboard that has one
-  local name icon="󰌌" text=US
-  name=$(swaymsg -t get_inputs -r 2>/dev/null \
-    | jq -r '[.[] | select(.type=="keyboard") | .xkb_active_layout_name | select(. != null)] | first // ""')
-  case "$name" in
-    Russian*) icon="🇷🇺"; text=RU ;;
-    *)        icon="🇺🇸"; text=US ;;
-  esac
-  echo -e " $icon$text"
+  # sway names the active layout per keyboard; under i3, grp_led:scroll lights Scroll Lock (bit 2 of xset's
+  # LED mask) while the second layout is on
+  local ru=0
+  if [ -n "$WAYLAND_DISPLAY" ]; then
+    swaymsg -t get_inputs -r 2>/dev/null \
+      | jq -r '[.[] | select(.type=="keyboard") | .xkb_active_layout_name | select(. != null)] | first // ""' \
+      | grep -q '^Russian' && ru=1
+  else
+    (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && ru=1
+  fi
+  (( ru )) && echo -e " 🇷🇺RU" || echo -e " 🇺🇸US"
 }
 
 while true; do

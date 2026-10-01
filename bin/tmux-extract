@@ -3,7 +3,7 @@
 # fzf-based replacement for the extrakto tmux plugin: no python, no TPM, works
 # anywhere fzf+tmux exist. Opens on prefix+Tab; inside fzf, Tab types the picked
 # token (word/path/url) into the pane, Enter copies it to the clipboard through
-# tmux's copy-command (wl-copy, see .tmux.conf).
+# tmux's copy-command (bin/clip, see .tmux.conf).
 #
 # The pane is resolved via display-message rather than passed in: display-popup
 # does NOT expand #{pane_id} in its command, so we ask tmux from the popup.

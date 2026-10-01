@@ -1,6 +1,0 @@
-#!/bin/sh
-# dmenu_run replacement for sway: wmenu with the old dmenu colours. The session
-# PATH from GDM lacks snaps and the user dirs, so add them before wmenu-run
-# reads it.
-export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/go/bin:/snap/bin:$PATH"
-exec wmenu-run -f 'Iosevka NF 14' -N 000000 -n ffffff -M 000000 -m ffffff -S ffffff -s 000000 "$@"

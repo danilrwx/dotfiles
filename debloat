@@ -33,7 +33,7 @@ REMOVE=(
   gnome-shell gnome-shell-common gnome-session gnome-settings-daemon gnome-control-center
   nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
-  firefox snapd wayland-scroll-factor ghostty
+  firefox snapd wayland-scroll-factor ghostty foot
 )
 installed() { dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null | grep -qx installed; }
 remove=(); for p in "${REMOVE[@]}"; do installed "$p" && remove+=("$p"); done
