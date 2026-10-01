@@ -234,6 +234,10 @@ EOT
     sudo systemctl enable --force greetd
     echo /usr/sbin/greetd | sudo tee /etc/X11/default-display-manager > /dev/null
   fi
+  # tuigreet draws on the console, so its scale is the console font: Terminus 16x32, twice the 8x16 default
+  # as Xft.dpi 192 is for the sessions, on vt 7 as well, which the default ACTIVE_CONSOLES leaves out
+  sudo sed -i -e 's|^ACTIVE_CONSOLES=.*|ACTIVE_CONSOLES="/dev/tty[1-7]"|' -e 's|^FONTFACE=.*|FONTFACE="Terminus"|' \
+    -e 's|^FONTSIZE=.*|FONTSIZE="16x32"|' /etc/default/console-setup
 
   log "Installing virtualization"; pkg virt-manager tigervnc-viewer
   # id -nG USER reads the group db, as for docker below
