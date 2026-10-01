@@ -1,0 +1,41 @@
+# sxhkd under dwm (started by bin/x-autostart dwm): the keys sway and i3 bind in their configs that dwm's own
+# config.h leaves out. Keep in step with config/sway/config.
+
+# levels as a dunst progress card, mute and the HONOR Fn keys as a card (bin/wm-fnkeys)
+XF86AudioRaiseVolume
+	~/dotfiles/bin/wm-fnkeys vol-up
+XF86AudioLowerVolume
+	~/dotfiles/bin/wm-fnkeys vol-down
+XF86AudioMute
+	~/dotfiles/bin/wm-fnkeys vol-mute
+super + XF86AudioRaiseVolume
+	~/dotfiles/bin/wm-fnkeys mic-up
+super + XF86AudioLowerVolume
+	~/dotfiles/bin/wm-fnkeys mic-down
+{super + shift + m,XF86AudioMicMute}
+	~/dotfiles/bin/wm-fnkeys mic
+XF86MonBrightness{Up,Down}
+	~/dotfiles/bin/wm-fnkeys bright-{up,down}
+XF86Touchpad{On,Off,Toggle}
+	~/dotfiles/bin/wm-fnkeys touchpad-{on,off,toggle}
+XF86Launch1
+	~/dotfiles/bin/wm-fnkeys profile
+XF86CameraAccessToggle
+	~/dotfiles/bin/wm-fnkeys camera
+XF86Audio{Play,Next,Prev}
+	playerctl {play-pause,next,previous}
+
+# region screenshot into the clipboard
+{super + shift + s,Print}
+	~/dotfiles/bin/screenshot-select
+# Wi-Fi, Bluetooth, sound, power profile
+super + x
+	~/dotfiles/bin/wm-ctl
+# lock
+super + shift + x
+	i3lock -c 000000
+# load/memory/battery and a calendar as a notification; dismiss notifications
+ctrl + alt + {s,c}
+	~/dotfiles/bin/{sys,cal}-notify
+super + {_,shift + }n
+	dunstctl {close,close-all}

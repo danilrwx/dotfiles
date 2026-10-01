@@ -5,7 +5,7 @@ log() {
 }
 
 # ./install [--desktop] [--ru-mirror]
-#   --desktop    the sway and i3 sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
+#   --desktop    the sway, i3 and dwm sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
 #                Discord, Steam.
 #                Then ./debloat strips GNOME and snapd
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
@@ -182,12 +182,33 @@ Section "InputClass"
 EndSection
 EOT
 
+  # dwm and st, my own builds (github.com/danilrwx/{dwm,st}, patched, config.def.h as config) into /usr/local.
+  # dwm runs as its own session (bin/dwm-session) with the same X11 setup as i3 (bin/x-autostart) and sxhkd
+  # for the keys its config.h leaves out (config/sxhkd). A rerun pulls and rebuilds
+  log "Installing dwm and st"
+  pkg libx11-dev libxft-dev libxinerama-dev sxhkd
+  for r in dwm st; do
+    if [ -d "$HOME/w/$r/.git" ]; then
+      git -C "$HOME/w/$r" pull -q --ff-only || log "Failed to update ~/w/$r. Continue installation."
+    else
+      mkdir -p "$HOME/w" && git clone -q "https://github.com/danilrwx/$r" "$HOME/w/$r"
+    fi
+    make -s -C "$HOME/w/$r" && sudo make -s -C "$HOME/w/$r" install || log "Failed to build $r. Continue installation."
+  done
+  sudo install -D -m 644 /dev/stdin /usr/share/xsessions/dwm.desktop <<EOT
+[Desktop Entry]
+Name=dwm
+Comment=dwm with the dotfiles session setup
+Exec=$HOME/dotfiles/bin/dwm-session
+Type=Application
+EOT
+
   # Terminal: kitty in both sessions (config/kitty), whose touch_scroll_multiplier makes up for sway's
   # slow touchpad scroll_factor in the terminal and tmux
   log "Installing kitty"; pkg kitty
   link config/kitty $HOME/.config/kitty
 
-  # Login: greetd with tuigreet, offering sway and i3 (through startx) and remembering the pick; GDM goes
+  # Login: greetd with tuigreet, offering sway, i3 and dwm (through startx), remembering the pick; GDM goes
   # with GNOME in ./debloat. Takes over the display-manager alias at the next boot, the running session is
   # left alone
   log "Installing greetd"
@@ -224,6 +245,16 @@ EOT
     font_tmp=$(mktemp -d)
     curl -fsSL -o "$font_tmp/Iosevka.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip \
       && unzip -o -q "$font_tmp/Iosevka.zip" 'IosevkaNerdFont-*' -d $HOME/.local/share/fonts
+    rm -rf "$font_tmp"
+    fc-cache -f
+  fi
+  # "Iosevka NFM", the single-width icon family my dwm and st ask for: the four plain styles only
+  if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFontMono-Regular.ttf ]; then
+    log "Downloading Iosevka nerd font mono"
+    font_tmp=$(mktemp -d)
+    curl -fsSL -o "$font_tmp/Iosevka.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip \
+      && unzip -o -q "$font_tmp/Iosevka.zip" 'IosevkaNerdFontMono-Regular.ttf' 'IosevkaNerdFontMono-Bold.ttf' \
+        'IosevkaNerdFontMono-Italic.ttf' 'IosevkaNerdFontMono-BoldItalic.ttf' -d $HOME/.local/share/fonts
     rm -rf "$font_tmp"
     fc-cache -f
   fi

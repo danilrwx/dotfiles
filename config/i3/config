@@ -1,5 +1,5 @@
 # i3, the X11 twin of config/sway/config: same keys, rules and bar, keep the two in step. What differs is
-# X11's: no input/output blocks (bin/i3-autostart sets the keyboard, the touchpad is
+# X11's: no input/output blocks (bin/x-autostart sets the keyboard, the touchpad is
 # /etc/X11/xorg.conf.d/30-touchpad.conf from install), window classes, i3-nagbar, i3lock.
 
 set $mod Mod4
@@ -25,7 +25,7 @@ font pango:Iosevka NF 12
 
 # autostart ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # once per session: keyboard, Xresources, background, notifications, polkit, idle/lock
-exec --no-startup-id $HOME/dotfiles/bin/i3-autostart
+exec --no-startup-id $HOME/dotfiles/bin/x-autostart
 
 default_border pixel 1
 smart_borders  on

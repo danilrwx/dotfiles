@@ -47,9 +47,12 @@ once a revision has been applied.
 - i3, its X11 twin (`config/i3`) with the same keys, rules and bar: dmenu, dunst
   (`config/dunst`), i3lock/xss-lock, maim, xclip, `Xft.dpi` for the scale
   (`.Xresources`), the touchpad set as under sway
-- kitty as the terminal in both (`config/kitty`): its `touch_scroll_multiplier`
+- dwm and st, my own builds from github.com/danilrwx/{dwm,st} in `~/w`, as a third
+  session: the X11 setup of i3, `bin/wm-status` as the status text, and sxhkd
+  (`config/sxhkd`) for the media, Fn and menu keys dwm's config leaves out
+- kitty as the terminal in sway and i3 (`config/kitty`): its `touch_scroll_multiplier`
   makes up for sway's slow touchpad `scroll_factor` in the terminal and tmux
-- greetd with tuigreet as the login, offering sway and i3 and remembering the pick
+- greetd with tuigreet as the login, offering sway, i3 and dwm and remembering the pick
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
   the wire; `$mod+x` picks impala or bluetui (Wi-Fi, Bluetooth), pavucontrol or the power profile
 - the Iosevka Nerd Font and Apple Color Emoji
@@ -80,6 +83,7 @@ anything; it refuses to run before greetd is enabled.
 | `bin/wm-status` | swaybar/i3bar line: memory, volume, mic, battery, brightness, layout, date |
 | `bin/wm-menu` | wmenu or dmenu in the dmenu colours: the launcher, and `pick` for the menus |
 | `bin/clip` | stdin to the clipboard: wl-copy under sway, xclip under i3 (tmux, nvim, screenshots) |
-| `bin/sway-autostart`, `bin/i3-autostart` | the session daemons: notifications, polkit agent, idle/lock (and wob, the keyboard, Xresources) |
+| `bin/sway-autostart`, `bin/x-autostart` | the session daemons: notifications, polkit agent, idle/lock (and wob; the keyboard, Xresources, sxhkd under dwm) |
+| `bin/dwm-session` | the dwm session: `x-autostart dwm`, `wm-status` as the status text, dwm |
 | `bin/screenshot-select` | region screenshot into the clipboard |
 | `bin/sys-notify`, `bin/cal-notify` | load/memory/battery and a calendar as a notification |

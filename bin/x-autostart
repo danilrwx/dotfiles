@@ -1,7 +1,8 @@
 #!/bin/bash
-# Started once by i3 (`exec` in config/i3/config): what sway does in its config and bin/sway-autostart. The
-# keyboard as sway's input block (Caps as Ctrl is config/hwdb, below the keymap), Xresources for the scale,
-# a black root, then the daemons, each detached.
+# The X11 session setup for i3 (`exec` in config/i3/config) and dwm (bin/dwm-session): what sway does in its
+# config and bin/sway-autostart. The keyboard as sway's input block (Caps as Ctrl is config/hwdb, below the
+# keymap), Xresources for the scale, a black root, then the daemons, each detached. Under dwm, which binds
+# none of them, sxhkd takes the media, Fn and menu keys (config/sxhkd).
 
 xrdb -merge "$HOME/.Xresources"
 setxkbmap -layout us,ru -option '' -option grp:ctrl_space_toggle,grp_led:scroll
@@ -14,3 +15,7 @@ lxpolkit &                 # polkit agent: virt-manager, udisks, ...
 # lock at 10 min idle and before sleep, as swayidle; screens off at 15 min through DPMS
 xset s 600 600 dpms 900 900 900
 xss-lock --transfer-sleep-lock -- i3lock -n -c 000000 &
+
+if [ "${1:-}" = dwm ]; then
+	sxhkd -c "$HOME/dotfiles/config/sxhkd/sxhkdrc" &
+fi
