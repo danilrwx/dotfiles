@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # ./debloat [-n]
-#   Strip a stock Ubuntu desktop down to what the sway session from `./install --desktop` runs on: every
-#   snap and snapd itself (blocked from coming back), then GNOME, GDM and the Ubuntu desktop extras.
+#   Strip a stock Ubuntu desktop down to what the i3 and dwm sessions from `./install --desktop` run on:
+#   every snap and snapd itself (blocked from coming back), GNOME, GDM and the Ubuntu desktop extras, the
+#   sway stack from before, NetworkManager (iwd has Wi-Fi), the services nothing here uses and the configs
+#   the removed apps left in ~/.config.
 #   Run `./install --desktop` first, so greetd is there to log in with once GDM is gone.
 #   -n  dry run: show what apt would remove, change nothing
 set -euo pipefail
@@ -34,7 +36,26 @@ REMOVE=(
   nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
   firefox snapd wayland-scroll-factor ghostty foot
+  # the sway session, given up for i3 and dwm on X11, and pavucontrol (bin/wm-ctl picks the devices)
+  sway swaybg swayidle swaylock wmenu mako-notifier grim slurp wl-clipboard xdg-desktop-portal-wlr wob xwayland
+  pavucontrol
+  # the heavy terminals, st is the one; not xterm, xinit and steam-libs depend on it
+  kitty alacritty wezterm terminator tilix konsole xfce4-terminal lxterminal gnome-console qterminal
+  # NetworkManager stays off for iwd and systemd-networkd (install), so it goes with its plugins and the
+  # wpa_supplicant iwd replaces
+  network-manager network-manager-gnome network-manager-openvpn network-manager-pptp wpasupplicant
+  # input methods and dictionaries the Ubuntu installer marks as manual
+  ibus ibus-table-cangjie3 ibus-table-cangjie5 ibus-table-cangjie-big m17n-db
+  hunspell-en-au hunspell-en-ca hunspell-en-gb hunspell-en-za wbritish zenity
 )
+# Services of what stays that nothing here needs: no modem, no printer discovery on the network, no Ubuntu
+# Pro or MOTD news
+DISABLE=(ModemManager.service cups-browsed.service motd-news.timer ua-timer.timer ubuntu-advantage.service)
+# ~/.config leftovers of the removed apps and of the browsers' first-run probes
+STALE=(org.gnome.Ptyxis nautilus evolution goa-1.0 gnome-initial-setup gnome-initial-setup-done
+  tiling-assistant ubuntu-insights yelp ibus update-notifier gnome-xdg-terminals.list
+  ubuntu-xdg-terminals.list xdg-terminals.list monitors.xml monitors.xml~
+  BraveSoftware chromium microsoft-edge opera vivaldi)
 installed() { dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null | grep -qx installed; }
 remove=(); for p in "${REMOVE[@]}"; do installed "$p" && remove+=("$p"); done
 
@@ -45,6 +66,10 @@ if [ "$DRY" == 1 ]; then
     || log "(install --desktop has not run yet: the list still has the desktop base it would keep)"
   log "apt would remove:"
   LC_ALL=C apt-get -s purge --autoremove "${remove[@]}" | awk '/^Purg|^Remv/ {print "  " $2}'
+  log "Services that would be disabled:"
+  for u in "${DISABLE[@]}"; do systemctl -q is-enabled "$u" 2>/dev/null && echo "  $u"; done
+  log "~/.config entries that would go:"
+  for c in "${STALE[@]}"; do [ -e "$HOME/.config/$c" ] && echo "  $c"; done
   exit 0
 fi
 
@@ -74,5 +99,14 @@ log "Removing GNOME, GDM and snapd"
 sudo apt purge -y --autoremove "${remove[@]}"
 rm -rf "$HOME/snap"
 sudo rm -rf /snap /var/snap /var/lib/snapd /var/cache/snapd
+
+
+# Services and configs ──────────────────────────────────────────────────────────────────────────────────────────────
+log "Disabling unused services"
+for u in "${DISABLE[@]}"; do sudo systemctl disable --now "$u" 2>/dev/null || true; done
+log "Removing configs of the removed apps"
+for c in "${STALE[@]}"; do rm -rf "${HOME:?}/.config/$c"; done
+# the links install made for sway, mako and kitty point at nothing now
+for l in sway mako kitty; do [ -L "$HOME/.config/$l" ] && [ ! -e "$HOME/.config/$l" ] && rm "$HOME/.config/$l"; done
 
 log "Done. Reboot: greetd takes over the login."
