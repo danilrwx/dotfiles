@@ -19,9 +19,11 @@ esac
 [ -f /etc/os-release ] && . /etc/os-release
 [ "${ID:-}" == ubuntu ] || { log "Ubuntu only"; exit 1; }
 
-# Without a greeter, removing gdm3 leaves the next boot at a console login
-if [ "$DRY" == 0 ] && ! systemctl is-enabled -q greetd 2>/dev/null; then
-  log "greetd is not enabled: run ./install --desktop first"; exit 1
+# install --desktop has to come first: greetd to log in with once GDM is gone, and the desktop base
+# (network, sound, Bluetooth...) installed by hand, so the autoremove below keeps it
+if [ "$DRY" == 0 ] && { [ "$(readlink -f /etc/systemd/system/display-manager.service)" != /usr/lib/systemd/system/greetd.service ] \
+  || ! apt-mark showmanual | grep -qx network-manager; }; then
+  log "Run ./install --desktop first"; exit 1
 fi
 
 # What goes. The metapackages and session first; `--autoremove` then takes the ~350 packages only they
@@ -33,32 +35,16 @@ REMOVE=(
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
   firefox snapd wayland-scroll-factor ghostty
 )
-# What stays although the metapackages above are what pulled it in: marked manual first, so
-# autoremove keeps it. Network, Bluetooth, sound, fingerprint (the HONOR fork's patched libfprint),
-# power profiles (bin/sway-fnkeys), firmware updates, Xwayland (Steam), the keyring Chrome keeps
-# passwords in, the askpass, the GTK portal for file dialogs, printing.
-KEEP=(
-  network-manager wpasupplicant bluez rfkill
-  pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf sof-firmware
-  fprintd libpam-fprintd libfprint-2-2 libfprint-2-tod1
-  power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower udisks2 fwupd
-  systemd-oomd accountsservice polkitd
-  xwayland xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
-  gnome-keyring libpam-gnome-keyring ssh-askpass-gnome
-  fonts-noto-color-emoji fonts-noto-cjk cups
-  software-properties-common ubuntu-drivers-common
-)
-
 installed() { dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null | grep -qx installed; }
 remove=(); for p in "${REMOVE[@]}"; do installed "$p" && remove+=("$p"); done
-keep=();   for p in "${KEEP[@]}";   do installed "$p" && keep+=("$p");   done
 
 if [ "$DRY" == 1 ]; then
   log "Snaps that would go:"
   command -v snap > /dev/null && snap list 2>/dev/null | awk 'NR > 1 {print "  " $1}'
+  apt-mark showmanual | grep -qx network-manager \
+    || log "(install --desktop has not run yet: the list still has the desktop base it would keep)"
   log "apt would remove:"
-  # install keep + remove-, the way apt-mark manual followed by purge --autoremove resolves
-  LC_ALL=C apt-get -s --autoremove install "${keep[@]}" "${remove[@]/%/-}" | awk '/^Remv/ {print "  " $2}'
+  LC_ALL=C apt-get -s purge --autoremove "${remove[@]}" | awk '/^Purg|^Remv/ {print "  " $2}'
   exit 0
 fi
 
@@ -84,8 +70,6 @@ Pin-Priority: -10
 EOF
 
 # GNOME ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
-log "Keeping ${#keep[@]} packages the desktop metapackages pulled in"
-sudo apt-mark manual "${keep[@]}" > /dev/null
 log "Removing GNOME, GDM and snapd"
 sudo apt purge -y --autoremove "${remove[@]}"
 rm -rf "$HOME/snap"

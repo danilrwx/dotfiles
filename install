@@ -84,6 +84,23 @@ ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
 
 # Desktop (--desktop): sway, greetd, GUI apps ───────────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
+  # The desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop: network, Bluetooth,
+  # sound, fingerprint, power profiles (bin/sway-fnkeys), firmware updates, Xwayland (Steam), the portal for
+  # file dialogs, the keyring Chrome keeps passwords in, fonts, printing. Installed by hand, so debloat's
+  # autoremove keeps them when the desktop metapackages go
+  log "Installing the desktop base"
+  pkg network-manager wpasupplicant bluez rfkill \
+    pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf sof-firmware \
+    fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower \
+    udisks2 fwupd systemd-oomd accountsservice polkitd xwayland xdg-desktop-portal-gtk xdg-utils xdg-user-dirs \
+    gnome-keyring libpam-gnome-keyring fonts-noto-color-emoji fonts-noto-cjk cups
+  # Ubuntu Server leaves the network to systemd-networkd; hand it to NetworkManager, as the desktop
+  # installer does. Next boot, not now: switching mid-run could drop the connection
+  if [ ! -e /etc/netplan/01-network-manager-all.yaml ]; then
+    printf 'network:\n  version: 2\n  renderer: NetworkManager\n' \
+      | sudo install -m 600 /dev/stdin /etc/netplan/01-network-manager-all.yaml
+  fi
+
   # sway: the i3 config ported to Wayland (config/sway), swaybar with bin/swaybar-status, wmenu as dmenu,
   # mako as dunst, swaylock/swayidle, grim+slurp screenshots, wob as the OSD bar, foot as the terminal
   log "Installing sway"
@@ -107,9 +124,11 @@ vt = 7
 command = "tuigreet --time --remember --asterisks --cmd sway"
 user = "_greetd"
 EOT
-  if ! systemctl is-enabled -q greetd; then
-    systemctl is-enabled -q gdm3 2>/dev/null && sudo systemctl disable gdm3
-    sudo systemctl enable greetd
+  # display-manager.service points at gdm3.service, itself an alias of gdm.service, so disabling gdm3 keeps
+  # the link and a plain enable (greetd's postinst too) fails on it quietly; --force replaces it
+  if [ "$(readlink -f /etc/systemd/system/display-manager.service)" != /usr/lib/systemd/system/greetd.service ]; then
+    sudo systemctl enable --force greetd
+    echo /usr/sbin/greetd | sudo tee /etc/X11/default-display-manager > /dev/null
   fi
 
   log "Installing virtualization"; pkg virt-manager tigervnc-viewer
