@@ -4,16 +4,20 @@ log() {
   echo -e "\033[0;31m$1\033[0m"
 }
 
-# ./install [--desktop] [--ru-mirror]
+# ./install [--desktop] [--ru-mirror] [--skip-go] [--skip-ts]
 #   --desktop    the sway, i3 and dwm sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
 #                Discord, Steam.
 #                Then ./debloat strips GNOME and snapd
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
-DESKTOP=0; RU_MIRROR=0
+#   --skip-go    keep the Go tools in ~/go/bin as they are, no `go install`
+#   --skip-ts    keep the built treesitter parsers, no TSBuild
+DESKTOP=0; RU_MIRROR=0; SKIP_GO=0; SKIP_TS=0
 for arg in "$@"; do
   case "$arg" in
     --desktop)   DESKTOP=1 ;;
     --ru-mirror) RU_MIRROR=1 ;;
+    --skip-go)   SKIP_GO=1 ;;
+    --skip-ts)   SKIP_TS=1 ;;
     -h|--help)   sed -n '/^# \.\/install/,/^[^#]/{s/^# \{0,1\}//p;}' "$0"; exit 0 ;;
     *) log "Unknown option: $arg"; exit 1 ;;
   esac
@@ -205,7 +209,7 @@ Exec=$HOME/dotfiles/bin/dwm-session
 Type=Application
 EOT
 
-  # Terminal: kitty in both sessions (config/kitty), whose touch_scroll_multiplier makes up for sway's
+  # Terminal under sway: kitty (config/kitty), whose touch_scroll_multiplier makes up for sway's
   # slow touchpad scroll_factor in the terminal and tmux
   log "Installing kitty"; pkg kitty
   link config/kitty $HOME/.config/kitty
@@ -238,7 +242,7 @@ EOT
     sudo usermod -aG libvirt $USER
   fi
 
-  # Fonts: Iosevka for kitty, the bars and the menus, Apple's emoji
+  # Fonts: Iosevka for kitty, st, the bars and the menus, Apple's emoji
   if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
     log "Downloading Iosevka nerd font"
     mkdir -p $HOME/.local/share/fonts
@@ -341,33 +345,41 @@ fi
 # Go-based CLIs and dev tools into ~/go/bin, newer than the archive's; fetched through
 # proxy.golang.org, no GitHub involved ─────────────────────────────────────────────────────
 export PATH="$HOME/go/bin:$HOME/.local/bin:$PATH"
-log "Installing go tools"
-for mod in \
-  github.com/cli/cli/v2/cmd/gh@latest \
-  gitlab.com/gitlab-org/cli/cmd/glab@latest \
-  helm.sh/helm/v3/cmd/helm@latest \
-  github.com/derailed/k9s@latest \
-  github.com/mikefarah/yq/v4@latest \
-  github.com/jesseduffield/lazygit@latest \
-  github.com/google/go-containerregistry/cmd/crane@latest \
-  github.com/go-task/task/v3/cmd/task@latest \
-  github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest \
-  golang.org/x/tools/gopls@latest \
-  golang.org/x/tools/cmd/goimports@latest \
-  mvdan.cc/gofumpt@latest \
-  github.com/go-delve/delve/cmd/dlv@latest \
-  github.com/matryer/moq@latest \
-  github.com/onsi/ginkgo/v2/ginkgo@v2.14.0 \
-  github.com/mrjosh/helm-ls@latest \
-  github.com/nametake/golangci-lint-langserver@latest
-do
-  go install "$mod" || log "go install $mod failed. Continue installation."
-done
+if [ "$SKIP_GO" == 1 ]; then
+  log "Skipping go tools"
+else
+  log "Installing go tools"
+  for mod in \
+    github.com/cli/cli/v2/cmd/gh@latest \
+    gitlab.com/gitlab-org/cli/cmd/glab@latest \
+    helm.sh/helm/v3/cmd/helm@latest \
+    github.com/derailed/k9s@latest \
+    github.com/mikefarah/yq/v4@latest \
+    github.com/jesseduffield/lazygit@latest \
+    github.com/google/go-containerregistry/cmd/crane@latest \
+    github.com/go-task/task/v3/cmd/task@latest \
+    github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest \
+    golang.org/x/tools/gopls@latest \
+    golang.org/x/tools/cmd/goimports@latest \
+    mvdan.cc/gofumpt@latest \
+    github.com/go-delve/delve/cmd/dlv@latest \
+    github.com/matryer/moq@latest \
+    github.com/onsi/ginkgo/v2/ginkgo@v2.14.0 \
+    github.com/mrjosh/helm-ls@latest \
+    github.com/nametake/golangci-lint-langserver@latest
+  do
+    go install "$mod" || log "go install $mod failed. Continue installation."
+  done
+fi
 
 # Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
 # plugin. Queries are vendored in the repo; parsers are compiled here.
-log "Building treesitter parsers"
-nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
+if [ "$SKIP_TS" == 1 ]; then
+  log "Skipping treesitter parsers"
+else
+  log "Building treesitter parsers"
+  nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
+fi
 
 # zsh completions (sourced from .zshrc)
 log "Generating zsh completions"

@@ -18,6 +18,9 @@ cd ~/dotfiles && ./install --desktop  # plus the sway desktop and GUI apps
 ./debloat -n && ./debloat             # once, after --desktop: drop GNOME and snapd
 ```
 
+`--skip-go` and `--skip-ts` leave the Go tools and the treesitter parsers as they
+are, for a quick rerun after a config change.
+
 `./install` can be run from any directory and again at any time; it symlinks
 the configs and installs the tool set:
 
@@ -50,7 +53,7 @@ once a revision has been applied.
 - dwm and st, my own builds from github.com/danilrwx/{dwm,st} in `~/w`, as a third
   session: the X11 setup of i3 and `bin/wm-status` as the status text; dwm's own
   config binds the media, Fn and menu keys to the same `bin/` scripts
-- kitty as the terminal in sway and i3 (`config/kitty`): its `touch_scroll_multiplier`
+- kitty as the terminal in sway (`config/kitty`), st in i3 and dwm: its `touch_scroll_multiplier`
   makes up for sway's slow touchpad `scroll_factor` in the terminal and tmux
 - greetd with tuigreet as the login, offering sway, i3 and dwm and remembering the pick
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for

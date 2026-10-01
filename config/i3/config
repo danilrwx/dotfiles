@@ -15,8 +15,8 @@ set $fg       #ffffff
 set $accent   #00cd00
 set $darkgray #7f849c
 
-# kitty (config/kitty), one instance for every window
-set $term kitty --single-instance
+# st, my own build (github.com/danilrwx/st) as under dwm; kitty's touchpad multiplier does nothing on X11
+set $term st
 # dmenu-like launcher with the old dmenu colours, PATH fixed up for ~/.local/bin (bin/wm-menu)
 set $menu $HOME/dotfiles/bin/wm-menu
 set $lock i3lock -c 000000
