@@ -183,16 +183,18 @@ EndSection
 EOT
 
   # dwm and st, my own builds (github.com/danilrwx/{dwm,st}, patched, config.def.h as config) into /usr/local.
-  # dwm runs as its own session (bin/dwm-session) with the same X11 setup as i3 (bin/x-autostart) and sxhkd
-  # for the keys its config.h leaves out (config/sxhkd). A rerun pulls and rebuilds
+  # dwm runs as its own session (bin/dwm-session) with the same X11 setup as i3 (bin/x-autostart); its
+  # config.def.h binds the media, Fn and menu keys to the bin/ scripts. A rerun pulls and rebuilds
   log "Installing dwm and st"
-  pkg libx11-dev libxft-dev libxinerama-dev sxhkd
+  pkg libx11-dev libxft-dev libxinerama-dev
   for r in dwm st; do
     if [ -d "$HOME/w/$r/.git" ]; then
       git -C "$HOME/w/$r" pull -q --ff-only || log "Failed to update ~/w/$r. Continue installation."
     else
       mkdir -p "$HOME/w" && git clone -q "https://github.com/danilrwx/$r" "$HOME/w/$r"
     fi
+    # make copies config.def.h to config.h only while there is none, so a stale one would win
+    rm -f "$HOME/w/$r/config.h"
     make -s -C "$HOME/w/$r" && sudo make -s -C "$HOME/w/$r" install || log "Failed to build $r. Continue installation."
   done
   sudo install -D -m 644 /dev/stdin /usr/share/xsessions/dwm.desktop <<EOT
