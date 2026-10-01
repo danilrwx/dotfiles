@@ -61,7 +61,7 @@ log "Linking configs"
 mkdir -p $HOME/.config
 mkdir -p $HOME/.local/bin $HOME/.local/share
 
-for f in .gitconfig .gitignore_global .tmux.conf .zprofile .zshrc; do
+for f in .gitconfig .gitignore_global .profile .tmux.conf .zprofile .zshrc; do
   link $f $HOME/$f
 done
 for c in k9s htop lazygit nvim; do
