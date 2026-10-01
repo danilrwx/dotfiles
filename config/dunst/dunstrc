@@ -1,4 +1,4 @@
-# dunst under i3 and dwm: white cards, black text, thin blue frame, top right.
+# dunst under i3: white cards, black text, thin blue frame, top right.
 # bin/wm-fnkeys sends volume/brightness with a value hint, drawn as the progress bar.
 [global]
     font = Iosevka 14

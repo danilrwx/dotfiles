@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ./debloat [-n]
-#   Strip a stock Ubuntu desktop down to what the i3 and dwm sessions from `./install --desktop` run on:
+#   Strip a stock Ubuntu desktop down to what the i3 session from `./install --desktop` runs on:
 #   every snap and snapd itself (blocked from coming back), GNOME, GDM and the Ubuntu desktop extras, the
 #   sway stack from before, NetworkManager (iwd has Wi-Fi), the services nothing here uses and the configs
 #   the removed apps left in ~/.config.
@@ -36,11 +36,11 @@ REMOVE=(
   nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
   firefox snapd wayland-scroll-factor ghostty foot
-  # the sway session, given up for i3 and dwm on X11, and pavucontrol (bin/wm-ctl picks the devices)
+  # the sway session, given up for i3 on X11, and pavucontrol (bin/wm-ctl picks the devices)
   sway swaybg swayidle swaylock wmenu mako-notifier grim slurp wl-clipboard xdg-desktop-portal-wlr wob xwayland
   pavucontrol
-  # Openbox and its bar, tried as a third session and dropped
-  openbox dzen2 stalonetray wmctrl
+  # Openbox and its bar, awesome: tried as sessions next to i3 and dropped
+  openbox dzen2 stalonetray wmctrl awesome
   # the heavy terminals, st is the one; not xterm, xinit and steam-libs depend on it
   kitty alacritty wezterm terminator tilix konsole xfce4-terminal lxterminal gnome-console qterminal
   # NetworkManager stays off for iwd and systemd-networkd (install), so it goes with its plugins and the
@@ -110,5 +110,7 @@ log "Removing configs of the removed apps"
 for c in "${STALE[@]}"; do rm -rf "${HOME:?}/.config/$c"; done
 # the links install made for sway, mako and kitty point at nothing now
 for l in sway mako kitty; do [ -L "$HOME/.config/$l" ] && [ ! -e "$HOME/.config/$l" ] && rm "$HOME/.config/$l"; done
+# dwm, built into /usr/local by an older install, and its session; ~/w/dwm stays, a clone of my repo
+sudo rm -f /usr/local/bin/dwm /usr/local/share/man/man1/dwm.1 /usr/share/xsessions/dwm.desktop
 
 log "Done. Reboot: greetd takes over the login."

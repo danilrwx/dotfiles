@@ -14,7 +14,7 @@ Personal dotfiles for Ubuntu.
 ```sh
 git clone https://github.com/danilrwx/dotfiles ~/dotfiles
 cd ~/dotfiles && ./install            # CLI tools only
-cd ~/dotfiles && ./install --desktop  # plus the i3 and dwm desktop and GUI apps
+cd ~/dotfiles && ./install --desktop  # plus the i3 desktop and GUI apps
 ./debloat -n && ./debloat             # once, after --desktop: drop GNOME and snapd
 ```
 
@@ -46,10 +46,8 @@ once a revision has been applied.
 - i3 on X11 (`config/i3`) with `bin/wm-status` in i3bar: dmenu, dunst (`config/dunst`),
   i3lock/xss-lock, maim, xclip, the volume/brightness cards and HONOR Fn keys through
   `bin/wm-fnkeys`, `Xft.dpi` for the scale (`.Xresources`), the touchpad in xorg.conf.d
-- dwm and st, my own builds from github.com/danilrwx/{dwm,st} in `~/w`, as the second
-  session: the X11 setup of i3 and `bin/wm-status` as the status text; dwm's own
-  config binds the media, Fn and menu keys to the same `bin/` scripts. st is the terminal in both
-- greetd with tuigreet as the login, offering i3 and dwm and remembering the pick; the
+- st, my own build from github.com/danilrwx/st in `~/w`, as the terminal
+- greetd with tuigreet as the login, starting i3 and remembering the user; the
   session environment comes from `.profile`
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
   the wire; `$mod+x` picks impala or bluetui (Wi-Fi, Bluetooth), the sound output or input,
@@ -64,7 +62,7 @@ once a revision has been applied.
 
 `./debloat` then removes every snap and snapd (pinned out of apt), GNOME, GDM and
 the ~350 packages only the Ubuntu desktop metapackages pulled in, keeping what
-the i3 and dwm sessions need (iwd, Bluetooth, sound, fingerprint, power profiles,
+the i3 session needs (iwd, Bluetooth, sound, fingerprint, power profiles,
 the keyring). It also takes the old sway stack and kitty, NetworkManager, ibus and
 the extra dictionaries, disables ModemManager, cups-browsed and the Ubuntu Pro and
 MOTD timers, and clears what the removed apps left in `~/.config`. `-n` shows all of it without changing
@@ -74,17 +72,16 @@ anything; it refuses to run before greetd is enabled.
 
 | Path | What |
 |---|---|
-| `install` | host setup (symlinks, packages, go tools, the i3 and dwm desktop); `bin/dotfiles-update` is the same script on PATH |
+| `install` | host setup (symlinks, packages, go tools, the i3 desktop); `bin/dotfiles-update` is the same script on PATH |
 | `debloat` | one-off: strip GNOME, snapd and the unused rest from a stock Ubuntu desktop |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
 | `bin/wm-fnkeys` | volume/brightness as a dunst card, HONOR Fn-key actions and cards |
 | `bin/wm-ctl` | `$mod+x`: Wi-Fi (impala), Bluetooth (bluetui), sound output and input, headset mode, power profile |
-| `bin/wm-status` | i3bar and dwm status line: memory, volume, mic, battery, brightness, layout, date |
+| `bin/wm-status` | i3bar's status line: memory, volume, mic, battery, brightness, layout, date |
 | `bin/wm-menu` | dmenu in the old colours: the launcher, and `pick` for the menus |
 | `bin/clip` | stdin to the clipboard through xclip (tmux, nvim, screenshots) |
 | `bin/x-autostart` | the X11 session setup: keyboard, Xresources, notifications, polkit agent, idle/lock |
-| `bin/dwm-session` | the dwm session: `x-autostart`, `wm-status` as the status text, dwm |
 | `bin/screenshot-select` | region screenshot into the clipboard |
 | `bin/sys-notify`, `bin/cal-notify` | load/memory/battery and a calendar as a notification |

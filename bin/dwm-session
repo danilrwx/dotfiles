@@ -1,7 +1,0 @@
-#!/bin/sh
-# The dwm session (/usr/share/xsessions/dwm.desktop from install, started by tuigreet through startx): the
-# X11 setup from bin/x-autostart, bin/wm-status as dwm's status text, then dwm itself. dwm binds the media,
-# Fn and menu keys in its own config.def.h.
-"$HOME/dotfiles/bin/x-autostart"
-WM_STATUS_ICONS=nerd "$HOME/dotfiles/bin/wm-status" | while read -r line; do xsetroot -name "$line"; done &
-exec dwm

@@ -5,7 +5,7 @@ log() {
 }
 
 # ./install [--desktop] [--ru-mirror] [--skip-go] [--skip-ts]
-#   --desktop    the i3 and dwm sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
+#   --desktop    the i3 session with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
 #                Discord, Steam.
 #                Then ./debloat strips GNOME and snapd
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
@@ -87,7 +87,7 @@ pkg build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugr
 # Ubuntu ships fd as fdfind; nvim's :find and file picker look for fd
 ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
 
-# Desktop (--desktop): i3, dwm, greetd, GUI apps ────────────────────────────────────────────────────────────────
+# Desktop (--desktop): i3, greetd, GUI apps ─────────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
   # The desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop: iwd for Wi-Fi, Bluetooth,
   # sound, fingerprint, power profiles (bin/wm-fnkeys), firmware updates, the portal for
@@ -154,7 +154,7 @@ EOT
     fi
   done
 
-  # X11 and i3 (config/i3), the base dwm shares: dmenu, dunst (config/dunst), i3lock/xss-lock, maim
+  # X11 and i3 (config/i3): dmenu, dunst (config/dunst), i3lock/xss-lock, maim
   # screenshots, xclip, the media keys (bin/wm-fnkeys), lxpolkit; Xft.dpi for the scale (.Xresources).
   # Started by tuigreet through startx
   log "Installing i3"
@@ -170,7 +170,7 @@ EOT
   # (clickfinger); natural scrolling, a slower pointer, and scrolling at the driver's slowest: 50 px of
   # finger travel per wheel step, against the default 15 (the most xf86-input-libinput accepts)
   sudo install -D -m 644 /dev/stdin /etc/X11/xorg.conf.d/30-touchpad.conf <<'EOT'
-# install: the touchpad under i3 and dwm
+# install: the touchpad under i3
 Section "InputClass"
     Identifier "touchpad"
     MatchIsTouchpad "on"
@@ -184,41 +184,31 @@ Section "InputClass"
 EndSection
 EOT
 
-  # dwm and st, my own builds (github.com/danilrwx/{dwm,st}, patched, config.def.h as config) into /usr/local.
-  # dwm runs as its own session (bin/dwm-session) with the same X11 setup as i3 (bin/x-autostart); its
-  # config.def.h binds the media, Fn and menu keys to the bin/ scripts. A rerun pulls and rebuilds
-  log "Installing dwm and st"
-  pkg libx11-dev libxft-dev libxinerama-dev
-  for r in dwm st; do
-    if [ -d "$HOME/w/$r/.git" ]; then
-      git -C "$HOME/w/$r" pull -q --ff-only || log "Failed to update ~/w/$r. Continue installation."
-    else
-      mkdir -p "$HOME/w" && git clone -q "https://github.com/danilrwx/$r" "$HOME/w/$r"
-    fi
-    # make copies config.def.h to config.h only while there is none, so a stale one would win
-    rm -f "$HOME/w/$r/config.h"
-    make -s -C "$HOME/w/$r" && sudo make -s -C "$HOME/w/$r" install || log "Failed to build $r. Continue installation."
-  done
+  # st, the terminal, my own build (github.com/danilrwx/st, patched, config.def.h as config) into
+  # /usr/local. A rerun pulls and rebuilds
+  log "Installing st"
+  pkg libx11-dev libxft-dev
+  if [ -d "$HOME/w/st/.git" ]; then
+    git -C "$HOME/w/st" pull -q --ff-only || log "Failed to update ~/w/st. Continue installation."
+  else
+    mkdir -p "$HOME/w" && git clone -q "https://github.com/danilrwx/st" "$HOME/w/st"
+  fi
+  # make copies config.def.h to config.h only while there is none, so a stale one would win
+  rm -f "$HOME/w/st/config.h"
+  make -s -C "$HOME/w/st" && sudo make -s -C "$HOME/w/st" install || log "Failed to build st. Continue installation."
   # st as x-terminal-emulator, for whatever opens "a terminal"; debloat takes the rest
   if [ -x /usr/local/bin/st ]; then
     sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/local/bin/st 60
     sudo update-alternatives --set x-terminal-emulator /usr/local/bin/st
   fi
-  sudo install -D -m 644 /dev/stdin /usr/share/xsessions/dwm.desktop <<EOT
-[Desktop Entry]
-Name=dwm
-Comment=dwm with the dotfiles session setup
-Exec=$HOME/dotfiles/bin/dwm-session
-Type=Application
-EOT
 
-  # Login: greetd with tuigreet, offering i3 and dwm (through startx), remembering the pick; GDM goes
+  # Login: greetd with tuigreet, starting i3 through startx, remembering the user; GDM goes
   # with GNOME in ./debloat. Takes over the display-manager alias at the next boot, the running session is
   # left alone
   log "Installing greetd"
   pkg greetd tuigreet
   sudo tee /etc/greetd/config.toml > /dev/null <<'EOT'
-# install: tuigreet on vt 7 with the i3 and dwm sessions, remembering the last user and session
+# install: tuigreet on vt 7 with the i3 session, remembering the last user and session
 [terminal]
 vt = 7
 
@@ -245,7 +235,7 @@ EOT
   fi
 
   # Fonts: Iosevka from the archive for st, the bars and the menus; the Nerd Font icons as their own
-  # single-width Symbols Nerd Font Mono, which fontconfig falls back to and dwm lists after Iosevka; Apple's
+  # single-width Symbols Nerd Font Mono, which fontconfig falls back to; Apple's
   # emoji. The patched Iosevka Nerd Fonts from before go, their 700 MB zip with them
   log "Installing Iosevka"; pkg fonts-iosevka
   mkdir -p $HOME/.local/share/fonts

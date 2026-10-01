@@ -1,5 +1,5 @@
-# i3, with the same keys and bin/ scripts as dwm (~/w/dwm config.def.h). bin/x-autostart sets the keyboard
-# and the daemons, the touchpad is /etc/X11/xorg.conf.d/30-touchpad.conf from install.
+# i3, the session (tuigreet starts it through startx). bin/x-autostart sets the keyboard and the daemons,
+# the touchpad is /etc/X11/xorg.conf.d/30-touchpad.conf from install.
 
 set $mod Mod4
 
@@ -14,7 +14,7 @@ set $fg       #ffffff
 set $accent   #00cd00
 set $darkgray #888888
 
-# st, my own build (github.com/danilrwx/st) as under dwm
+# st, my own build (github.com/danilrwx/st)
 set $term st
 # dmenu-like launcher with the old dmenu colours, PATH fixed up for ~/.local/bin (bin/wm-menu)
 set $menu $HOME/dotfiles/bin/wm-menu
@@ -166,9 +166,9 @@ client.unfocused               $bg        $bg       $darkgray      $bg          
 client.urgent                  $accent    $bg       $accent        $accent      $accent
 
 bar {
-  # as dwm's bar: Nerd Font icons a size below the text (wm-status' pango mode), 24px clear of the panel's
-  # rounded corners at either end (12 logical px, i3 doubles them at Xft.dpi 192)
-  status_command WM_STATUS_ICONS=pango $HOME/dotfiles/bin/wm-status
+  # Nerd Font icons a size below the text (bin/wm-status), 24px clear of the panel's rounded corners at
+  # either end (12 logical px, i3 doubles them at Xft.dpi 192); the tray takes no padding
+  status_command $HOME/dotfiles/bin/wm-status
   padding 0 12px
   tray_padding 5
   position top

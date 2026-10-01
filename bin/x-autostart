@@ -1,5 +1,5 @@
 #!/bin/bash
-# The X11 session setup for i3 (`exec` in config/i3/config) and dwm (bin/dwm-session): the keyboard (Caps
+# The X11 session setup, run by i3 (`exec` in config/i3/config): the keyboard (Caps
 # as Ctrl is config/hwdb, below the keymap), Xresources for the scale, a black root, then the daemons, each
 # detached.
 

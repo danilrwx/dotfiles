@@ -1,5 +1,5 @@
 #!/bin/sh
-# dmenu for i3 and dwm, in the old dmenu colours.
+# dmenu for i3, in the old dmenu colours.
 #   wm-menu             run a program; the session PATH lacks the user dirs, so they are added first
 #   wm-menu pick PROMPT choose a line of stdin, print it
 export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"

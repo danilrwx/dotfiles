@@ -1,5 +1,5 @@
 #!/bin/sh
-# Media and HONOR Fn keys under i3 and dwm. Levels (volume, mic, brightness)
+# Media and HONOR Fn keys under i3. Levels (volume, mic, brightness)
 # are a dunst progress card, states (mute, touchpad, profile, camera) a
 # notification card. The performance and camera keys are acted on by
 # honor-hotkey-actions.service; here we only show what it did.
