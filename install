@@ -360,10 +360,9 @@ if [[ "$OS" == "Linux" ]]; then
       git clone -q https://github.com/danilrwx/honor-magicbook-pro-14-2026-ubuntu "$HONOR"
     fi
     # No pipe around it: under sudo's pty a piped apt stops on SIGTTOU.
-    # The alc269 overlay hangs this unit at boot on the 7.0 kernel. The DSC
-    # colour-depth preference is not worth an xe.ko rebuild on every kernel.
+    # The DSC colour-depth preference is not worth an xe.ko rebuild on every kernel.
     log "Applying the HONOR MagicBook fixes"
-    sudo SKIP_HEADSET=1 SKIP_DSC=1 "$HONOR/apply_patch.sh" \
+    sudo SKIP_DSC=1 "$HONOR/apply_patch.sh" \
       || log "HONOR fixes reported problems, see above. Continue installation."
 
     # Touchpad scroll speed: GNOME has no setting for it. wayland-scroll-factor scales libinput's
