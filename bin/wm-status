@@ -5,88 +5,47 @@
 # wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0
 export LC_NUMERIC=C
 
-# Icons: Nerd Font glyphs (Symbols Nerd Font Mono) in the text's color, each a size below the text; emoji
-# would draw at their own size and colors
-glyph() { printf "<span font='Symbols Nerd Font Mono 9'>%s</span>" "$1"; }
-I_MEM="$(glyph $'\U000f035b') " I_VOL="$(glyph $'\U000f057e') " I_MUTE="$(glyph $'\U000f075f') "
-I_MIC="$(glyph $'\U000f036c') " I_MICOFF="$(glyph $'\U000f036d') " I_BRI="$(glyph $'\U000f00e0') "
-I_RU="$(glyph $'\U000f030c') " I_US="$(glyph $'\U000f030c') "
+# Icons: Noto Color Emoji (fonts-noto-color-emoji), each a size below the text so the bar keeps its height.
+# glyph EMOJI [PX]: the emoji between its two spaces. A narrow one (the mic, the battery) leaves blank on
+# both sides of its square, so PX comes off each space: Pango letter-spacing, 1024 of its units a px in
+# i3bar at Xft.dpi 192 (Iosevka has no narrower space to swap in, its thin ones are as wide as the plain)
+glyph() {
+  local sp=' '
+  [ "${2:-0}" -gt 0 ] && sp="<span letter_spacing='-$(( $2 * 1024 ))'> </span>"
+  printf "%s<span font='Noto Color Emoji 9'>%s</span>%s" "$sp" "$1" "$sp"
+}
+I_MEM=$(glyph 🧠) I_VOL=$(glyph 🔊) I_MUTE=$(glyph 🔇) I_MIC=$(glyph 🎙️ 4) I_MICOFF=$(glyph 🙊)
+I_BRI=$(glyph 🌞) I_RU=$(glyph 🇷🇺) I_US=$(glyph 🇺🇸)
 
 vol() {
   local icon=$I_VOL out
   out=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)   # "Volume: 0.45 [MUTED]"
   [[ $out == *MUTED* ]] && icon=$I_MUTE
-  echo -e " $icon$(awk '{printf "%d%%", $2*100}' <<<"$out")"
+  echo -e "$icon$(awk '{printf "%d%%", $2*100}' <<<"$out")"
 }
 
 mic() {
   local icon=$I_MIC out
   out=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null)
   [[ $out == *MUTED* ]] && icon=$I_MICOFF
-  echo -e " $icon$(awk '{printf "%d%%", $2*100}' <<<"$out")"
+  echo -e "$icon$(awk '{printf "%d%%", $2*100}' <<<"$out")"
 }
 
+# bat_icon N: ⚡ while charging, 🪫 below 20%, 🔋 otherwise
 bat_icon() {
   local bat="/sys/class/power_supply/BAT$1"
-  local vol status
-  vol="$(cat "$bat/capacity")"
-  status="$(cat "$bat/status")"
-
-  local result="󰁹"
-  [[ $status = "Charging" ]] && result="󰂅"
-
-  if [[ $vol -lt 90 ]]; then
-    result="󰂂"
-    [[ $status = "Charging" ]] && result="󰂋"
-  fi
-
-  if [[ $vol -lt 80 ]]; then
-    result="󰂁"
-    [[ $status = "Charging" ]] && result="󰂊"
-  fi
-
-  if [[ $vol -lt 70 ]]; then
-    result="󰂀"
-    [[ $status = "Charging" ]] && result="󰢞"
-  fi
-
-  if [[ $vol -lt 60 ]]; then
-    result="󰁿"
-    [[ $status = "Charging" ]] && result="󰂉"
-  fi
-
-  if [[ $vol -lt 50 ]]; then
-    result="󰁾"
-    [[ $status = "Charging" ]] && result="󰢝"
-  fi
-
-  if [[ $vol -lt 40 ]]; then
-    result="󰁽"
-    [[ $status = "Charging" ]] && result="󰂈"
-  fi
-
-  if [[ $vol -lt 30 ]]; then
-    result="󰁼"
-    [[ $status = "Charging" ]] && result="󰂇"
-  fi
-
-  if [[ $vol -lt 20 ]]; then
-    result="󰁻"
-    [[ $status = "Charging" ]] && result="󰂆"
-  fi
-
-  if [[ $vol -lt 10 ]]; then
-    result="󰁺"
-    [[ $status = "Charging" ]] && result="󰢜"
-  fi
-
-  echo "$result"
+  if [[ $(cat "$bat/status") = "Charging" ]]; then printf ⚡
+  elif (( $(cat "$bat/capacity") < 20 )); then printf 🪫
+  else printf 🔋; fi
 }
 
 bat() {
   local n=$1
   if [[ -d /sys/class/power_supply/BAT$n/ ]]; then
-    echo -e " $(del)$(glyph "$(bat_icon $n)") $(cat /sys/class/power_supply/BAT$n/capacity)%"
+    local icon trim=0
+    icon=$(bat_icon "$n")
+    [ "$icon" = 🔋 ] && trim=6   # the battery stands narrow in its square, ⚡ and 🪫 less so
+    echo -e "$(del)$(glyph "$icon" $trim)$(cat /sys/class/power_supply/BAT$n/capacity)%"
   fi
 }
 
@@ -95,7 +54,7 @@ bri() {
     local c m
     c=$(brightnessctl get)
     m=$(brightnessctl max)
-    echo -e "$(del) $I_BRI$(( c * 100 / m ))%"
+    echo -e "$(del)$I_BRI$(( c * 100 / m ))%"
   fi
 }
 
@@ -108,14 +67,14 @@ datef() {
 }
 
 mem() {
-  echo -e " $I_MEM$(free -h | awk '/Mem/{print $3}')"
+  echo -e "$I_MEM$(free -h | awk '/Mem/{print $3}')"
 }
 
 keyboard() {
   # grp_led:scroll lights Scroll Lock (bit 2 of xset's LED mask) while the second layout is on
   local ru=0
   (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && ru=1
-  (( ru )) && echo -e " ${I_RU}RU" || echo -e " ${I_US}US"
+  (( ru )) && echo -e "${I_RU}RU" || echo -e "${I_US}US"
 }
 
 # one block per line in an endless array; the line has no " or \ to escape

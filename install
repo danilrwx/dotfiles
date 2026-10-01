@@ -41,7 +41,7 @@ DESKTOP_PKGS=(iwd bluez rfkill
   pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
   udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
-  gnome-keyring libpam-gnome-keyring fonts-noto-color-emoji fonts-noto-cjk fonts-iosevka cups
+  gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-font-awesome fonts-noto-color-emoji fonts-noto-cjk cups
   greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome libx11-dev libxft-dev)
 # X11 and i3 without their recommends: dmenu, dunst, i3lock/xss-lock, maim and xclip for screenshots, the
 # media keys (bin/wm-fnkeys), the polkit agent
@@ -188,7 +188,7 @@ desktop_system() {
     -e 's|^FONTSIZE=.*|FONTSIZE="16x32"|' /etc/default/console-setup
 }
 
-# Desktop, user side: the session's configs, st, fonts, ssh-agent ─────────────────────────────────────────────────────
+# Desktop, user side: the session's configs, st, ssh-agent ────────────────────────────────────────────────────────────
 desktop_session() {
   link config/i3 "$HOME/.config/i3"
   link config/dunst "$HOME/.config/dunst"
@@ -209,25 +209,6 @@ desktop_session() {
   if [ -x /usr/local/bin/st ]; then
     sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/local/bin/st 60
     sudo update-alternatives --set x-terminal-emulator /usr/local/bin/st
-  fi
-
-  # Fonts: Iosevka (DESKTOP_PKGS) for st, the bar and the menus; the Nerd Font icons as the single-width
-  # Symbols Nerd Font Mono, which fontconfig falls back to; Apple's emoji
-  local fonts=$HOME/.local/share/fonts tmp
-  mkdir -p "$fonts"
-  if [ ! -f "$fonts/SymbolsNerdFontMono-Regular.ttf" ]; then
-    log "Downloading Symbols Nerd Font Mono"
-    tmp=$(mktemp -d)
-    curl -fsSL -o "$tmp/symbols.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/NerdFontsSymbolsOnly.zip \
-      && unzip -o -q "$tmp/symbols.zip" SymbolsNerdFontMono-Regular.ttf -d "$fonts"
-    rm -rf "$tmp"
-    fc-cache -f
-  fi
-  if [ ! -f "$fonts/AppleColorEmoji.ttf" ]; then
-    log "Downloading Apple Emoji font"
-    curl -fsSL -o "$fonts/AppleColorEmoji.ttf" \
-      https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
-    fc-cache -f
   fi
 
   # ssh: the plain ssh-agent with OpenSSH's GTK3 askpass, so AddKeysToAgent confirm shows a dialog per key

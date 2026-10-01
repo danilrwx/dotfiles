@@ -52,7 +52,8 @@ once a revision has been applied.
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
   the wire; `$mod+x` picks impala or bluetui (Wi-Fi, Bluetooth), the sound output or input,
   the Bluetooth headset mode (headphones or handsfree) or the power profile
-- Iosevka (fonts-iosevka), Symbols Nerd Font Mono and Apple Color Emoji
+- fonts from the archive alone: Iosevka for the text, Noto Color Emoji for the bar's icons and the rest,
+  Font Awesome 4.7 for the prompt's chevron
 - ssh through the plain `ssh-agent` with OpenSSH's GTK3 askpass
   (`ssh-askpass-gnome`, per-use confirm too) instead of gcr's agent
 - Google Chrome from Google's .deb (their apt repo comes with it), set as the default
