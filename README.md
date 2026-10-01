@@ -32,7 +32,7 @@ the configs and installs the tool set:
   `helm-ls`, `golangci-lint-langserver`
 
 `kubectl` comes from dl.k8s.io (checked against its sha256); `d8` and `claude`
-use their own installers. It also installs Docker (get.docker.com) and joins the
+use their own installers. It also installs Docker from the archive (`docker.io`, compose, buildx) and joins the
 `docker` group, sets `zsh` as the login shell, and installs the Caps Lock as Ctrl
 hwdb rule (`config/hwdb`).
 

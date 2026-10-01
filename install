@@ -405,9 +405,19 @@ if [ -n "$zsh_bin" ] && [ "$(getent passwd "$USER" | cut -d: -f7)" != "$zsh_bin"
 fi
 
 # Docker and the HONOR MagicBook fixes ────────────────────────────────────────
-if [ ! -f /usr/bin/docker ]; then
+# Docker from the Ubuntu archive (docker.io, compose and buildx as their own packages), updated with the
+# rest by apt. A host that has Docker Inc's docker-ce from an older install (get.docker.com) drops it and
+# its apt repo first; /var/lib/docker, the images and containers, stays for docker.io to take over
+if dpkg-query -W -f='${db:Status-Status}' docker-ce 2>/dev/null | grep -qx installed; then
+  log "Moving from Docker Inc's docker-ce to the archive's docker.io"
+  sudo apt remove -y docker-ce docker-ce-cli docker-ce-rootless-extras containerd.io docker-buildx-plugin \
+    docker-compose-plugin docker-model-plugin
+  sudo rm -f /etc/apt/sources.list.d/docker.list /etc/apt/sources.list.d/docker.sources /etc/apt/keyrings/docker.asc
+  sudo apt update -y
+fi
+if ! dpkg-query -W -f='${db:Status-Status}' docker.io 2>/dev/null | grep -qx installed; then
   log "Installing docker"
-  curl -fsSL https://get.docker.com | bash
+  pkg docker.io docker-compose-v2 docker-buildx
   log "Enabling docker"
   sudo systemctl enable --now docker.socket
 fi
