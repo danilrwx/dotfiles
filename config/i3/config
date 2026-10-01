@@ -25,8 +25,6 @@ font pango:Iosevka 11
 # autostart ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # once per session: keyboard, Xresources, background, notifications, polkit, idle/lock
 exec --no-startup-id $HOME/dotfiles/bin/x-autostart
-# the focus history Alt+Tab goes by (bin/i3-mru)
-exec --no-startup-id $HOME/dotfiles/bin/i3-mru daemon
 
 default_border pixel 1
 smart_borders  on
@@ -114,9 +112,6 @@ set $ws9  "9"
 set $ws10 "10"
 
 bindsym $mod+Tab workspace back_and_forth
-# Alt+Tab back to the window before, Alt+Shift+Tab every window in a dmenu pick, the recent first
-bindsym Mod1+Tab       exec --no-startup-id $HOME/dotfiles/bin/i3-mru last
-bindsym Mod1+Shift+Tab exec --no-startup-id $HOME/dotfiles/bin/i3-mru pick
 
 bindsym $mod+1 workspace number $ws1
 bindsym $mod+2 workspace number $ws2

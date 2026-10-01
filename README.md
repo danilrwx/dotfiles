@@ -79,7 +79,6 @@ anything; it refuses to run before greetd is enabled.
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
 | `bin/wm-fnkeys` | volume/brightness as a dunst card, HONOR Fn-key actions and cards |
 | `bin/wm-ctl` | `$mod+x`: Wi-Fi (impala), Bluetooth (bluetui), sound output and input, headset mode, power profile |
-| `bin/i3-mru` | Alt+Tab: back to the previous window; Alt+Shift+Tab: every window in dmenu, recent first |
 | `bin/wm-status` | i3bar's status line: memory, volume, mic, battery, brightness, layout, date |
 | `bin/wm-menu` | dmenu in the old colours: the launcher, and `pick` for the menus |
 | `bin/clip` | stdin to the clipboard through xclip (tmux, nvim, screenshots) |
