@@ -39,6 +39,8 @@ REMOVE=(
   # the sway session, given up for i3 and dwm on X11, and pavucontrol (bin/wm-ctl picks the devices)
   sway swaybg swayidle swaylock wmenu mako-notifier grim slurp wl-clipboard xdg-desktop-portal-wlr wob xwayland
   pavucontrol
+  # Openbox and its bar, tried as a third session and dropped
+  openbox dzen2 stalonetray wmctrl
   # the heavy terminals, st is the one; not xterm, xinit and steam-libs depend on it
   kitty alacritty wezterm terminator tilix konsole xfce4-terminal lxterminal gnome-console qterminal
   # NetworkManager stays off for iwd and systemd-networkd (install), so it goes with its plugins and the
