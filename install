@@ -85,6 +85,11 @@ ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
 # GUI apps for any desktop (--desktop) ─────────────────────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
   log "Installing virtualization"; pkg virt-manager tigervnc-viewer
+  # id -nG USER reads the group db, as for docker below
+  if ! id -nG "$USER" | grep -qw libvirt; then
+    log "Adding user to libvirt group"
+    sudo usermod -aG libvirt $USER
+  fi
 
   # Terminal: Ghostty from universe instead of Ubuntu's Ptyxis, for a config file (config/ghostty) instead of
   # dconf profiles. Ptyxis stays installed: purging it drags ubuntu-desktop-minimal along. xdg-terminal-exec
@@ -94,6 +99,27 @@ if [ "$DESKTOP" == 1 ]; then
   # the ghostty package does not register itself as x-terminal-emulator, so add it first
   sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/ghostty 50
   sudo update-alternatives --set x-terminal-emulator /usr/bin/ghostty
+
+  # Fonts for ghostty
+  if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
+    log "Downloading Iosevka nerd font"
+    mkdir -p $HOME/.local/share/fonts
+    # only IosevkaNerdFont-* ("Iosevka NF" in ghostty); the zip also carries the Mono and Propo
+    # families, 700 MB nothing uses
+    font_tmp=$(mktemp -d)
+    curl -fsSL -o "$font_tmp/Iosevka.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip \
+      && unzip -o -q "$font_tmp/Iosevka.zip" 'IosevkaNerdFont-*' -d $HOME/.local/share/fonts
+    rm -rf "$font_tmp"
+    fc-cache -f
+  fi
+
+  if [ ! -f $HOME/.local/share/fonts/AppleColorEmoji.ttf ]; then
+    log "Downloading Apple Emoji font"
+    curl -fsSL -o $HOME/.local/share/fonts/AppleColorEmoji.ttf \
+      https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
+    fc-cache -f
+  fi
+
   # tmux (copy-command) and nvim copy through wl-copy
   log "Installing wl-clipboard"; pkg wl-clipboard
 
@@ -115,45 +141,10 @@ if [ "$DESKTOP" == 1 ]; then
   # the same askpass for ssh clients started without a terminal, for the key passphrase
   mkdir -p "$HOME/.config/environment.d"
   link config/environment.d/ssh-askpass.conf "$HOME/.config/environment.d/ssh-askpass.conf"
-  if command -v systemctl &> /dev/null && [ -n "${XDG_RUNTIME_DIR:-}" ]; then
+  if [ -n "${XDG_RUNTIME_DIR:-}" ]; then
     systemctl --user daemon-reload
     systemctl --user mask --now gcr-ssh-agent.socket gcr-ssh-agent.service
     systemctl --user enable --now ssh-agent.socket
-  fi
-
-  # Pin ssh to that socket: terminals started before the switch (or by a stale session) still carry the gcr
-  # SSH_AUTH_SOCK, and without an agent ssh reads the key file and asks the passphrase every time
-  # The Match block goes last: a Match scopes every line after it, so at the top it swallowed the global
-  # options and Includes that followed. Any earlier copy is cut out first, so a rerun (or an old top-placed
-  # block) always ends with exactly one at the end. Written with `cat >`, which keeps a symlinked config.
-  mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh" && touch "$HOME/.ssh/config"
-  log "Pinning ssh to the systemd ssh-agent socket"
-  ssh_tmp=$(mktemp)
-  awk 'skip > 0 { skip--; next }
-       /^# Linux: pin ssh to the systemd ssh-agent socket/ { skip = 2; next }
-       n == 0 && $0 == "" { next }
-       { line[++n] = $0 }
-       END { while (n > 0 && line[n] == "") n--; for (i = 1; i <= n; i++) print line[i] }' \
-    "$HOME/.ssh/config" > "$ssh_tmp"
-  cat >> "$ssh_tmp" <<'EOT'
-
-# Linux: pin ssh to the systemd ssh-agent socket, whatever stale SSH_AUTH_SOCK a terminal carries
-Match exec "test -S ${XDG_RUNTIME_DIR}/openssh_agent"
-    IdentityAgent ${XDG_RUNTIME_DIR}/openssh_agent
-EOT
-  cat "$ssh_tmp" > "$HOME/.ssh/config" && chmod 600 "$HOME/.ssh/config"
-  rm -f "$ssh_tmp"
-
-  # the old gnome-ssh-askpass grabbed the keyboard and needed a .desktop file for GNOME to remember the
-  # "inhibit shortcuts" answer; the shell's system prompt needs none, so drop that file
-  rm -f "$HOME/.local/share/applications/ssh-askpass.desktop"
-
-  # inside a VM: guest agents so the display follows the viewer window size
-  if systemd-detect-virt -q; then
-    log "Installing VM guest agents"
-    pkg spice-vdagent qemu-guest-agent
-    # both units are static, started by udev/socket activation; start them once for this boot
-    sudo systemctl start spice-vdagentd.socket qemu-guest-agent || true
   fi
 
   # Google Chrome from Google's own .deb, which adds their apt repo and key, so later updates come with
@@ -224,15 +215,6 @@ if ! command -v kubectl &> /dev/null; then
   rm -f "$tmp"
 fi
 
-# neovim: the config needs 0.11+ (vim.lsp.config); older Ubuntu LTS ship less ──────────────────────────────────────────
-nvim_ok() { command -v nvim &> /dev/null && nvim --version | head -1 | grep -qE 'v0\.(1[1-9]|[2-9][0-9])|v[1-9]'; }
-if ! nvim_ok; then
-  log "Installing neovim from github"
-  nvim_arch=$(uname -m | sed 's/aarch64/arm64/')
-  curl -fsSL "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${nvim_arch}.tar.gz" \
-    | sudo tar -xzf - -C /usr/local --strip-components=1
-fi
-
 # Go-based CLIs and dev tools into ~/go/bin, newer than the archive's; fetched through
 # proxy.golang.org, no GitHub involved ─────────────────────────────────────────────────────
 export PATH="$HOME/go/bin:$HOME/.local/bin:$PATH"
@@ -261,10 +243,8 @@ done
 
 # Treesitter parsers (.so, per-machine) + queries, without the nvim-treesitter
 # plugin. Queries are vendored in the repo; parsers are compiled here.
-if command -v cc >/dev/null 2>&1; then
-  log "Building treesitter parsers"
-  nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
-fi
+log "Building treesitter parsers"
+nvim --headless -c 'TSBuild' -c 'qa' || log "TSBuild failed. Continue installation."
 
 # zsh completions (sourced from .zshrc)
 log "Generating zsh completions"
@@ -293,7 +273,7 @@ if [ -n "$zsh_bin" ] && [ "$(getent passwd "$USER" | cut -d: -f7)" != "$zsh_bin"
   chsh -s "$zsh_bin"
 fi
 
-# Docker, HONOR MagicBook fixes; then (--desktop only) libvirt group and fonts ────────────────────────────────────────
+# Docker and the HONOR MagicBook fixes ────────────────────────────────────────
 if [ ! -f /usr/bin/docker ]; then
   log "Installing docker"
   curl -fsSL https://get.docker.com | bash
@@ -357,33 +337,5 @@ if [ "$(cat /sys/class/dmi/id/product_name 2>/dev/null)" == "ZQC-P" ]; then
     # upstream's suggested factor on first install only, a later `wsf set` is kept
     [ -f "$HOME/.config/wayland-scroll-factor/config" ] || wsf set 0.35
     wsf enable
-    # the per-app scroll extension would scale on top of it
-    gnome-extensions disable touchpad-speed-control@ritesh 2> /dev/null || true
   fi
-fi
-
-[ "$DESKTOP" == 1 ] || exit 0
-
-if ! id -nG "$USER" | grep -qw libvirt; then
-  log "Adding user to libvirt group"
-  sudo usermod -aG libvirt $USER
-fi
-
-if [ ! -f $HOME/.local/share/fonts/IosevkaNerdFont-Medium.ttf ]; then
-  log "Downloading Iosevka nerd font"
-  mkdir -p $HOME/.local/share/fonts
-  # only IosevkaNerdFont-* ("Iosevka NF" in ghostty); the zip also carries the Mono and Propo
-  # families, 700 MB nothing uses
-  font_tmp=$(mktemp -d)
-  curl -fsSL -o "$font_tmp/Iosevka.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Iosevka.zip \
-    && unzip -o -q "$font_tmp/Iosevka.zip" 'IosevkaNerdFont-*' -d $HOME/.local/share/fonts
-  rm -rf "$font_tmp"
-  fc-cache -f
-fi
-
-if [ ! -f $HOME/.local/share/fonts/AppleColorEmoji.ttf ]; then
-  log "Downloading Apple Emoji font"
-  curl -fsSL -o $HOME/.local/share/fonts/AppleColorEmoji.ttf \
-    https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf
-  fc-cache -f
 fi

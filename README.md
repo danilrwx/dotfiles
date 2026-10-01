@@ -20,8 +20,7 @@ cd ~/dotfiles && ./install
 the configs and installs the tool set:
 
 - system CLIs from `apt`: `zsh`, `git`, `tmux`, `gnupg`, `fzf`, `jq`, `ripgrep`,
-  `ugrep`, `fd`, `htop`, `fastfetch`, `go`, `clangd`, `neovim`, `nodejs`/`npm`,
-  and `neovim` from a GitHub tarball when the archive's build is older than 0.11
+  `ugrep`, `fd`, `htop`, `fastfetch`, `go`, `clangd`, `neovim`, `nodejs`/`npm`
 - Go-based CLIs and dev tools via `go install` through proxy.golang.org:
   `gh`, `glab`, `helm`, `k9s`, `yq`, `lazygit`, `crane`, `task`,
   `golangci-lint`, `gopls`, `gofumpt`, `goimports`, `dlv`, `moq`, `ginkgo`,
@@ -48,11 +47,10 @@ for the screenshot UI and `Super+Shift+M` for mic mute, as in the old i3 config.
 - Google Chrome from Google's .deb (their apt repo comes with it), set as the default
   browser
 - virt-manager (and the `libvirt` group), Telegram and Discord from snap, Steam
-  from multiverse's `steam-installer`, the VM guest agents inside a VM
+  from multiverse's `steam-installer`
 - the vanilla "GNOME" session with the stock Adwaita look and a dark theme
   (pick it in the GDM gear once); the tray extension is added to the enabled ones
-- ssh through the plain `ssh-agent` with an askpass on the GNOME Shell system prompt (`bin/askpass`, gcr 4) instead of gcr's agent,
-  pinned by a `Match` block appended to `~/.ssh/config`
+- ssh through the plain `ssh-agent` with an askpass on the GNOME Shell system prompt (`bin/askpass`, gcr 4) instead of gcr's agent
 
 ## Layout
 
