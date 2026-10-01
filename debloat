@@ -20,9 +20,9 @@ esac
 [ "${ID:-}" == ubuntu ] || { log "Ubuntu only"; exit 1; }
 
 # install --desktop has to come first: greetd to log in with once GDM is gone, and the desktop base
-# (network, sound, Bluetooth...) installed by hand, so the autoremove below keeps it
+# (iwd, sound, Bluetooth...) installed by hand, so the autoremove below keeps it
 if [ "$DRY" == 0 ] && { [ "$(readlink -f /etc/systemd/system/display-manager.service)" != /usr/lib/systemd/system/greetd.service ] \
-  || ! apt-mark showmanual | grep -qx network-manager; }; then
+  || ! apt-mark showmanual | grep -qx iwd; }; then
   log "Run ./install --desktop first"; exit 1
 fi
 
@@ -41,7 +41,7 @@ remove=(); for p in "${REMOVE[@]}"; do installed "$p" && remove+=("$p"); done
 if [ "$DRY" == 1 ]; then
   log "Snaps that would go:"
   command -v snap > /dev/null && snap list 2>/dev/null | awk 'NR > 1 {print "  " $1}'
-  apt-mark showmanual | grep -qx network-manager \
+  apt-mark showmanual | grep -qx iwd \
     || log "(install --desktop has not run yet: the list still has the desktop base it would keep)"
   log "apt would remove:"
   LC_ALL=C apt-get -s purge --autoremove "${remove[@]}" | awk '/^Purg|^Remv/ {print "  " $2}'

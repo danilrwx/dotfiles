@@ -1,0 +1,9 @@
+#!/bin/sh
+# $mod+x under sway: pick Wi-Fi, Bluetooth or sound in wmenu, get impala, bluetui or pavucontrol. The TUIs
+# open in a floating foot window (app_id sway-ctl, see the for_window rule in config/sway/config).
+choice=$(printf 'wifi\nbluetooth\nsound\n' | wmenu -p ctl -f 'Iosevka NF 14' -N 000000 -n ffffff -M 000000 -m ffffff -S ffffff -s 000000) || exit 0
+case "$choice" in
+wifi)      exec footclient -a sway-ctl -T Wi-Fi "$HOME/.local/bin/impala" ;;
+bluetooth) exec footclient -a sway-ctl -T Bluetooth "$HOME/.local/bin/bluetui" ;;
+sound)     exec pavucontrol ;;
+esac

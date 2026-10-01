@@ -79,6 +79,8 @@ bindsym --locked XF86AudioPrev             exec playerctl previous
 bindsym $mod+Shift+s exec $HOME/dotfiles/bin/screenshot-select
 bindsym $mod+d       exec $menu
 bindsym $mod+Shift+x exec $lock
+# Wi-Fi, Bluetooth, sound: a wmenu pick, then impala, bluetui or pavucontrol (bin/sway-ctl)
+bindsym $mod+x       exec $HOME/dotfiles/bin/sway-ctl
 
 bindsym Control+Mod1+s exec $HOME/dotfiles/bin/sys-notify
 bindsym Control+Mod1+c exec $HOME/dotfiles/bin/cal-notify
@@ -177,6 +179,7 @@ for_window [class="steam" title="^Steam$"]                             floating 
 for_window [app_id="org.pulseaudio.pavucontrol"]                       floating enable, border normal
 for_window [app_id="(?i).*telegram.*"]                                 floating enable, border none
 for_window [title="^SSH Askpass$"]                                     floating enable
+for_window [app_id="sway-ctl"]                                         floating enable, resize set 900 600
 
 
 client.focused                 $bg        $bg       $fg            $accent      $accent

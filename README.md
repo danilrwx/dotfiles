@@ -45,6 +45,8 @@ once a revision has been applied.
   the volume/brightness bar and the HONOR Fn keys through `bin/sway-fnkeys`,
   grim+slurp screenshots, foot as the terminal (`config/foot`, one server)
 - greetd with tuigreet as the login, starting sway
+- iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
+  the wire, impala and bluetui as the Wi-Fi and Bluetooth TUIs behind `$mod+x`
 - the Iosevka Nerd Font and Apple Color Emoji
 - ssh through the plain `ssh-agent` with OpenSSH's GTK3 askpass
   (`ssh-askpass-gnome`, per-use confirm too) instead of gcr's agent
@@ -55,7 +57,7 @@ once a revision has been applied.
 
 `./debloat` then removes every snap and snapd (pinned out of apt), GNOME, GDM and
 the ~350 packages only the Ubuntu desktop metapackages pulled in, keeping what
-the sway session needs (network, Bluetooth, sound, fingerprint, power profiles,
+the sway session needs (iwd, Bluetooth, sound, fingerprint, power profiles,
 Xwayland, the keyring). `-n` shows the list without changing
 anything; it refuses to run before greetd is enabled.
 
@@ -69,7 +71,8 @@ anything; it refuses to run before greetd is enabled.
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |
 | `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
 | `bin/sway-fnkeys` | volume/brightness to wob, HONOR Fn-key actions and mako cards under sway |
-| `bin/sway-autostart` | sway session daemons: mako, foot server, wob, polkit agent, nm-applet, swayidle |
+| `bin/sway-autostart` | sway session daemons: mako, foot server, wob, polkit agent, swayidle |
+| `bin/sway-ctl` | `$mod+x`: Wi-Fi (impala), Bluetooth (bluetui) or sound (pavucontrol) |
 | `bin/swaybar-status` | swaybar line: memory, volume, mic, battery, brightness, layout, date |
 | `bin/sway-menu` | wmenu-run with the dmenu colours and the full PATH |
 | `bin/screenshot-select` | region screenshot into the clipboard |

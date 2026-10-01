@@ -84,29 +84,77 @@ ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
 
 # Desktop (--desktop): sway, greetd, GUI apps ───────────────────────────────────────────────────────────────────────
 if [ "$DESKTOP" == 1 ]; then
-  # The desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop: network, Bluetooth,
+  # The desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop: iwd for Wi-Fi, Bluetooth,
   # sound, fingerprint, power profiles (bin/sway-fnkeys), firmware updates, Xwayland (Steam), the portal for
   # file dialogs, the keyring Chrome keeps passwords in, fonts, printing. Installed by hand, so debloat's
   # autoremove keeps them when the desktop metapackages go
   log "Installing the desktop base"
-  pkg network-manager wpasupplicant bluez rfkill \
+  pkg iwd bluez rfkill \
     pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf sof-firmware \
     fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower \
     udisks2 fwupd systemd-oomd accountsservice polkitd xwayland xdg-desktop-portal-gtk xdg-utils xdg-user-dirs \
     gnome-keyring libpam-gnome-keyring fonts-noto-color-emoji fonts-noto-cjk cups
-  # Ubuntu Server leaves the network to systemd-networkd; hand it to NetworkManager, as the desktop
-  # installer does. Next boot, not now: switching mid-run could drop the connection
-  if [ ! -e /etc/netplan/01-network-manager-all.yaml ]; then
-    printf 'network:\n  version: 2\n  renderer: NetworkManager\n' \
-      | sudo install -m 600 /dev/stdin /etc/netplan/01-network-manager-all.yaml
+  # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
+  # netplan, DNS through systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
+  sudo install -D -m 644 /dev/stdin /etc/iwd/main.conf <<'EOT'
+# install: iwd configures the address itself, DNS goes to systemd-resolved
+[General]
+EnableNetworkConfiguration=true
+
+[Network]
+NameResolvingService=systemd
+EOT
+  sudo install -m 600 /dev/stdin /etc/netplan/01-wired.yaml <<'EOT'
+# install: the wire by systemd-networkd; Wi-Fi is iwd's, outside netplan
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    wired:
+      match:
+        name: "en*"
+      dhcp4: true
+      dhcp6: true
+      optional: true
+EOT
+  if systemctl is-active -q NetworkManager; then
+    # NM's saved Wi-Fi networks to iwd profiles while NM still runs; iwd names a file after the SSID
+    # when it is plain [A-Za-z0-9 _-], else "=" and its hex
+    log "Moving the saved Wi-Fi networks from NetworkManager to iwd"
+    nmcli -t -f NAME,TYPE connection show | while IFS=: read -r name type; do
+      [ "$type" == 802-11-wireless ] || continue
+      IFS=$'\n' read -r -d '' ssid keymgmt psk < <(sudo nmcli -s -g 802-11-wireless.ssid,802-11-wireless-security.key-mgmt,802-11-wireless-security.psk connection show "$name"; printf '\0') || true
+      file=$ssid
+      [[ $ssid =~ ^[A-Za-z0-9\ _-]+$ ]] || file="=$(printf %s "$ssid" | od -An -tx1 | tr -d ' \n')"
+      case "$keymgmt" in
+        wpa-psk|sae) printf '[Security]\nPassphrase=%s\n' "$psk" | sudo install -D -m 600 /dev/stdin "/var/lib/iwd/$file.psk" ;;
+        "")          sudo install -D -m 600 /dev/null "/var/lib/iwd/$file.open" ;;
+        *)           log "  $ssid: $keymgmt is not moved, add it in impala" ;;
+      esac
+    done
+    # the switch itself at the next boot: done now, it would cut the network under this very script
+    sudo rm -f /etc/netplan/01-network-manager-all.yaml /etc/netplan/90-NM-*.yaml
+    sudo systemctl disable NetworkManager NetworkManager-wait-online wpa_supplicant 2>/dev/null || true
+    log "Wi-Fi moves to iwd at the next boot"
   fi
+  sudo systemctl enable iwd systemd-networkd
+
+  # Wi-Fi and Bluetooth TUIs (impala, bluetui), one author, static builds; not in the archive
+  for t in impala:v0.9.0:impala-x86_64-unknown-linux-musl bluetui:v0.8.1:bluetui-x86_64-linux-musl; do
+    IFS=: read -r name ver asset <<< "$t"
+    if [ "$("$HOME/.local/bin/$name" --version 2>/dev/null | awk '{print "v" $2}')" != "$ver" ]; then
+      log "Installing $name $ver"
+      curl -fsSL -o "$HOME/.local/bin/$name.new" "https://github.com/pythops/$name/releases/download/$ver/$asset" \
+        && chmod +x "$HOME/.local/bin/$name.new" && mv "$HOME/.local/bin/$name.new" "$HOME/.local/bin/$name"
+    fi
+  done
 
   # sway: the i3 config ported to Wayland (config/sway), swaybar with bin/swaybar-status, wmenu as dmenu,
   # mako as dunst, swaylock/swayidle, grim+slurp screenshots, wob as the OSD bar, foot as the terminal
   log "Installing sway"
   sudo apt install -y --no-install-recommends sway swaybg swayidle swaylock wmenu mako-notifier grim slurp \
     wl-clipboard xdg-desktop-portal-wlr xdg-desktop-portal-gtk brightnessctl playerctl lxpolkit \
-    network-manager-gnome pavucontrol libnotify-bin jq wob foot
+    pavucontrol libnotify-bin jq wob foot
   link config/sway $HOME/.config/sway
   link config/foot $HOME/.config/foot
   link config/mako $HOME/.config/mako

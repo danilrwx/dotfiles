@@ -10,7 +10,6 @@ wob_fifo="${XDG_RUNTIME_DIR}/wob.fifo"
 rm -f "$wob_fifo" && mkfifo "$wob_fifo"
 tail -f "$wob_fifo" | wob &
 lxpolkit &                 # polkit agent: virt-manager, udisks, ...
-nm-applet --indicator &    # network tray icon (swaybar has an SNI tray)
 swayidle -w \
   timeout 600 'swaylock -f -c 000000' \
   timeout 900 'swaymsg "output * power off"' \
