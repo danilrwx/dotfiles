@@ -5,7 +5,7 @@ log() {
 }
 
 # ./install [--desktop] [--ru-mirror] [--skip-go] [--skip-ts]
-#   --desktop    the i3, dwm and awesome sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
+#   --desktop    the i3 and dwm sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
 #                Discord, Steam.
 #                Then ./debloat strips GNOME and snapd
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
@@ -212,19 +212,13 @@ Exec=$HOME/dotfiles/bin/dwm-session
 Type=Application
 EOT
 
-  # awesome, a third session (config/awesome) with dwm's keys and bar, the tray its own; the package's
-  # awesome.desktop starts it. No recommends: awesome-extra and the rest it suggests
-  log "Installing awesome"
-  sudo apt install -y --no-install-recommends awesome
-  link config/awesome $HOME/.config/awesome
-
-  # Login: greetd with tuigreet, offering i3, dwm and awesome (through startx), remembering the pick; GDM goes
+  # Login: greetd with tuigreet, offering i3 and dwm (through startx), remembering the pick; GDM goes
   # with GNOME in ./debloat. Takes over the display-manager alias at the next boot, the running session is
   # left alone
   log "Installing greetd"
   pkg greetd tuigreet
   sudo tee /etc/greetd/config.toml > /dev/null <<'EOT'
-# install: tuigreet on vt 7 with the i3, dwm and awesome sessions, remembering the last user and session
+# install: tuigreet on vt 7 with the i3 and dwm sessions, remembering the last user and session
 [terminal]
 vt = 7
 

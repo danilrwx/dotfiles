@@ -49,9 +49,7 @@ once a revision has been applied.
 - dwm and st, my own builds from github.com/danilrwx/{dwm,st} in `~/w`, as the second
   session: the X11 setup of i3 and `bin/wm-status` as the status text; dwm's own
   config binds the media, Fn and menu keys to the same `bin/` scripts. st is the terminal in both
-- awesome (`config/awesome/rc.lua`) as a third session: dwm's keys, layouts and bar with its own
-  tray, `bin/wm-status` in its markup mode, the bar hidden by `$mod+b` and shown while Super is held
-- greetd with tuigreet as the login, offering i3, dwm and awesome and remembering the pick; the
+- greetd with tuigreet as the login, offering i3 and dwm and remembering the pick; the
   session environment comes from `.profile`
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
   the wire; `$mod+x` picks impala or bluetui (Wi-Fi, Bluetooth), the sound output or input,
