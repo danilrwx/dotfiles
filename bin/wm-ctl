@@ -1,15 +1,56 @@
 #!/bin/sh
-# $mod+x: pick Wi-Fi, Bluetooth, sound or the power profile. Wi-Fi and Bluetooth are impala and bluetui in
-# a floating terminal of class wm-ctl, kitty under sway and st under i3 and dwm (for_window rules in
-# config/sway/config and config/i3/config),
-# sound is pavucontrol, power a second pick among power-profiles-daemon's profiles, the current one first.
+# $mod+x: pick Wi-Fi, Bluetooth, the sound output or input, the headset mode or the power profile. Wi-Fi
+# and Bluetooth are impala and bluetui in a floating st of class wm-ctl (for_window rule in
+# config/i3/config); output, input and power are a second pick, the current one first: PipeWire's sinks or
+# sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between
+# headphones (A2DP, the good sound, no mic) and handsfree (HFP, with the mic).
 menu="$HOME/dotfiles/bin/wm-menu"
-# term TITLE CMD: the session's terminal with class wm-ctl
-term() {
-	if [ -n "$WAYLAND_DISPLAY" ]; then exec kitty --class wm-ctl -T "$1" "$2"; fi
-	exec st -c wm-ctl -t "$1" -e "$2"
+# term TITLE CMD: st with class wm-ctl
+term() { exec st -c wm-ctl -t "$1" -e "$2"; }
+# devices Sinks|Sources: "ID<tab>NAME" per device of wpctl's Audio section, the default one first
+devices() {
+	wpctl status | awk -v want="$1:" '
+		/^Audio/ { audio = 1 } /^Video/ { audio = 0 }
+		audio && index($0, want) { in_list = 1; next }
+		in_list && /^ │[[:space:]]*$/ { exit }
+		in_list {
+			line = $0; sub(/^ │[[:space:]]*/, "", line)
+			def = sub(/^\*[[:space:]]*/, "", line)
+			id = line; sub(/\..*/, "", id)
+			name = line; sub(/^[0-9]+\.[[:space:]]*/, "", name); sub(/[[:space:]]*\[vol:.*$/, "", name)
+			print (def ? 0 : 1) "\t" id "\t" name
+		}' | sort -s -k1,1 | cut -f2-
 }
-choice=$(printf 'wifi\nbluetooth\nsound\npower\n' | "$menu" pick ctl) || exit 0
+# sound Sinks|Sources TITLE: pick a device by name, make it the default
+sound() {
+	list=$(devices "$1")
+	name=$(printf '%s\n' "$list" | cut -f2- | "$menu" pick "$2") || exit 0
+	id=$(printf '%s\n' "$list" | awk -F '\t' -v n="$name" '$2 == n {print $1; exit}')
+	[ -n "$id" ] && wpctl set-default "$id" && notify-send -a fnkeys -r 9912 -t 1500 "Sound $2" "$name"
+}
+# headset: the first Bluetooth device as "ID<tab>NAME<tab>PROFILE<tab>A2DP<tab>HFP", the current profile's
+# name and the index of the best A2DP and handsfree profile each; nothing without one
+headset_info() {
+	pw-dump | jq -r '[.[] | select(.type == "PipeWire:Interface:Device" and .info.props["device.api"] == "bluez5")][0]
+		// empty | [.id, .info.props["device.description"], (.info.params.Profile[0].name // ""),
+		([.info.params.EnumProfile[] | select(.name | startswith("a2dp-sink"))] | max_by(.priority) | .index // ""),
+		([.info.params.EnumProfile[] | select(.name | startswith("headset-head-unit"))] | max_by(.priority) | .index // "")]
+		| map(tostring) | @tsv'
+}
+headset() {
+	info=$(headset_info)
+	[ -n "$info" ] || { notify-send -a fnkeys -r 9912 -t 1500 "Headset" "no Bluetooth headset"; exit 0; }
+	IFS='	' read -r id name cur a2dp hfp <<-EOF
+	$info
+	EOF
+	case "$cur" in
+	headset-head-unit*) to=$a2dp mode=headphones ;;
+	*)                  to=$hfp mode=handsfree ;;
+	esac
+	[ -n "$to" ] || { notify-send -a fnkeys -r 9912 -t 1500 "Headset" "$name has no $mode mode"; exit 0; }
+	wpctl set-profile "$id" "$to" && notify-send -a fnkeys -r 9912 -t 1500 "Headset" "$name: $mode"
+}
+choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\npower\n' | "$menu" pick ctl) || exit 0
 case "$choice" in
 power)
 	cur=$(powerprofilesctl get)
@@ -17,5 +58,7 @@ power)
 	powerprofilesctl set "$profile" && notify-send -a fnkeys -r 9912 -t 1500 "Power profile" "$profile" ;;
 wifi)      term Wi-Fi "$HOME/.local/bin/impala" ;;
 bluetooth) term Bluetooth "$HOME/.local/bin/bluetui" ;;
-sound)     exec pavucontrol ;;
+output)    sound Sinks output ;;
+input)     sound Sources input ;;
+headset)   headset ;;
 esac
