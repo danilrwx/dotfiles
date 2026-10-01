@@ -287,6 +287,14 @@ EOT
     systemctl --user enable --now ssh-agent.socket
   fi
 
+  # User daemons the session has no use for: filter-chain runs with no filter configured, the at-spi bus
+  # serves screen readers, the document portal and its permission store serve flatpak, which is not here
+  link config/environment.d/no-at-bridge.conf "$HOME/.config/environment.d/no-at-bridge.conf"
+  if [ -n "${XDG_RUNTIME_DIR:-}" ]; then
+    systemctl --user mask --now filter-chain.service at-spi-dbus-bus.service \
+      xdg-document-portal.service xdg-permission-store.service
+  fi
+
   # Google Chrome from Google's own .deb, which adds their apt repo and key, so later updates come with
   # apt upgrade. Only amd64, Google ships no Linux arm64 build
   if [ "$(dpkg --print-architecture)" == amd64 ] && ! dpkg -s google-chrome-stable &> /dev/null; then
