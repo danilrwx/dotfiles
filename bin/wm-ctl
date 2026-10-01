@@ -7,40 +7,33 @@
 menu="$HOME/dotfiles/bin/wm-menu"
 # term TITLE CMD: st with class wm-ctl
 term() { exec st -c wm-ctl -t "$1" -e "$2"; }
-# unplugged: the ids of the sinks and sources whose every port the card reports as unplugged ("available":
-# "no"), the HDMI outputs with no display on them; a port ALSA cannot sense (speaker, mic) says "unknown"
-unplugged() {
-	pw-dump | jq -r '
-		(map(select(.type == "PipeWire:Interface:Device"))
-			| map({key: (.id | tostring), value: [.info.params.EnumRoute[]?]}) | from_entries) as $routes
-		| .[] | select(.type == "PipeWire:Interface:Node"
-			and ((.info.props["media.class"] // "") | test("^Audio/(Sink|Source)$")))
-		| .info.props["card.profile.device"] as $pd
-		| (($routes[.info.props["device.id"] | tostring] // []) | map(select(.devices | index($pd)))) as $r
-		| select(($r | length) > 0 and all($r[]; .available == "no")) | .id'
-}
-# devices Sinks|Sources: "ID<tab>NAME" per device of wpctl's Audio section, the default one first, the
-# unplugged ones left out unless the default
+# devices Sink|Source: "ID<tab>NAME" per PipeWire audio sink or source, the default one first. Only the
+# nodes of class Audio/Sink or Audio/Source: wpctl status lists WirePlumber's internal Bluetooth nodes as the
+# sinks, while the headset's real one sits under its filters. Left out unless the default: those whose every
+# port the card reports unplugged ("available": "no", the HDMI outputs with no display on them; a port ALSA
+# cannot sense, the speaker or a mic, says "unknown")
 devices() {
-	wpctl status | awk -v want="$1:" -v skip=" $(unplugged | tr '\n' ' ') " '
-		/^Audio/ { audio = 1 } /^Video/ { audio = 0 }
-		audio && index($0, want) { in_list = 1; next }
-		in_list && /^ │[[:space:]]*$/ { exit }
-		in_list {
-			line = $0; sub(/^ │[[:space:]]*/, "", line)
-			def = sub(/^\*[[:space:]]*/, "", line)
-			id = line; sub(/\..*/, "", id)
-			if (!def && index(skip, " " id " ")) next
-			name = line; sub(/^[0-9]+\.[[:space:]]*/, "", name); sub(/[[:space:]]*\[vol:.*$/, "", name)
-			print (def ? 0 : 1) "\t" id "\t" name
-		}' | sort -s -k1,1 | cut -f2-
+	pw-dump | jq -r --arg class "Audio/$1" --arg key "default.audio.$(echo "$1" | tr '[:upper:]' '[:lower:]')" '
+		([.[] | select(.type == "PipeWire:Interface:Metadata" and .props["metadata.name"] == "default")
+			| .metadata[] | select(.key == $key) | .value.name][0] // "") as $default
+		| (map(select(.type == "PipeWire:Interface:Device"))
+			| map({key: (.id | tostring), value: [.info.params.EnumRoute[]?]}) | from_entries) as $routes
+		| [.[] | select(.type == "PipeWire:Interface:Node" and .info.props["media.class"] == $class)
+			| .info.props as $p
+			| ($p["node.name"] == $default) as $def
+			| (($routes[$p["device.id"] | tostring] // []) | map(select(.devices | index($p["card.profile.device"])))) as $r
+			| select($def or ($r | length) == 0 or any($r[]; .available != "no"))
+			| {def: $def, id, name: ($p["node.nick"] // $p["node.description"])}]
+		| sort_by(.def | not) | .[] | "\(.id)\t\(.name)"'
 }
-# sound Sinks|Sources TITLE: pick a device by name, make it the default
+# sound Sink|Source TITLE: pick a device by name, make it the default
 sound() {
 	list=$(devices "$1")
 	name=$(printf '%s\n' "$list" | cut -f2- | "$menu" pick "$2") || exit 0
 	id=$(printf '%s\n' "$list" | awk -F '\t' -v n="$name" '$2 == n {print $1; exit}')
-	[ -n "$id" ] && wpctl set-default "$id" && notify-send -a fnkeys -r 9912 -t 1500 "Sound $2" "$name"
+	[ -n "$id" ] || exit 0
+	if wpctl set-default "$id"; then notify-send -a fnkeys -r 9912 -t 1500 "Sound $2" "$name"
+	else notify-send -a fnkeys -r 9912 -t 3000 "Sound $2" "could not switch to $name"; fi
 }
 # headset: the first Bluetooth device as "ID<tab>NAME<tab>PROFILE<tab>A2DP<tab>HFP", the current profile's
 # name and the index of the best A2DP and handsfree profile each; nothing without one
@@ -72,7 +65,7 @@ power)
 	powerprofilesctl set "$profile" && notify-send -a fnkeys -r 9912 -t 1500 "Power profile" "$profile" ;;
 wifi)      term Wi-Fi "$HOME/.local/bin/impala" ;;
 bluetooth) term Bluetooth "$HOME/.local/bin/bluetui" ;;
-output)    sound Sinks output ;;
-input)     sound Sources input ;;
+output)    sound Sink output ;;
+input)     sound Source input ;;
 headset)   headset ;;
 esac
