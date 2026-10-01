@@ -60,4 +60,4 @@ alias vim=nvim
 alias lg='lazygit'
 
 setopt PROMPT_SUBST
-PROMPT='[%F{11}%*%f] %F{green}%~%f %F{12}%f '
+PROMPT='[%F{11}%*%f] %F{green}%~%f %F{12}❯%f '

@@ -41,7 +41,7 @@ DESKTOP_PKGS=(iwd bluez rfkill
   pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
   udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
-  gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-font-awesome fonts-noto-color-emoji fonts-noto-cjk cups
+  gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
   greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome libx11-dev libxft-dev)
 # X11 and i3 without their recommends: dmenu, dunst, i3lock/xss-lock, maim and xclip for screenshots, the
 # media keys (bin/wm-fnkeys), the polkit agent
