@@ -41,6 +41,8 @@ REMOVE=(
   pavucontrol
   # Openbox and its bar, awesome: tried as sessions next to i3 and dropped
   openbox dzen2 stalonetray wmctrl awesome
+  # Ubuntu's wallpapers under a black root, and the Xinerama headers only the dwm build wanted
+  ubuntu-wallpapers ubuntu-wallpapers-resolute libxinerama-dev
   # the heavy terminals, st is the one; not xterm, xinit and steam-libs depend on it
   kitty alacritty wezterm terminator tilix konsole xfce4-terminal lxterminal gnome-console qterminal
   # NetworkManager stays off for iwd and systemd-networkd (install), so it goes with its plugins and the
