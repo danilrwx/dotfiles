@@ -1,11 +1,11 @@
-# mihomo, the VLESS client bin/vpn starts and stops (no WantedBy: off until asked). Its config is built from
+# mihomo, the VLESS client bin/vless starts and stops (no WantedBy: off until asked). Its config is built from
 # config/mihomo/base.yaml and the private part before each start. Linked to ~/.config/systemd/user by install.
 [Unit]
-Description=mihomo, the VLESS client (bin/vpn)
+Description=mihomo, the VLESS client (bin/vless)
 After=network-online.target
 
 [Service]
-ExecStartPre=%h/dotfiles/bin/vpn build
+ExecStartPre=%h/dotfiles/bin/vless build
 ExecStart=%h/.local/bin/mihomo -d %h/.config/mihomo
 Restart=on-failure
 RestartSec=2

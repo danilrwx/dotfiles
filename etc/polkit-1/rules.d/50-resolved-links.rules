@@ -1,5 +1,5 @@
 // dotfiles: the per-link DNS settings of systemd-resolved without a password, for a sudo-group user at
-// the machine (an active local session). mihomo in bin/vpn's TUN mode runs as that user and sets its Meta
+// the machine (an active local session). mihomo in bin/vless's TUN mode runs as that user and sets its Meta
 // link's DNS on start and reverts it on stop, which polkit would otherwise ask the password for each time.
 polkit.addRule(function(action, subject) {
     var link = [

@@ -237,7 +237,7 @@ desktop_apps() {
     fi
   done
 
-  # mihomo, the VLESS client behind bin/vpn: the static build, not in the archive, with the capability its
+  # mihomo, the VLESS client behind bin/vless: the static build, not in the archive, with the capability its
   # TUN mode needs to route the system's traffic, so it runs as a --user service (config/systemd/mihomo.service)
   local mihomo=$HOME/.local/bin/mihomo ver=v1.19.32
   if [ "$("$mihomo" -v 2>/dev/null | awk '{print $3}')" != "$ver" ]; then

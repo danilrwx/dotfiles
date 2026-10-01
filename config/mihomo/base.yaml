@@ -1,8 +1,8 @@
-# mihomo, the VLESS client behind bin/vpn: the public part of its config. bin/vpn build merges the private
+# mihomo, the VLESS client behind bin/vless: the public part of its config. bin/vless build merges the private
 # part over it (private/config/mihomo/desktop.yaml: the servers under proxies, the subscriptions under
 # proxy-providers) into ~/.config/mihomo/config.yaml, which mihomo.service runs.
 #
-# Started with TUN off and the rule mode; bin/vpn turns TUN on or off and switches rule/global at run time
+# Started with TUN off and the rule mode; bin/vless turns TUN on or off and switches rule/global at run time
 # through the API below, no restart.
 
 mixed-port: 7890          # the proxy mode: HTTP and SOCKS5 on one port
@@ -12,7 +12,7 @@ log-level: warning
 ipv6: false
 external-controller: 127.0.0.1:9090
 profile:
-  store-selected: true    # the profile picked in bin/vpn survives a restart
+  store-selected: true    # the profile picked in bin/vless survives a restart
 
 # the TUN mode: every app's traffic, the DNS too, through mihomo
 tun:
@@ -45,7 +45,7 @@ dns:
 geo-auto-update: true
 geo-update-interval: 168
 
-# the profile to go by: every server and every subscription's, picked in bin/vpn
+# the profile to go by: every server and every subscription's, picked in bin/vless
 proxy-groups:
   - name: PROXY
     type: select

@@ -1,13 +1,13 @@
 #!/bin/bash
 # The VLESS client: mihomo as a systemd --user service (config/systemd/mihomo.service), driven through its
-# API on 127.0.0.1:9090. bin/wm-ctl's vpn menu and bin/wm-status's bar block call it.
-#   vpn on tun|proxy    start, all traffic through TUN, or the proxy on 127.0.0.1:7890 set as GNOME's
+# API on 127.0.0.1:9090. bin/wm-ctl's vless menu and bin/wm-status's bar block call it.
+#   vless on tun|proxy    start, all traffic through TUN, or the proxy on 127.0.0.1:7890 set as GNOME's
 #                       system proxy (GTK apps; Chrome outside GNOME reads only the env, Telegram its own)
-#   vpn off             stop, the system proxy cleared
-#   vpn mode rule|global  Russia and the local networks direct (rule), or everything through the profile
-#   vpn profile [NAME]  pick the profile (PROXY's server), or list them, the current one first
-#   vpn status          "off", or "tun|proxy rule|global PROFILE"
-#   vpn build           merge config/mihomo/base.yaml and private/config/mihomo/desktop.yaml into
+#   vless off             stop, the system proxy cleared
+#   vless mode rule|global  Russia and the local networks direct (rule), or everything through the profile
+#   vless profile [NAME]  pick the profile (PROXY's server), or list them, the current one first
+#   vless status          "off", or "tun|proxy rule|global PROFILE"
+#   vless build           merge config/mihomo/base.yaml and private/config/mihomo/desktop.yaml into
 #                       ~/.config/mihomo/config.yaml (mihomo.service's ExecStartPre)
 api=http://127.0.0.1:9090
 dir=$HOME/.config/mihomo
@@ -26,7 +26,7 @@ reroute() { call DELETE /connections; }
 up() {
 	systemctl --user start mihomo.service || exit 1
 	for _ in $(seq 1 100); do call GET /version > /dev/null 2>&1 && { global_via_profile; return; }; sleep 0.2; done
-	echo "vpn: mihomo's API did not come up, see journalctl --user -u mihomo" >&2
+	echo "vless: mihomo's API did not come up, see journalctl --user -u mihomo" >&2
 	exit 1
 }
 
@@ -56,13 +56,13 @@ on)
 		# mihomo takes the patch even when the TUN device fails to come up, so check it did
 		if [ "$(call GET /configs | jq -r .tun.enable)" != true ]; then
 			systemctl --user stop mihomo.service; system_proxy off   # back to off, not a half-on proxy
-			echo "vpn: TUN did not come up, so off. mihomo lacks cap_net_admin? Run:" >&2
+			echo "vless: TUN did not come up, so off. mihomo lacks cap_net_admin? Run:" >&2
 			echo "sudo setcap cap_net_admin,cap_net_bind_service+ep ~/.local/bin/mihomo" >&2
 			exit 1
 		fi
 		system_proxy off; reroute ;;
 	proxy) up; call PATCH /configs '{"tun":{"enable":false}}' && system_proxy on && reroute ;;
-	*)     echo "usage: vpn on tun|proxy" >&2; exit 1 ;;
+	*)     echo "usage: vless on tun|proxy" >&2; exit 1 ;;
 	esac ;;
 off)
 	system_proxy off
@@ -70,7 +70,7 @@ off)
 mode)
 	case "${2:-}" in
 	rule|global) global_via_profile && call PATCH /configs "{\"mode\":\"$2\"}" && reroute ;;
-	*) echo "usage: vpn mode rule|global" >&2; exit 1 ;;
+	*) echo "usage: vless mode rule|global" >&2; exit 1 ;;
 	esac ;;
 profile)
 	if [ -n "${2:-}" ]; then
@@ -83,6 +83,6 @@ status)
 	now=$(call GET /proxies/PROXY | jq -r .now)
 	jq -r --arg now "$now" '"\(if .tun.enable then "tun" else "proxy" end) \(.mode) \($now)"' <<< "$configs" ;;
 *)
-	echo "usage: vpn on tun|proxy | off | mode rule|global | profile [NAME] | status | build" >&2
+	echo "usage: vless on tun|proxy | off | mode rule|global | profile [NAME] | status | build" >&2
 	exit 1 ;;
 esac
