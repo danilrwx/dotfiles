@@ -15,7 +15,7 @@
 # colour goes to ~/.cache/theme/barbg for bin/wm-menu, dmenu being solid where the bar is see-through.
 state=${XDG_CACHE_HOME:-$HOME/.cache}/theme
 walls=$HOME/Pictures/wallpapers
-ALPHA=0.75
+ALPHA=0.65
 mkdir -p "$state"
 
 wallpapers() {
