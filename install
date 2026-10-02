@@ -42,7 +42,7 @@ DESKTOP_PKGS=(iwd bluez rfkill
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
   udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
-  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome libx11-dev libxft-dev python3-pil)
+  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome libx11-dev libxft-dev)
 # X11 and i3 without their recommends: dmenu, dunst, i3lock/xss-lock, maim and xclip for screenshots, the
 # media keys (bin/wm-fnkeys), the polkit agent
 X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit x11-xserver-utils xinput
@@ -195,6 +195,8 @@ desktop_session() {
   link .Xresources "$HOME/.Xresources"
   # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE, GDK_SCALE), and .profile the session
   for e in config/environment.d/*.conf; do link "$e" "$HOME/.config/environment.d/${e##*/}"; done
+  # dark GTK3 and GTK4; GTK keeps bookmarks next to them, so the files are linked, not the dirs
+  for g in gtk-3.0 gtk-4.0; do link "config/$g/settings.ini" "$HOME/.config/$g/settings.ini"; done
   # the system's app entries that are tools, hidden from bin/wm-menu's list
   for a in config/applications/*.desktop; do link "$a" "$HOME/.local/share/applications/${a##*/}"; done
 
@@ -205,12 +207,11 @@ desktop_session() {
   # make copies config.def.h to config.h only while there is none, so a stale one would win
   rm -f "$HOME/w/st/config.h"
   make -s -C "$HOME/w/st" && sudo make -s -C "$HOME/w/st" install || log "Failed to build st. Continue installation."
-  # st as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim): through bin/term,
-  # so a command run in it gets the theme's colours; st itself, registered by an older install, goes
+  # st as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim)
   if [ -x /usr/local/bin/st ]; then
-    sudo update-alternatives --remove x-terminal-emulator /usr/local/bin/st 2>/dev/null
-    sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator "$HOME/dotfiles/bin/term" 60
-    sudo update-alternatives --set x-terminal-emulator "$HOME/dotfiles/bin/term"
+    sudo update-alternatives --remove x-terminal-emulator "$HOME/dotfiles/bin/term" 2>/dev/null
+    sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/local/bin/st 60
+    sudo update-alternatives --set x-terminal-emulator /usr/local/bin/st
   fi
 
   # ssh: the plain ssh-agent with OpenSSH's GTK3 askpass, so AddKeysToAgent confirm shows a dialog per key

@@ -59,9 +59,5 @@ alias vim=nvim
 
 alias lg='lazygit'
 
-# the theme's terminal colours (bin/theme) in a new st, which starts with its own compiled ones; not inside
-# tmux, which keeps its panes' colours to itself
-[[ -z $TMUX && -r ${XDG_CACHE_HOME:-$HOME/.cache}/theme/sequences ]] && printf '%s' "$(<${XDG_CACHE_HOME:-$HOME/.cache}/theme/sequences)"
-
 setopt PROMPT_SUBST
 PROMPT='[%F{11}%*%f] %F{green}%~%f %F{12}❯%f '

@@ -9,13 +9,12 @@ set $up    k
 set $right l
 
 # base ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# the theme's colours from the X resources bin/theme sets (its `dark` is the fallback below); $barbg is $bg
-# with the alpha the bar is see-through by over a wallpaper
-set_from_resource $bg       theme.bg     #000000
-set_from_resource $fg       theme.fg     #ffffff
-set_from_resource $accent   theme.accent #00cd00
-set_from_resource $darkgray theme.gray   #888888
-set_from_resource $barbg    theme.barbg  #000000
+set $bg       #000000
+set $fg       #ffffff
+set $accent   #00cd00
+set $darkgray #888888
+# the bar's background: black, see-through over a wallpaper under bin/theme's dark-wall (the X resource)
+set_from_resource $barbg theme.barbg #000000
 
 # st, my own build (github.com/danilrwx/st)
 set $term st
@@ -28,6 +27,8 @@ font pango:Iosevka 11
 # autostart ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # once per session: keyboard, Xresources, background, notifications, polkit, idle/lock
 exec --no-startup-id $HOME/dotfiles/bin/x-autostart
+# under the dark-wall theme, a random wallpaper on every start and restart of i3 (bin/theme)
+exec_always --no-startup-id $HOME/dotfiles/bin/theme shuffle
 
 default_border pixel 1
 smart_borders  on
@@ -172,7 +173,7 @@ bar {
   # Nerd Font icons a size below the text (bin/wm-status), 24px clear of the panel's rounded corners at
   # either end (12 logical px, i3 doubles them at Xft.dpi 192); the tray takes no padding
   status_command $HOME/dotfiles/bin/wm-status
-  # RGBA colours, for $barbg's alpha under xcompmgr (bin/theme)
+  # RGBA colours, for $barbg's alpha under xcompmgr (bin/theme dark-wall)
   i3bar_command i3bar --transparency
   padding 0 12px
   tray_padding 5

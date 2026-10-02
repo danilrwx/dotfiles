@@ -1,124 +1,66 @@
 #!/bin/bash
-# The desktop's theme, picked in bin/wm-ctl's theme menu:
-#   theme dark            black, white text, gray, the green accent, no wallpaper: the default
-#   theme wall-dark [IMG] a wallpaper (~/Pictures/wallpapers) and a dark palette from its colours, the
-#   theme wall-light [IMG]  terminal and the bar see-through over it (one ALPHA for both)
+# The desktop's theme, picked in bin/wm-ctl's theme menu; the colours are the same dark ones in both:
+#   theme dark            black root, everything solid: the default
+#   theme dark-wall [IMG] a wallpaper (~/Pictures/wallpapers) under a see-through terminal and bar, the
+#                         one ALPHA of both (st's alpha in config.def.h is the same), through xcompmgr
 #   theme apply           the last pick again (bin/x-autostart, at login)
+#   theme shuffle         under dark-wall, a random other wallpaper, the root alone touched: i3 runs it on
+#                         every start and restart (exec_always in config/i3/config)
 #   theme wallpapers      the wallpapers to pick from
-# Over the state in ~/.cache/theme it writes and reloads: the X resources i3 and its bar read
-# (set_from_resource), dunst's colour drop-in, colors.sh for bin/wm-menu, the terminal's escape sequences
-# (sent to every open st and replayed by .zshrc in new ones), GTK's light or dark, the wallpaper, and
-# xcompmgr, run only under a wallpaper, for the see-through.
+# The pick is kept in ~/.cache/theme: the bar's background alpha as the X resource config/i3/config reads,
+# the root, and xcompmgr, run only under a wallpaper.
 state=${XDG_CACHE_HOME:-$HOME/.cache}/theme
 walls=$HOME/Pictures/wallpapers
-ALPHA=0.85   # st's alpha (config.def.h) is the same, so the terminal and the bar match
+ALPHA=0.85
 mkdir -p "$state"
 
-# palette MODE [IMG]: the colour variables, dwm's old scheme and st's own colours for dark
-palette() {
-	if [ "$1" = dark ]; then
-		BG='#000000' FG='#ffffff' GRAY='#888888' DIM='#444444' ACCENT='#00cd00' BARBG='#000000'
-		local st=('#000000' '#cd0000' '#00cd00' '#cdcd00' '#80a0ff' '#cd00cd' '#00cdcd' '#e5e5e5'
-			'#7f7f7f' '#ff0000' '#00ff00' '#ffff00' '#5c5cff' '#ff00ff' '#00ffff' '#ffffff')
-		local i
-		for i in "${!st[@]}"; do printf -v "C$i" %s "${st[$i]}"; done
-	else
-		eval "$("$HOME/dotfiles/bin/theme-palette" "$2" "${1#wall-}" "$ALPHA")"
-	fi
+wallpapers() {
+	find "$walls" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) 2>/dev/null | sort
 }
 
-# apply MODE [IMG]: everything recoloured from the palette, the pick saved
+# wall IMG: the root and the remembered wallpaper
+wall() {
+	hsetroot -fill "$1" > /dev/null
+	echo "$1" > "$state/wallpaper"
+}
+
+# apply MODE [IMG]
 apply() {
-	local mode=$1 img=${2:-} a hex i
-	palette "$mode" "$img" || exit 1
+	local mode=$1 a hex
 	if [ "$mode" = dark ]; then a=1; else a=$ALPHA; fi
 	hex=$(printf '%02x' "$(awk -v a="$a" 'BEGIN { printf "%d", a * 255 + 0.5 }')")
+	echo "theme.barbg: #000000$hex" | xrdb -merge
 
-	{
-		echo "MODE='$mode' WALL='$img'"
-		for v in BG FG GRAY DIM ACCENT BARBG; do echo "$v='${!v}'"; done
-	} > "$state/colors.sh"
-
-	# i3 and its bar (config/i3/config reads these); the bar's background carries the alpha
-	xrdb -merge <<-EOF
-	theme.bg: $BG
-	theme.fg: $FG
-	theme.gray: $GRAY
-	theme.dim: $DIM
-	theme.accent: $ACCENT
-	theme.barbg: $BG$hex
-	EOF
-
-	# dunst: cards in the theme's colours, the accent as the frame
-	mkdir -p "$HOME/.config/dunst/dunstrc.d"
-	cat > "$HOME/.config/dunst/dunstrc.d/50-theme.conf" <<-EOF
-	# bin/theme: the colours of $mode
-	[global]
-	    frame_color = "$ACCENT"
-	    background = "$BG"
-	    foreground = "$FG"
-	    highlight = "$ACCENT"
-	EOF
-
-	# the terminal: palette (OSC 4), text, background and cursor (OSC 10, 11, 12)
-	{
-		for i in $(seq 0 15); do v=C$i; printf '\033]4;%d;%s\033\\' "$i" "${!v}"; done
-		printf '\033]10;%s\033\\\033]11;%s\033\\\033]12;%s\033\\' "$FG" "$BG" "$FG"
-	} > "$state/sequences"
-	for tty in /dev/pts/[0-9]*; do
-		[ -O "$tty" ] && [ -w "$tty" ] && cat "$state/sequences" > "$tty" 2>/dev/null
-	done
-
-	# GTK and the portal's colour scheme, which Chrome follows
-	local dark=1 scheme=prefer-dark
-	[ "$mode" = wall-light ] && dark=0 scheme=prefer-light
-	for g in gtk-3.0 gtk-4.0; do
-		mkdir -p "$HOME/.config/$g"
-		rm -f "$HOME/.config/$g/settings.ini"   # a link into dotfiles from an older install
-		{
-			echo "# bin/theme: $mode"
-			echo "[Settings]"
-			[ "$g" = gtk-3.0 ] && echo "gtk-theme-name=Adwaita"
-			echo "gtk-application-prefer-dark-theme=$dark"
-		} > "$HOME/.config/$g/settings.ini"
-	done
-	gsettings set org.gnome.desktop.interface color-scheme "$scheme" 2>/dev/null
-
-	# the root and the compositor: a wallpaper and xcompmgr, or black and none
 	pkill -x xcompmgr
 	if [ "$mode" = dark ]; then
-		hsetroot -solid '#000000'
+		hsetroot -solid '#000000' > /dev/null
 	else
-		hsetroot -fill "$img"
+		wall "$2"
 		xcompmgr &
 		disown
 	fi
-
 	pgrep -x i3 > /dev/null && i3-msg -q reload
-	pgrep -x dunst > /dev/null && dunstctl reload
 	echo "$mode" > "$state/mode"
-	if [ -n "$img" ]; then echo "$img" > "$state/wallpaper"; fi
-}
-
-# wall_or_last [IMG]: the image given, else the last one, else the first in the wallpapers dir
-wall_or_last() {
-	if [ -n "${1:-}" ]; then readlink -f "$1"; return; fi
-	[ -f "$state/wallpaper" ] && [ -f "$(cat "$state/wallpaper")" ] && { cat "$state/wallpaper"; return; }
-	find "$walls" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) 2>/dev/null | sort | head -1
 }
 
 case "${1:-}" in
 dark) apply dark ;;
-wall-dark|wall-light)
-	img=$(wall_or_last "${2:-}")
+dark-wall)
+	# the image given, else the last one, else the first in the wallpapers dir
+	img=${2:+$(readlink -f "$2")}
+	[ -z "$img" ] && [ -f "$state/wallpaper" ] && img=$(cat "$state/wallpaper")
+	[ -f "$img" ] || img=$(wallpapers | head -1)
 	[ -f "$img" ] || { echo "theme: no wallpaper; put some in $walls" >&2; exit 1; }
-	apply "$1" "$img" ;;
+	apply dark-wall "$img" ;;
 apply)
-	mode=$(cat "$state/mode" 2>/dev/null || echo dark)
-	if [ "$mode" = dark ]; then apply dark; else "$0" "$mode"; fi ;;
-wallpapers)
-	find "$walls" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) 2>/dev/null | sort ;;
+	if [ "$(cat "$state/mode" 2>/dev/null)" = dark-wall ]; then "$0" dark-wall; else apply dark; fi ;;
+shuffle)
+	[ "$(cat "$state/mode" 2>/dev/null)" = dark-wall ] || exit 0
+	last=$(cat "$state/wallpaper" 2>/dev/null)
+	img=$(wallpapers | grep -vxF "$last" | shuf -n 1)
+	[ -n "$img" ] && wall "$img" ;;
+wallpapers) wallpapers ;;
 *)
-	echo "usage: theme dark | wall-dark [IMG] | wall-light [IMG] | apply | wallpapers" >&2
+	echo "usage: theme dark | dark-wall [IMG] | apply | shuffle | wallpapers" >&2
 	exit 1 ;;
 esac
