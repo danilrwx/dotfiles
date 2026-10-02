@@ -106,7 +106,12 @@ base() {
   if compgen -G "$HOME/.ssh/id_*" | grep -qv '\.pub$'; then
     log "Switching origin to ssh and updating submodules"
     git remote set-url origin git@github.com:danilrwx/dotfiles.git
-    git submodule update --init --recursive || log "Failed to update submodules. Continue installation."
+    # --merge, and private back on its master: a plain update checks the submodule out at the commit this
+    # repo records, detached, which undoes private's own newer commits (as it once hid an OpenVPN profile)
+    git submodule update --init --recursive --merge || log "Failed to update submodules. Continue installation."
+    if ! git -C private symbolic-ref -q HEAD > /dev/null; then
+      git -C private checkout -q master 2>/dev/null || log "private is detached and has no master. Continue installation."
+    fi
   else
     log "No ssh key in ~/.ssh. Skip ssh remote and private submodules."
   fi
