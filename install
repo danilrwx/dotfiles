@@ -262,6 +262,16 @@ desktop_apps() {
     deb_from https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   fi
   command -v google-chrome &> /dev/null && xdg-settings set default-web-browser google-chrome.desktop
+  # GPU compositing under X11: Chrome's blocklist takes this GPU (Arc B370) for software compositing, and
+  # scrolling at 3120x2080 120Hz drops frames on it; the chrome://flags switch that overrides the list,
+  # put in its Local State while it is not running (it rewrites the file on exit)
+  local state=$HOME/.config/google-chrome/"Local State"
+  if command -v google-chrome &> /dev/null && ! pgrep -x chrome > /dev/null; then
+    mkdir -p "$(dirname "$state")"
+    [ -s "$state" ] || echo '{}' > "$state"
+    jq '.browser.enabled_labs_experiments = ((.browser.enabled_labs_experiments // []) - ["ignore-gpu-blocklist"] + ["ignore-gpu-blocklist"])' \
+      "$state" > "$state.new" && mv "$state.new" "$state"
+  fi
 
   # Telegram: the official tarball in ~/.local/opt, which updates itself and writes its own .desktop file
   if [ ! -x "$HOME/.local/opt/Telegram/Telegram" ]; then
