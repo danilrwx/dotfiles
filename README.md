@@ -58,6 +58,8 @@ once a revision has been applied.
 - mihomo as the VLESS client (`bin/vless`, `config/mihomo`, the servers and subscriptions in `private`):
   through TUN or as the system proxy, the rule mode (Russia direct) or global, the profile; its state
   in the bar
+- OpenVPN (`bin/openvpn-ctl`): the profiles from `private/config/openvpn` as openvpn-client units, started
+  from ctl without sudo (a polkit rule), the server's DNS for systemd-resolved, the profile up in the bar
 - fonts from the archive alone: Iosevka for the text, Noto Color Emoji for the bar's icons and the rest
 - ssh through the plain `ssh-agent` with OpenSSH's GTK3 askpass
   (`ssh-askpass-gnome`, per-use confirm too) instead of gcr's agent
@@ -88,6 +90,7 @@ anything; it refuses to run before greetd is enabled.
 | `bin/wm-ctl` | `$mod+x`: Wi-Fi (impala), Bluetooth (bluetui), sound output and input, headset mode, power profile |
 | `bin/vless` | the VLESS client: mihomo on through TUN or as the system proxy, off, rule/global, the profile |
 | `bin/theme` | dark, or dark-wall: a wallpaper under a see-through terminal and bar; `shuffle` picks one at random |
+| `bin/openvpn-ctl` | OpenVPN: a profile from `private/config/openvpn` up or down, its state for the bar |
 | `bin/wm-status` | i3bar's status line: memory, volume, mic, battery, brightness, layout, date |
 | `bin/wm-menu` | dmenu in the old colours: the launcher, and `pick` for the menus |
 | `bin/clip` | stdin to the clipboard through xclip (tmux, nvim, screenshots) |

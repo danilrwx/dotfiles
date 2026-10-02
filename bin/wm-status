@@ -78,6 +78,18 @@ vless() {
   if [ "$how" = tun ]; then echo -e "$(glyph 🛡️)$profile$(del)"; else echo -e "$(glyph 🔀)$profile$(del)"; fi
 }
 
+# openvpn: bin/openvpn-ctl's profile while one is up, nothing while off; ⏳ while it connects
+openvpn() {
+  local s
+  s=$("$HOME/dotfiles/bin/openvpn-ctl" status)
+  [ "$s" = off ] && return
+  s=$(printf %s "${s:0:20}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/["\\]//g')
+  case "$s" in
+  *" connecting") echo -e "$(glyph ⏳)${s% connecting}$(del)" ;;
+  *)              echo -e "$(glyph 🔒)$s$(del)" ;;
+  esac
+}
+
 mem() {
   echo -e "$I_MEM$(free -h | awk '/Mem/{print $3}')"
 }
@@ -93,7 +105,7 @@ keyboard() {
 echo '{"version":1}'
 echo '['
 while true; do
-  line="$(vless)$(mem)$(del)$(vol)$(del)$(mic)$(bat 0)$(bat 1)$(bri)$(del)$(keyboard)$(del)$(datef)"
+  line="$(vless)$(openvpn)$(mem)$(del)$(vol)$(del)$(mic)$(bat 0)$(bat 1)$(bri)$(del)$(keyboard)$(del)$(datef)"
   printf '[{"full_text":"%s","markup":"pango"}],\n' "$line"
   sleep 1
 done

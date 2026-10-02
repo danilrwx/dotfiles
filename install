@@ -42,7 +42,8 @@ DESKTOP_PKGS=(iwd bluez rfkill
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
   udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
-  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome libx11-dev libxft-dev)
+  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome libx11-dev libxft-dev
+  openvpn openvpn-systemd-resolved)
 # X11 and i3 without their recommends: dmenu, dunst, i3lock/xss-lock, maim and xclip for screenshots, the
 # media keys (bin/wm-fnkeys), the polkit agent
 X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit x11-xserver-utils xinput
@@ -251,6 +252,38 @@ desktop_apps() {
   getcap "$mihomo" | grep -q cap_net_admin || sudo setcap cap_net_admin,cap_net_bind_service+ep "$mihomo"
   # its TUN sets and reverts the Meta link's DNS in systemd-resolved, without a password prompt each time
   put /etc/polkit-1/rules.d/50-resolved-links.rules
+
+  # OpenVPN (bin/openvpn-ctl): each private/config/openvpn/NAME.ovpn as /etc/openvpn/client/NAME.conf for
+  # openvpn-client@NAME.service, root's alone (the keys are in it). NAME.auth, the login and the password
+  # line by line, goes next to it as what auth-user-pass reads; the server's DNS goes to systemd-resolved
+  # through openvpn-systemd-resolved, for the names behind it. The polkit rule starts and stops the units
+  # without sudo
+  put /etc/polkit-1/rules.d/50-openvpn-client.rules
+  local ovpn name conf
+  for ovpn in private/config/openvpn/*.ovpn; do
+    [ -f "$ovpn" ] || continue
+    name=$(basename "$ovpn" .ovpn)
+    conf=$(mktemp)
+    if [ -f "private/config/openvpn/$name.auth" ]; then
+      sudo install -D -m 600 "private/config/openvpn/$name.auth" "/etc/openvpn/client/$name.auth"
+      grep -v '^[[:space:]]*auth-user-pass' "$ovpn" > "$conf"
+      echo "auth-user-pass /etc/openvpn/client/$name.auth" >> "$conf"
+    else
+      cat "$ovpn" > "$conf"
+    fi
+    cat >> "$conf" <<'EOT'
+
+# install: the server's DNS to systemd-resolved, for the names behind the tunnel
+script-security 2
+up /etc/openvpn/update-systemd-resolved
+up-restart
+down /etc/openvpn/update-systemd-resolved
+down-pre
+EOT
+    sudo cmp -s "$conf" "/etc/openvpn/client/$name.conf" \
+      || { log "Installing the OpenVPN profile $name"; sudo install -D -m 600 "$conf" "/etc/openvpn/client/$name.conf"; }
+    rm -f "$conf"
+  done
   link config/systemd/mihomo.service "$HOME/.config/systemd/user/mihomo.service"
   user_systemctl daemon-reload
 

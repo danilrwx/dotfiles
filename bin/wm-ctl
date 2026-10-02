@@ -5,7 +5,8 @@
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between
 # headphones (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vless: on through
 # TUN or as the system proxy, off, the rule or global mode, the profile. theme picks bin/theme's dark, or
-# dark-wall and then the wallpaper, a random one or by name.
+# dark-wall and then the wallpaper, a random one or by name. openvpn brings a profile of bin/openvpn-ctl up,
+# or the one up down.
 menu="$HOME/dotfiles/bin/wm-menu"
 # term TITLE CMD: st with class wm-ctl
 term() { exec st -c wm-ctl -t "$1" -e "$2"; }
@@ -88,6 +89,18 @@ vless() {
 		notify-send -a fnkeys -r 9912 -u critical "VLESS" "$err"
 	fi
 }
+# openvpn: the profiles, the one up first, and off while one is
+openvpn() {
+	ovpn=$HOME/dotfiles/bin/openvpn-ctl
+	cur=$("$ovpn" status)
+	pick=$({ "$ovpn" list; [ "$cur" != off ] && echo off; } | "$menu" pick "openvpn $cur") || exit 0
+	if [ "$pick" = off ]; then set -- off; else set -- on "$pick"; fi
+	if err=$("$ovpn" "$@" 2>&1); then
+		notify-send -a fnkeys -r 9912 -t 1500 "OpenVPN" "$("$ovpn" status)"
+	else
+		notify-send -a fnkeys -r 9912 -u critical "OpenVPN" "$err"
+	fi
+}
 # theme: the mode, then for a wallpaper's palette the wallpaper, by file name
 theme() {
 	theme=$HOME/dotfiles/bin/theme
@@ -111,7 +124,7 @@ theme() {
 		notify-send -a fnkeys -r 9912 -u critical "Theme" "$err"
 	fi
 }
-choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\ntheme\npower\n' | "$menu" pick ctl) || exit 0
+choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\nopenvpn\ntheme\npower\n' | "$menu" pick ctl) || exit 0
 case "$choice" in
 power)
 	cur=$(powerprofilesctl get)
@@ -123,5 +136,6 @@ output)    sound Sink output ;;
 input)     sound Source input ;;
 headset)   headset ;;
 vless)     vless ;;
+openvpn)   openvpn ;;
 theme)     theme ;;
 esac

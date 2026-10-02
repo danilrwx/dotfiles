@@ -1,0 +1,60 @@
+#!/bin/bash
+# OpenVPN through the package's openvpn-client@NAME.service, one profile up at a time; the profiles are
+# private/config/openvpn/NAME.ovpn, which install turns into /etc/openvpn/client/NAME.conf with the login
+# from NAME.auth and the server's DNS for systemd-resolved. The polkit rule
+# (etc/polkit-1/rules.d/50-openvpn-client.rules) lets these units start and stop without sudo.
+# bin/wm-ctl's openvpn menu and bin/wm-status's bar block call it.
+#   openvpn-ctl on NAME   bring NAME up, the one up before down, and wait for the tunnel
+#   openvpn-ctl off       bring the one up down
+#   openvpn-ctl status    "off", or the profile up ("NAME"), or "NAME connecting"
+#   openvpn-ctl list      the profiles, the one up first
+profiles=$HOME/dotfiles/private/config/openvpn
+
+# up: the active openvpn-client unit's profile, if any
+up() {
+	systemctl list-units 'openvpn-client@*.service' --state=active,activating --no-legend --plain 2>/dev/null \
+		| awk '{print $1}' | sed -n 's/^openvpn-client@\(.*\)\.service$/\1/p' | head -1
+}
+
+# ready NAME: the tunnel is through, as openvpn tells systemd (Type=notify, its status text)
+ready() {
+	systemctl show -p StatusText --value "openvpn-client@$1.service" | grep -q 'Initialization Sequence Completed'
+}
+
+list() {
+	local cur
+	cur=$(up)
+	{ [ -n "$cur" ] && echo "$cur"
+	  find "$profiles" -maxdepth 1 -name '*.ovpn' -printf '%f\n' 2>/dev/null | sed 's/\.ovpn$//' | sort | grep -vxF "${cur:-/}" || true; }
+}
+
+case "${1:-}" in
+on)
+	name=${2:?usage: openvpn-ctl on NAME}
+	[ -f "$profiles/$name.ovpn" ] || { echo "openvpn-ctl: no profile $profiles/$name.ovpn" >&2; exit 1; }
+	[ -e "/etc/openvpn/client/$name.conf" ] || { echo "openvpn-ctl: $name is not in /etc/openvpn/client yet; run install" >&2; exit 1; }
+	cur=$(up)
+	[ -n "$cur" ] && [ "$cur" != "$name" ] && systemctl stop "openvpn-client@$cur.service"
+	systemctl start "openvpn-client@$name.service" || exit 1
+	for _ in $(seq 1 60); do
+		ready "$name" && exit 0
+		systemctl is-active -q "openvpn-client@$name.service" || break
+		sleep 0.5
+	done
+	echo "openvpn-ctl: $name did not connect: $(systemctl show -p StatusText --value "openvpn-client@$name.service")" >&2
+	echo "see: journalctl -u openvpn-client@$name" >&2
+	systemctl stop "openvpn-client@$name.service"
+	exit 1 ;;
+off)
+	cur=$(up)
+	[ -n "$cur" ] && systemctl stop "openvpn-client@$cur.service" ;;
+status)
+	cur=$(up)
+	if [ -z "$cur" ]; then echo off
+	elif ready "$cur"; then echo "$cur"
+	else echo "$cur connecting"; fi ;;
+list) list ;;
+*)
+	echo "usage: openvpn-ctl on NAME | off | status | list" >&2
+	exit 1 ;;
+esac
