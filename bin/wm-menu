@@ -1,5 +1,5 @@
 #!/bin/sh
-# dmenu for i3, in the old dmenu colours.
+# dmenu for i3, in the old dmenu colours, matching case-insensitively.
 #   wm-menu             launch an app: the ones with a .desktop entry, by name, through gtk-launch (which
 #                       opens alacritty for the terminal ones); a name not in the list runs as a command
 #   wm-menu pick PROMPT choose a line of stdin, print it
@@ -12,7 +12,7 @@ h=''
 if [ -x /usr/local/bin/dmenu ]; then
 	h=$(xwininfo -root -tree | awk '/i3bar for output/ { split($(NF-1), g, /[x+]/); print g[2]; exit }')
 fi
-dmenu() { command dmenu -fn 'Iosevka-11' ${h:+-h "$h"} -nb "$bg" -nf '#ffffff' -sb '#ffffff' -sf "$bg" "$@"; }
+dmenu() { command dmenu -i -fn 'Iosevka-11' ${h:+-h "$h"} -nb "$bg" -nf '#ffffff' -sb '#ffffff' -sf "$bg" "$@"; }
 [ "${1:-}" = pick ] && { dmenu -p "$2"; exit; }
 
 # apps: "NAME<tab>ID" per entry an app launcher shows, an ID in ~/.local/share/applications hiding the
