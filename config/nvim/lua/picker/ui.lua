@@ -172,7 +172,7 @@ function View:preview(item)
   vim.bo[self.prev_buf].modifiable = false
   local ft = not binary and (vim.filetype.match({ filename = item.file, contents = lines }) or "") or ""
   vim.bo[self.prev_buf].filetype = ft
-  if ft ~= "" then
+  if vim.g.treesitter and ft ~= "" then
     pcall(vim.treesitter.start, self.prev_buf)
   end
 
@@ -199,7 +199,7 @@ function View:show_text(lines, ft, title)
   vim.bo[self.prev_buf].modifiable = false
   vim.api.nvim_buf_clear_namespace(self.prev_buf, hlns, 0, -1)
   vim.bo[self.prev_buf].filetype = ft or ""
-  if ft and ft ~= "" then
+  if vim.g.treesitter and ft and ft ~= "" then
     pcall(vim.treesitter.start, self.prev_buf)
   end
 
