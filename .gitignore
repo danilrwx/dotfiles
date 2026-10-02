@@ -3,3 +3,5 @@
 *.log
 
 config/k9s/clusters
+# bin/theme writes it, ~/.config/dunst being a link here
+config/dunst/dunstrc.d

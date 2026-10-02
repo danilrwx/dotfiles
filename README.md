@@ -51,7 +51,10 @@ once a revision has been applied.
   session environment comes from `.profile`
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
   the wire; `$mod+x` picks impala or bluetui (Wi-Fi, Bluetooth), the sound output or input,
-  the Bluetooth headset mode (headphones or handsfree), the VPN or the power profile
+  the Bluetooth headset mode (headphones or handsfree), the VPN, the theme or the power profile
+- themes (`bin/theme`): dark, black as ever, or a wallpaper from `~/Pictures/wallpapers` with a dark or
+  light palette from its colours (`bin/theme-palette`) for i3, the bar, dunst, dmenu, st and GTK, the
+  terminal and the bar see-through over it under xcompmgr
 - mihomo as the VLESS client (`bin/vless`, `config/mihomo`, the servers and subscriptions in `private`):
   through TUN or as the system proxy, the rule mode (Russia direct) or global, the profile; its state
   in the bar
@@ -84,6 +87,7 @@ anything; it refuses to run before greetd is enabled.
 | `bin/wm-fnkeys` | volume/brightness as a dunst card, HONOR Fn-key actions and cards |
 | `bin/wm-ctl` | `$mod+x`: Wi-Fi (impala), Bluetooth (bluetui), sound output and input, headset mode, power profile |
 | `bin/vless` | the VLESS client: mihomo on through TUN or as the system proxy, off, rule/global, the profile |
+| `bin/theme` | dark, or a wallpaper and its palette (dark or light), applied to i3, bar, dunst, dmenu, st, GTK |
 | `bin/wm-status` | i3bar's status line: memory, volume, mic, battery, brightness, layout, date |
 | `bin/wm-menu` | dmenu in the old colours: the launcher, and `pick` for the menus |
 | `bin/clip` | stdin to the clipboard through xclip (tmux, nvim, screenshots) |

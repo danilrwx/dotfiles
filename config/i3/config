@@ -9,10 +9,13 @@ set $up    k
 set $right l
 
 # base ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-set $bg       #000000
-set $fg       #ffffff
-set $accent   #00cd00
-set $darkgray #888888
+# the theme's colours from the X resources bin/theme sets (its `dark` is the fallback below); $barbg is $bg
+# with the alpha the bar is see-through by over a wallpaper
+set_from_resource $bg       theme.bg     #000000
+set_from_resource $fg       theme.fg     #ffffff
+set_from_resource $accent   theme.accent #00cd00
+set_from_resource $darkgray theme.gray   #888888
+set_from_resource $barbg    theme.barbg  #000000
 
 # st, my own build (github.com/danilrwx/st)
 set $term st
@@ -169,17 +172,19 @@ bar {
   # Nerd Font icons a size below the text (bin/wm-status), 24px clear of the panel's rounded corners at
   # either end (12 logical px, i3 doubles them at Xft.dpi 192); the tray takes no padding
   status_command $HOME/dotfiles/bin/wm-status
+  # RGBA colours, for $barbg's alpha under xcompmgr (bin/theme)
+  i3bar_command i3bar --transparency
   padding 0 12px
   tray_padding 5
   position top
   colors {
-     background $bg
+     background $barbg
      statusline $darkgray
      #class               border  backgr. text
-     focused_workspace    $bg     $bg     $fg
-     inactive_workspace   $bg     $bg     $darkgray
-     active_workspace     $bg     $bg     $darkgray
-     urgent_workspace     $bg     $bg     $accent
+     focused_workspace    $barbg     $barbg     $fg
+     inactive_workspace   $barbg     $barbg     $darkgray
+     active_workspace     $barbg     $barbg     $darkgray
+     urgent_workspace     $barbg     $barbg     $accent
   }
 }
 

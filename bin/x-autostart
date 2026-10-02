@@ -5,7 +5,8 @@
 
 xrdb -merge "$HOME/.Xresources"
 setxkbmap -layout us,ru -option '' -option grp:ctrl_space_toggle,grp_led:scroll
-hsetroot -solid '#000000'
+# the theme picked last (bin/theme): its colours, wallpaper and compositor, black by default
+"$HOME/dotfiles/bin/theme" apply
 # portals and systemd user units see this session
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP 2>/dev/null
 

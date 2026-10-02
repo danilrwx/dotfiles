@@ -4,7 +4,8 @@
 # config/i3/config); output, input and power are a second pick, the current one first: PipeWire's sinks or
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between
 # headphones (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vless: on through
-# TUN or as the system proxy, off, the rule or global mode, the profile.
+# TUN or as the system proxy, off, the rule or global mode, the profile. theme picks bin/theme's dark,
+# or a wallpaper's dark or light palette and then the wallpaper, the current one first.
 menu="$HOME/dotfiles/bin/wm-menu"
 # term TITLE CMD: st with class wm-ctl
 term() { exec st -c wm-ctl -t "$1" -e "$2"; }
@@ -87,7 +88,26 @@ vless() {
 		notify-send -a fnkeys -r 9912 -u critical "VLESS" "$err"
 	fi
 }
-choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\npower\n' | "$menu" pick ctl) || exit 0
+# theme: the mode, then for a wallpaper's palette the wallpaper, by file name
+theme() {
+	theme=$HOME/dotfiles/bin/theme
+	state=${XDG_CACHE_HOME:-$HOME/.cache}/theme
+	mode=$(cat "$state/mode" 2>/dev/null || echo dark)
+	pick=$(printf 'dark\nwall-dark\nwall-light\n' | "$menu" pick "theme $mode") || exit 0
+	if [ "$pick" = dark ]; then
+		set -- dark
+	else
+		cur=$(cat "$state/wallpaper" 2>/dev/null)
+		name=$({ [ -f "$cur" ] && basename "$cur"; "$theme" wallpapers | xargs -r -n1 -d '\n' basename | grep -vxF "$(basename "$cur" 2>/dev/null)"; } | "$menu" pick wallpaper) || exit 0
+		set -- "$pick" "$HOME/Pictures/wallpapers/$name"
+	fi
+	if err=$("$theme" "$@" 2>&1); then
+		notify-send -a fnkeys -r 9912 -t 1500 "Theme" "$*"
+	else
+		notify-send -a fnkeys -r 9912 -u critical "Theme" "$err"
+	fi
+}
+choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\ntheme\npower\n' | "$menu" pick ctl) || exit 0
 case "$choice" in
 power)
 	cur=$(powerprofilesctl get)
@@ -99,4 +119,5 @@ output)    sound Sink output ;;
 input)     sound Source input ;;
 headset)   headset ;;
 vless)     vless ;;
+theme)     theme ;;
 esac

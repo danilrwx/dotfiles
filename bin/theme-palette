@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+"""theme-palette IMAGE dark|light: a palette from a wallpaper, for bin/theme, as shell assignments.
+
+The image cut down to its main colours (PIL's median cut). The base is the hue of the most common colour:
+the background and the text in it, near black and near white (dark) or the other way round (light), with
+little saturation. The accent is the most saturated colour that also covers a fair part of the picture.
+The terminal's 16 colours are the picture's own as well, by hue, their lightness evened out so text in
+any of them reads on that background.
+"""
+import colorsys
+import sys
+
+from PIL import Image
+
+
+def hexc(h, l, s):
+    r, g, b = colorsys.hls_to_rgb(h % 1.0, min(max(l, 0), 1), min(max(s, 0), 1))
+    return "#%02x%02x%02x" % (round(r * 255), round(g * 255), round(b * 255))
+
+
+def main():
+    path, mode = sys.argv[1], sys.argv[2]
+    dark = mode == "dark"
+    img = Image.open(path).convert("RGB")
+    img.thumbnail((256, 256))
+    q = img.quantize(colors=24, method=Image.Quantize.MEDIANCUT)
+    pal = q.getpalette()
+    total = img.width * img.height
+    colours = []  # (share, h, l, s)
+    for count, idx in q.getcolors():
+        r, g, b = (c / 255 for c in pal[idx * 3: idx * 3 + 3])
+        h, l, s = colorsys.rgb_to_hls(r, g, b)
+        colours.append((count / total, h, l, s))
+    colours.sort(reverse=True)
+
+    base_h, base_s = colours[0][1], colours[0][3]
+    tint = min(base_s, 0.25)
+
+    # the accent: saturated, not near black or white, weighted by how much of the picture it covers
+    vivid = [c for c in colours if 0.15 < c[2] < 0.85] or colours
+    acc = max(vivid, key=lambda c: c[3] * (c[0] ** 0.5))
+    acc_h, acc_s = acc[1], max(acc[3], 0.55)
+
+    if dark:
+        bg, fg = hexc(base_h, 0.08, tint), hexc(base_h, 0.90, tint * 0.4)
+        gray, dim = hexc(base_h, 0.58, tint * 0.5), hexc(base_h, 0.30, tint * 0.6)
+        accent = hexc(acc_h, 0.60, acc_s)
+        norm_l, bright_l = 0.62, 0.74
+        black, white = hexc(base_h, 0.20, tint), hexc(base_h, 0.82, tint * 0.4)
+    else:
+        bg, fg = hexc(base_h, 0.94, tint * 0.6), hexc(base_h, 0.13, tint)
+        gray, dim = hexc(base_h, 0.42, tint * 0.5), hexc(base_h, 0.72, tint * 0.6)
+        accent = hexc(acc_h, 0.38, acc_s)
+        norm_l, bright_l = 0.38, 0.28
+        black, white = hexc(base_h, 0.20, tint), hexc(base_h, 0.80, tint * 0.4)
+
+    # the terminal's six hues: the picture's saturated colours spread round the wheel, gaps filled by
+    # stepping from the accent so there are always six
+    hues = []
+    for c in sorted(vivid, key=lambda c: -c[3] * (c[0] ** 0.5)):
+        if c[3] > 0.2 and all(min(abs(c[1] - h), 1 - abs(c[1] - h)) > 0.07 for h in hues):
+            hues.append(c[1])
+        if len(hues) == 6:
+            break
+    while len(hues) < 6:
+        hues.append((acc_h + len(hues) / 6) % 1.0)
+    hues.sort()
+    sat = max(min(acc_s, 0.85), 0.45)
+    normal = [hexc(h, norm_l, sat) for h in hues]
+    bright = [hexc(h, bright_l, sat) for h in hues]
+    term = [black] + normal + [white] + [gray] + bright + [fg]
+
+    out = {"BG": bg, "FG": fg, "GRAY": gray, "DIM": dim, "ACCENT": accent}
+    for i, c in enumerate(term):
+        out["C%d" % i] = c
+    for k, v in out.items():
+        print("%s='%s'" % (k, v))
+
+
+if __name__ == "__main__":
+    main()
