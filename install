@@ -337,6 +337,13 @@ EOT
       "$state" > "$state.new" && mv "$state.new" "$state"
   fi
 
+  # hardware video encode (VA-API, iHD) for calls and screen sharing: a feature Chrome leaves off on
+  # Linux and chrome://flags has no switch for, so its launcher entry with the flag, made from the
+  # system one on every run, hiding it in ~/.local/share/applications
+  local desk=/usr/share/applications/google-chrome.desktop
+  [ -f "$desk" ] && sed 's|^Exec=/usr/bin/google-chrome-stable|& --enable-features=AcceleratedVideoEncoder|' "$desk" \
+    > "$HOME/.local/share/applications/google-chrome.desktop"
+
   # Firefox from Mozilla's APT repo (etc/apt), pinned over Ubuntu's firefox, which only installs the
   # snap; the signing key checked against the fingerprint Mozilla publishes
   local mozkey=/etc/apt/keyrings/packages.mozilla.org.asc
