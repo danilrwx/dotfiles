@@ -31,11 +31,11 @@ touchpad() {
 
 SINK=@DEFAULT_AUDIO_SINK@ SOURCE=@DEFAULT_AUDIO_SOURCE@
 case ${1:-} in
-vol-up)      vol $SINK 10%+ ;;
-vol-down)    vol $SINK 10%- ;;
+vol-up)      vol $SINK 2%+ ;;
+vol-down)    vol $SINK 2%- ;;
 vol-mute)    mute $SINK "Volume" ;;
-mic-up)      vol $SOURCE 10%+ ;;
-mic-down)    vol $SOURCE 10%- ;;
+mic-up)      vol $SOURCE 2%+ ;;
+mic-down)    vol $SOURCE 2%- ;;
 mic)         mute $SOURCE "Microphone" ;;
 bright-up)   light 2%+ ;;
 bright-down) light 2%- ;;
