@@ -11,7 +11,7 @@
 # the root, and xcompmgr, run only under a wallpaper.
 state=${XDG_CACHE_HOME:-$HOME/.cache}/theme
 walls=$HOME/Pictures/wallpapers
-ALPHA=0.85
+ALPHA=0.75
 mkdir -p "$state"
 
 wallpapers() {
