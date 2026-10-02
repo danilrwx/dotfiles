@@ -82,7 +82,7 @@ anything; it refuses to run before greetd is enabled.
 | Path | What |
 |---|---|
 | `install` | host setup (symlinks, packages, go tools, the i3 desktop); `bin/dotfiles-update` is the same script on PATH |
-| `etc/` | files `install` puts into `/etc` as they are: iwd, netplan, the touchpad, greetd, the Caps as Ctrl hwdb rule, the polkit rule for the VPN's DNS |
+| `etc/` | files `install` puts into `/etc` as they are: iwd, netplan, the touchpad, greetd, the Caps as Ctrl hwdb rule, the polkit rules, i3lock's PAM |
 | `debloat` | one-off: strip GNOME, snapd and the unused rest from a stock Ubuntu desktop |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
 | `bin/tmux-ru-keys` | mirror tmux bindings onto the Russian layout |

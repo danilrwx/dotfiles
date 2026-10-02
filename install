@@ -170,6 +170,9 @@ desktop_system() {
   fi
   sudo systemctl enable iwd systemd-networkd
 
+  # i3lock unlocks on the password at once, without the fingerprint wait common-auth puts first
+  put /etc/pam.d/i3lock
+
   # the touchpad: clicks by pressing it down only (one, two, three fingers for left, right, middle),
   # natural scrolling at libinput's slowest, a slower pointer
   put /etc/X11/xorg.conf.d/30-touchpad.conf

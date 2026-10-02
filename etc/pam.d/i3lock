@@ -1,0 +1,6 @@
+# dotfiles: i3lock by password alone. The stock file includes login and with it common-auth, whose first
+# module is pam_fprintd (timeout=10): i3lock shows no fingerprint prompt, so after the password it hung
+# that long for a finger before checking it. sudo and the rest keep the fingerprint.
+auth    [success=1 default=ignore]  pam_unix.so nullok
+auth    requisite                   pam_deny.so
+auth    required                    pam_permit.so
