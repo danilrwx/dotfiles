@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""theme-palette IMAGE dark|light: a palette from a wallpaper, for bin/theme, as shell assignments.
+"""theme-palette IMAGE dark|light [ALPHA]: a palette from a wallpaper, for bin/theme, as shell assignments.
 
 The image cut down to its main colours (PIL's median cut). The base is the hue of the most common colour:
 the background and the text in it, near black and near white (dark) or the other way round (light), with
 little saturation. The accent is the most saturated colour that also covers a fair part of the picture.
 The terminal's 16 colours are the picture's own as well, by hue, their lightness evened out so text in
-any of them reads on that background.
+any of them reads on that background. BARBG is what the see-through bar shows over the wallpaper at ALPHA:
+the background over the mean of the picture's top strip, where the bar lies, for what cannot be
+see-through (dmenu) to match it.
 """
 import colorsys
 import sys
@@ -20,8 +22,12 @@ def hexc(h, l, s):
 
 def main():
     path, mode = sys.argv[1], sys.argv[2]
+    alpha = float(sys.argv[3]) if len(sys.argv) > 3 else 1.0
     dark = mode == "dark"
     img = Image.open(path).convert("RGB")
+    # the top strip (hsetroot -fill stretches the picture over the screen, the bar is ~2.5% of its height)
+    strip = img.crop((0, 0, img.width, max(1, img.height // 40))).resize((1, 1), Image.Resampling.BOX)
+    top = strip.getpixel((0, 0))
     img.thumbnail((256, 256))
     q = img.quantize(colors=24, method=Image.Quantize.MEDIANCUT)
     pal = q.getpalette()
@@ -70,7 +76,9 @@ def main():
     bright = [hexc(h, bright_l, sat) for h in hues]
     term = [black] + normal + [white] + [gray] + bright + [fg]
 
-    out = {"BG": bg, "FG": fg, "GRAY": gray, "DIM": dim, "ACCENT": accent}
+    bgrgb = [int(bg[i:i + 2], 16) for i in (1, 3, 5)]
+    barbg = "#%02x%02x%02x" % tuple(round(alpha * b + (1 - alpha) * t) for b, t in zip(bgrgb, top))
+    out = {"BG": bg, "FG": fg, "GRAY": gray, "DIM": dim, "ACCENT": accent, "BARBG": barbg}
     for i, c in enumerate(term):
         out["C%d" % i] = c
     for k, v in out.items():

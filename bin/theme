@@ -17,13 +17,13 @@ mkdir -p "$state"
 # palette MODE [IMG]: the colour variables, dwm's old scheme and st's own colours for dark
 palette() {
 	if [ "$1" = dark ]; then
-		BG='#000000' FG='#ffffff' GRAY='#888888' DIM='#444444' ACCENT='#00cd00'
+		BG='#000000' FG='#ffffff' GRAY='#888888' DIM='#444444' ACCENT='#00cd00' BARBG='#000000'
 		local st=('#000000' '#cd0000' '#00cd00' '#cdcd00' '#80a0ff' '#cd00cd' '#00cdcd' '#e5e5e5'
 			'#7f7f7f' '#ff0000' '#00ff00' '#ffff00' '#5c5cff' '#ff00ff' '#00ffff' '#ffffff')
 		local i
 		for i in "${!st[@]}"; do printf -v "C$i" %s "${st[$i]}"; done
 	else
-		eval "$("$HOME/dotfiles/bin/theme-palette" "$2" "${1#wall-}")"
+		eval "$("$HOME/dotfiles/bin/theme-palette" "$2" "${1#wall-}" "$ALPHA")"
 	fi
 }
 
@@ -36,7 +36,7 @@ apply() {
 
 	{
 		echo "MODE='$mode' WALL='$img'"
-		for v in BG FG GRAY DIM ACCENT; do echo "$v='${!v}'"; done
+		for v in BG FG GRAY DIM ACCENT BARBG; do echo "$v='${!v}'"; done
 	} > "$state/colors.sh"
 
 	# i3 and its bar (config/i3/config reads these); the bar's background carries the alpha
