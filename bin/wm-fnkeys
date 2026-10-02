@@ -17,9 +17,20 @@ mute() {
 }
 light() { brightnessctl -q set "$1" && bar "$(brightnessctl -m | cut -d, -f4 | tr -d %)"; }
 
-# on, off or toggle, through xinput
+# on, off or toggle, through xinput, the pad by its id: xinput lists a disabled one's name as "∼ NAME",
+# which no xinput command then finds, so it could not be turned back on. One at a time (flock), a toggle
+# within half a second of the last one dropped, should the key arrive twice
 touchpad() {
-	dev=$(xinput list --name-only | grep -i -m1 touchpad)
+	lock=${XDG_RUNTIME_DIR:-/tmp}/wm-fnkeys-touchpad
+	exec 9> "$lock"
+	flock 9
+	if [ "$1" = toggle ]; then
+		now=$(date +%s%N)
+		last=$(cat "$lock.last" 2>/dev/null || echo 0)
+		[ $(( (now - last) / 1000000 )) -lt 500 ] && return
+		echo "$now" > "$lock.last"
+	fi
+	dev=$(xinput list | grep -i -m1 touchpad | sed -n 's/.*id=\([0-9]*\).*/\1/p')
 	state=$(xinput list-props "$dev" | awk '/Device Enabled/ {print $NF == 1 ? "on" : "off"}')
 	case $1 in
 	toggle) [ "$state" = on ] && state=off || state=on ;;
