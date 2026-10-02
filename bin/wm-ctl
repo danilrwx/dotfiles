@@ -7,8 +7,8 @@
 # TUN or as the system proxy, off, the rule or global mode, the profile. theme picks bin/theme's dark,
 # or a wallpaper's dark or light palette and then the wallpaper, the current one first.
 menu="$HOME/dotfiles/bin/wm-menu"
-# term TITLE CMD: st with class wm-ctl
-term() { exec st -c wm-ctl -t "$1" -e "$2"; }
+# term TITLE CMD: st with class wm-ctl, in the theme's colours (bin/term)
+term() { exec "$HOME/dotfiles/bin/term" -c wm-ctl -t "$1" -e "$2"; }
 # devices Sink|Source: "ID<tab>NAME" per PipeWire audio sink or source, the default one first. Only the
 # nodes of class Audio/Sink or Audio/Source: wpctl status lists WirePlumber's internal Bluetooth nodes as the
 # sinks, while the headset's real one sits under its filters. Left out unless the default: those whose every

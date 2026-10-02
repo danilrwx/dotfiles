@@ -1,0 +1,17 @@
+#!/bin/bash
+# st with bin/theme's colours for a command run in it too (-e CMD ...): a shell replays them itself (.zshrc),
+# a command alone would keep st's compiled black. The theme's escape sequences go out first in the new
+# terminal, then the command. Takes st's options as they are; x-terminal-emulator (install) and bin/wm-ctl
+# run it.
+seq=${XDG_CACHE_HOME:-$HOME/.cache}/theme/sequences
+args=()
+while [ $# -gt 0 ]; do
+	if [ "$1" = -e ]; then
+		shift
+		# shellcheck disable=SC2016 # expanded by that sh, $0 the sequences file
+		exec st "${args[@]}" -e sh -c '[ -r "$0" ] && cat "$0"; exec "$@"' "$seq" "$@"
+	fi
+	args+=("$1")
+	shift
+done
+exec st "${args[@]}"

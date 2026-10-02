@@ -160,7 +160,7 @@ for_window [class="steam"]                  floating enable
 for_window [class="steam" title="^Steam$"]  floating disable
 for_window [class="(?i).*telegram.*"]       floating enable, border none
 for_window [title="^SSH Askpass$"]          floating enable
-for_window [class="wm-ctl"]                 floating enable, resize set 900 600
+for_window [class="wm-ctl"]                 floating enable, resize set 60 ppt 70 ppt, move position center
 
 
 client.focused                 $bg        $bg       $fg            $accent      $accent

@@ -88,6 +88,7 @@ anything; it refuses to run before greetd is enabled.
 | `bin/wm-ctl` | `$mod+x`: Wi-Fi (impala), Bluetooth (bluetui), sound output and input, headset mode, power profile |
 | `bin/vless` | the VLESS client: mihomo on through TUN or as the system proxy, off, rule/global, the profile |
 | `bin/theme` | dark, or a wallpaper and its palette (dark or light), applied to i3, bar, dunst, dmenu, st, GTK |
+| `bin/term` | st with the theme's colours for a command run in it too (`-e`); `x-terminal-emulator` |
 | `bin/wm-status` | i3bar's status line: memory, volume, mic, battery, brightness, layout, date |
 | `bin/wm-menu` | dmenu in the old colours: the launcher, and `pick` for the menus |
 | `bin/clip` | stdin to the clipboard through xclip (tmux, nvim, screenshots) |

@@ -205,10 +205,12 @@ desktop_session() {
   # make copies config.def.h to config.h only while there is none, so a stale one would win
   rm -f "$HOME/w/st/config.h"
   make -s -C "$HOME/w/st" && sudo make -s -C "$HOME/w/st" install || log "Failed to build st. Continue installation."
-  # st as x-terminal-emulator, for whatever opens "a terminal"
+  # st as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim): through bin/term,
+  # so a command run in it gets the theme's colours; st itself, registered by an older install, goes
   if [ -x /usr/local/bin/st ]; then
-    sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/local/bin/st 60
-    sudo update-alternatives --set x-terminal-emulator /usr/local/bin/st
+    sudo update-alternatives --remove x-terminal-emulator /usr/local/bin/st 2>/dev/null
+    sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator "$HOME/dotfiles/bin/term" 60
+    sudo update-alternatives --set x-terminal-emulator "$HOME/dotfiles/bin/term"
   fi
 
   # ssh: the plain ssh-agent with OpenSSH's GTK3 askpass, so AddKeysToAgent confirm shows a dialog per key
