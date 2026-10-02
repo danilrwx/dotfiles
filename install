@@ -255,7 +255,8 @@ desktop_apps() {
 
   # OpenVPN (bin/openvpn-ctl): each private/config/openvpn/NAME.ovpn as /etc/openvpn/client/NAME.conf for
   # openvpn-client@NAME.service, root's alone (the keys are in it). NAME.auth, the login and the password
-  # line by line, goes next to it as what auth-user-pass reads; the server's DNS goes to systemd-resolved
+  # line by line, goes next to it as what auth-user-pass reads, NAME.pass as the key's passphrase for
+  # askpass; the server's DNS goes to systemd-resolved
   # through openvpn-systemd-resolved, for the names behind it. The polkit rule starts and stops the units
   # without sudo
   put /etc/polkit-1/rules.d/50-openvpn-client.rules
@@ -264,12 +265,15 @@ desktop_apps() {
     [ -f "$ovpn" ] || continue
     name=$(basename "$ovpn" .ovpn)
     conf=$(mktemp)
+    grep -vE '^[[:space:]]*(auth-user-pass|askpass)([[:space:]]|$)' "$ovpn" > "$conf"
     if [ -f "private/config/openvpn/$name.auth" ]; then
       sudo install -D -m 600 "private/config/openvpn/$name.auth" "/etc/openvpn/client/$name.auth"
-      grep -v '^[[:space:]]*auth-user-pass' "$ovpn" > "$conf"
       echo "auth-user-pass /etc/openvpn/client/$name.auth" >> "$conf"
-    else
-      cat "$ovpn" > "$conf"
+    fi
+    # NAME.pass: the passphrase of an encrypted private key, what askpass reads
+    if [ -f "private/config/openvpn/$name.pass" ]; then
+      sudo install -D -m 600 "private/config/openvpn/$name.pass" "/etc/openvpn/client/$name.pass"
+      echo "askpass /etc/openvpn/client/$name.pass" >> "$conf"
     fi
     cat >> "$conf" <<'EOT'
 
