@@ -7,6 +7,6 @@ k9s:
     enableMouse: true
     logoless: true
     headless: true
-    # skin: transparent
-    # skin: catppuccin-mocha-transparent
+    # every colour the terminal's default: see-through over a wallpaper and in bin/theme's palette
+    skin: transparent
     reactive: true
