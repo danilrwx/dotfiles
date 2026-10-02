@@ -92,10 +92,13 @@ git_sync() {
 }
 
 # deb_from URL: download a .deb and install it with its dependencies
+# deb_from URL [SHA512]: a .deb installed from the web, checked against the base64 SHA-512 if given
 deb_from() {
   local deb
   deb=$(mktemp --suffix .deb)
-  curl -fsSL -o "$deb" "$1" && sudo apt install -y "$deb"
+  curl -fsSL -o "$deb" "$1" &&
+    { [ -z "${2:-}" ] || [ "$(openssl dgst -sha512 -binary "$deb" | base64 -w0)" == "$2" ] || { log "$1: checksum mismatch"; false; }; } &&
+    sudo apt install -y "$deb"
   rm -f "$deb"
 }
 
@@ -319,6 +322,15 @@ EOT
     deb_from https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   fi
   command -v google-chrome &> /dev/null && xdg-settings set default-web-browser google-chrome.desktop
+
+  # Lolka, an Electron app with no apt repo: the .deb its electron-builder manifest names, checked
+  # against the manifest's hash
+  if [ "$(dpkg --print-architecture)" == amd64 ] && ! installed lolka; then
+    log "Installing Lolka"
+    local lolka=https://storage.yandexcloud.net/lolka-electron/releases manifest
+    manifest=$(curl -fsSL "$lolka/latest-linux.yml") &&
+      deb_from "$lolka/$(awk '/^path:/ { print $2 }' <<< "$manifest")" "$(awk '/^sha512:/ { print $2 }' <<< "$manifest")"
+  fi
   # Chrome's theme colour, which bin/theme sets from the wallpaper (BrowserThemeColor): a policy file of
   # this user's, so bin/theme writes it without sudo; '{}' leaves Chrome its own theme
   local policy=/etc/opt/chrome/policies/managed/dotfiles-theme.json
