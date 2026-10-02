@@ -32,7 +32,11 @@ case "${1:-}" in
 on)
 	name=${2:?usage: openvpn-ctl on NAME}
 	[ -f "$profiles/$name.ovpn" ] || { echo "openvpn-ctl: no profile $profiles/$name.ovpn" >&2; exit 1; }
-	[ -e "/etc/openvpn/client/$name.conf" ] || { echo "openvpn-ctl: $name is not in /etc/openvpn/client yet; run install" >&2; exit 1; }
+	# the profile install put there (when the dir lets this user look: the package may keep it root's)
+	if [ ! -d /etc/openvpn/client ] || { [ -r /etc/openvpn/client ] && [ ! -e "/etc/openvpn/client/$name.conf" ]; }; then
+		echo "openvpn-ctl: $name is not in /etc/openvpn/client yet; run install" >&2
+		exit 1
+	fi
 	cur=$(up)
 	[ -n "$cur" ] && [ "$cur" != "$name" ] && systemctl stop "openvpn-client@$cur.service"
 	systemctl start "openvpn-client@$name.service" || exit 1
