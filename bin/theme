@@ -11,7 +11,8 @@
 # the root, and xcompmgr, run only under a wallpaper. Chrome's theme colour follows: under a wallpaper the
 # colour the see-through bar shows over it (black at ALPHA over the picture's top strip), set as Chrome's
 # BrowserThemeColor policy in the file install makes this user's; under dark the policy is cleared and
-# Chrome keeps its own theme. Chrome watches the policy dir and recolours as the file changes.
+# Chrome keeps its own theme. Chrome watches the policy dir and recolours as the file changes. The same
+# colour goes to ~/.cache/theme/barbg for bin/wm-menu, dmenu being solid where the bar is see-through.
 state=${XDG_CACHE_HOME:-$HOME/.cache}/theme
 walls=$HOME/Pictures/wallpapers
 ALPHA=0.75
@@ -42,11 +43,14 @@ chrome() {
 	if [ -n "${1:-}" ]; then printf '{ "BrowserThemeColor": "%s" }\n' "$1"; else echo '{}'; fi > "$CHROME_POLICY"
 }
 
-# wall IMG: the root, the remembered wallpaper and Chrome's colour from it
+# wall IMG: the root, the remembered wallpaper, and the bar's colour over it for dmenu and Chrome
 wall() {
+	local c
 	hsetroot -fill "$1" > /dev/null
 	echo "$1" > "$state/wallpaper"
-	chrome "$(barcolor "$1")"
+	c=$(barcolor "$1")
+	echo "$c" > "$state/barbg"
+	chrome "$c"
 }
 
 # apply MODE [IMG]
@@ -59,6 +63,7 @@ apply() {
 	pkill -x xcompmgr
 	if [ "$mode" = dark ]; then
 		hsetroot -solid '#000000' > /dev/null
+		echo '#000000' > "$state/barbg"
 		chrome
 	else
 		wall "$2"

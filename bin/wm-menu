@@ -4,7 +4,9 @@
 #                       opens st for the terminal ones); a name not in the list runs as a command
 #   wm-menu pick PROMPT choose a line of stdin, print it
 export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
-dmenu() { command dmenu -fn 'Iosevka-11' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000' "$@"; }
+# the background: the colour the see-through bar shows over the wallpaper (bin/theme), black without one
+bg=$(cat "${XDG_CACHE_HOME:-$HOME/.cache}/theme/barbg" 2>/dev/null || echo '#000000')
+dmenu() { command dmenu -fn 'Iosevka-11' -nb "$bg" -nf '#ffffff' -sb '#ffffff' -sf "$bg" "$@"; }
 [ "${1:-}" = pick ] && { dmenu -p "$2"; exit; }
 
 # apps: "NAME<tab>ID" per entry an app launcher shows, an ID in ~/.local/share/applications hiding the
