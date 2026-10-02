@@ -304,6 +304,13 @@ EOT
     deb_from https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   fi
   command -v google-chrome &> /dev/null && xdg-settings set default-web-browser google-chrome.desktop
+  # Chrome's theme colour, which bin/theme sets from the wallpaper (BrowserThemeColor): a policy file of
+  # this user's, so bin/theme writes it without sudo; '{}' leaves Chrome its own theme
+  local policy=/etc/opt/chrome/policies/managed/dotfiles-theme.json
+  sudo install -d -m 755 "$(dirname "$policy")"
+  [ -f "$policy" ] || echo '{}' | sudo install -m 644 /dev/stdin "$policy"
+  sudo chown "$USER" "$policy"
+
   # GPU compositing under X11: Chrome's blocklist takes this GPU (Arc B370) for software compositing, and
   # scrolling at 3120x2080 120Hz drops frames on it; the chrome://flags switch that overrides the list,
   # put in its Local State while it is not running (it rewrites the file on exit)

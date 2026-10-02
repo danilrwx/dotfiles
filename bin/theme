@@ -8,7 +8,10 @@
 #                         every start and restart (exec_always in config/i3/config)
 #   theme wallpapers      the wallpapers to pick from
 # The pick is kept in ~/.cache/theme: the bar's background alpha as the X resource config/i3/config reads,
-# the root, and xcompmgr, run only under a wallpaper.
+# the root, and xcompmgr, run only under a wallpaper. Chrome's theme colour follows: under a wallpaper the
+# colour the see-through bar shows over it (black at ALPHA over the picture's top strip), set as Chrome's
+# BrowserThemeColor policy in the file install makes this user's; under dark the policy is cleared and
+# Chrome keeps its own theme. Chrome watches the policy dir and recolours as the file changes.
 state=${XDG_CACHE_HOME:-$HOME/.cache}/theme
 walls=$HOME/Pictures/wallpapers
 ALPHA=0.75
@@ -18,10 +21,32 @@ wallpapers() {
 	find "$walls" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) 2>/dev/null | sort
 }
 
-# wall IMG: the root and the remembered wallpaper
+CHROME_POLICY=/etc/opt/chrome/policies/managed/dotfiles-theme.json
+
+# barcolor IMG: black at ALPHA over the mean of the picture's top strip, where the bar lies (hsetroot
+# -fill stretches the picture over the screen, the bar is about a fortieth of its height)
+barcolor() {
+	python3 - "$1" "$ALPHA" <<-'EOF'
+	import sys
+	from PIL import Image
+	img = Image.open(sys.argv[1]).convert("RGB")
+	a = float(sys.argv[2])
+	strip = img.crop((0, 0, img.width, max(1, img.height // 40))).resize((1, 1), Image.Resampling.BOX)
+	print("#%02x%02x%02x" % tuple(round((1 - a) * c) for c in strip.getpixel((0, 0))))
+	EOF
+}
+
+# chrome [COLOUR]: Chrome's theme colour, or none (its own theme); nothing where install made no file
+chrome() {
+	[ -w "$CHROME_POLICY" ] || return 0
+	if [ -n "${1:-}" ]; then printf '{ "BrowserThemeColor": "%s" }\n' "$1"; else echo '{}'; fi > "$CHROME_POLICY"
+}
+
+# wall IMG: the root, the remembered wallpaper and Chrome's colour from it
 wall() {
 	hsetroot -fill "$1" > /dev/null
 	echo "$1" > "$state/wallpaper"
+	chrome "$(barcolor "$1")"
 }
 
 # apply MODE [IMG]
@@ -34,6 +59,7 @@ apply() {
 	pkill -x xcompmgr
 	if [ "$mode" = dark ]; then
 		hsetroot -solid '#000000' > /dev/null
+		chrome
 	else
 		wall "$2"
 		xcompmgr &
