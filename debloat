@@ -43,7 +43,7 @@ REMOVE=(
   openbox dzen2 stalonetray wmctrl awesome
   # Ubuntu's wallpapers under a black root
   ubuntu-wallpapers ubuntu-wallpapers-resolute
-  # the heavy terminals, st is the one; not xterm, xinit and steam-libs depend on it
+  # the heavy terminals, alacritty is the one; not xterm, xinit and steam-libs depend on it
   kitty alacritty wezterm terminator tilix konsole xfce4-terminal lxterminal gnome-console qterminal
   # NetworkManager stays off for iwd and systemd-networkd (install), so it goes with its plugins and the
   # wpa_supplicant iwd replaces
@@ -112,8 +112,9 @@ log "Removing configs of the removed apps"
 for c in "${STALE[@]}"; do rm -rf "${HOME:?}/.config/$c"; done
 # the links install made for sway, mako and kitty point at nothing now
 for l in sway mako kitty; do [ -L "$HOME/.config/$l" ] && [ ! -e "$HOME/.config/$l" ] && rm "$HOME/.config/$l"; done
-# dwm, built into /usr/local by an older install, and its session; ~/w/dwm stays, a clone of my repo
-sudo rm -f /usr/local/bin/dwm /usr/local/share/man/man1/dwm.1 /usr/share/xsessions/dwm.desktop
+# dwm and st, built into /usr/local by older installs (alacritty is the terminal now), and dwm's session
+sudo rm -f /usr/local/bin/dwm /usr/local/share/man/man1/dwm.1 /usr/share/xsessions/dwm.desktop \
+  /usr/local/bin/st /usr/local/share/man/man1/st.1
 
 # What older installs left ───────────────────────────────────────────────────────────────────────────────────────────
 # fonts downloaded before the archive's fonts-iosevka, fonts-font-awesome and fonts-noto-color-emoji: the

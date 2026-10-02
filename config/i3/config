@@ -16,8 +16,8 @@ set $darkgray #888888
 # the bar's background: black, see-through over a wallpaper under bin/theme's dark-wall (the X resource)
 set_from_resource $barbg theme.barbg #000000
 
-# st, my own build (github.com/danilrwx/st)
-set $term st
+# alacritty (config/alacritty)
+set $term alacritty
 # dmenu-like launcher with the old dmenu colours, PATH fixed up for ~/.local/bin (bin/wm-menu)
 set $menu $HOME/dotfiles/bin/wm-menu
 set $lock i3lock -c 000000

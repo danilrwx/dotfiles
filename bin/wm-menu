@@ -1,7 +1,7 @@
 #!/bin/sh
 # dmenu for i3, in the old dmenu colours.
 #   wm-menu             launch an app: the ones with a .desktop entry, by name, through gtk-launch (which
-#                       opens st for the terminal ones); a name not in the list runs as a command
+#                       opens alacritty for the terminal ones); a name not in the list runs as a command
 #   wm-menu pick PROMPT choose a line of stdin, print it
 export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
 # the background: the colour the see-through bar shows over the wallpaper (bin/theme), black without one

@@ -1,0 +1,59 @@
+# alacritty, the terminal (in place of my st build): st's look carried over, Iosevka 12, st's palette on
+# black. The see-through comes from bin/theme, which writes ~/.cache/theme/alacritty.toml (window.opacity:
+# 1 under dark, the bar's ALPHA under dark-wall); alacritty reloads it, imports too, in every open window.
+# Linked to ~/.config/alacritty by install.
+
+[general]
+import = ["~/.cache/theme/alacritty.toml"]
+live_config_reload = true
+
+[env]
+# what ssh hosts and tmux know, alacritty's own terminfo being rare out there
+TERM = "xterm-256color"
+
+[window]
+padding = { x = 2, y = 2 }
+dynamic_padding = false
+resize_increments = false
+
+[font]
+normal = { family = "Iosevka" }
+size = 12
+
+[scrolling]
+history = 10000
+
+[cursor]
+style = { shape = "Block" }
+
+[colors.primary]
+background = "#000000"
+foreground = "#ffffff"
+
+[colors.cursor]
+cursor = "#555555"
+text = "#cccccc"
+
+[colors.selection]
+background = "#b5d5ff"
+text = "#000000"
+
+[colors.normal]
+black = "#000000"
+red = "#cd0000"
+green = "#00cd00"
+yellow = "#cdcd00"
+blue = "#80a0ff"
+magenta = "#cd00cd"
+cyan = "#00cdcd"
+white = "#e5e5e5"
+
+[colors.bright]
+black = "#7f7f7f"
+red = "#ff0000"
+green = "#00ff00"
+yellow = "#ffff00"
+blue = "#5c5cff"
+magenta = "#ff00ff"
+cyan = "#00ffff"
+white = "#ffffff"

@@ -1,6 +1,6 @@
 #!/bin/sh
 # $mod+x: pick Wi-Fi, Bluetooth, the sound output or input, the headset mode or the power profile. Wi-Fi
-# and Bluetooth are impala and bluetui in a floating st of class wm-ctl (for_window rule in
+# and Bluetooth are impala and bluetui in a floating alacritty of class wm-ctl (for_window rule in
 # config/i3/config); output, input and power are a second pick, the current one first: PipeWire's sinks or
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between
 # headphones (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vless: on through
@@ -8,8 +8,8 @@
 # dark-wall and then the wallpaper, a random one or by name. openvpn brings a profile of bin/openvpn-ctl up,
 # or the one up down.
 menu="$HOME/dotfiles/bin/wm-menu"
-# term TITLE CMD: st with class wm-ctl
-term() { exec st -c wm-ctl -t "$1" -e "$2"; }
+# term TITLE CMD: alacritty with class wm-ctl
+term() { exec alacritty --class wm-ctl -T "$1" -e "$2"; }
 # devices Sink|Source: "ID<tab>NAME" per PipeWire audio sink or source, the default one first. Only the
 # nodes of class Audio/Sink or Audio/Source: wpctl status lists WirePlumber's internal Bluetooth nodes as the
 # sinks, while the headset's real one sits under its filters. Left out unless the default: those whose every

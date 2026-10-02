@@ -46,7 +46,8 @@ once a revision has been applied.
 - i3 on X11 (`config/i3`) with `bin/wm-status` in i3bar: dmenu, dunst (`config/dunst`),
   i3lock/xss-lock, maim, xclip, the volume/brightness cards and HONOR Fn keys through
   `bin/wm-fnkeys`, `Xft.dpi` for the scale (`.Xresources`), the touchpad in xorg.conf.d
-- st, my own build from github.com/danilrwx/st in `~/w`, as the terminal
+- alacritty as the terminal (`config/alacritty`), see-through under dark-wall as the bar; emoji from
+  Noto Color Emoji after Iosevka (`config/fontconfig`)
 - greetd with tuigreet as the login, starting i3 and remembering the user; the
   session environment comes from `.profile`
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for

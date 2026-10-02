@@ -2,7 +2,7 @@
 # The desktop's theme, picked in bin/wm-ctl's theme menu; the colours are the same dark ones in both:
 #   theme dark            black root, everything solid: the default
 #   theme dark-wall [IMG] a wallpaper (~/Pictures/wallpapers) under a see-through terminal and bar, the
-#                         one ALPHA of both (st's alpha in config.def.h is the same), through xcompmgr
+#                         one ALPHA of both (alacritty's window.opacity, written here), through xcompmgr
 #   theme apply           the last pick again (bin/x-autostart, at login)
 #   theme shuffle         under dark-wall, a random other wallpaper, the root alone touched: i3 runs it on
 #                         every start and restart (exec_always in config/i3/config)
@@ -59,6 +59,8 @@ apply() {
 	if [ "$mode" = dark ]; then a=1; else a=$ALPHA; fi
 	hex=$(printf '%02x' "$(awk -v a="$a" 'BEGIN { printf "%d", a * 255 + 0.5 }')")
 	echo "theme.barbg: #000000$hex" | xrdb -merge
+	# alacritty's opacity, the file its config imports; it reloads it in every open window
+	printf '# bin/theme: %s\n[window]\nopacity = %s\n' "$mode" "$a" > "$state/alacritty.toml"
 
 	pkill -x xcompmgr
 	if [ "$mode" = dark ]; then

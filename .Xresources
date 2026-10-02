@@ -1,5 +1,5 @@
 ! the X11 sessions (bin/x-autostart loads it): the HONOR's 3120x2080 panel at 2x.
-! Xft.dpi scales text and the toolkits that follow it (GTK, Qt, Chrome, st) natively, no blur
+! Xft.dpi scales text and the toolkits that follow it (GTK, Qt, Chrome, alacritty) natively, no blur
 Xft.dpi: 192
 Xft.antialias: 1
 Xft.hinting: 1
