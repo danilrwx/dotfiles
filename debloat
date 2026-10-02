@@ -131,6 +131,13 @@ if dpkg-query -W -f='${db:Status-Status}' docker-ce 2>/dev/null | grep -qx insta
   sudo apt update -y && sudo apt install -y docker.io docker-compose-v2 docker-buildx
   sudo systemctl enable --now docker.socket
 fi
+# the dpkg leftovers of what went (the "rc" packages: their configs), and i3's debug-log session hidden
+# from tuigreet, the package's own; diverted, so an upgrade does not bring it back
+rc=$(dpkg -l | awk '/^rc/ {print $2}')
+[ -n "$rc" ] && sudo apt purge -y $rc
+[ -f /usr/share/xsessions/i3-with-shmlog.desktop ] \
+  && sudo dpkg-divert --quiet --local --rename --add /usr/share/xsessions/i3-with-shmlog.desktop
+
 # the document portal and its permission store, which an older install masked: xdg-desktop-portal exits
 # without them
 [ -n "${XDG_RUNTIME_DIR:-}" ] && systemctl --user unmask xdg-document-portal.service xdg-permission-store.service
