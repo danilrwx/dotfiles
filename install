@@ -42,7 +42,7 @@ DESKTOP_PKGS=(iwd bluez rfkill
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
   udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
-  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome libx11-dev libxft-dev
+  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome libx11-dev libxft-dev libxinerama-dev
   openvpn openvpn-systemd-resolved)
 # X11 and i3 without their recommends: dmenu, dunst, i3lock/xss-lock, maim and xclip for screenshots, the
 # media keys (bin/wm-fnkeys), the polkit agent
@@ -213,6 +213,18 @@ desktop_session() {
   # make copies config.def.h to config.h only while there is none, so a stale one would win
   rm -f "$HOME/w/st/config.h"
   make -s -C "$HOME/w/st" && sudo make -s -C "$HOME/w/st" install || log "Failed to build st. Continue installation."
+  # dmenu 5.4 with the line-height patch (patches/dmenu-lineheight.diff) into /usr/local, ahead of the
+  # archive's: -h, so bin/wm-menu opens it exactly as tall as the i3 bar. Built once per version
+  local dmenu_ver=5.4 tmp
+  if [ "$(/usr/local/bin/dmenu -v 2>&1)" != "dmenu-$dmenu_ver" ]; then
+    log "Building dmenu $dmenu_ver with line-height"
+    tmp=$(mktemp -d)
+    git clone -q --depth 1 --branch "$dmenu_ver" https://git.suckless.org/dmenu "$tmp" \
+      && git -C "$tmp" apply "$HOME/dotfiles/patches/dmenu-lineheight.diff" \
+      && make -s -C "$tmp" && sudo make -s -C "$tmp" install || log "Failed to build dmenu. Continue installation."
+    rm -rf "$tmp"
+  fi
+
   # st as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim)
   if [ -x /usr/local/bin/st ]; then
     sudo update-alternatives --remove x-terminal-emulator "$HOME/dotfiles/bin/term" 2>/dev/null

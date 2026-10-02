@@ -6,7 +6,13 @@
 export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
 # the background: the colour the see-through bar shows over the wallpaper (bin/theme), black without one
 bg=$(cat "${XDG_CACHE_HOME:-$HOME/.cache}/theme/barbg" 2>/dev/null || echo '#000000')
-dmenu() { command dmenu -fn 'Iosevka-11' -nb "$bg" -nf '#ffffff' -sb '#ffffff' -sf "$bg" "$@"; }
+# as tall as the i3 bar, through the line-height patch of the dmenu install builds into /usr/local
+# (the archive's knows no -h)
+h=''
+if [ -x /usr/local/bin/dmenu ]; then
+	h=$(xwininfo -root -tree | awk '/i3bar for output/ { split($(NF-1), g, /[x+]/); print g[2]; exit }')
+fi
+dmenu() { command dmenu -fn 'Iosevka-11' ${h:+-h "$h"} -nb "$bg" -nf '#ffffff' -sb '#ffffff' -sf "$bg" "$@"; }
 [ "${1:-}" = pick ] && { dmenu -p "$2"; exit; }
 
 # apps: "NAME<tab>ID" per entry an app launcher shows, an ID in ~/.local/share/applications hiding the
