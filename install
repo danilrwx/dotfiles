@@ -34,13 +34,15 @@ log "This is an Ubuntu $VERSION_ID system."
 BASE_PKGS=(build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf jq clangd
   golang-go neovim nodejs npm fd-find fastfetch)
 # the desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop (installed by hand, so
-# debloat's autoremove keeps it): Wi-Fi by iwd, Bluetooth, sound, fingerprint, power profiles, firmware
-# updates, the file dialogs' portal, the keyring Chrome keeps passwords in, fonts, printing; then the login,
-# virtualization, ssh's askpass, the terminal, and dmenu's build headers
+# debloat's autoremove keeps it): the Intel GPU's video decode and encode (VA-API, iHD), Wi-Fi by iwd,
+# Bluetooth, sound, fingerprint, power profiles, firmware updates, the file dialogs' portal, the keyring
+# Chrome keeps passwords in, fonts, printing; then the login, virtualization, ssh's askpass, the terminal,
+# and dmenu's build headers
 DESKTOP_PKGS=(iwd bluez rfkill
   pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
   udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
+  intel-media-va-driver-non-free
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
   greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome alacritty libx11-dev libxft-dev libxinerama-dev
   openvpn openvpn-systemd-resolved)
