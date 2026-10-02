@@ -170,8 +170,10 @@ desktop_system() {
   fi
   sudo systemctl enable iwd systemd-networkd
 
-  # i3lock unlocks on the password at once, without the fingerprint wait common-auth puts first
-  put /etc/pam.d/i3lock
+  # No fingerprint login: pam_fprintd first in common-auth waits up to 10 s for a finger on every sudo,
+  # login and unlock (i3lock does not even ask for it). Its PAM profile off, which pam-auth-update keeps
+  # off across package updates; fprintd and the sensor's driver (the HONOR fixes install them) stay
+  sudo DEBIAN_FRONTEND=noninteractive pam-auth-update --disable fprintd
 
   # the touchpad: clicks by pressing it down only (one, two, three fingers for left, right, middle),
   # natural scrolling at libinput's slowest, a slower pointer
