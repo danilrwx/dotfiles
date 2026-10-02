@@ -2,12 +2,12 @@
 # part over it (private/config/mihomo/desktop.yaml: the servers under proxies, the subscriptions under
 # proxy-providers) into ~/.config/mihomo/config.yaml, which mihomo.service runs.
 #
-# Started with TUN off and the rule mode; bin/vless turns TUN on or off and switches rule/global at run time
-# through the API below, no restart.
+# Started with TUN off and the global mode (everything through the profile); bin/vless turns TUN on or off
+# and switches rule/global at run time through the API below, no restart.
 
 mixed-port: 7890          # the proxy mode: HTTP and SOCKS5 on one port
 allow-lan: false
-mode: rule
+mode: global
 log-level: warning
 ipv6: false
 external-controller: 127.0.0.1:9090
