@@ -1,6 +1,0 @@
-# dotfiles: Firefox from Mozilla's own APT repo, the .deb (Ubuntu's firefox package installs the snap)
-Types: deb
-URIs: https://packages.mozilla.org/apt
-Suites: mozilla
-Components: main
-Signed-By: /etc/apt/keyrings/packages.mozilla.org.asc

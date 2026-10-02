@@ -36,6 +36,8 @@ REMOVE=(
   nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
   snapd wayland-scroll-factor ghostty foot
+  # Firefox, Mozilla's .deb an older install put in, Chrome being the browser
+  firefox
   # the sway session, given up for i3 on X11, and pavucontrol (bin/wm-ctl picks the devices)
   sway swaybg swayidle swaylock wmenu mako-notifier grim slurp wl-clipboard xdg-desktop-portal-wlr wob xwayland
   pavucontrol
@@ -132,6 +134,9 @@ if dpkg-query -W -f='${db:Status-Status}' docker-ce 2>/dev/null | grep -qx insta
   sudo apt update -y && sudo apt install -y docker.io docker-compose-v2 docker-buildx
   sudo systemctl enable --now docker.socket
 fi
+# Mozilla's apt repo, its pin and key, put in with that Firefox, and its profiles
+sudo rm -f /etc/apt/sources.list.d/mozilla.sources /etc/apt/preferences.d/mozilla /etc/apt/keyrings/packages.mozilla.org.asc
+rm -rf "$HOME/.mozilla" "$HOME/.cache/mozilla" "$HOME/.config/mozilla"
 # the dpkg leftovers of what went (the "rc" packages: their configs), and i3's debug-log session hidden
 # from tuigreet, the package's own; diverted, so an upgrade does not bring it back
 rc=$(dpkg -l | awk '/^rc/ {print $2}')
