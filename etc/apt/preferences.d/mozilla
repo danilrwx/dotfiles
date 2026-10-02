@@ -1,0 +1,4 @@
+# dotfiles: Mozilla's packages over Ubuntu's of the same name, its firefox over the snap installer
+Package: *
+Pin: origin packages.mozilla.org
+Pin-Priority: 1000

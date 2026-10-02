@@ -335,6 +335,29 @@ EOT
       "$state" > "$state.new" && mv "$state.new" "$state"
   fi
 
+  # Firefox from Mozilla's APT repo (etc/apt), pinned over Ubuntu's firefox, which only installs the
+  # snap; the signing key checked against the fingerprint Mozilla publishes
+  local mozkey=/etc/apt/keyrings/packages.mozilla.org.asc
+  if [ ! -f "$mozkey" ]; then
+    local key
+    key=$(mktemp)
+    curl -fsSL -o "$key" https://packages.mozilla.org/apt/repo-signing-key.gpg
+    if gpg -n -q --import --import-options import-show "$key" 2>/dev/null | grep -q 35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3; then
+      sudo install -D -m 644 "$key" "$mozkey"
+    else
+      log "Mozilla's signing key does not match its fingerprint. Skip Firefox."
+    fi
+    rm -f "$key"
+  fi
+  if [ -f "$mozkey" ]; then
+    # apt learns of the repo and the pin only after an update, so one when either file is new or changed
+    local changed=''
+    put /etc/apt/sources.list.d/mozilla.sources && changed=1
+    put /etc/apt/preferences.d/mozilla && changed=1
+    [ -n "$changed" ] && sudo apt update -y
+    pkg firefox
+  fi
+
   # Telegram: the official tarball in ~/.local/opt, which updates itself and writes its own .desktop file
   if [ ! -x "$HOME/.local/opt/Telegram/Telegram" ]; then
     log "Installing Telegram"

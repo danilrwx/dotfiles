@@ -35,7 +35,7 @@ REMOVE=(
   gnome-shell gnome-shell-common gnome-session gnome-settings-daemon gnome-control-center
   nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
-  firefox snapd wayland-scroll-factor ghostty foot
+  snapd wayland-scroll-factor ghostty foot
   # the sway session, given up for i3 on X11, and pavucontrol (bin/wm-ctl picks the devices)
   sway swaybg swayidle swaylock wmenu mako-notifier grim slurp wl-clipboard xdg-desktop-portal-wlr wob xwayland
   pavucontrol
