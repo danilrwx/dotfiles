@@ -1,20 +1,9 @@
 -- Runtime: enable treesitter for any filetype whose parser is present. c/lua/
 -- vim/vimdoc/markdown*/query are compiled into neovim; the rest come from
 -- :TSBuild below. Filetypes without a parser fall back to regex syntax.
---
--- vim.g.treesitter: off for now, to try the plain regex syntax (colors.lua maps
--- its groups to the same buckets) with folds by indent; true brings it all back.
--- The picker's preview (lua/picker/ui.lua) follows it too.
-vim.g.treesitter = false
-
 vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("treesitter_start", { clear = true }),
   callback = function()
-    if not vim.g.treesitter then
-      vim.wo[0][0].foldmethod = "indent"
-      vim.wo[0][0].foldlevel = 99
-      return
-    end
     if vim.treesitter.get_parser(nil, nil, { error = false }) then
       vim.treesitter.start()
       -- [0][0] is :setlocal, so the folds stay with this buffer in this window

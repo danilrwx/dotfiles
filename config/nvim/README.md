@@ -231,7 +231,3 @@ vendored under `queries/`.
   save. Symlinks are skipped (git blames the target, not the followed content).
 - `private/config/nvim` (a submodule, if present) is appended to `runtimepath`
   for machine-specific tooling not tracked here.
-
-
-ftdetect/helm.vim and syntax/helm.vim are a copy of [vim-helm](https://github.com/towolf/vim-helm)
-(LICENSE.vim-helm): the regex syntax for Helm templates while treesitter is off.
