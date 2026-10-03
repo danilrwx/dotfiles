@@ -4,8 +4,8 @@
 // layout, the tray (StatusNotifierItem, Discord's menu included) and the status as one block, Wi-Fi, VPN, sound
 // and battery in Adwaita's symbolic icons (a click: the quick settings, the wheel: the volume). Sound, battery,
 // tray, workspaces and the clock from Quickshell's own services and the layout from Hyprland's event, live;
-// Wi-Fi and Bluetooth from wmd's D-Bus events; brightness from bin/wm-status once a second, VLESS and the power
-// profile from bin/wm-quick every 3 s. bin/wl-autostart starts it; linked to ~/.config/quickshell by install.
+// the rest from wmd (wmd/), on every change. bin/wl-autostart starts it; linked to ~/.config/quickshell by
+// install.
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
@@ -23,14 +23,8 @@ ShellRoot {
     readonly property string bin: Quickshell.env("HOME") + "/dotfiles/bin/"
     readonly property string fnkeys: bin + "wm-fnkeys"
 
-    // bin/wm-status's last line: the layout, brightness, VLESS and OpenVPN as text
-    property var status: ({})
-    Process {
-        command: [root.bin + "wm-status"]
-        running: true
-        stdout: SplitParser { onRead: line => { try { root.status = JSON.parse(line) } catch (e) {} } }
-    }
-    // Wi-Fi and Bluetooth from wmd (wmd/, go install), its state on every change iwd and BlueZ signal
+    // the state from wmd (wmd/, go install): Wi-Fi, Bluetooth, power, brightness, the layout, the sound devices,
+    // VLESS, OpenVPN, a JSON line on every change
     readonly property string wmd: Quickshell.env("HOME") + "/go/bin/wmd"
     property var net: ({ wifi: {}, bt: {} })
     Process {
@@ -38,20 +32,8 @@ ShellRoot {
         running: true
         stdout: SplitParser { onRead: line => { try { root.net = JSON.parse(line) } catch (e) {} } }
     }
-    // bin/wm-quick's: VLESS and the power profile
-    property var q: ({})
-    Process {
-        id: quickProc
-        command: [root.bin + "wm-quick"]
-        stdout: StdioCollector { onStreamFinished: { try { root.q = JSON.parse(text) } catch (e) {} } }
-    }
-    Timer {
-        interval: 3000; repeat: true; running: true; triggeredOnStart: true
-        onTriggered: quickProc.running = true
-    }
-    // the state again soon after a change, not in 3 s
-    Timer { id: soon; interval: 400; onTriggered: quickProc.running = true }
-    function refresh() { soon.restart() }
+    // after a switch: wmd brings the change itself, so nothing is to be fetched again
+    function refresh() {}
 
     PwObjectTracker { objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource] }
     readonly property var sink: Pipewire.defaultAudioSink?.audio ?? null
@@ -87,8 +69,9 @@ ShellRoot {
         return "battery-level-" + level + (full && level === 100 ? "-charged" : charging ? "-charging" : "")
             + "-symbolic"
     }
-    // the keyboard layout, Hyprland's word on every switch, at once; until the first, bin/wm-status's
-    property bool ru: status.ru ?? false
+    // the keyboard layout, Hyprland's word on every switch, at once, and wmd's besides (at the start)
+    property bool ru: false
+    onNetChanged: ru = /Russian/.test(net.keymap ?? "")
     Connections {
         target: Hyprland
         function onRawEvent(event) {
@@ -98,7 +81,7 @@ ShellRoot {
             else if (root.peeking && root.comboEvents.indexOf(event.name) >= 0) root.peeking = false
         }
     }
-    readonly property bool vpn: (q.vless ?? "off") !== "off" || (status.openvpn ?? "") !== ""
+    readonly property bool vpn: (net.vless?.how ?? "off") !== "off" || (net.openvpn?.profile ?? "") !== ""
 
     // the panels, one at a time (QuickSettings.qml, CalendarPopup.qml)
     QuickSettings { id: qs; shell: root }

@@ -1,10 +1,10 @@
-// The quick settings, GNOME's layout in the old look (Theme.qml): a popover under the bar's status. Up top the battery and round buttons for a
-// screenshot, the lock and the power menu; then the sliders, volume and mic (their device lists behind an arrow)
-// and brightness; then the toggles, two a row, GNOME's split pills: Wi-Fi, Bluetooth, the power mode, VLESS
-// and the headset's mode, the left side flips one (inverted while on), the arrow opens its menu. A menu
-// unfolds in place under its row, one at a time, in 100 ms. Closed by a click outside (Hyprland's focus grab)
-// or on the pill again. The toggles' state from the bar's wmd (Wi-Fi, Bluetooth) and bin/wm-quick (VLESS,
-// power), the devices from bin/wm-audio json every 2 s while open, volume and mute straight through PipeWire.
+// The quick settings, GNOME's layout in the old look (Theme.qml): a popover under the bar's status. Up top the
+// battery and round buttons for a screenshot, the lock and the power menu; then the sliders, volume and mic
+// (their device lists behind an arrow) and brightness; then the toggles, two a row, GNOME's split pills:
+// Wi-Fi, Bluetooth, the power mode, VLESS, OpenVPN and the headset's mode, the left side flips one (inverted
+// while on), the arrow opens its menu. A menu unfolds in place under its row, one at a time, in 100 ms; a new
+// Wi-Fi network asks its passphrase right there. Closed by a click outside (Hyprland's focus grab) or on the
+// pill again. The state from the bar's wmd, volume and mute straight through PipeWire.
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
@@ -15,37 +15,49 @@ import QtQuick.Layouts
 PanelWindow {
     id: panel
 
-    // the bar's ShellRoot: status, q, sink, source, battery, run(), refresh(), the icon functions
+    // the bar's ShellRoot: net (wmd's state), sink, source, battery, run(), the icon functions
     required property var shell
     property bool open: false
     function toggle() { open = !open }
-    readonly property var q: shell.q
     readonly property var net: shell.net
+    readonly property var audio: net.audio ?? ({})
+    readonly property var vless: net.vless ?? ({})
+    readonly property var ovpn: net.openvpn ?? ({})
+    readonly property string profile: net.power?.active ?? ""
     readonly property string bin: shell.bin
+    readonly property string wmd: shell.wmd
 
-    // the menu unfolded: "", system, outs, ins, wifi, bt, power, vless; folded on every opening
+    // the menu unfolded: "", system, outs, ins, wifi, bt, power, vless, openvpn; folded on every opening
     property string menu: ""
     function flip(m) { menu = menu === m ? "" : m }
-    onOpenChanged: menu = ""
+    onOpenChanged: { menu = ""; asking = ""; wifiError = "" }
 
-    property var audio: ({})
+    // run ARGS...; wmd reports what changes
+    function act(cmd) { shell.run(cmd) }
+
+    // a new Wi-Fi network: the one whose passphrase is asked, and why the last try failed
+    property string asking: ""
+    property string wifiError: ""
     Process {
-        id: audioProc
-        command: [panel.bin + "wm-audio", "json"]
-        stdout: StdioCollector { onStreamFinished: { try { panel.audio = JSON.parse(text) } catch (e) {} } }
+        id: join
+        property string ssid
+        property string passphrase
+        command: [panel.wmd, "wifi", "connect", ssid]
+        stdinEnabled: true
+        // the passphrase once it runs, for wmd's agent to hand iwd should it ask
+        onStarted: write(passphrase + "\n")
+        stderr: StdioCollector { id: joinErr }
+        onExited: code => {
+            panel.wifiError = code === 0 ? "" : joinErr.text.replace(/^wmd: /, "").trim()
+            if (code === 0) panel.asking = ""
+        }
     }
-    Timer {
-        interval: 2000; repeat: true; triggeredOnStart: true
-        running: panel.visible
-        onTriggered: audioProc.running = true
+    function connect(ssid, passphrase) {
+        join.ssid = ssid
+        join.passphrase = passphrase
+        wifiError = ""
+        join.running = true
     }
-    // run ARGS..., then the state again at once
-    function act(cmd) {
-        shell.run(cmd)
-        shell.refresh()
-        later.restart()
-    }
-    Timer { id: later; interval: 400; onTriggered: audioProc.running = true }
     // close, then run ARGS... (what takes the screen: a tool, the lock)
     function leave(cmd) {
         open = false
@@ -63,6 +75,8 @@ PanelWindow {
     mask: Region { item: pop }
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell-panel"
+    // the keyboard on a click into it, for a passphrase
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     HyprlandFocusGrab {
         active: panel.visible
@@ -380,8 +394,8 @@ PanelWindow {
             }
             Slider {
                 Layout.fillWidth: true
-                icon: "display-brightness-symbolic"; value: (panel.shell.status.bri ?? 0) / 100
-                onMoved: v => panel.shell.run(["brightnessctl", "-q", "set", Math.max(1, Math.round(v * 100)) + "%"])
+                icon: "display-brightness-symbolic"; value: (panel.net.brightness ?? 0) / 100
+                onMoved: v => panel.shell.run([panel.wmd, "brightness", String(Math.round(v * 100))])
             }
 
             // the toggles, two a row, each row's menu under it
@@ -392,13 +406,13 @@ PanelWindow {
                     icon: panel.shell.wifiIcon(); title: "Wi-Fi"; on: panel.net.wifi.on ?? false
                     sub: on ? (panel.net.wifi.ssid ?? "") : ""
                     menuName: "wifi"
-                    onFlip: panel.act([panel.shell.wmd, "wifi", on ? "off" : "on"])
+                    onFlip: panel.act([panel.wmd, "wifi", on ? "off" : "on"])
                 }
                 Toggle {
                     icon: on ? "bluetooth-active-symbolic" : "bluetooth-disabled-symbolic"; title: "Bluetooth"
                     on: panel.net.bt.on ?? false; sub: panel.net.bt.connected ?? ""
                     menuName: "bt"
-                    onFlip: panel.act([panel.shell.wmd, "bt", on ? "off" : "on"])
+                    onFlip: panel.act([panel.wmd, "bt", on ? "off" : "on"])
                 }
             }
             Menu {
@@ -409,13 +423,50 @@ PanelWindow {
                         required property var modelData
                         icon: "network-wireless-signal-" + ["none", "weak", "ok", "good", "excellent"][modelData.signal] + "-symbolic"
                         text: modelData.ssid; on: modelData.connected
-                        // a known network joins; a new one needs its passphrase, typed in impala
-                        onClicked: modelData.known ? panel.act([panel.shell.wmd, "wifi", "connect", modelData.ssid])
-                                                   : panel.leave([panel.bin + "wm-ctl", "wifi"])
+                        note: modelData.known || modelData.security === "open" ? "" : "🔒"
+                        // a known or open network joins; a new one asks its passphrase below
+                        onClicked: {
+                            if (modelData.known || modelData.security === "open") panel.act([panel.wmd, "wifi", "connect", modelData.ssid])
+                            else { panel.asking = modelData.ssid; panel.wifiError = ""; pass.text = ""; pass.forceActiveFocus() }
+                        }
+                    }
+                }
+                // the passphrase of the network asked for: Enter joins, Escape gives up
+                ColumnLayout {
+                    visible: panel.asking !== ""
+                    Layout.fillWidth: true
+                    Layout.margins: 6
+                    spacing: 4
+                    Label { text: "Passphrase for " + panel.asking; color: Theme.dim; font.pointSize: 9 }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 32
+                        color: Theme.popover
+                        border.color: pass.activeFocus ? Theme.fg : Theme.rule
+                        TextInput {
+                            id: pass
+                            anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
+                            verticalAlignment: TextInput.AlignVCenter
+                            echoMode: TextInput.Password
+                            color: Theme.fg
+                            font.family: Theme.font
+                            font.pointSize: 10
+                            enabled: !join.running
+                            onAccepted: panel.connect(panel.asking, text)
+                            Keys.onEscapePressed: panel.asking = ""
+                        }
+                    }
+                    Label {
+                        visible: join.running || panel.wifiError !== ""
+                        text: join.running ? "Joining…" : panel.wifiError
+                        color: join.running ? Theme.dim : Theme.urgent
+                        font.pointSize: 9
+                        wrapMode: Text.Wrap
+                        Layout.fillWidth: true
                     }
                 }
                 Separator {}
-                Item_ { text: "Scan"; onClicked: panel.act([panel.shell.wmd, "wifi", "scan"]) }
+                Item_ { text: "Scan"; onClicked: panel.act([panel.wmd, "wifi", "scan"]) }
                 Item_ { text: "All Networks…"; onClicked: panel.leave([panel.bin + "wm-ctl", "wifi"]) }
             }
             Menu {
@@ -426,7 +477,7 @@ PanelWindow {
                         required property var modelData
                         icon: (modelData.icon || "bluetooth") + "-symbolic"
                         text: modelData.name; on: modelData.connected
-                        onClicked: panel.act([panel.shell.wmd, "bt", modelData.connected ? "disconnect" : "connect", modelData.address])
+                        onClicked: panel.act([panel.wmd, "bt", modelData.connected ? "disconnect" : "connect", modelData.address])
                     }
                 }
                 Separator {}
@@ -439,15 +490,16 @@ PanelWindow {
                 Toggle {
                     readonly property var order: ["power-saver", "balanced", "performance"]
                     readonly property var names: ({ "power-saver": "Power Saver", "balanced": "Balanced", "performance": "Performance" })
-                    icon: "power-profile-" + (panel.q.power || "balanced") + "-symbolic"
-                    title: "Power Mode"; sub: names[panel.q.power] ?? ""
-                    on: (panel.q.power ?? "balanced") !== "balanced"
+                    icon: "power-profile-" + (panel.profile || "balanced") + "-symbolic"
+                    title: "Power Mode"; sub: names[panel.profile] ?? ""
+                    on: (panel.profile || "balanced") !== "balanced"
                     menuName: "power"
-                    onFlip: panel.act(["powerprofilesctl", "set", order[(order.indexOf(panel.q.power) + 1) % 3]])
+                    onFlip: panel.act([panel.wmd, "power", "set", order[(order.indexOf(panel.profile) + 1) % 3]])
                 }
                 Toggle {
                     icon: "network-vpn-symbolic"; title: "VLESS"
-                    on: (panel.q.vless ?? "off") !== "off"; sub: on ? (panel.q.vprofile ?? "") : ""
+                    on: (panel.vless.how ?? "off") !== "off"
+                    sub: on ? (panel.vless.profile ?? "") + (panel.vless.mode === "global" ? ", global" : "") : ""
                     menuName: "vless"
                     onFlip: panel.act(on ? [panel.bin + "vless", "off"] : [panel.bin + "vless", "on", "tun"])
                 }
@@ -459,28 +511,28 @@ PanelWindow {
                     Item_ {
                         required property var modelData
                         icon: "power-profile-" + modelData[0] + "-symbolic"
-                        text: modelData[1]; on: panel.q.power === modelData[0]
-                        onClicked: panel.act(["powerprofilesctl", "set", modelData[0]])
+                        text: modelData[1]; on: panel.profile === modelData[0]
+                        onClicked: panel.act([panel.wmd, "power", "set", modelData[0]])
                     }
                 }
             }
             Menu {
                 names: ["vless"]; icon: "network-vpn-symbolic"; title: "VLESS"
-                Item_ { text: "TUN, every app"; on: panel.q.vless === "tun"; onClicked: panel.act([panel.bin + "vless", "on", "tun"]) }
-                Item_ { text: "System proxy"; on: panel.q.vless === "proxy"; onClicked: panel.act([panel.bin + "vless", "on", "proxy"]) }
+                Item_ { text: "TUN, every app"; on: panel.vless.how === "tun"; onClicked: panel.act([panel.bin + "vless", "on", "tun"]) }
+                Item_ { text: "System proxy"; on: panel.vless.how === "proxy"; onClicked: panel.act([panel.bin + "vless", "on", "proxy"]) }
                 ColumnLayout {
-                    visible: (panel.q.vless ?? "off") !== "off"
+                    visible: (panel.vless.how ?? "off") !== "off"
                     Layout.fillWidth: true
                     spacing: 0
                     Separator {}
-                    Item_ { text: "Rule: Russia direct"; on: panel.q.vmode === "rule"; onClicked: panel.act([panel.bin + "vless", "mode", "rule"]) }
-                    Item_ { text: "Global"; on: panel.q.vmode === "global"; onClicked: panel.act([panel.bin + "vless", "mode", "global"]) }
+                    Item_ { text: "Rule: Russia direct"; on: panel.vless.mode === "rule"; onClicked: panel.act([panel.bin + "vless", "mode", "rule"]) }
+                    Item_ { text: "Global"; on: panel.vless.mode === "global"; onClicked: panel.act([panel.bin + "vless", "mode", "global"]) }
                     Separator {}
                     Repeater {
-                        model: panel.q.profiles ?? []
+                        model: panel.vless.profiles ?? []
                         Item_ {
                             required property string modelData
-                            text: modelData; on: modelData === panel.q.vprofile
+                            text: modelData; on: modelData === panel.vless.profile
                             onClicked: panel.act([panel.bin + "vless", "profile", modelData])
                         }
                     }
@@ -488,16 +540,39 @@ PanelWindow {
             }
 
             RowLayout {
-                visible: (panel.audio.headset ?? "") !== ""
                 Layout.fillWidth: true
                 spacing: 10
                 Toggle {
+                    icon: "network-vpn-symbolic"; title: "OpenVPN"
+                    on: (panel.ovpn.profile ?? "") !== ""
+                    sub: on ? panel.ovpn.profile + (panel.ovpn.ready ? "" : ", connecting") : ""
+                    menuName: "openvpn"
+                    // on: the first profile; off: the one up
+                    onFlip: panel.act(on ? [panel.bin + "openvpn-ctl", "off"]
+                                         : [panel.bin + "openvpn-ctl", "on", (panel.ovpn.profiles ?? [])[0] ?? ""])
+                }
+                Toggle {
+                    visible: (panel.audio.headset ?? "") !== ""
                     icon: "audio-headphones-symbolic"; title: "Headset"
                     sub: panel.audio.headset === "handsfree" ? "Handsfree, with the mic" : "Headphones"
                     on: panel.audio.headset === "handsfree"
                     onFlip: panel.act([panel.bin + "wm-ctl", "headset"])
                 }
-                Item { Layout.fillWidth: true; Layout.preferredWidth: 1 }
+                Item { visible: (panel.audio.headset ?? "") === ""; Layout.fillWidth: true; Layout.preferredWidth: 1 }
+            }
+            Menu {
+                names: ["openvpn"]; icon: "network-vpn-symbolic"; title: "OpenVPN"
+                Repeater {
+                    model: panel.ovpn.profiles ?? []
+                    Item_ {
+                        required property string modelData
+                        text: modelData; on: modelData === panel.ovpn.profile
+                        note: on && !panel.ovpn.ready ? "connecting" : ""
+                        onClicked: panel.act([panel.bin + "openvpn-ctl", "on", modelData])
+                    }
+                }
+                Separator {}
+                Item_ { text: "Off"; on: (panel.ovpn.profile ?? "") === ""; onClicked: panel.act([panel.bin + "openvpn-ctl", "off"]) }
             }
         }
     }
