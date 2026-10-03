@@ -1,7 +1,17 @@
 #!/bin/sh
-# The bar's panels (config/eww): wm-panel NAME toggles the window NAME, wm-panel NAME close closes it. The
-# variable of the same name tells the panel's polls to run only while it is open; one panel at a time
+# The bar's panels (config/eww):
+#   wm-panel NAME        toggle the window NAME, one panel at a time, opened on its first view
+#   wm-panel NAME close  close it
+#   wm-panel set VAR=VAL the control panel's view or a device list folded or not, the window opened anew:
+#                        under X11 eww grows a window with its content but never shrinks it back
+# The variable of the same name as a panel tells its polls to run only while it is open
+if [ "$1" = set ]; then
+	eww update "$2" && eww close ctl && eww open ctl
+	exit
+fi
 name=$1
 open=$(eww active-windows | grep -c "^$name:")
 for w in ctl calendar; do eww close "$w" 2>/dev/null; eww update "$w=false"; done
+# the panel back on its cards, its device lists folded
+eww update sub='' outs=false ins=false
 [ "${2:-}" = close ] || [ "$open" -gt 0 ] || { eww update "$name=true"; eww open "$name"; }

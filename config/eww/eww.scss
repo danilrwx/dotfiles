@@ -113,6 +113,27 @@ scale trough {
 .devices {
   margin-top: 6px;
 }
+.arrow {
+  color: rgba(255, 255, 255, 0.55);
+  min-width: 20px;
+  border-radius: 10px;
+  &:hover { background-color: rgba(255, 255, 255, 0.10); color: #ffffff; }
+}
+.title .arrow:first-child {
+  margin-right: 4px;
+}
+.subtitle {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 8.5pt;
+  margin: 8px 0 2px 4px;
+}
+.note {
+  color: rgba(255, 255, 255, 0.55);
+}
+.more {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.55);
+}
 .device {
   padding: 3px 4px;
   border-radius: 6px;

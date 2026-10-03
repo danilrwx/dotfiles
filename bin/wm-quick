@@ -1,13 +1,39 @@
-#!/bin/sh
-# The bar panel's toggles (config/eww), their state as one JSON object:
-#   {"wifi": ON, "ssid": NAME, "bt": ON, "btdev": NAME, "vless": ON}
-# ON true or false; NAME the network or device connected, "" without one. Wi-Fi and Bluetooth as rfkill
-# blocks them (the toggles flip that, /dev/rfkill being the session's), the network from iwd, the device from
-# bluez, VLESS from bin/vless
+#!/bin/bash
+# The bar panel's toggles and their lists (config/eww), as one JSON object:
+#   {"wifi": ON, "ssid": NAME, "networks": [{ssid, signal, known, on}],
+#    "bt": ON, "btdev": NAME, "devices": [{mac, name, on}],
+#    "vless": HOW, "vmode": MODE, "vprofile": NAME, "profiles": [NAME]}
+# ON true or false; NAME what is connected, "" without one. Wi-Fi and Bluetooth as rfkill blocks them (the
+# toggles flip that, /dev/rfkill being the session's), the networks iwd has seen (signal 0 to 4 stars, known
+# ones join without a passphrase), the paired Bluetooth devices, VLESS as bin/vless puts it: off, tun or
+# proxy, the mode and profile, its profiles while it runs
 blocked() { rfkill -rno TYPE,SOFT | awk -v t="$1" '$1 == t {print $2; exit}'; }
-ssid=$(iwctl station wlan0 show 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | awk '/Connected network/ {sub(/.*Connected network +/, ""); sub(/ +$/, ""); print}')
-btdev=$(bluetoothctl devices Connected 2>/dev/null | awk 'NR == 1 {$1 = $2 = ""; sub(/^ +/, ""); print}')
-vless=$("$HOME/dotfiles/bin/vless" status | awk '{print $1}')
-jq -nc --arg wifi "$(blocked wlan)" --arg ssid "$ssid" --arg bt "$(blocked bluetooth)" --arg btdev "$btdev" \
-	--arg vless "$vless" \
-	'{wifi: ($wifi != "blocked"), $ssid, bt: ($bt != "blocked"), $btdev, vless: ($vless != "off")}'
+plain() { sed 's/\x1b\[[0-9;]*m//g'; }
+
+ssid=$(iwctl station wlan0 show 2>/dev/null | plain | awk '/Connected network/ {sub(/.*Connected network +/, ""); sub(/ +$/, ""); print}')
+known=$(iwctl known-networks list 2>/dev/null | plain | awk 'NR > 4 && NF {print substr($0, 3, 34)}' | sed 's/ *$//')
+# iwctl's table by its header's columns: a name may hold spaces
+networks=$(iwctl station wlan0 get-networks 2>/dev/null | plain | awk '
+	/Network name/ { n = index($0, "Network name"); s = index($0, "Security"); g = index($0, "Signal"); next }
+	n && NF && !/^-/ && !/Available networks/ {
+		name = substr($0, n, s - n); sub(/ +$/, "", name)
+		sig = substr($0, g); gsub(/[^*]/, "", sig)
+		print name "\t" length(sig)
+	}' | jq -Rnc --arg ssid "$ssid" --arg known "$known" '
+	($known | split("\n")) as $k
+	| [inputs | split("\t") | {ssid: .[0], signal: (.[1] | tonumber), known: (.[0] | IN($k[])), on: (.[0] == $ssid)}]')
+
+devices=$(bluetoothctl devices Paired 2>/dev/null | while read -r _ mac name; do
+	on=false; bluetoothctl info "$mac" | grep -q 'Connected: yes' && on=true
+	jq -nc --arg mac "$mac" --arg name "$name" --argjson on "$on" '{$mac, $name, $on}'
+done | jq -sc .)
+
+read -r how mode profile < <("$HOME/dotfiles/bin/vless" status)
+profiles=$([ "$how" = off ] || "$HOME/dotfiles/bin/vless" profile 2>/dev/null)
+
+jq -nc --arg wifi "$(blocked wlan)" --arg ssid "$ssid" --argjson networks "${networks:-[]}" \
+	--arg bt "$(blocked bluetooth)" --argjson devices "${devices:-[]}" \
+	--arg how "$how" --arg mode "$mode" --arg profile "$profile" --arg profiles "$profiles" \
+	'{wifi: ($wifi != "blocked"), $ssid, $networks,
+	  bt: ($bt != "blocked"), btdev: ([$devices[] | select(.on) | .name][0] // ""), $devices,
+	  vless: $how, vmode: $mode, vprofile: $profile, profiles: ($profiles | split("\n") | map(select(. != "")))}'
