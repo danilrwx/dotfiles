@@ -588,12 +588,13 @@ PanelWindow {
                     menuName: "power"
                     onFlip: panel.act([panel.wmd, "power", "set", order[(order.indexOf(panel.profile) + 1) % 3]])
                 }
+                // the wallpaper under a see-through bar and terminal (bin/theme's dark-wall), or all black
                 Toggle {
-                    icon: "network-vpn-symbolic"; title: "VLESS"
-                    on: (panel.vless.how ?? "off") !== "off"
-                    sub: on ? (panel.vless.profile ?? "") + (panel.vless.mode === "global" ? ", global" : "") : ""
-                    menuName: "vless"
-                    onFlip: panel.act(on ? [panel.bin + "vless", "off"] : [panel.bin + "vless", "on", "tun"])
+                    icon: "preferences-desktop-wallpaper-symbolic"; title: "Wallpaper"
+                    on: panel.theme.mode === "dark-wall"
+                    sub: on ? (panel.theme.wallpaper ?? "").replace(/.*\//, "") : ""
+                    menuName: "theme"
+                    onFlip: panel.act([panel.bin + "theme", on ? "dark" : "dark-wall"])
                 }
             }
             Menu {
@@ -607,6 +608,54 @@ PanelWindow {
                         onClicked: panel.act([panel.wmd, "power", "set", modelData[0]])
                     }
                 }
+            }
+            Menu {
+                names: ["theme"]; icon: "preferences-desktop-wallpaper-symbolic"; title: "Wallpaper"
+                Item_ { text: "Random"; onClicked: panel.act([panel.bin + "theme", "dark-wall", panel.randomWall()]) }
+                Separator {}
+                Repeater {
+                    model: panel.theme.wallpapers ?? []
+                    Item_ {
+                        required property string modelData
+                        text: modelData.replace(/.*\//, ""); on: panel.theme.mode === "dark-wall" && modelData === panel.theme.wallpaper
+                        onClicked: panel.act([panel.bin + "theme", "dark-wall", modelData])
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+                Toggle {
+                    icon: "network-vpn-symbolic"; title: "OpenVPN"
+                    on: (panel.ovpn.profile ?? "") !== ""
+                    sub: on ? panel.ovpn.profile + (panel.ovpn.ready ? "" : ", connecting") : ""
+                    menuName: "openvpn"
+                    // on: the first profile; off: the one up
+                    onFlip: panel.act(on ? [panel.bin + "openvpn-ctl", "off"]
+                                         : [panel.bin + "openvpn-ctl", "on", (panel.ovpn.profiles ?? [])[0] ?? ""])
+                }
+                Toggle {
+                    icon: "network-vpn-symbolic"; title: "VLESS"
+                    on: (panel.vless.how ?? "off") !== "off"
+                    sub: on ? (panel.vless.profile ?? "") + (panel.vless.mode === "global" ? ", global" : "") : ""
+                    menuName: "vless"
+                    onFlip: panel.act(on ? [panel.bin + "vless", "off"] : [panel.bin + "vless", "on", "tun"])
+                }
+            }
+            Menu {
+                names: ["openvpn"]; icon: "network-vpn-symbolic"; title: "OpenVPN"
+                Repeater {
+                    model: panel.ovpn.profiles ?? []
+                    Item_ {
+                        required property string modelData
+                        text: modelData; on: modelData === panel.ovpn.profile
+                        note: on && !panel.ovpn.ready ? "connecting" : ""
+                        onClicked: panel.act([panel.bin + "openvpn-ctl", "on", modelData])
+                    }
+                }
+                Separator {}
+                Item_ { text: "Off"; on: (panel.ovpn.profile ?? "") === ""; onClicked: panel.act([panel.bin + "openvpn-ctl", "off"]) }
             }
             Menu {
                 names: ["vless"]; icon: "network-vpn-symbolic"; title: "VLESS"
@@ -634,41 +683,6 @@ PanelWindow {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 10
-                Toggle {
-                    icon: "network-vpn-symbolic"; title: "OpenVPN"
-                    on: (panel.ovpn.profile ?? "") !== ""
-                    sub: on ? panel.ovpn.profile + (panel.ovpn.ready ? "" : ", connecting") : ""
-                    menuName: "openvpn"
-                    // on: the first profile; off: the one up
-                    onFlip: panel.act(on ? [panel.bin + "openvpn-ctl", "off"]
-                                         : [panel.bin + "openvpn-ctl", "on", (panel.ovpn.profiles ?? [])[0] ?? ""])
-                }
-                // the wallpaper under a see-through bar and terminal (bin/theme's dark-wall), or all black
-                Toggle {
-                    icon: "preferences-desktop-wallpaper-symbolic"; title: "Wallpaper"
-                    on: panel.theme.mode === "dark-wall"
-                    sub: on ? (panel.theme.wallpaper ?? "").replace(/.*\//, "") : ""
-                    menuName: "theme"
-                    onFlip: panel.act([panel.bin + "theme", on ? "dark" : "dark-wall"])
-                }
-            }
-            Menu {
-                names: ["theme"]; icon: "preferences-desktop-wallpaper-symbolic"; title: "Wallpaper"
-                Item_ { text: "Random"; onClicked: panel.act([panel.bin + "theme", "dark-wall", panel.randomWall()]) }
-                Separator {}
-                Repeater {
-                    model: panel.theme.wallpapers ?? []
-                    Item_ {
-                        required property string modelData
-                        text: modelData.replace(/.*\//, ""); on: panel.theme.mode === "dark-wall" && modelData === panel.theme.wallpaper
-                        onClicked: panel.act([panel.bin + "theme", "dark-wall", modelData])
-                    }
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
                 // the screen warmed (Hyprland's screen shader through wmd), kept across reloads
                 Toggle {
                     icon: "night-light-symbolic"; title: "Night Light"
@@ -683,20 +697,6 @@ PanelWindow {
                     onFlip: panel.act([panel.wmd, "headset"])
                 }
                 Item { visible: (panel.audio.headset ?? "") === ""; Layout.fillWidth: true; Layout.preferredWidth: 1 }
-            }
-            Menu {
-                names: ["openvpn"]; icon: "network-vpn-symbolic"; title: "OpenVPN"
-                Repeater {
-                    model: panel.ovpn.profiles ?? []
-                    Item_ {
-                        required property string modelData
-                        text: modelData; on: modelData === panel.ovpn.profile
-                        note: on && !panel.ovpn.ready ? "connecting" : ""
-                        onClicked: panel.act([panel.bin + "openvpn-ctl", "on", modelData])
-                    }
-                }
-                Separator {}
-                Item_ { text: "Off"; on: (panel.ovpn.profile ?? "") === ""; onClicked: panel.act([panel.bin + "openvpn-ctl", "off"]) }
             }
         }
     }
