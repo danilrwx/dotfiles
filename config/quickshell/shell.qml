@@ -325,6 +325,7 @@ ShellRoot {
                             id: menu
                             handle: item.modelData.menu
                             anchorItem: item
+                            grabWith: [bar]
                         }
                         IconImage { implicitSize: 15; source: item.modelData.icon }
                     }

@@ -28,10 +28,19 @@ PopupWindow {
     implicitHeight: col.implicitHeight + 2
     color: "transparent"
 
+    // closed by a click outside it and the bar: Hyprland's focus grab, taken once the popup is up (taken as
+    // it maps, it never lands), the bar in it so a click on the icon toggles rather than closes and reopens
+    property var grabWith: []
+    property bool grabbing: false
+    onVisibleChanged: {
+        grabbing = false
+        if (visible && !parentMenu) grabTimer.restart()
+    }
+    Timer { id: grabTimer; interval: 50; onTriggered: menu.grabbing = true }
     HyprlandFocusGrab {
-        active: menu.visible && !menu.parentMenu
-        windows: [menu]
-        onCleared: menu.open = false
+        active: menu.grabbing
+        windows: [menu].concat(menu.grabWith)
+        onCleared: menu.close()
     }
 
     QsMenuOpener { id: opener; menu: menu.handle }
