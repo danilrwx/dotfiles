@@ -15,3 +15,9 @@ screens_off = 900
 # any colour of the palette (src/style.rs) over its own: fg, dim, ink, accent, surface, hover, raised, card,
 # well, sunk, rule, idle, urgent, ...
 [colors]
+
+# while a game's window has the focus, the power profile below; the one before back as it leaves
+# (classes as Hyprland names windows; a trailing * a prefix)
+[games]
+classes = ["dota2", "cs2", "steam_app_*"]
+profile = "performance"
