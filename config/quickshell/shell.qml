@@ -1,8 +1,8 @@
 //@ pragma IconTheme Adwaita
-// The bar under Hyprland (config/eww is i3's), GNOME's top bar: the workspaces as dots at the left, the clock in
-// the middle (a click: the calendar), at the right the keyboard layout, the tray (StatusNotifierItem, Discord's
-// menu included) and the status as one pill, Wi-Fi, VPN, sound and battery in Adwaita's symbolic icons (a
-// click: the quick settings, the wheel: the volume). Sound, battery, tray, workspaces and the clock from
+// The bar under Hyprland (config/eww is i3's), the old look (Theme.qml): the workspaces by number at the left, at
+// the right the keyboard layout, the tray (StatusNotifierItem, Discord's menu included), the status as one block,
+// Wi-Fi, VPN, sound and battery in Adwaita's symbolic icons (a click: the quick settings, the wheel: the volume),
+// and the clock (a click: the calendar). Sound, battery, tray, workspaces and the clock from
 // Quickshell's own services and the layout from Hyprland's event, live; brightness from bin/wm-status once a
 // second, Wi-Fi, Bluetooth, VLESS and the power profile from bin/wm-quick every 3 s. bin/wl-autostart starts it; linked to
 // ~/.config/quickshell by install.
@@ -121,24 +121,30 @@ ShellRoot {
         signal wheelUp
         signal wheelDown
         implicitWidth: row.implicitWidth + 20
-        implicitHeight: 21
+        implicitHeight: 25
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onWheel: w => w.angleDelta.y > 0 ? wheelUp() : wheelDown()
         Rectangle {
             anchors.fill: parent
-            radius: height / 2
-            color: pill.lit ? Qt.rgba(1, 1, 1, 0.18) : pill.containsMouse ? Theme.hover : "transparent"
+            radius: 0
+            color: pill.lit || pill.containsMouse ? Theme.hover : "transparent"
             Behavior on color { ColorAnimation { duration: Theme.quick } }
+        }
+        // a white rule under it while its panel is open
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+            height: 2
+            color: Theme.accent
+            visible: pill.lit
         }
         RowLayout { id: row; anchors.centerIn: parent; spacing: 7 }
     }
     component BarText: Text {
-        color: Theme.fg
+        color: Theme.dim
         font.family: Theme.font
-        font.pointSize: 10
-        font.bold: true
+        font.pointSize: 11
     }
 
     Variants {
@@ -156,35 +162,36 @@ ShellRoot {
             WlrLayershell.layer: root.docked ? WlrLayer.Top : WlrLayer.Overlay
             color: "#000000"
 
-            // the workspaces as dots, the focused one a longer pill, a click to go there
-            Pill {
-                anchors { left: parent.left; leftMargin: 6; verticalCenter: parent.verticalCenter }
-                onWheelUp: Hyprland.dispatch("workspace e-1")
-                onWheelDown: Hyprland.dispatch("workspace e+1")
+            // the workspaces by number, the focused one inverted, an urgent one green; a click to go there
+            Row {
+                anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
                 Repeater {
                     model: Hyprland.workspaces.values.filter(w => w.id > 0).sort((a, b) => a.id - b.id)
                     MouseArea {
+                        id: ws
                         required property var modelData
                         readonly property bool focused: modelData.id === Hyprland.focusedWorkspace?.id
-                        implicitWidth: focused ? 26 : 7
-                        implicitHeight: 7
+                        width: num.implicitWidth + 16
+                        height: parent.height
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: Hyprland.dispatch("workspace " + modelData.id)
-                        Behavior on implicitWidth { NumberAnimation { duration: Theme.quick } }
+                        onWheel: w => Hyprland.dispatch(w.angleDelta.y > 0 ? "workspace e-1" : "workspace e+1")
                         Rectangle {
                             anchors.fill: parent
-                            radius: 3.5
-                            color: modelData.urgent ? Theme.accent : parent.focused ? Theme.fg : Qt.rgba(1, 1, 1, 0.5)
+                            color: ws.focused ? Theme.accent : ws.containsMouse ? Theme.hover : "transparent"
+                        }
+                        Text {
+                            id: num
+                            anchors.centerIn: parent
+                            text: ws.modelData.name
+                            color: ws.focused ? Theme.inverse : ws.modelData.urgent ? Theme.urgent : Theme.dim
+                            font.family: Theme.font
+                            font.pointSize: 11
+                            font.bold: ws.focused
                         }
                     }
                 }
-            }
-
-            // the clock, GNOME's "Sat Oct 3  13:31"
-            Pill {
-                anchors.centerIn: parent
-                lit: cal.open
-                onClicked: root.panel(cal)
-                BarText { text: Qt.formatDateTime(clock.date, "ddd MMM d  hh:mm") }
             }
 
             RowLayout {
@@ -192,7 +199,7 @@ ShellRoot {
                 spacing: 2
 
                 Pill {
-                    BarText { text: root.ru ? "ru" : "en" }
+                    BarText { text: root.ru ? "RU" : "US" }
                 }
 
                 // the tray: a click activates, a right click opens the item's menu
@@ -234,6 +241,13 @@ ShellRoot {
                         visible: root.battery.isLaptopBattery
                         text: Math.round(root.battery.percentage * 100) + "%"
                     }
+                }
+
+                // the clock, the old 03/10/2026 13:31
+                Pill {
+                    lit: cal.open
+                    onClicked: root.panel(cal)
+                    BarText { text: Qt.formatDateTime(clock.date, "dd/MM/yyyy hh:mm") }
                 }
             }
         }

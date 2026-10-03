@@ -1,5 +1,5 @@
-// The calendar under the bar's clock, GNOME's date menu: today's weekday and date up top, then the month with
-// today on an accent circle, arrows through the months. Fades in in 100 ms; closed by a click outside it or
+// The calendar under the bar's clock, GNOME's date menu in the old look (Theme.qml): today's weekday and date
+// up top, then the month with today inverted, arrows through the months. Fades in in 100 ms; closed by a click outside it or
 // on the clock again.
 import Quickshell
 import Quickshell.Hyprland
@@ -17,9 +17,9 @@ PanelWindow {
     onOpenChanged: if (open) shown = new Date()
 
     visible: open
-    // the top edge alone: centred under the clock
-    anchors { top: true }
-    margins { top: 4 }
+    // under the clock, at the bar's right end
+    anchors { top: true; right: true }
+    margins { top: 4; right: 6 }
     exclusiveZone: 0
     implicitWidth: 330
     implicitHeight: card.height
@@ -44,7 +44,7 @@ PanelWindow {
         implicitWidth: 32; implicitHeight: 32
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        Rectangle { anchors.fill: parent; radius: 16; color: parent.containsMouse ? Theme.hover : "transparent" }
+        Rectangle { anchors.fill: parent; radius: 0; color: parent.containsMouse ? Theme.hover : "transparent" }
         Icon { anchors.centerIn: parent; name: parent.icon }
     }
 
@@ -52,9 +52,9 @@ PanelWindow {
         id: card
         width: parent.width
         height: col.implicitHeight + 28
-        radius: 24
+        radius: 0
         color: Theme.popover
-        border.color: Qt.rgba(1, 1, 1, 0.08)
+        border.color: Theme.fg
         border.width: 1
         opacity: popup.visible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: Theme.quick } }
@@ -76,8 +76,9 @@ PanelWindow {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: month.implicitHeight + 16
-                radius: 18
+                radius: 0
                 color: Theme.card
+                border.color: Theme.rule
                 ColumnLayout {
                     id: month
                     anchors { left: parent.left; right: parent.right; top: parent.top; margins: 8 }
@@ -112,14 +113,14 @@ PanelWindow {
                             implicitHeight: 34
                             Rectangle {
                                 anchors.centerIn: parent
-                                width: 32; height: 32; radius: 16
+                                width: 32; height: 32; radius: 0
                                 color: parent.today ? Theme.accent : "transparent"
                             }
                             Label {
                                 anchors.centerIn: parent
                                 text: parent.day
                                 font.bold: parent.today
-                                color: parent.month === popup.shown.getMonth() ? Theme.fg : Qt.rgba(1, 1, 1, 0.3)
+                                color: parent.today ? Theme.inverse : parent.month === popup.shown.getMonth() ? Theme.fg : "#444444"
                             }
                         }
                     }

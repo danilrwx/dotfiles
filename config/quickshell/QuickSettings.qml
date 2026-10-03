@@ -1,7 +1,7 @@
-// The quick settings, GNOME's: a popover under the bar's status pill. Up top the battery and round buttons for a
+// The quick settings, GNOME's layout in the old look (Theme.qml): a popover under the bar's status. Up top the battery and round buttons for a
 // screenshot, the lock and the power menu; then the sliders, volume and mic (their device lists behind an arrow)
 // and brightness; then the toggles, two a row, GNOME's split pills: Wi-Fi, Bluetooth, the power mode, VLESS
-// and the headset's mode, the left side flips one, the arrow opens its menu. A menu unfolds in place under its
+// and the headset's mode, the left side flips one (inverted while on), the arrow opens its menu. A menu unfolds in place under its
 // row, one at a time, in 100 ms. Closed by a click outside (Hyprland's focus grab) or on the pill again. The
 // toggles' state from the bar's bin/wm-quick, the devices from bin/wm-audio json every 2 s while open, volume
 // and mute straight through PipeWire.
@@ -10,7 +10,6 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
-import QtQuick.Effects
 import QtQuick.Layouts
 
 PanelWindow {
@@ -86,11 +85,12 @@ PanelWindow {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         Rectangle {
-            anchors.fill: parent; radius: width / 2
-            color: rb.lit ? Qt.rgba(1, 1, 1, 0.22) : rb.containsMouse ? Theme.hover : Theme.pill
+            anchors.fill: parent; radius: 0
+            color: rb.lit ? Theme.accent : rb.containsMouse ? Theme.hover : Theme.pill
+            border.color: Theme.rule
             Behavior on color { ColorAnimation { duration: Theme.quick } }
         }
-        Icon { anchors.centerIn: parent; name: rb.icon }
+        Icon { anchors.centerIn: parent; name: rb.icon; tint: rb.lit ? Theme.inverse : Theme.fg }
     }
 
     // an arrow button that opens a menu, turned while it is open
@@ -101,17 +101,17 @@ PanelWindow {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         Rectangle {
-            anchors.fill: parent; radius: width / 2
-            color: ar.unfolded ? Qt.rgba(1, 1, 1, 0.22) : ar.containsMouse ? Theme.hover : "transparent"
+            anchors.fill: parent; radius: 0
+            color: ar.unfolded ? Theme.accent : ar.containsMouse ? Theme.hover : "transparent"
         }
         Icon {
-            anchors.centerIn: parent; name: "go-next-symbolic"
+            anchors.centerIn: parent; name: "go-next-symbolic"; tint: ar.unfolded ? Theme.inverse : Theme.fg
             rotation: ar.unfolded ? 90 : 0
             Behavior on rotation { NumberAnimation { duration: Theme.quick } }
         }
     }
 
-    // GNOME's slider: an icon (a button, mute), a thin track filled in the accent with a white knob, an arrow
+    // a slider: an icon (a button, mute), a thick square bar filled white as far as the level, an arrow
     component Slider: RowLayout {
         id: sl
         property string icon
@@ -125,7 +125,7 @@ PanelWindow {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: sl.iconClicked()
-            Rectangle { anchors.fill: parent; radius: 16; color: parent.containsMouse ? Theme.hover : "transparent" }
+            Rectangle { anchors.fill: parent; radius: 0; color: parent.containsMouse ? Theme.hover : "transparent" }
             Icon { anchors.centerIn: parent; name: sl.icon }
         }
         Item {
@@ -135,29 +135,20 @@ PanelWindow {
             readonly property real shown: Math.min(1, Math.max(0, drag.pressed ? drag.v : sl.value))
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width; height: 4; radius: 2
-                color: Qt.rgba(1, 1, 1, 0.2)
+                width: parent.width; height: 14; radius: 0
+                color: Theme.rule
             }
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                width: knob.x + knob.width / 2; height: 4; radius: 2
+                width: track.shown * parent.width; height: 14; radius: 0
                 color: Theme.accent
-            }
-            Rectangle {
-                id: knob
-                width: 20; height: 20; radius: 10
-                anchors.verticalCenter: parent.verticalCenter
-                x: track.shown * (track.width - width)
-                color: "#ffffff"
-                layer.enabled: true
-                layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 0.4; shadowOpacity: 0.5 }
             }
             MouseArea {
                 id: drag
                 property real v: 0
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                function set(x) { v = Math.min(1, Math.max(0, (x - 10) / (width - 20))); sl.moved(v) }
+                function set(x) { v = Math.min(1, Math.max(0, x / width)); sl.moved(v) }
                 onPressed: m => set(m.x)
                 onPositionChanged: m => { if (pressed) set(m.x) }
                 onWheel: w => { v = Math.min(1, Math.max(0, sl.value + (w.angleDelta.y > 0 ? 0.02 : -0.02))); sl.moved(v) }
@@ -183,8 +174,9 @@ PanelWindow {
         Layout.preferredWidth: 1
         implicitHeight: 48
         Rectangle {
-            anchors.fill: parent; radius: height / 2
+            anchors.fill: parent; radius: 0
             color: tg.on ? Theme.accent : Theme.pill
+            border.color: tg.on ? Theme.accent : Theme.rule
             Behavior on color { ColorAnimation { duration: Theme.quick } }
         }
         MouseArea {
@@ -194,20 +186,20 @@ PanelWindow {
             cursorShape: Qt.PointingHandCursor
             onClicked: tg.flip()
             Rectangle {
-                anchors.fill: parent; radius: tg.height / 2
-                color: main.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                anchors.fill: parent; radius: 0
+                color: main.containsMouse ? (tg.on ? "#d0d0d0" : Theme.hover) : "transparent"
             }
             RowLayout {
                 anchors { fill: parent; leftMargin: 14; rightMargin: 6 }
                 spacing: 10
-                Icon { name: tg.icon }
+                Icon { name: tg.icon; tint: tg.on ? Theme.inverse : Theme.fg }
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 0
-                    Label { text: tg.title; font.bold: true; Layout.fillWidth: true }
+                    Label { text: tg.title; font.bold: true; Layout.fillWidth: true; color: tg.on ? Theme.inverse : Theme.fg }
                     Label {
                         visible: tg.sub !== ""; text: tg.sub; font.pointSize: 8.5; Layout.fillWidth: true
-                        color: tg.on ? Qt.rgba(1, 1, 1, 0.8) : Theme.dim
+                        color: tg.on ? "#333333" : Theme.dim
                     }
                 }
             }
@@ -221,15 +213,15 @@ PanelWindow {
             cursorShape: Qt.PointingHandCursor
             onClicked: panel.flip(tg.menuName)
             Rectangle {
-                anchors.fill: parent; radius: tg.height / 2
-                color: side.containsMouse || panel.menu === tg.menuName ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                anchors.fill: parent; radius: 0
+                color: side.containsMouse || panel.menu === tg.menuName ? (tg.on ? "#d0d0d0" : Theme.hover) : "transparent"
             }
             Rectangle {
                 anchors { left: parent.left; verticalCenter: parent.verticalCenter }
-                width: 1; height: 24; color: Qt.rgba(1, 1, 1, 0.15)
+                width: 1; height: 24; color: tg.on ? "#999999" : Theme.rule
             }
             Icon {
-                anchors.centerIn: parent; name: "go-next-symbolic"
+                anchors.centerIn: parent; name: "go-next-symbolic"; tint: tg.on ? Theme.inverse : Theme.fg
                 rotation: panel.menu === tg.menuName ? 90 : 0
                 Behavior on rotation { NumberAnimation { duration: Theme.quick } }
             }
@@ -255,8 +247,9 @@ PanelWindow {
             id: box
             y: 4; width: parent.width
             implicitHeight: col.implicitHeight + 20
-            radius: 18
+            radius: 0
             color: Theme.card
+            border.color: Theme.rule
             ColumnLayout {
                 id: col
                 anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
@@ -266,8 +259,8 @@ PanelWindow {
                     spacing: 10
                     Layout.bottomMargin: 6
                     Rectangle {
-                        implicitWidth: 32; implicitHeight: 32; radius: 16; color: Theme.accent
-                        Icon { anchors.centerIn: parent; name: mn.icon }
+                        implicitWidth: 32; implicitHeight: 32; radius: 0; color: Theme.accent
+                        Icon { anchors.centerIn: parent; name: mn.icon; tint: Theme.inverse }
                     }
                     Label { text: mn.title; font.bold: true; font.pointSize: 11 }
                 }
@@ -287,25 +280,24 @@ PanelWindow {
         implicitHeight: 34
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        Rectangle { anchors.fill: parent; radius: 8; color: it.containsMouse ? Theme.hover : "transparent" }
+        Rectangle { anchors.fill: parent; radius: 0; color: it.on ? Theme.accent : it.containsMouse ? Theme.hover : "transparent" }
         RowLayout {
             anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
             spacing: 10
-            Icon { visible: it.icon !== ""; name: it.icon }
-            Label { text: it.text; Layout.fillWidth: true }
-            Label { visible: it.note !== ""; text: it.note; color: Theme.dim }
-            Icon { visible: it.on; name: "object-select-symbolic" }
+            Icon { visible: it.icon !== ""; name: it.icon; tint: it.on ? Theme.inverse : Theme.fg }
+            Label { text: it.text; Layout.fillWidth: true; color: it.on ? Theme.inverse : Theme.fg }
+            Label { visible: it.note !== ""; text: it.note; color: it.on ? "#333333" : Theme.dim }
         }
     }
-    component Separator: Rectangle { Layout.fillWidth: true; Layout.margins: 4; implicitHeight: 1; color: Qt.rgba(1, 1, 1, 0.1) }
+    component Separator: Rectangle { Layout.fillWidth: true; Layout.margins: 4; implicitHeight: 1; color: Theme.rule }
 
     Rectangle {
         id: pop
         width: parent.width
         height: col.implicitHeight + 28
-        radius: 24
+        radius: 0
         color: Theme.popover
-        border.color: Qt.rgba(1, 1, 1, 0.08)
+        border.color: Theme.fg
         border.width: 1
         opacity: panel.visible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: Theme.quick } }
@@ -321,7 +313,7 @@ PanelWindow {
                 spacing: 8
                 Rectangle {
                     visible: panel.shell.battery.isLaptopBattery
-                    implicitWidth: bat.implicitWidth + 28; implicitHeight: 40; radius: 20
+                    implicitWidth: bat.implicitWidth + 28; implicitHeight: 40; radius: 0
                     color: Theme.pill
                     RowLayout {
                         id: bat
