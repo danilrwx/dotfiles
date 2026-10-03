@@ -1,8 +1,8 @@
 //@ pragma IconTheme Adwaita
-// The bar under Hyprland (config/eww is i3's), the old look (Theme.qml): the workspaces by number at the left, at
-// the right the keyboard layout, the tray (StatusNotifierItem, Discord's menu included), the status as one block,
-// Wi-Fi, VPN, sound and battery in Adwaita's symbolic icons (a click: the quick settings, the wheel: the volume),
-// and the clock (a click: the calendar). Sound, battery, tray, workspaces and the clock from
+// The bar under Hyprland (config/eww is i3's), the old look (Theme.qml): the workspaces by number at the left as
+// i3bar had them, the clock in the middle as GNOME has it (a click: the calendar), at the right the keyboard
+// layout, the tray (StatusNotifierItem, Discord's menu included) and the status as one block, Wi-Fi, VPN, sound
+// and battery in Adwaita's symbolic icons (a click: the quick settings, the wheel: the volume). Sound, battery, tray, workspaces and the clock from
 // Quickshell's own services and the layout from Hyprland's event, live; brightness from bin/wm-status once a
 // second, Wi-Fi, Bluetooth, VLESS and the power profile from bin/wm-quick every 3 s. bin/wl-autostart starts it; linked to
 // ~/.config/quickshell by install.
@@ -162,36 +162,40 @@ ShellRoot {
             WlrLayershell.layer: root.docked ? WlrLayer.Top : WlrLayer.Overlay
             color: "#000000"
 
-            // the workspaces by number, the focused one inverted, an urgent one green; a click to go there
+            // the workspaces by number as i3bar had them: the focused one white, the rest gray, an urgent one green;
+            // a click to go there
             Row {
-                anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
+                anchors { left: parent.left; leftMargin: 6; top: parent.top; bottom: parent.bottom }
                 Repeater {
                     model: Hyprland.workspaces.values.filter(w => w.id > 0).sort((a, b) => a.id - b.id)
                     MouseArea {
                         id: ws
                         required property var modelData
                         readonly property bool focused: modelData.id === Hyprland.focusedWorkspace?.id
-                        width: num.implicitWidth + 16
+                        width: num.implicitWidth + 12
                         height: parent.height
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: Hyprland.dispatch("workspace " + modelData.id)
                         onWheel: w => Hyprland.dispatch(w.angleDelta.y > 0 ? "workspace e-1" : "workspace e+1")
-                        Rectangle {
-                            anchors.fill: parent
-                            color: ws.focused ? Theme.accent : ws.containsMouse ? Theme.hover : "transparent"
-                        }
                         Text {
                             id: num
                             anchors.centerIn: parent
                             text: ws.modelData.name
-                            color: ws.focused ? Theme.inverse : ws.modelData.urgent ? Theme.urgent : Theme.dim
+                            color: ws.modelData.urgent ? Theme.urgent : ws.focused || ws.containsMouse ? Theme.fg : Theme.dim
                             font.family: Theme.font
                             font.pointSize: 11
-                            font.bold: ws.focused
                         }
                     }
                 }
+            }
+
+            // the clock in the middle, GNOME's "Sat Oct 3  13:31"
+            Pill {
+                anchors.centerIn: parent
+                lit: cal.open
+                onClicked: root.panel(cal)
+                BarText { text: Qt.formatDateTime(clock.date, "ddd MMM d  hh:mm"); color: Theme.fg }
             }
 
             RowLayout {
@@ -243,12 +247,6 @@ ShellRoot {
                     }
                 }
 
-                // the clock, the old 03/10/2026 13:31
-                Pill {
-                    lit: cal.open
-                    onClicked: root.panel(cal)
-                    BarText { text: Qt.formatDateTime(clock.date, "dd/MM/yyyy hh:mm") }
-                }
             }
         }
     }

@@ -17,9 +17,9 @@ PanelWindow {
     onOpenChanged: if (open) shown = new Date()
 
     visible: open
-    // under the clock, at the bar's right end
-    anchors { top: true; right: true }
-    margins { top: 4; right: 6 }
+    // the top edge alone: centred under the clock
+    anchors { top: true }
+    margins { top: 4 }
     exclusiveZone: 0
     implicitWidth: 330
     implicitHeight: card.height
