@@ -356,18 +356,16 @@ PanelWindow {
             anchors { left: parent.left; right: parent.right; top: parent.top; margins: 14 }
             spacing: 10
 
-            // the battery, then a screenshot, the lock, the power menu
-            RowLayout {
+            // the battery at the left, a screenshot, the lock and the power menu at the right; the battery as wide
+            // as it needs but no wider than the buttons leave it, its time cut short to fit
+            Item {
                 Layout.fillWidth: true
-                spacing: 8
+                implicitHeight: 40
                 Rectangle {
                     visible: panel.shell.battery.isLaptopBattery
-                    // as wide as it needs, but no wider than the row leaves it, the time cut short to fit
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: bat.implicitWidth + 28
-                    Layout.maximumWidth: bat.implicitWidth + 28
-                    Layout.minimumWidth: 90
-                    implicitHeight: 40; radius: Theme.radius
+                    anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
+                    width: Math.min(bat.implicitWidth + 28, parent.width - buttons.width - 12)
+                    radius: Theme.radius
                     color: Theme.pill
                     RowLayout {
                         id: bat
@@ -381,12 +379,16 @@ PanelWindow {
                         }
                     }
                 }
-                Item { Layout.preferredWidth: 4 }
-                RoundButton { icon: "applets-screenshooter-symbolic"; onClicked: panel.leave([panel.bin + "screenshot-select"]) }
-                RoundButton { icon: "system-lock-screen-symbolic"; onClicked: { panel.open = false; panel.shell.lockNow() } }
-                RoundButton {
-                    icon: "system-shutdown-symbolic"; lit: panel.menu === "system"
-                    onClicked: panel.flip("system")
+                RowLayout {
+                    id: buttons
+                    anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                    spacing: 8
+                    RoundButton { icon: "applets-screenshooter-symbolic"; onClicked: panel.leave([panel.bin + "screenshot-select"]) }
+                    RoundButton { icon: "system-lock-screen-symbolic"; onClicked: { panel.open = false; panel.shell.lockNow() } }
+                    RoundButton {
+                        icon: "system-shutdown-symbolic"; lit: panel.menu === "system"
+                        onClicked: panel.flip("system")
+                    }
                 }
             }
             Menu {
