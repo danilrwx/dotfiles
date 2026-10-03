@@ -1,0 +1,11 @@
+#!/bin/sh
+# The sway session's daemons, run once by config/sway/config (bin/x-autostart is i3's): portals and systemd
+# user units told it is a Wayland session, notifications, the polkit agent, then lock at 10 min idle and
+# before sleep, the screen off at 15
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway 2>/dev/null
+dunst &
+lxpolkit &
+exec swayidle -w \
+	timeout 600 'swaylock -f -c 000000' \
+	timeout 900 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+	before-sleep 'swaylock -f -c 000000'

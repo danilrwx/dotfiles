@@ -1,4 +1,6 @@
 #!/bin/sh
-# stdin to the desktop clipboard through xclip. Extra args go to it, e.g. `clip -t image/png`. tmux's
-# copy-command, nvim's yank mirror and screenshots use it.
+# stdin to the desktop clipboard: wl-copy under Wayland (sway), xclip under X11 (i3). Extra args go to it,
+# e.g. `clip -t image/png`, which both read alike. tmux's copy-command, nvim's yank mirror and screenshots
+# use it.
+[ -n "${WAYLAND_DISPLAY:-}" ] && exec wl-copy "$@"
 exec xclip -selection clipboard "$@"

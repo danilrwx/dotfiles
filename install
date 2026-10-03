@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ./install [--desktop] [--ru-mirror] [--skip-go] [--skip-ts]
-#   --desktop    the i3 session with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
+#   --desktop    the i3 and sway sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
 #                Discord, Steam.
 #                Then ./debloat strips GNOME and snapd
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
@@ -51,6 +51,9 @@ DESKTOP_PKGS=(iwd bluez rfkill
 # media keys (bin/wm-fnkeys), the polkit agent
 X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit x11-xserver-utils xinput
   i3-wm i3lock xss-lock dunst rofi maim xclip hsetroot xcompmgr brightnessctl playerctl lxpolkit libnotify-bin)
+# sway, the Wayland session next to i3, without its recommends: wallpaper, idle and lock, screenshots
+# (grim, slurp), the clipboard, the screen-sharing portal, X apps under Xwayland
+SWAY_PKGS=(sway swaybg swayidle swaylock grim slurp wl-clipboard xdg-desktop-portal-wlr xwayland)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
 
 # Helpers ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -148,7 +151,7 @@ base() {
 desktop_system() {
   log "Installing the desktop base"
   pkg "${DESKTOP_PKGS[@]}"
-  sudo apt install -y --no-install-recommends "${X11_PKGS[@]}"
+  sudo apt install -y --no-install-recommends "${X11_PKGS[@]}" "${SWAY_PKGS[@]}"
 
   # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
   # netplan, DNS by systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
@@ -190,7 +193,7 @@ desktop_system() {
   sudo sed -i -e 's/^XKBLAYOUT=.*/XKBLAYOUT="us,ru"/' -e 's/^XKBVARIANT=.*/XKBVARIANT=","/' \
     -e 's/^XKBOPTIONS=.*/XKBOPTIONS="grp:ctrl_space_toggle,grp_led:scroll"/' /etc/default/keyboard
 
-  # Login: greetd with tuigreet, starting i3 through startx; GDM goes with GNOME in ./debloat. It takes
+  # Login: greetd with tuigreet, starting i3 through startx or sway (it lists both, i3 the default); GDM goes with GNOME in ./debloat. It takes
   # over the display-manager alias at the next boot, the running session is left alone
   put /etc/greetd/config.toml
   # display-manager.service points at gdm3.service, itself an alias of gdm.service, so disabling gdm3 keeps
@@ -208,6 +211,7 @@ desktop_system() {
 # Desktop, user side: the session's configs, ssh-agent───────────────────────────────────────────────────────────────────
 desktop_session() {
   link config/i3 "$HOME/.config/i3"
+  link config/sway "$HOME/.config/sway"
   link config/dunst "$HOME/.config/dunst"
   link .Xresources "$HOME/.Xresources"
   # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE, GDK_SCALE), and .profile the session
@@ -352,9 +356,10 @@ EOT
 
   # hardware video encode (VA-API, iHD) for calls and screen sharing: a feature Chrome leaves off on
   # Linux and chrome://flags has no switch for, so its launcher entry with the flag, made from the
-  # system one on every run, hiding it in ~/.local/share/applications
+  # system one on every run, hiding it in ~/.local/share/applications. With it, Wayland under sway (sharp
+  # at 2x where Xwayland blurs), X11 under i3
   local desk=/usr/share/applications/google-chrome.desktop
-  [ -f "$desk" ] && sed 's|^Exec=/usr/bin/google-chrome-stable|& --enable-features=AcceleratedVideoEncoder|' "$desk" \
+  [ -f "$desk" ] && sed 's|^Exec=/usr/bin/google-chrome-stable|& --enable-features=AcceleratedVideoEncoder --ozone-platform-hint=auto|' "$desk" \
     > "$HOME/.local/share/applications/google-chrome.desktop"
 
   # Telegram: the official tarball in ~/.local/opt, which updates itself and writes its own .desktop file

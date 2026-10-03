@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ./debloat [-n]
 #   Strip a stock Ubuntu desktop down to what the i3 session from `./install --desktop` runs on:
-#   every snap and snapd itself (blocked from coming back), GNOME, GDM and the Ubuntu desktop extras, the
-#   sway stack from before, NetworkManager (iwd has Wi-Fi), the services nothing here uses and the configs
+#   every snap and snapd itself (blocked from coming back), GNOME, GDM and the Ubuntu desktop extras, what
+#   the old sway session had, NetworkManager (iwd has Wi-Fi), the services nothing here uses and the configs
 #   the removed apps left in ~/.config.
 #   Run `./install --desktop` first, so greetd is there to log in with once GDM is gone.
 #   -n  dry run: show what apt would remove, change nothing
@@ -40,8 +40,8 @@ REMOVE=(
   firefox
   # dmenu and bemenu, rofi being the menu (bin/wm-menu), and the headers dmenu's and st's builds took
   suckless-tools bemenu libx11-dev libxft-dev libxinerama-dev
-  # the sway session, given up for i3 on X11, and pavucontrol (bin/wm-ctl picks the devices)
-  sway swaybg swayidle swaylock wmenu mako-notifier grim slurp wl-clipboard xdg-desktop-portal-wlr wob xwayland
+  # what the old sway session had that the new one does without, and pavucontrol (bin/wm-ctl picks the devices)
+  wmenu mako-notifier wob
   pavucontrol
   # Openbox and its bar, awesome: tried as sessions next to i3 and dropped
   openbox dzen2 stalonetray wmctrl awesome
@@ -114,8 +114,8 @@ log "Disabling unused services"
 for u in "${DISABLE[@]}"; do sudo systemctl disable --now "$u" 2>/dev/null || true; done
 log "Removing configs of the removed apps"
 for c in "${STALE[@]}"; do rm -rf "${HOME:?}/.config/$c"; done
-# the links install made for sway, mako and kitty point at nothing now
-for l in sway mako kitty; do [ -L "$HOME/.config/$l" ] && [ ! -e "$HOME/.config/$l" ] && rm "$HOME/.config/$l"; done
+# the links install made for mako and kitty point at nothing now
+for l in mako kitty; do [ -L "$HOME/.config/$l" ] && [ ! -e "$HOME/.config/$l" ] && rm "$HOME/.config/$l"; done
 # dwm, st and dmenu, built into /usr/local by older installs (alacritty is the terminal, rofi the menu now),
 # and dwm's session
 sudo rm -f /usr/local/bin/dwm /usr/local/share/man/man1/dwm.1 /usr/share/xsessions/dwm.desktop \
