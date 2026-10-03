@@ -1,5 +1,6 @@
 #!/bin/bash
-# The desktop's theme, picked in bin/wm-ctl's theme menu; the colours are the same dark ones in both:
+# The desktop's theme, picked in bin/wm-ctl's theme menu (i3) or the quick settings (Hyprland); the colours are
+# the same dark ones in both:
 #   theme dark            black root, everything solid: the default
 #   theme dark-wall [IMG] a wallpaper (~/Pictures/wallpapers) under a see-through terminal and bar, the
 #                         one ALPHA of both (alacritty's window.opacity, written here), through xcompmgr
@@ -43,10 +44,25 @@ chrome() {
 	if [ -n "${1:-}" ]; then printf '{ "BrowserThemeColor": "%s" }\n' "$1"; else echo '{}'; fi > "$CHROME_POLICY"
 }
 
-# wall IMG: the root, the remembered wallpaper, and the bar's colour over it for dmenu and Chrome
+# background IMG|COLOUR: the root under X11 (hsetroot), swaybg under Wayland (Hyprland, sway), the last one
+# replaced; under Wayland black is no swaybg at all, the compositor's own ground being black
+background() {
+	if [ -n "${WAYLAND_DISPLAY:-}" ]; then
+		pkill -x swaybg
+		[ -f "$1" ] || return 0
+		swaybg -m fill -i "$1" > /dev/null 2>&1 &
+		disown
+	elif [ -f "$1" ]; then
+		hsetroot -fill "$1" > /dev/null
+	else
+		hsetroot -solid "$1" > /dev/null
+	fi
+}
+
+# wall IMG: the background, the remembered wallpaper, and the bar's colour over it for dmenu and Chrome
 wall() {
 	local c
-	hsetroot -fill "$1" > /dev/null
+	background "$1"
 	echo "$1" > "$state/wallpaper"
 	c=$(barcolor "$1")
 	echo "$c" > "$state/barbg"
@@ -57,21 +73,25 @@ wall() {
 apply() {
 	local mode=$1 a
 	if [ "$mode" = dark ]; then a=1; else a=$ALPHA; fi
-	# the bar's alpha (config/eww), read at its start and pushed to a running one
+	# the bar's alpha (config/eww, config/quickshell), read at its start, pushed to a running eww, watched by
+	# Quickshell
 	echo "$a" > "$state/alpha"
 	eww update alpha="$a" 2> /dev/null
 	# alacritty's opacity, the file its config imports; it reloads it in every open window
 	printf '# bin/theme: %s\n[window]\nopacity = %s\n' "$mode" "$a" > "$state/alacritty.toml"
 
-	pkill -x xcompmgr
+	# xcompmgr under X11 alone, Wayland compositors blending by themselves
+	[ -z "${WAYLAND_DISPLAY:-}" ] && pkill -x xcompmgr
 	if [ "$mode" = dark ]; then
-		hsetroot -solid '#000000' > /dev/null
+		background '#000000'
 		echo '#000000' > "$state/barbg"
 		chrome
 	else
 		wall "$2"
-		xcompmgr > /dev/null 2>&1 &   # its BadRegion errors are harmless noise
-		disown
+		if [ -z "${WAYLAND_DISPLAY:-}" ]; then
+			xcompmgr > /dev/null 2>&1 &   # its BadRegion errors are harmless noise
+			disown
+		fi
 	fi
 	echo "$mode" > "$state/mode"
 }

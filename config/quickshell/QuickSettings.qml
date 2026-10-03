@@ -1,10 +1,10 @@
 // The quick settings, GNOME's layout in the old look (Theme.qml): a popover under the bar's status. Up top the
 // battery and round buttons for a screenshot, the lock and the power menu; then the sliders, volume and mic
 // (their device lists behind an arrow) and brightness; then the toggles, two a row, GNOME's split pills:
-// Wi-Fi, Bluetooth, the power mode, VLESS, OpenVPN and the headset's mode, the left side flips one (inverted
-// while on), the arrow opens its menu. A menu unfolds in place under its row, one at a time, in 100 ms; a new
-// Wi-Fi network asks its passphrase right there. Closed by a click outside (Hyprland's focus grab) or on the
-// pill again. The state from the bar's wmd, volume and mute straight through PipeWire.
+// Wi-Fi, Bluetooth, the power mode, VLESS, OpenVPN, the wallpaper and the headset's mode, the left side flips
+// one (inverted while on), the arrow opens its menu. A menu unfolds in place under its row, one at a time, in
+// 100 ms; a new Wi-Fi network asks its passphrase right there. Closed by a click outside (Hyprland's focus
+// grab) or on the pill again. The state from the bar's wmd, volume and mute straight through PipeWire.
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
@@ -24,10 +24,16 @@ PanelWindow {
     readonly property var vless: net.vless ?? ({})
     readonly property var ovpn: net.openvpn ?? ({})
     readonly property string profile: net.power?.active ?? ""
+    readonly property var theme: net.theme ?? ({})
+    // a wallpaper other than the one on
+    function randomWall() {
+        const others = (theme.wallpapers ?? []).filter(w => w !== theme.wallpaper)
+        return others.length ? others[Math.floor(Math.random() * others.length)] : (theme.wallpaper ?? "")
+    }
     readonly property string bin: shell.bin
     readonly property string wmd: shell.wmd
 
-    // the menu unfolded: "", system, outs, ins, wifi, bt, power, vless, openvpn; folded on every opening
+    // the menu unfolded: "", system, outs, ins, wifi, bt, power, vless, openvpn, theme; folded on every opening
     property string menu: ""
     function flip(m) { menu = menu === m ? "" : m }
     onOpenChanged: { menu = ""; asking = ""; wifiError = ""; btError = "" }
@@ -635,14 +641,40 @@ PanelWindow {
                     onFlip: panel.act(on ? [panel.bin + "openvpn-ctl", "off"]
                                          : [panel.bin + "openvpn-ctl", "on", (panel.ovpn.profiles ?? [])[0] ?? ""])
                 }
+                // the wallpaper under a see-through bar and terminal (bin/theme's dark-wall), or all black
                 Toggle {
-                    visible: (panel.audio.headset ?? "") !== ""
+                    icon: "preferences-desktop-wallpaper-symbolic"; title: "Wallpaper"
+                    on: panel.theme.mode === "dark-wall"
+                    sub: on ? (panel.theme.wallpaper ?? "").replace(/.*\//, "") : ""
+                    menuName: "theme"
+                    onFlip: panel.act([panel.bin + "theme", on ? "dark" : "dark-wall"])
+                }
+            }
+            Menu {
+                names: ["theme"]; icon: "preferences-desktop-wallpaper-symbolic"; title: "Wallpaper"
+                Item_ { text: "Random"; onClicked: panel.act([panel.bin + "theme", "dark-wall", panel.randomWall()]) }
+                Separator {}
+                Repeater {
+                    model: panel.theme.wallpapers ?? []
+                    Item_ {
+                        required property string modelData
+                        text: modelData.replace(/.*\//, ""); on: panel.theme.mode === "dark-wall" && modelData === panel.theme.wallpaper
+                        onClicked: panel.act([panel.bin + "theme", "dark-wall", modelData])
+                    }
+                }
+            }
+
+            RowLayout {
+                visible: (panel.audio.headset ?? "") !== ""
+                Layout.fillWidth: true
+                spacing: 10
+                Toggle {
                     icon: "audio-headphones-symbolic"; title: "Headset"
                     sub: panel.audio.headset === "handsfree" ? "Handsfree, with the mic" : "Headphones"
                     on: panel.audio.headset === "handsfree"
                     onFlip: panel.act([panel.wmd, "headset"])
                 }
-                Item { visible: (panel.audio.headset ?? "") === ""; Layout.fillWidth: true; Layout.preferredWidth: 1 }
+                Item { Layout.fillWidth: true; Layout.preferredWidth: 1 }
             }
             Menu {
                 names: ["openvpn"]; icon: "network-vpn-symbolic"; title: "OpenVPN"

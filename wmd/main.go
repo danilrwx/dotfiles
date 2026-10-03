@@ -2,7 +2,7 @@
 // than their command-line tools: Wi-Fi through iwd and Bluetooth through BlueZ (D-Bus), the radios through
 // /dev/rfkill, the power profile through power-profiles-daemon, the backlight through logind, the keyboard
 // layout through Hyprland's sockets, the sound devices through pw-dump, VLESS through mihomo's API, OpenVPN
-// through systemd.
+// through systemd, bin/theme's pick from its state files.
 //
 //	wmd watch                                 the state as a JSON line, again on every change
 //	wmd wifi on|off|scan|disconnect           the radio, a scan, leave the network
@@ -41,6 +41,7 @@ type State struct {
 	Audio      Audio     `json:"audio"`
 	Vless      Vless     `json:"vless"`
 	OpenVPN    OpenVPN   `json:"openvpn"`
+	Theme      Theme     `json:"theme"`
 }
 
 func state(conn *dbus.Conn) State {
@@ -59,14 +60,14 @@ func state(conn *dbus.Conn) State {
 		fmt.Fprintln(os.Stderr, "wmd: audio:", err)
 	}
 	s.Brightness, s.Keymap = brightness(), keymap()
-	s.Vless, s.OpenVPN = vlessState(), openvpnState(conn)
+	s.Vless, s.OpenVPN, s.Theme = vlessState(), openvpnState(conn), themeState()
 	return s
 }
 
 // watch prints the state, then again 100 ms after the last of a burst of changes: iwd, BlueZ and
 // power-profiles-daemon signal theirs on D-Bus, Hyprland its layout switches, PipeWire its changes through
 // pw-dump's monitor. Every 3 s besides, for what tells nothing: a network's strength, the backlight, VLESS,
-// OpenVPN. Only a state that differs from the last one printed goes out.
+// OpenVPN, the theme. Only a state that differs from the last one printed goes out.
 func watch(conn *dbus.Conn) error {
 	for _, sender := range []string{iwd, bluez, ppd} {
 		if err := conn.AddMatchSignal(dbus.WithMatchSender(sender)); err != nil {

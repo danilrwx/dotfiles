@@ -85,6 +85,14 @@ ShellRoot {
             else if (root.peeking && root.comboEvents.indexOf(event.name) >= 0) root.peeking = false
         }
     }
+    // the bar's alpha, bin/theme's ALPHA under dark-wall and 1 under dark, followed as bin/theme rewrites it
+    FileView {
+        id: alphaFile
+        path: Quickshell.env("HOME") + "/.cache/theme/alpha"
+        watchChanges: true
+        onFileChanged: reload()
+    }
+    readonly property real alpha: parseFloat(alphaFile.text()) || 1
     readonly property bool vpn: (net.vless?.how ?? "off") !== "off" || (net.openvpn?.profile ?? "") !== ""
 
     // the panels, one at a time (QuickSettings.qml, CalendarPopup.qml)
@@ -190,7 +198,8 @@ ShellRoot {
             // docked it takes its strip from the windows; hidden it comes over them
             exclusiveZone: root.docked ? implicitHeight : 0
             WlrLayershell.layer: root.docked ? WlrLayer.Top : WlrLayer.Overlay
-            color: "#000000"
+            // black, see-through over a wallpaper (bin/theme's dark-wall)
+            color: Qt.rgba(0, 0, 0, root.alpha)
 
             // the workspaces by number as i3bar had them: the focused one white, the rest gray, an urgent one green;
             // a click to go there
