@@ -315,16 +315,16 @@ ShellRoot {
                         required property SystemTrayItem modelData
                         onClicked: m => {
                             if (m.button === Qt.RightButton || modelData.onlyMenu) {
-                                if (modelData.hasMenu) menu.open()
+                                if (modelData.hasMenu) menu.open = !menu.open
                             } else {
                                 modelData.activate()
                             }
                         }
-                        QsMenuAnchor {
+                        // the item's menu in the bar's look (TrayMenu.qml), not Qt's
+                        TrayMenu {
                             id: menu
-                            menu: item.modelData.menu
-                            anchor.item: item
-                            anchor.edges: Edges.Bottom
+                            handle: item.modelData.menu
+                            anchorItem: item
                         }
                         IconImage { implicitSize: 15; source: item.modelData.icon }
                     }
