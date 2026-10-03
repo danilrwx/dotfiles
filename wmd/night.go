@@ -202,7 +202,8 @@ func nightState() Night {
 }
 
 // night: mode off|on|time|sun, time FROM TO, temp K, location LAT LON, each saved and applied; apply alone
-// sets the screen as the config wants now (Hyprland's exec on every start and reload, and wmd watch's tick).
+// sets the screen as the config wants now (Hyprland's exec on every start and reload, and wmd watch's tick);
+// preview K shows a warmth at once, saving nothing, until the next apply.
 func night(args []string) error {
 	if len(args) == 0 {
 		return errUsage
@@ -212,6 +213,18 @@ func night(args []string) error {
 	switch {
 	case args[0] == "apply" && len(args) == 1:
 		return applyNight(c)
+	case args[0] == "preview" && len(args) == 2:
+		// the screen at K now, whatever the mode, nothing saved: the warmth slider while it is dragged
+		k, err := strconv.Atoi(args[1])
+		if err != nil {
+			return errUsage
+		}
+		path, err := shader(max(2500, min(6500, k)))
+		if err != nil {
+			return err
+		}
+		_, err = hyprctl("keyword decoration:screen_shader " + path)
+		return err
 	case args[0] == "mode" && len(args) == 2:
 		switch args[1] {
 		case "off", "on", "time", "sun":

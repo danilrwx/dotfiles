@@ -106,7 +106,7 @@ ShellRoot {
         if (battery.state === UPowerDeviceState.Charging)
             return battery.timeToFull > 0 ? "full in " + duration(battery.timeToFull) : "charging"
         if (battery.state === UPowerDeviceState.FullyCharged) return "full"
-        if (battery.state === UPowerDeviceState.PendingCharge) return "plugged in, not charging"
+        if (battery.state === UPowerDeviceState.PendingCharge) return "not charging"
         return battery.timeToEmpty > 0 ? duration(battery.timeToEmpty) + " left" : ""
     }
     readonly property bool vpn: (net.vless?.how ?? "off") !== "off" || (net.openvpn?.profile ?? "") !== ""
@@ -122,6 +122,8 @@ ShellRoot {
     IpcHandler {
         target: "panel"
         function ctl(): void { root.panel(qs) }
+        // the quick settings with one of their menus unfolded (wifi, bt, night, outs, ...)
+        function menu(name: string): void { cal.open = false; qs.open = true; qs.menu = name }
         function calendar(): void { root.panel(cal) }
     }
     // notifications, their history and the OSD (Notifications.qml)
@@ -214,9 +216,11 @@ ShellRoot {
         id: pill
         default property alias content: row.data
         property bool lit: false
+        // the space either side of what it holds
+        property int pad: 10
         signal wheelUp
         signal wheelDown
-        implicitWidth: row.implicitWidth + 20
+        implicitWidth: row.implicitWidth + 2 * pad
         implicitHeight: 25
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
@@ -395,6 +399,7 @@ ShellRoot {
                     Pill {
                         id: item
                         required property SystemTrayItem modelData
+                        pad: 5
                         onClicked: m => {
                             if (m.button === Qt.RightButton || modelData.onlyMenu) {
                                 if (modelData.hasMenu) menu.open = !menu.open

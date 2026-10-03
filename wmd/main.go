@@ -16,7 +16,7 @@
 //	wmd brightness PERCENT                    the backlight
 //	wmd night mode off|on|time|sun            night light (Hyprland's screen shader): off, on, by the hours, or
 //	                                          from sunset to sunrise
-//	wmd night time FROM TO | temp K | location LAT LON
+//	wmd night time FROM TO | temp K | location LAT LON | preview K
 //	wmd night apply                           the screen as the night light config wants now
 //
 // Installed by `go install github.com/danilrwx/dotfiles/wmd@latest`.
@@ -34,7 +34,7 @@ import (
 
 var errUsage = errors.New("usage: wmd watch | wifi on|off|scan|disconnect|connect SSID|forget SSID | " +
 	"bt on|off|scan|connect ADDR|disconnect ADDR|pair ADDR|forget ADDR | headset | power set PROFILE | " +
-	"brightness PERCENT | night mode off|on|time|sun|time FROM TO|temp K|location LAT LON|apply")
+	"brightness PERCENT | night mode off|on|time|sun|time FROM TO|temp K|location LAT LON|preview K|apply")
 
 // State is what wmd watch prints.
 type State struct {

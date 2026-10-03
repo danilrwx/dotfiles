@@ -152,7 +152,10 @@ PanelWindow {
         property string icon
         property real value
         property string menuName: ""
+        // the value drawn: the pointer's while dragged, else value
+        readonly property real shown: track.shown
         signal moved(real v)
+        signal released(real v)
         signal iconClicked
         spacing: 6
         MouseArea {
@@ -186,6 +189,7 @@ PanelWindow {
                 function set(x) { v = Math.min(1, Math.max(0, x / width)); sl.moved(v) }
                 onPressed: m => set(m.x)
                 onPositionChanged: m => { if (pressed) set(m.x) }
+                onReleased: sl.released(v)
                 onWheel: w => { v = Math.min(1, Math.max(0, sl.value + (w.angleDelta.y > 0 ? 0.02 : -0.02))); sl.moved(v) }
             }
         }
@@ -358,18 +362,26 @@ PanelWindow {
                 spacing: 8
                 Rectangle {
                     visible: panel.shell.battery.isLaptopBattery
-                    implicitWidth: bat.implicitWidth + 28; implicitHeight: 40; radius: Theme.radius
+                    // as wide as it needs, but no wider than the row leaves it, the time cut short to fit
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: bat.implicitWidth + 28
+                    Layout.maximumWidth: bat.implicitWidth + 28
+                    Layout.minimumWidth: 90
+                    implicitHeight: 40; radius: Theme.radius
                     color: Theme.pill
                     RowLayout {
                         id: bat
-                        anchors.centerIn: parent
+                        anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
                         spacing: 8
                         Icon { name: panel.shell.batteryIcon(); tint: panel.shell.batteryTint }
                         Label { text: Math.round(panel.shell.battery.percentage * 100) + "%"; font.bold: true }
-                        Label { visible: panel.shell.batteryTime !== ""; text: panel.shell.batteryTime; color: Theme.dim }
+                        Label {
+                            visible: panel.shell.batteryTime !== ""; text: panel.shell.batteryTime; color: Theme.dim
+                            Layout.fillWidth: true
+                        }
                     }
                 }
-                Item { Layout.fillWidth: true }
+                Item { Layout.preferredWidth: 4 }
                 RoundButton { icon: "applets-screenshooter-symbolic"; onClicked: panel.leave([panel.bin + "screenshot-select"]) }
                 RoundButton { icon: "system-lock-screen-symbolic"; onClicked: { panel.open = false; panel.shell.lockNow() } }
                 RoundButton {
@@ -481,19 +493,22 @@ PanelWindow {
                     onClicked: panel.act([panel.wmd, "night", "mode", "sun"])
                 }
                 Separator {}
-                // how warm: 6500 K at the left (no change) to 2500 K at the right
+                // how warm: 6500 K at the left (no change) to 2500 K at the right; the screen takes it while the
+                // slider is dragged (a preview), and keeps it, as the mode has it, once let go
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.leftMargin: 10; Layout.rightMargin: 10
-                    spacing: 10
-                    Label { text: "Warmth"; color: Theme.dim }
-                    Slider {
-                        Layout.fillWidth: true
-                        icon: "night-light-symbolic"
-                        value: (6500 - (panel.night.temp ?? 4000)) / 4000
-                        onMoved: v => panel.act([panel.wmd, "night", "temp", String(Math.round(6500 - v * 4000))])
-                    }
-                    Label { text: (panel.night.temp ?? 4000) + " K"; color: Theme.dim }
+                    Layout.leftMargin: 10; Layout.rightMargin: 10; Layout.topMargin: 2
+                    Label { text: "Warmth"; color: Theme.dim; Layout.fillWidth: true }
+                    Label { text: Math.round(6500 - warm.shown * 4000) + " K"; color: Theme.dim }
+                }
+                Slider {
+                    id: warm
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 4; Layout.rightMargin: 10
+                    icon: "night-light-symbolic"
+                    value: (6500 - (panel.night.temp ?? 4000)) / 4000
+                    onMoved: v => panel.shell.run([panel.wmd, "night", "preview", String(Math.round(6500 - v * 4000))])
+                    onReleased: v => panel.act([panel.wmd, "night", "temp", String(Math.round(6500 - v * 4000))])
                 }
             }
 
