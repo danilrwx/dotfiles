@@ -1,0 +1,8 @@
+#!/bin/sh
+# ssh's askpass (SSH_ASKPASS: config/environment.d, ssh-agent's drop-in): the key's passphrase, or a yes to use a
+# key (SSH_ASKPASS_PROMPT=confirm), asked by ostrov in its own look; where ostrov is not running (i3), by
+# OpenSSH's GTK3 askpass as before
+if busctl --user status dev.danil.ostrov > /dev/null 2>&1; then
+	exec "$HOME/.cargo/bin/ostrov" askpass ${SSH_ASKPASS_PROMPT:+--$SSH_ASKPASS_PROMPT} "$*"
+fi
+exec /usr/lib/openssh/gnome-ssh-askpass "$@"

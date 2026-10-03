@@ -51,10 +51,10 @@ DESKTOP_PKGS=(iwd bluez rfkill
 # media keys (bin/wm-fnkeys), the polkit agent
 X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit x11-xserver-utils xinput
   i3-wm i3lock xss-lock dunst rofi maim xclip hsetroot xcompmgr brightnessctl playerctl lxpolkit libnotify-bin)
-# the Wayland sessions next to i3, sway and Hyprland, without their recommends: wallpaper, idle and lock (both
-# take swayidle and swaylock), screenshots (grim, slurp), the clipboard, the screen-sharing portal, X apps
-# under Xwayland
-WAYLAND_PKGS=(sway hyprland swaybg swayidle swaylock grim slurp wl-clipboard xdg-desktop-portal-wlr xwayland)
+# the Wayland sessions next to i3, sway and Hyprland, without their recommends (ostrov draws the wallpaper and
+# keeps idle, sleep and the lock): swaylock for its PAM profile alone, ostrov's lock checking passwords by it;
+# screenshots (grim, slurp), the clipboard, the screen-sharing portal, X apps under Xwayland
+WAYLAND_PKGS=(sway hyprland swaylock grim slurp wl-clipboard xdg-desktop-portal-wlr xwayland)
 # ostrov's build, the shell under Hyprland (~/w/ostrov): GTK 4, its layer shell and session lock, PAM
 OSTROV_PKGS=(pkg-config libgtk-4-dev libgtk4-layer-shell-dev libpam0g-dev)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
