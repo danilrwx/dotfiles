@@ -12,6 +12,7 @@ import Quickshell.Io
 import Quickshell.Services.Pipewire
 import Quickshell.Services.SystemTray
 import Quickshell.Services.UPower
+import Quickshell.Wayland
 import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
@@ -101,11 +102,15 @@ ShellRoot {
         function ctl(): void { root.panel(qs) }
         function calendar(): void { root.panel(cal) }
     }
-    // the bar itself, hidden and shown: quickshell ipc call bar toggle ($mod+b, config/hypr)
-    property bool shown: true
+    // the bar's mode, i3's bar mode toggle: docked, or hidden and shown over the windows while Super is held.
+    // quickshell ipc call bar toggle ($mod+b), peek and unpeek (Super down and up, config/hypr)
+    property bool docked: true
+    property bool peeking: false
     IpcHandler {
         target: "bar"
-        function toggle(): void { root.shown = !root.shown }
+        function toggle(): void { root.docked = !root.docked }
+        function peek(): void { root.peeking = true }
+        function unpeek(): void { root.peeking = false }
     }
 
     // a pill of the bar: rounded, lit under the pointer, what it holds in a row; clicks and the wheel given
@@ -143,9 +148,12 @@ ShellRoot {
             id: bar
             required property var modelData
             screen: modelData
-            visible: root.shown
+            visible: root.docked || root.peeking
             anchors { top: true; left: true; right: true }
             implicitHeight: 25
+            // docked it takes its strip from the windows; hidden it comes over them
+            exclusiveZone: root.docked ? implicitHeight : 0
+            WlrLayershell.layer: root.docked ? WlrLayer.Top : WlrLayer.Overlay
             color: "#000000"
 
             // the workspaces as dots, the focused one a longer pill, a click to go there
