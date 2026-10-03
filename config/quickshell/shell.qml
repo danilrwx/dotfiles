@@ -108,6 +108,14 @@ ShellRoot {
         function ctl(): void { root.panel(qs) }
         function calendar(): void { root.panel(cal) }
     }
+    // the lock screen (Lock.qml): quickshell ipc call lock lock
+    Lock { id: lockScreen }
+    function lockNow() { lockScreen.engage() }
+    IpcHandler {
+        target: "lock"
+        function lock(): void { root.lockNow() }
+    }
+
     // the launcher in the bar, dmenu's way: open while launching ($mod+d: quickshell ipc call launcher toggle)
     property bool launching: false
     IpcHandler {
@@ -198,8 +206,13 @@ ShellRoot {
             // docked it takes its strip from the windows; hidden it comes over them
             exclusiveZone: root.docked ? implicitHeight : 0
             WlrLayershell.layer: root.docked ? WlrLayer.Top : WlrLayer.Overlay
-            // black, see-through over a wallpaper (bin/theme's dark-wall)
-            color: Qt.rgba(0, 0, 0, root.alpha)
+            // black, see-through over a wallpaper (bin/theme's dark-wall): drawn by a rectangle on a clear window,
+            // as a see-through window colour builds up darker frame by frame where the content changes
+            color: "transparent"
+            Rectangle {
+                anchors.fill: parent
+                color: Qt.rgba(0, 0, 0, root.alpha)
+            }
 
             // the workspaces by number as i3bar had them: the focused one white, the rest gray, an urgent one green;
             // a click to go there

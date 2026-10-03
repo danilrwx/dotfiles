@@ -8,12 +8,16 @@ dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK HYPRLAND_I
 dunst &
 lxpolkit &
 if [ "$desktop" = Hyprland ]; then
-	quickshell &   # the bar (config/quickshell); sway keeps its own
+	quickshell &   # the bar and the lock screen (config/quickshell); sway keeps its own
+	lock='quickshell ipc call lock lock'
 	off='hyprctl dispatch dpms off' on='hyprctl dispatch dpms on'
 else
+	lock='swaylock -f -c 000000'
 	off='swaymsg "output * power off"' on='swaymsg "output * power on"'
 fi
+# lock: logind's lock-session too (loginctl lock-session)
 exec swayidle -w \
-	timeout 600 'swaylock -f -c 000000' \
+	timeout 600 "$lock" \
 	timeout 900 "$off" resume "$on" \
-	before-sleep 'swaylock -f -c 000000'
+	before-sleep "$lock" \
+	lock "$lock"

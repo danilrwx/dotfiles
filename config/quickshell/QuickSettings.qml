@@ -367,7 +367,7 @@ PanelWindow {
                 }
                 Item { Layout.fillWidth: true }
                 RoundButton { icon: "applets-screenshooter-symbolic"; onClicked: panel.leave([panel.bin + "screenshot-select"]) }
-                RoundButton { icon: "system-lock-screen-symbolic"; onClicked: panel.leave(["swaylock", "-f", "-c", "000000"]) }
+                RoundButton { icon: "system-lock-screen-symbolic"; onClicked: { panel.open = false; panel.shell.lockNow() } }
                 RoundButton {
                     icon: "system-shutdown-symbolic"; lit: panel.menu === "system"
                     onClicked: panel.flip("system")
