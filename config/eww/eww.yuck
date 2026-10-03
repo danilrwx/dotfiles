@@ -12,11 +12,16 @@
 ; the panels, open one at a time through bin/wm-panel, which sets these while one is; their polls run only then
 (defvar ctl false)
 (defvar calendar false)
-; the panel's view: "" its cards, or the list behind a toggle (wifi, bt, vless, power); and the sound
-; cards' device lists, folded until their arrow opens them. bin/wm-panel resets them all on close
-(defvar sub "")
+; the panel's lists, folded until their arrow opens them: the Wi-Fi networks, the Bluetooth devices, VLESS's
+; settings, the power profiles, the sound outputs and inputs. bin/wm-panel folds them all on close; fit is
+; its nudge to GTK to refit the window once one folds (bin/wm-panel set)
+(defvar wifis false)
+(defvar bts false)
+(defvar vlesss false)
+(defvar powers false)
 (defvar outs false)
 (defvar ins false)
+(defvar fit "")
 (defpoll audio :interval "2s" :run-while ctl :initial "{}" "~/dotfiles/bin/wm-audio json")
 (defpoll profile :interval "2s" :run-while ctl "powerprofilesctl get")
 (defpoll quick :interval "2s" :run-while ctl :initial "{}" "~/dotfiles/bin/wm-quick")
@@ -79,19 +84,24 @@
 ; the panels: under the bar at its right end, out of i3's hands (wm-ignore), closed on a click on their block
 ; again or as the pointer leaves them ──────────────────────────────────────────────────────────────────────────
 
-; the panel, macOS's Control Center: cards on a see-through ground. Toggles up top, Wi-Fi, Bluetooth and
-; VLESS (the circle flips one, its name opens the tool behind it), the power profile and the headset beside
-; them; then a card a level: the display, the output, the input, each with its slider and devices
+; the panel, macOS's Control Center: cards on a see-through ground, one a thing. Each with its toggle or slider
+; and, behind an arrow, its list unfolding in place: Wi-Fi's networks, Bluetooth's devices, VLESS's way, mode
+; and profile, the power profiles, the sound outputs and inputs
 
-; toggle: a circle lit while on, a click on it runs ontoggle; the name and what it is on to, a click on them
-; runs onopen
-(defwidget toggle [icon name sub on ontoggle onopen]
+; toggle: a circle lit while on, a click on it runs ontoggle; the name and what it is on to; the arrow that
+; folds or unfolds the var given
+(defwidget toggle [icon name sub on ontoggle ?var ?open]
   (box :class "toggle" :space-evenly false
     (button :class "circle ${on ? 'on' : ''}" :onclick ontoggle icon)
-    (eventbox :cursor "pointer" :onclick onopen :hexpand true
-      (box :orientation "v" :valign "center" :space-evenly false
-        (label :class "name" :halign "start" :text name)
-        (label :class "sub" :halign "start" :limit-width 16 :text sub)))))
+    (box :orientation "v" :valign "center" :space-evenly false :hexpand true
+      (label :class "name" :halign "start" :text name)
+      (label :class "sub" :halign "start" :limit-width 28 :text sub))
+    (arrow :var {var ?: ""} :open {open ?: false})))
+
+; arrow: folds or unfolds the var given (bin/wm-panel set refits the window), nothing without one
+(defwidget arrow [var open]
+  (button :class "arrow" :visible {var != ""} :onclick "~/dotfiles/bin/wm-panel set ${var}=${open ? 'false' : 'true'}"
+    {open ? "⌄" : "›"}))
 
 ; slider: a thick bar from 0 to 100 that runs onchange with {}, an icon before it (a button: onclick)
 (defwidget slider [icon value onchange ?onclick]
@@ -99,123 +109,99 @@
     (button :class "slider-icon" :onclick {onclick ?: ""} icon)
     (scale :hexpand true :min 0 :max 101 :value value :onchange onchange)))
 
-; devices: PipeWire's sinks or sources, the default one ticked, a click makes one the default
-(defwidget devices [list]
-  (box :orientation "v" :class "devices"
-    (for d in list
-      (row :on {d.def} :text {d.name} :onclick "wpctl set-default ${d.id}"))))
-
 ; row: a line of a list, ticked while on, a click runs onclick
 (defwidget row [on text onclick ?note]
   (button :class "device ${on ? 'def' : ''}" :onclick onclick
     (box :space-evenly false
       (label :class "tick" :text {on ? "✓" : ""})
-      (label :halign "start" :hexpand true :limit-width 30 :text text)
+      (label :halign "start" :hexpand true :limit-width 32 :text text)
       (label :class "note" :text {note ?: ""}))))
 
-; heading: a card's title, what goes at its right, and an arrow that folds or unfolds the var given
-(defwidget heading [text ?var ?open]
-  (box :class "title" :space-evenly false
-    (label :halign "start" :hexpand true :text text)
-    (children)
-    (button :class "arrow" :visible {var != ""} :onclick "~/dotfiles/bin/wm-panel set ${var}=${open ? 'false' : 'true'}"
-      {open ? "⌄" : "›"})))
+; fold: a list under its card, shown while open
+(defwidget fold [open]
+  (revealer :reveal open :transition "none"
+    (box :class "devices" :orientation "v" :space-evenly false
+      (children))))
 
-; sublist: the view behind a toggle, a back arrow to the cards, its rows, a last row that opens the tool
-(defwidget sublist [title ?tool ?toolcmd]
-  (box :class "card" :orientation "v" :space-evenly false
-    (box :class "title" :space-evenly false
-      (button :class "arrow" :onclick "~/dotfiles/bin/wm-panel set sub=" "‹")
-      (label :halign "start" :hexpand true :text title))
-    (children)
-    (button :class "device more" :visible {tool != ""} :onclick "eww update sub=''; ${toolcmd} &"
-      (label :halign "start" :text {tool ?: ""}))))
+; devices: PipeWire's sinks or sources, the default one ticked, a click makes one the default
+(defwidget devices [list]
+  (box :orientation "v"
+    (for d in list
+      (row :on {d.def} :text {d.name} :onclick "wpctl set-default ${d.id}"))))
 
-(defwidget cards []
-  (box :orientation "v" :space-evenly false
-    (box :class "row" :space-evenly true :spacing 10
-      (box :class "card" :orientation "v" :space-evenly false
-        (toggle :icon "📶" :name "Wi-Fi" :on {quick.wifi ?: false}
-                :sub {(quick.wifi ?: false) ? (quick.ssid ?: "") : "Off"}
-                :ontoggle "rfkill ${(quick.wifi ?: false) ? 'block' : 'unblock'} wlan"
-                :onopen "~/dotfiles/bin/wm-panel set sub=wifi")
-        (toggle :icon "🔵" :name "Bluetooth" :on {quick.bt ?: false}
-                :sub {(quick.bt ?: false) ? ((quick.btdev ?: "") != "" ? quick.btdev : "On") : "Off"}
-                :ontoggle "rfkill ${(quick.bt ?: false) ? 'block' : 'unblock'} bluetooth"
-                :onopen "~/dotfiles/bin/wm-panel set sub=bt")
-        (toggle :icon "🛡️" :name "VLESS" :on {(quick.vless ?: "off") != "off"}
-                :sub {status.vless != "" ? status.vless : "Off"}
-                :ontoggle "~/dotfiles/bin/vless ${(quick.vless ?: 'off') != 'off' ? 'off' : 'on tun'}"
-                :onopen "~/dotfiles/bin/wm-panel set sub=vless"))
-      (box :orientation "v" :space-evenly false :spacing 10
-        (box :class "card"
-          (toggle :icon "⚡" :name "Power" :on {profile == "performance"} :sub profile
-                  :ontoggle "powerprofilesctl set ${profile == 'power-saver' ? 'balanced' : profile == 'balanced' ? 'performance' : 'power-saver'}"
-                  :onopen "~/dotfiles/bin/wm-panel set sub=power"))
-        (box :class "card" :visible {(audio.headset ?: "") != ""}
-          (toggle :icon "🎧" :name "Headset" :on {audio.headset == "handsfree"} :sub {audio.headset ?: ""}
-                  :ontoggle "~/dotfiles/bin/wm-ctl headset &" :onopen "~/dotfiles/bin/wm-ctl headset &"))))
-    (box :class "card" :orientation "v" :space-evenly false
-      (heading :text "Display")
-      (slider :icon "🌞" :value {status.bri ?: 0} :onchange "brightnessctl -q set {}%"))
-    (box :class "card" :orientation "v" :space-evenly false
-      (heading :text "Sound" :var "outs" :open outs)
-      (slider :icon {status.volmute ? "🔇" : "🔊"} :value {status.vol ?: 0}
-              :onclick "~/dotfiles/bin/wm-fnkeys vol-mute" :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%")
-      (revealer :reveal outs :transition "slidedown" :duration "150ms"
-        (devices :list {audio.sinks ?: []})))
-    (box :class "card" :orientation "v" :space-evenly false
-      (heading :text "Microphone" :var "ins" :open ins)
-      (slider :icon {status.micmute ? "🙊" : "🎙️"} :value {status.mic ?: 0}
-              :onclick "~/dotfiles/bin/wm-fnkeys mic" :onchange "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ {}%")
-      (revealer :reveal ins :transition "slidedown" :duration "150ms"
-        (devices :list {audio.sources ?: []})))))
-
-; the lists behind the toggles. A Wi-Fi network iwd knows joins with a click, a new one needs its passphrase
-; typed in impala; a Bluetooth device connects or disconnects; VLESS's way, mode and profile
-(defwidget wifi []
-  (sublist :title "Wi-Fi" :tool "Other networks…" :toolcmd "~/dotfiles/bin/wm-ctl wifi"
-    (row :on false :text "Scan" :onclick "iwctl station wlan0 scan")
-    (box :orientation "v"
-      (for n in {quick.networks ?: []}
-        (row :on {n.on} :text {n.ssid} :note {substring('▂▄▆█', 0, n.signal)}
-             :onclick {n.known ? "iwctl station wlan0 connect '${n.ssid}'" : "eww update sub=''; ~/dotfiles/bin/wm-ctl wifi &"})))))
-
-(defwidget bt []
-  (sublist :title "Bluetooth" :tool "Pair a device…" :toolcmd "~/dotfiles/bin/wm-ctl bluetooth"
-    (box :orientation "v"
-      (for d in {quick.devices ?: []}
-        (row :on {d.on} :text {d.name} :onclick "bluetoothctl ${d.on ? 'disconnect' : 'connect'} ${d.mac} > /dev/null &")))))
-
-(defwidget vless []
-  (sublist :title "VLESS"
-    (row :on {quick.vless == "tun"} :text "TUN, every app" :onclick "~/dotfiles/bin/vless on tun")
-    (row :on {quick.vless == "proxy"} :text "System proxy" :onclick "~/dotfiles/bin/vless on proxy")
-    (row :on {quick.vless == "off"} :text "Off" :onclick "~/dotfiles/bin/vless off")
-    ; a revealer, as a box eww hides keeps its height
-    (revealer :reveal {(quick.vless ?: "off") != "off"} :transition "none"
-     (box :orientation "v" :space-evenly false
-      (label :class "subtitle" :halign "start" :text "Mode")
-      (row :on {quick.vmode == "rule"} :text "Rule: Russia direct" :onclick "~/dotfiles/bin/vless mode rule")
-      (row :on {quick.vmode == "global"} :text "Global" :onclick "~/dotfiles/bin/vless mode global")
-      (label :class "subtitle" :halign "start" :text "Profile")
-      (box :orientation "v"
-        (for p in {quick.profiles ?: []}
-          (row :on {p == quick.vprofile} :text p :onclick "~/dotfiles/bin/vless profile '${p}'")))))))
-
-(defwidget power []
-  (sublist :title "Power"
-    (box :orientation "v"
-      (for p in '["power-saver", "balanced", "performance"]'
-        (row :on {profile == p} :text p :onclick "powerprofilesctl set ${p}")))))
-
+; A Wi-Fi network iwd knows joins with a click, a new one needs its passphrase typed in impala; a Bluetooth
+; device connects or disconnects, a new one is paired in bluetui
 (defwidget ctl []
   (eventbox :onhoverlost "~/dotfiles/bin/wm-panel ctl close"
     (box :class "panel" :orientation "v" :space-evenly false
-      ; one view at a time, the panel as tall as that one
-      (stack :same-size false :transition "none"
-             :selected {sub == "wifi" ? 1 : sub == "bt" ? 2 : sub == "vless" ? 3 : sub == "power" ? 4 : 0}
-        (cards) (wifi) (bt) (vless) (power)))))
+      (box :class "card" :orientation "v" :space-evenly false
+        (toggle :icon "📶" :name "Wi-Fi" :on {quick.wifi ?: false}
+                :sub {(quick.wifi ?: false) ? (quick.ssid ?: "") : "Off"}
+                :ontoggle "rfkill ${(quick.wifi ?: false) ? 'block' : 'unblock'} wlan" :var "wifis" :open wifis)
+        (fold :open wifis
+          (box :orientation "v"
+            (for n in {quick.networks ?: []}
+              (row :on {n.on} :text {n.ssid} :note {substring('▂▄▆█', 0, n.signal)}
+                   :onclick {n.known ? "iwctl station wlan0 connect '${n.ssid}'" : "~/dotfiles/bin/wm-panel ctl close; ~/dotfiles/bin/wm-ctl wifi &"})))
+          (row :on false :text "Scan" :onclick "iwctl station wlan0 scan")
+          (row :on false :text "Other networks…" :onclick "~/dotfiles/bin/wm-panel ctl close; ~/dotfiles/bin/wm-ctl wifi &")))
+      (box :class "card" :orientation "v" :space-evenly false
+        (toggle :icon "🔵" :name "Bluetooth" :on {quick.bt ?: false}
+                :sub {(quick.bt ?: false) ? ((quick.btdev ?: "") != "" ? quick.btdev : "On") : "Off"}
+                :ontoggle "rfkill ${(quick.bt ?: false) ? 'block' : 'unblock'} bluetooth" :var "bts" :open bts)
+        (fold :open bts
+          (box :orientation "v"
+            (for d in {quick.devices ?: []}
+              (row :on {d.on} :text {d.name} :onclick "bluetoothctl ${d.on ? 'disconnect' : 'connect'} ${d.mac} > /dev/null &")))
+          (row :on false :text "Pair a device…" :onclick "~/dotfiles/bin/wm-panel ctl close; ~/dotfiles/bin/wm-ctl bluetooth &")))
+      (box :class "card" :orientation "v" :space-evenly false
+        (toggle :icon "🛡️" :name "VLESS" :on {(quick.vless ?: "off") != "off"}
+                :sub {status.vless != "" ? status.vless : "Off"}
+                :ontoggle "~/dotfiles/bin/vless ${(quick.vless ?: 'off') != 'off' ? 'off' : 'on tun'}"
+                :var "vlesss" :open vlesss)
+        (fold :open vlesss
+          (row :on {quick.vless == "tun"} :text "TUN, every app" :onclick "~/dotfiles/bin/vless on tun")
+          (row :on {quick.vless == "proxy"} :text "System proxy" :onclick "~/dotfiles/bin/vless on proxy")
+          ; a revealer, as a box eww hides keeps its height
+          (revealer :reveal {(quick.vless ?: "off") != "off"} :transition "none"
+           (box :orientation "v" :space-evenly false
+            (label :class "subtitle" :halign "start" :text "Mode")
+            (row :on {quick.vmode == "rule"} :text "Rule: Russia direct" :onclick "~/dotfiles/bin/vless mode rule")
+            (row :on {quick.vmode == "global"} :text "Global" :onclick "~/dotfiles/bin/vless mode global")
+            (label :class "subtitle" :halign "start" :text "Profile")
+            (box :orientation "v"
+              (for p in {quick.profiles ?: []}
+                (row :on {p == quick.vprofile} :text p :onclick "~/dotfiles/bin/vless profile '${p}'")))))))
+      (box :class "card" :orientation "v" :space-evenly false
+        (toggle :icon "⚡" :name "Power" :on {profile == "performance"} :sub profile
+                :ontoggle "powerprofilesctl set ${profile == 'power-saver' ? 'balanced' : profile == 'balanced' ? 'performance' : 'power-saver'}"
+                :var "powers" :open powers)
+        (fold :open powers
+          (box :orientation "v"
+            (for p in '["power-saver", "balanced", "performance"]'
+              (row :on {profile == p} :text p :onclick "powerprofilesctl set ${p}")))))
+      (box :class "card" :orientation "v" :space-evenly false :visible {(audio.headset ?: "") != ""}
+        (toggle :icon "🎧" :name "Headset" :on {audio.headset == "handsfree"} :sub {audio.headset ?: ""}
+                :ontoggle "~/dotfiles/bin/wm-ctl headset &"))
+      (box :class "card" :orientation "v" :space-evenly false
+        (label :class "title" :halign "start" :text "Display")
+        (slider :icon "🌞" :value {status.bri ?: 0} :onchange "brightnessctl -q set {}%"))
+      (box :class "card" :orientation "v" :space-evenly false
+        (box :class "title" :space-evenly false
+          (label :halign "start" :hexpand true :text "Sound")
+          (arrow :var "outs" :open outs))
+        (slider :icon {status.volmute ? "🔇" : "🔊"} :value {status.vol ?: 0}
+                :onclick "~/dotfiles/bin/wm-fnkeys vol-mute" :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%")
+        (fold :open outs (devices :list {audio.sinks ?: []})))
+      (box :class "card" :orientation "v" :space-evenly false
+        (box :class "title" :space-evenly false
+          (label :halign "start" :hexpand true :text "Microphone")
+          (arrow :var "ins" :open ins))
+        (slider :icon {status.micmute ? "🙊" : "🎙️"} :value {status.mic ?: 0}
+                :onclick "~/dotfiles/bin/wm-fnkeys mic" :onchange "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ {}%")
+        (fold :open ins (devices :list {audio.sources ?: []})))
+      ; bin/wm-panel's nudge to GTK to refit the window, a change of text being a new size to lay out
+      (label :class "fit" :text fit))))
 
 (defwindow ctl
   :monitor 0

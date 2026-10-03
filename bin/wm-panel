@@ -1,17 +1,34 @@
 #!/bin/sh
 # The bar's panels (config/eww):
-#   wm-panel NAME        toggle the window NAME, one panel at a time, opened on its first view
+#   wm-panel NAME        toggle the window NAME, one panel at a time, its lists folded
 #   wm-panel NAME close  close it
-#   wm-panel set VAR=VAL the control panel's view or a device list folded or not, the window opened anew:
-#                        under X11 eww grows a window with its content but never shrinks it back
+#   wm-panel set VAR=VAL one of the control panel's lists folded or not, the window refitted: under X11 eww
+#                        grows a window with its content but never shrinks it back, so once the content is laid
+#                        out it is cut to a pixel's height, and fit's new text has GTK grow it back to what the
+#                        content needs, in place, with no reopening
 # The variable of the same name as a panel tells its polls to run only while it is open
+# a refit's moment at a pixel's height has the pointer leave the panel, which closes it on that; the close it
+# asks for within the second after a refit is not taken
+fitted=${XDG_RUNTIME_DIR:-/tmp}/wm-panel-fit
 if [ "$1" = set ]; then
-	eww update "$2" && eww close ctl && eww open ctl
+	touch "$fitted"
+	win=$(xwininfo -root -tree | awk '/"Eww - ctl"/ {print $1; exit}')
+	[ -n "$win" ] && python3 -c '
+import ctypes, sys
+x = ctypes.CDLL("libX11.so.6"); x.XOpenDisplay.restype = ctypes.c_void_p
+d = ctypes.c_void_p(x.XOpenDisplay(None)); w = ctypes.c_ulong(int(sys.argv[1], 16))
+a = (ctypes.c_int * 64)(); x.XGetWindowAttributes(d, w, a)
+x.XResizeWindow(d, w, a[2], 1); x.XSync(d, 0)' "$win"
+	eww update "$2"
 	exit
 fi
 name=$1
+[ "${2:-}" = close ] && [ -n "$(find "$fitted" -newermt '-1 second' 2>/dev/null)" ] && exit
 open=$(eww active-windows | grep -c "^$name:")
 for w in ctl calendar; do eww close "$w" 2>/dev/null; eww update "$w=false"; done
-# the panel back on its cards, its device lists folded
-eww update sub='' outs=false ins=false
-[ "${2:-}" = close ] || [ "$open" -gt 0 ] || { eww update "$name=true"; eww open "$name"; }
+# the panel's lists folded
+eww update wifis=false bts=false vlesss=false powers=false outs=false ins=false
+[ "${2:-}" = close ] || [ "$open" -gt 0 ] && exit
+eww update "$name=true"; eww open "$name"
+# the control panel opens taller than its folded lists need: refitted once they are laid out
+[ "$name" = ctl ] && sleep 0.3 && exec "$0" set fit="$(head -c "$(shuf -i 1-9 -n 1)" /dev/zero | tr '\0' .)"
