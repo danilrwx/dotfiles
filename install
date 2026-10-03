@@ -231,6 +231,9 @@ desktop_session() {
   for e in config/environment.d/*.conf; do link "$e" "$HOME/.config/environment.d/${e##*/}"; done
   # dark GTK3 and GTK4; GTK keeps bookmarks next to them, so the files are linked, not the dirs
   for g in gtk-3.0 gtk-4.0; do link "config/$g/settings.ini" "$HOME/.config/$g/settings.ini"; done
+  # the UI font at 10, as GTK's own default under X11: under Wayland GTK and Chrome take GNOME's setting (11),
+  # Chrome's tabs and menus coming out bigger than under i3
+  gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 10'
   # the system's app entries that are tools, hidden from bin/wm-menu's list
   for a in config/applications/*.desktop; do link "$a" "$HOME/.local/share/applications/${a##*/}"; done
 
