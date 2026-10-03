@@ -66,13 +66,11 @@ ShellRoot {
         if (!w.ssid) return "network-wireless-offline-symbolic"
         return "network-wireless-signal-" + ["none", "weak", "ok", "good", "excellent"][w.signal] + "-symbolic"
     }
-    function batteryIcon() {
-        const level = Math.round(battery.percentage * 10) * 10
-        const charging = battery.state === UPowerDeviceState.Charging
-        const full = battery.state === UPowerDeviceState.FullyCharged
-        return "battery-level-" + level + (full && level === 100 ? "-charged" : charging ? "-charging" : "")
-            + "-symbolic"
-    }
+    // the battery's icon as UPower names it, for every state it knows: charging, plugged in but held (a
+    // charge threshold), full, low
+    function batteryIcon() { return battery.iconName || "battery-missing-symbolic" }
+    readonly property bool plugged: battery.state === UPowerDeviceState.Charging
+        || battery.state === UPowerDeviceState.PendingCharge || battery.state === UPowerDeviceState.FullyCharged
     // the keyboard layout, Hyprland's word on every switch, at once, and wmd's besides (at the start)
     property bool ru: false
     onNetChanged: ru = /Russian/.test(net.keymap ?? "")
@@ -93,9 +91,9 @@ ShellRoot {
         onFileChanged: reload()
     }
     readonly property real alpha: parseFloat(alphaFile.text()) || 1
-    // the battery's icon colour: white, turning red from 30% down, all red at 10%; white while charging
+    // the battery's icon colour: white, turning red from 30% down, all red at 10%; white while plugged in
     readonly property color batteryTint: {
-        if (battery.state === UPowerDeviceState.Charging) return Theme.fg
+        if (plugged) return Theme.fg
         const t = Math.min(1, Math.max(0, (0.30 - battery.percentage) / 0.20))
         return Qt.rgba(1, 1 - t * 0.89, 1 - t * 0.86, 1)
     }
@@ -108,6 +106,7 @@ ShellRoot {
         if (battery.state === UPowerDeviceState.Charging)
             return battery.timeToFull > 0 ? "full in " + duration(battery.timeToFull) : "charging"
         if (battery.state === UPowerDeviceState.FullyCharged) return "full"
+        if (battery.state === UPowerDeviceState.PendingCharge) return "plugged in, not charging"
         return battery.timeToEmpty > 0 ? duration(battery.timeToEmpty) + " left" : ""
     }
     readonly property bool vpn: (net.vless?.how ?? "off") !== "off" || (net.openvpn?.profile ?? "") !== ""

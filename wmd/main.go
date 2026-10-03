@@ -14,7 +14,10 @@
 //	wmd headset                               the Bluetooth headset between headphones and handsfree
 //	wmd power set PROFILE                     power-saver, balanced, performance
 //	wmd brightness PERCENT                    the backlight
-//	wmd night on|off|apply                    night light (Hyprland's screen shader), or what was last chosen
+//	wmd night mode off|on|time|sun            night light (Hyprland's screen shader): off, on, by the hours, or
+//	                                          from sunset to sunrise
+//	wmd night time FROM TO | temp K | location LAT LON
+//	wmd night apply                           the screen as the night light config wants now
 //
 // Installed by `go install github.com/danilrwx/dotfiles/wmd@latest`.
 package main
@@ -31,7 +34,7 @@ import (
 
 var errUsage = errors.New("usage: wmd watch | wifi on|off|scan|disconnect|connect SSID|forget SSID | " +
 	"bt on|off|scan|connect ADDR|disconnect ADDR|pair ADDR|forget ADDR | headset | power set PROFILE | " +
-	"brightness PERCENT | night on|off|apply")
+	"brightness PERCENT | night mode off|on|time|sun|time FROM TO|temp K|location LAT LON|apply")
 
 // State is what wmd watch prints.
 type State struct {
@@ -44,7 +47,7 @@ type State struct {
 	Vless      Vless     `json:"vless"`
 	OpenVPN    OpenVPN   `json:"openvpn"`
 	Theme      Theme     `json:"theme"`
-	Night      bool      `json:"night"`
+	Night      Night     `json:"night"`
 }
 
 func state(conn *dbus.Conn) State {
@@ -62,7 +65,7 @@ func state(conn *dbus.Conn) State {
 	if s.Audio, err = audioState(); err != nil {
 		fmt.Fprintln(os.Stderr, "wmd: audio:", err)
 	}
-	s.Brightness, s.Keymap, s.Night = brightness(), keymap(), nightOn()
+	s.Brightness, s.Keymap, s.Night = brightness(), keymap(), nightState()
 	s.Vless, s.OpenVPN, s.Theme = vlessState(), openvpnState(conn), themeState()
 	return s
 }
@@ -109,6 +112,10 @@ func watch(conn *dbus.Conn) error {
 				return err
 			}
 		case <-tick.C:
+			// night light kept to its schedule
+			if err := applyNight(loadNight()); err != nil {
+				fmt.Fprintln(os.Stderr, "wmd: night:", err)
+			}
 			if err := emit(); err != nil {
 				return err
 			}

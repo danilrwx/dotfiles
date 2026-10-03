@@ -1,8 +1,8 @@
 // The quick settings, GNOME's layout in the old look (Theme.qml): a popover under the bar's status. Up top the
 // battery and round buttons for a screenshot, the lock and the power menu; then the sliders, volume and mic
-// (their device lists behind an arrow) and brightness; then the toggles, two a row, GNOME's split pills:
-// Wi-Fi, Bluetooth, the power mode, VLESS, OpenVPN, the wallpaper, night light and the headset's mode, the left
-// side flips one (inverted while on), the arrow opens its menu. A menu unfolds in place under its row, one at
+// (their device lists behind an arrow) and brightness (night light behind its arrow); then the toggles, two a
+// row, GNOME's split pills: Wi-Fi, Bluetooth, the power mode, VLESS, OpenVPN, the wallpaper and the headset's
+// mode, the left side flips one (inverted while on), the arrow opens its menu. A menu unfolds in place under its row, one at
 // a time, in 100 ms; a new Wi-Fi network asks its passphrase right there. Closed by a click outside
 // (Hyprland's focus grab) or on the pill again. The state from the bar's wmd, volume and mute straight through
 // PipeWire.
@@ -26,6 +26,7 @@ PanelWindow {
     readonly property var ovpn: net.openvpn ?? ({})
     readonly property string profile: net.power?.active ?? ""
     readonly property var theme: net.theme ?? ({})
+    readonly property var night: net.night ?? ({})
     // a wallpaper other than the one on
     function randomWall() {
         const others = (theme.wallpapers ?? []).filter(w => w !== theme.wallpaper)
@@ -34,7 +35,8 @@ PanelWindow {
     readonly property string bin: shell.bin
     readonly property string wmd: shell.wmd
 
-    // the menu unfolded: "", system, outs, ins, wifi, bt, power, vless, openvpn, theme; folded on every opening
+    // the menu unfolded: "", system, outs, ins, night, wifi, bt, power, vless, openvpn, theme; folded on every
+    // opening
     property string menu: ""
     function flip(m) { menu = menu === m ? "" : m }
     onOpenChanged: { menu = ""; asking = ""; wifiError = ""; btError = "" }
@@ -424,7 +426,75 @@ PanelWindow {
             Slider {
                 Layout.fillWidth: true
                 icon: "display-brightness-symbolic"; value: (panel.net.brightness ?? 0) / 100
+                menuName: "night"
                 onMoved: v => panel.shell.run([panel.wmd, "brightness", String(Math.round(v * 100))])
+            }
+            // night light behind the brightness's arrow: off, on, by the hours, or sunset to sunrise, and how warm
+            Menu {
+                names: ["night"]; icon: "night-light-symbolic"; title: "Night Light"
+                Item_ { text: "Off"; on: panel.night.mode === "off"; onClicked: panel.act([panel.wmd, "night", "mode", "off"]) }
+                Item_ { text: "Always on"; on: panel.night.mode === "on"; onClicked: panel.act([panel.wmd, "night", "mode", "on"]) }
+                Item_ {
+                    text: "Scheduled"; on: panel.night.mode === "time"; note: panel.night.from + " – " + panel.night.to
+                    onClicked: panel.act([panel.wmd, "night", "mode", "time"])
+                }
+                // the hours, while scheduled: Enter in either field sets both
+                RowLayout {
+                    visible: panel.night.mode === "time"
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 36; Layout.rightMargin: 10; Layout.bottomMargin: 4
+                    spacing: 8
+                    Repeater {
+                        model: ["from", "to"]
+                        RowLayout {
+                            id: span
+                            required property string modelData
+                            required property int index
+                            spacing: 6
+                            Label { text: span.modelData; color: Theme.dim }
+                            Rectangle {
+                                implicitWidth: 64; implicitHeight: 28
+                                radius: Theme.radius
+                                color: Theme.popover
+                                border.color: field.activeFocus ? Theme.fg : Theme.rule
+                                TextInput {
+                                    id: field
+                                    anchors.centerIn: parent
+                                    text: span.index === 0 ? panel.night.from : panel.night.to
+                                    inputMask: "99:99"
+                                    color: Theme.fg
+                                    font.family: Theme.font
+                                    font.pointSize: 10
+                                    onAccepted: {
+                                        const from = span.index === 0 ? text : panel.night.from
+                                        const to = span.index === 1 ? text : panel.night.to
+                                        panel.act([panel.wmd, "night", "time", from, to])
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Item_ {
+                    text: "Sunset to sunrise"; on: panel.night.mode === "sun"
+                    note: panel.night.located ? panel.night.sunset + " – " + panel.night.sunrise : "no location"
+                    onClicked: panel.act([panel.wmd, "night", "mode", "sun"])
+                }
+                Separator {}
+                // how warm: 6500 K at the left (no change) to 2500 K at the right
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 10; Layout.rightMargin: 10
+                    spacing: 10
+                    Label { text: "Warmth"; color: Theme.dim }
+                    Slider {
+                        Layout.fillWidth: true
+                        icon: "night-light-symbolic"
+                        value: (6500 - (panel.night.temp ?? 4000)) / 4000
+                        onMoved: v => panel.act([panel.wmd, "night", "temp", String(Math.round(6500 - v * 4000))])
+                    }
+                    Label { text: (panel.night.temp ?? 4000) + " K"; color: Theme.dim }
+                }
             }
 
             // the toggles, two a row, each row's menu under it
@@ -681,22 +751,16 @@ PanelWindow {
             }
 
             RowLayout {
+                visible: (panel.audio.headset ?? "") !== ""
                 Layout.fillWidth: true
                 spacing: 10
-                // the screen warmed (Hyprland's screen shader through wmd), kept across reloads
                 Toggle {
-                    icon: "night-light-symbolic"; title: "Night Light"
-                    on: panel.net.night ?? false
-                    onFlip: panel.act([panel.wmd, "night", on ? "off" : "on"])
-                }
-                Toggle {
-                    visible: (panel.audio.headset ?? "") !== ""
                     icon: "audio-headphones-symbolic"; title: "Headset"
                     sub: panel.audio.headset === "handsfree" ? "Handsfree, with the mic" : "Headphones"
                     on: panel.audio.headset === "handsfree"
                     onFlip: panel.act([panel.wmd, "headset"])
                 }
-                Item { visible: (panel.audio.headset ?? "") === ""; Layout.fillWidth: true; Layout.preferredWidth: 1 }
+                Item { Layout.fillWidth: true; Layout.preferredWidth: 1 }
             }
         }
     }
