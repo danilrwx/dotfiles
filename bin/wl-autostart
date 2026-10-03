@@ -2,12 +2,9 @@
 # The Wayland sessions' daemons, run once by config/sway/config and config/hypr/hyprland.conf (bin/x-autostart
 # is i3's): portals and systemd user units told it is a Wayland session and which (wl-autostart sway|Hyprland),
 # the shell (ostrov: the bar, notifications, the wallpaper, the lock screen, idle and sleep: locked at 10 min
-# idle and before sleep, the screen off at 15; the polkit agent, ssh's askpass), the clipboard's history
+# idle and before sleep, the screen off at 15; the polkit agent, ssh's askpass, the clipboard's history)
 desktop=${1:-$XDG_CURRENT_DESKTOP}
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK HYPRLAND_INSTANCE_SIGNATURE \
 	XDG_CURRENT_DESKTOP="$desktop" 2>/dev/null
 # the shell: the bar, its panels, the launcher, notifications, the lock screen (~/w/ostrov, install builds it)
 "$HOME/.cargo/bin/ostrov" &
-# the clipboard's history for the bar's picker ($mod+Shift+v): text and images as they are copied
-wl-paste --type text --watch cliphist store &
-wl-paste --type image --watch cliphist store &
