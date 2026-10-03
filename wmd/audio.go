@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"math"
@@ -169,17 +168,48 @@ func audioState() (Audio, error) {
 	return a, nil
 }
 
-// audioEvents kicks on every change PipeWire reports, pw-dump's monitor printing one.
+// audioEvents kicks on a change PipeWire reports to what the sound's state is made of: the sinks and sources,
+// the cards (their routes, the headset's profile), the default metadata, and their coming and going. pw-dump's
+// monitor reports every object's change, a browser's client and streams several times a second among them,
+// and a kick costs a pw-dump of the whole graph, so the rest is passed over.
 func audioEvents(kick chan<- struct{}) {
 	cmd := exec.Command("pw-dump", "--monitor", "--no-colors")
 	out, err := cmd.StdoutPipe()
 	if err != nil || cmd.Start() != nil {
 		return
 	}
-	s := bufio.NewScanner(out)
-	s.Buffer(make([]byte, 1<<20), 1<<24)
-	for s.Scan() {
-		if s.Text() == "]" {
+	dec := json.NewDecoder(out)
+	watched := map[int]bool{}
+	for {
+		var objs []struct {
+			ID    int    `json:"id"`
+			Type  string `json:"type"`
+			Props map[string]any
+			Info  *struct {
+				Props map[string]any `json:"props"`
+			} `json:"info"`
+		}
+		if dec.Decode(&objs) != nil {
+			return
+		}
+		touched := false
+		for _, o := range objs {
+			switch {
+			case o.Info == nil && o.Type == "":
+				// gone
+				touched = touched || watched[o.ID]
+				delete(watched, o.ID)
+			case o.Type == "PipeWire:Interface:Device",
+				o.Type == "PipeWire:Interface:Metadata" && str(o.Props, "metadata.name") == "default":
+				watched[o.ID] = true
+			case o.Type == "PipeWire:Interface:Node" && o.Info != nil && o.Info.Props != nil:
+				// a node says its class when its props change; streams and the rest are not watched
+				c := str(o.Info.Props, "media.class")
+				watched[o.ID] = c == "Audio/Sink" || c == "Audio/Source"
+			}
+			touched = touched || watched[o.ID]
+		}
+		if touched {
 			kick <- struct{}{}
 		}
 	}
