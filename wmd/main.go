@@ -7,7 +7,11 @@
 //	wmd watch                                 the state as a JSON line, again on every change
 //	wmd wifi on|off|scan|disconnect           the radio, a scan, leave the network
 //	wmd wifi connect SSID                     join a network; one iwd does not know reads its passphrase from stdin
+//	wmd wifi forget SSID                      drop a known network
 //	wmd bt on|off|connect ADDR|disconnect ADDR
+//	wmd bt scan                               look for devices for 20 s
+//	wmd bt pair ADDR|forget ADDR              pair (then trust and connect) a device found, or unpair one
+//	wmd headset                               the Bluetooth headset between headphones and handsfree
 //	wmd power set PROFILE                     power-saver, balanced, performance
 //	wmd brightness PERCENT                    the backlight
 //
@@ -24,8 +28,8 @@ import (
 	"github.com/godbus/dbus/v5"
 )
 
-var errUsage = errors.New("usage: wmd watch | wifi on|off|scan|disconnect|connect SSID | " +
-	"bt on|off|connect ADDR|disconnect ADDR | power set PROFILE | brightness PERCENT")
+var errUsage = errors.New("usage: wmd watch | wifi on|off|scan|disconnect|connect SSID|forget SSID | " +
+	"bt on|off|scan|connect ADDR|disconnect ADDR|pair ADDR|forget ADDR | headset | power set PROFILE | brightness PERCENT")
 
 // State is what wmd watch prints.
 type State struct {
@@ -128,6 +132,8 @@ func run(args []string) error {
 		return power(conn, args[1:])
 	case "brightness":
 		return setBrightness(conn, args[1:])
+	case "headset":
+		return headset()
 	}
 	return errUsage
 }

@@ -30,7 +30,7 @@ PanelWindow {
     // the menu unfolded: "", system, outs, ins, wifi, bt, power, vless, openvpn; folded on every opening
     property string menu: ""
     function flip(m) { menu = menu === m ? "" : m }
-    onOpenChanged: { menu = ""; asking = ""; wifiError = "" }
+    onOpenChanged: { menu = ""; asking = ""; wifiError = ""; btError = "" }
 
     // run ARGS...; wmd reports what changes
     function act(cmd) { shell.run(cmd) }
@@ -52,6 +52,17 @@ PanelWindow {
             if (code === 0) panel.asking = ""
         }
     }
+    // a Bluetooth scan, and a pairing with why it failed
+    Process { id: scanner; command: [panel.wmd, "bt", "scan"] }
+    property string btError: ""
+    Process {
+        id: pairer
+        property string address
+        command: [panel.wmd, "bt", "pair", address]
+        stderr: StdioCollector { id: pairErr }
+        onExited: code => panel.btError = code === 0 ? "" : pairErr.text.replace(/^wmd: /, "").trim()
+    }
+
     function connect(ssid, passphrase) {
         join.ssid = ssid
         join.passphrase = passphrase
@@ -291,6 +302,16 @@ PanelWindow {
         property bool on
         property string note
         property string icon
+        // what a right click does (forget a network, unpair a device), none by default; the press is then
+        // not let through to the click
+        property var onRight: null
+        acceptedButtons: onRight ? Qt.LeftButton | Qt.RightButton : Qt.LeftButton
+        onPressed: m => {
+            if (m.button === Qt.RightButton) {
+                onRight()
+                m.accepted = false
+            }
+        }
         Layout.fillWidth: true
         implicitHeight: 34
         hoverEnabled: true
@@ -430,6 +451,8 @@ PanelWindow {
                             icon: "network-wireless-signal-" + ["none", "weak", "ok", "good", "excellent"][nw.modelData.signal] + "-symbolic"
                             text: nw.modelData.ssid; on: nw.modelData.connected
                             note: nw.modelData.known || nw.modelData.security === "open" ? "" : "🔒"
+                            // a right click forgets a known network
+                            onRight: nw.modelData.known ? () => panel.act([panel.wmd, "wifi", "forget", nw.modelData.ssid]) : null
                             // a known or open network joins; a new one asks its passphrase
                             onClicked: {
                                 if (nw.modelData.known || nw.modelData.security === "open") {
@@ -505,21 +528,44 @@ PanelWindow {
                 }
                 Separator {}
                 Item_ { text: "Scan"; onClicked: panel.act([panel.wmd, "wifi", "scan"]) }
-                Item_ { text: "All Networks…"; onClicked: panel.leave([panel.bin + "wm-ctl", "wifi"]) }
             }
             Menu {
                 names: ["bt"]; icon: "bluetooth-active-symbolic"; title: "Bluetooth"
+                // the paired devices: a click connects or disconnects, a right click unpairs
                 Repeater {
-                    model: panel.net.bt.devices ?? []
+                    model: (panel.net.bt.devices ?? []).filter(d => d.paired)
                     Item_ {
                         required property var modelData
                         icon: (modelData.icon || "bluetooth") + "-symbolic"
                         text: modelData.name; on: modelData.connected
                         onClicked: panel.act([panel.wmd, "bt", modelData.connected ? "disconnect" : "connect", modelData.address])
+                        onRight: () => panel.act([panel.wmd, "bt", "forget", modelData.address])
                     }
                 }
                 Separator {}
-                Item_ { text: "Bluetooth Settings…"; onClicked: panel.leave([panel.bin + "wm-ctl", "bluetooth"]) }
+                // a scan for 20 s (lit while it runs), then the devices it found: a click pairs, trusts and
+                // connects one
+                Item_ {
+                    icon: "system-search-symbolic"
+                    text: panel.net.bt.discovering ? "Scanning…" : "Scan for Devices"
+                    on: panel.net.bt.discovering ?? false
+                    onClicked: if (!scanner.running) scanner.running = true
+                }
+                Repeater {
+                    model: (panel.net.bt.devices ?? []).filter(d => !d.paired)
+                    Item_ {
+                        required property var modelData
+                        icon: (modelData.icon || "bluetooth") + "-symbolic"
+                        text: modelData.name
+                        note: pairer.running && pairer.address === modelData.address ? "pairing…" : "pair"
+                        onClicked: if (!pairer.running) { pairer.address = modelData.address; panel.btError = ""; pairer.running = true }
+                    }
+                }
+                Label {
+                    visible: panel.btError !== ""
+                    text: panel.btError; color: Theme.urgent; font.pointSize: 9
+                    wrapMode: Text.Wrap; Layout.fillWidth: true; Layout.leftMargin: 10
+                }
             }
 
             RowLayout {
@@ -594,7 +640,7 @@ PanelWindow {
                     icon: "audio-headphones-symbolic"; title: "Headset"
                     sub: panel.audio.headset === "handsfree" ? "Handsfree, with the mic" : "Headphones"
                     on: panel.audio.headset === "handsfree"
-                    onFlip: panel.act([panel.bin + "wm-ctl", "headset"])
+                    onFlip: panel.act([panel.wmd, "headset"])
                 }
                 Item { visible: (panel.audio.headset ?? "") === ""; Layout.fillWidth: true; Layout.preferredWidth: 1 }
             }

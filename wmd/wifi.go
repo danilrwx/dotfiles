@@ -32,6 +32,14 @@ type Wifi struct {
 
 type objects map[dbus.ObjectPath]map[string]map[string]dbus.Variant
 
+// prop stores the property k of an interface's properties into dst, reporting whether it was there and of the
+// type; a missing one (a device a scan found has no Icon yet) is left alone rather than handed to godbus,
+// which panics on an empty Variant.
+func prop[T any](props map[string]dbus.Variant, k string, dst *T) bool {
+	v, ok := props[k]
+	return ok && v.Store(dst) == nil
+}
+
 func managed(conn *dbus.Conn, service string) (objects, error) {
 	var objs objects
 	err := conn.Object(service, "/").Call("org.freedesktop.DBus.ObjectManager.GetManagedObjects", 0).Store(&objs)
@@ -88,9 +96,9 @@ func wifiState(conn *dbus.Conn) (Wifi, error) {
 	for _, o := range ordered {
 		props := objs[o.Path][iwd+".Network"]
 		n := Network{Signal: bars(o.Signal)}
-		_ = props["Name"].Store(&n.SSID)
-		_ = props["Type"].Store(&n.Security)
-		_ = props["Connected"].Store(&n.Connected)
+		prop(props, "Name", &n.SSID)
+		prop(props, "Type", &n.Security)
+		prop(props, "Connected", &n.Connected)
 		_, n.Known = props["KnownNetwork"]
 		if n.Connected {
 			w.SSID, w.Signal = n.SSID, n.Signal
@@ -109,7 +117,7 @@ func network(conn *dbus.Conn, ssid string) (dbus.ObjectPath, error) {
 	for p, ifaces := range objs {
 		if n, ok := ifaces[iwd+".Network"]; ok {
 			var name string
-			if n["Name"].Store(&name) == nil && name == ssid {
+			if prop(n, "Name", &name) && name == ssid {
 				return p, nil
 			}
 		}
@@ -156,6 +164,23 @@ func wifi(conn *dbus.Conn, args []string) error {
 		}
 		method := map[string]string{"scan": "Scan", "disconnect": "Disconnect"}[args[0]]
 		return conn.Object(iwd, st).Call(iwd+".Station."+method, 0).Err
+	case "forget":
+		if len(args) != 2 {
+			return errUsage
+		}
+		path, err := network(conn, args[1])
+		if err != nil {
+			return err
+		}
+		known, err := conn.Object(iwd, path).GetProperty(iwd + ".Network.KnownNetwork")
+		if err != nil {
+			return fmt.Errorf("%q is not a known network", args[1])
+		}
+		var kpath dbus.ObjectPath
+		if err := known.Store(&kpath); err != nil {
+			return err
+		}
+		return conn.Object(iwd, kpath).Call(iwd+".KnownNetwork.Forget", 0).Err
 	case "connect":
 		if len(args) != 2 {
 			return errUsage

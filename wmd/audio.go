@@ -3,9 +3,11 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"os/exec"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -43,6 +45,11 @@ type pwObject struct {
 			Profile []struct {
 				Name string `json:"name"`
 			} `json:"Profile"`
+			EnumProfile []struct {
+				Index    int    `json:"index"`
+				Name     string `json:"name"`
+				Priority int    `json:"priority"`
+			} `json:"EnumProfile"`
 		} `json:"params"`
 	} `json:"info"`
 }
@@ -61,14 +68,19 @@ func num(m map[string]any, k string) int {
 // Bluetooth nodes as sinks, the headset's real one sitting under its filters), left out unless the default
 // when every port of theirs the card reports unplugged ("available": "no": an HDMI output with no display;
 // a port ALSA cannot sense, the speaker or a mic, says "unknown").
-func audioState() (Audio, error) {
-	a := Audio{Sinks: []Sound{}, Sources: []Sound{}}
+func pwDump() ([]pwObject, error) {
 	out, err := exec.Command("pw-dump").Output()
 	if err != nil {
-		return a, err
+		return nil, err
 	}
 	var objs []pwObject
-	if err := json.Unmarshal(out, &objs); err != nil {
+	return objs, json.Unmarshal(out, &objs)
+}
+
+func audioState() (Audio, error) {
+	a := Audio{Sinks: []Sound{}, Sources: []Sound{}}
+	objs, err := pwDump()
+	if err != nil {
 		return a, err
 	}
 	defaults := map[string]string{}
@@ -148,4 +160,33 @@ func audioEvents(kick chan<- struct{}) {
 			kick <- struct{}{}
 		}
 	}
+}
+
+// headset flips the Bluetooth headset between headphones (its best A2DP profile: the good sound, no mic) and
+// handsfree (its best headset-head-unit: with the mic), through wpctl.
+func headset() error {
+	objs, err := pwDump()
+	if err != nil {
+		return err
+	}
+	for _, o := range objs {
+		if o.Type != "PipeWire:Interface:Device" || str(o.Info.Props, "device.api") != "bluez5" {
+			continue
+		}
+		want := "headset-head-unit"
+		if p := o.Info.Params.Profile; len(p) > 0 && strings.HasPrefix(p[0].Name, want) {
+			want = "a2dp-sink"
+		}
+		best, prio := -1, -1
+		for _, e := range o.Info.Params.EnumProfile {
+			if strings.HasPrefix(e.Name, want) && e.Priority > prio {
+				best, prio = e.Index, e.Priority
+			}
+		}
+		if best < 0 {
+			return errors.New("the headset has no " + want + " profile")
+		}
+		return exec.Command("wpctl", "set-profile", strconv.Itoa(o.ID), strconv.Itoa(best)).Run()
+	}
+	return errors.New("no Bluetooth headset")
 }

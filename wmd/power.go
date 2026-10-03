@@ -29,7 +29,7 @@ func powerState(conn *dbus.Conn) (Power, error) {
 	_ = v.Store(&profiles)
 	for _, pr := range profiles {
 		var name string
-		if pr["Profile"].Store(&name) == nil {
+		if prop(pr, "Profile", &name) {
 			p.Profiles = append(p.Profiles, name)
 		}
 	}

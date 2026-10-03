@@ -28,10 +28,14 @@ ShellRoot {
     readonly property string wmd: Quickshell.env("HOME") + "/go/bin/wmd"
     property var net: ({ wifi: {}, bt: {} })
     Process {
+        id: watcher
         command: [root.wmd, "watch"]
         running: true
         stdout: SplitParser { onRead: line => { try { root.net = JSON.parse(line) } catch (e) {} } }
+        // back in a second should it ever exit
+        onExited: rewatch.start()
     }
+    Timer { id: rewatch; interval: 1000; onTriggered: watcher.running = true }
     // after a switch: wmd brings the change itself, so nothing is to be fetched again
     function refresh() {}
 
