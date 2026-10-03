@@ -2,7 +2,8 @@
 // than their command-line tools: Wi-Fi through iwd and Bluetooth through BlueZ (D-Bus), the radios through
 // /dev/rfkill, the power profile through power-profiles-daemon, the backlight through logind, the keyboard
 // layout through Hyprland's sockets, the sound devices through pw-dump, VLESS through mihomo's API, OpenVPN
-// through systemd, bin/theme's pick from its state files.
+// through systemd, bin/theme's pick from its state files, the load from /proc and hwmon, the weather from
+// open-meteo.
 //
 //	wmd watch                                 the state as a JSON line, again on every change
 //	wmd wifi on|off|scan|disconnect           the radio, a scan, leave the network
@@ -16,8 +17,9 @@
 //	wmd brightness PERCENT                    the backlight
 //	wmd night mode off|on|time|sun            night light (Hyprland's screen shader): off, on, by the hours, or
 //	                                          from sunset to sunrise
-//	wmd night time FROM TO | temp K | location LAT LON | preview K
+//	wmd night time FROM TO | temp K | preview K
 //	wmd night apply                           the screen as the night light config wants now
+//	wmd location CITY | LAT LON               where the machine is, for the weather and sunset and sunrise
 //
 // Installed by `go install github.com/danilrwx/dotfiles/wmd@latest`.
 package main
@@ -34,7 +36,7 @@ import (
 
 var errUsage = errors.New("usage: wmd watch | wifi on|off|scan|disconnect|connect SSID|forget SSID | " +
 	"bt on|off|scan|connect ADDR|disconnect ADDR|pair ADDR|forget ADDR | headset | power set PROFILE | " +
-	"brightness PERCENT | night mode off|on|time|sun|time FROM TO|temp K|location LAT LON|preview K|apply")
+	"brightness PERCENT | night mode off|on|time|sun|time FROM TO|temp K|preview K|apply | location CITY|LAT LON")
 
 // State is what wmd watch prints.
 type State struct {
@@ -48,6 +50,8 @@ type State struct {
 	OpenVPN    OpenVPN   `json:"openvpn"`
 	Theme      Theme     `json:"theme"`
 	Night      Night     `json:"night"`
+	System     System    `json:"system"`
+	Weather    *Weather  `json:"weather"`
 }
 
 func state(conn *dbus.Conn) State {
@@ -66,6 +70,7 @@ func state(conn *dbus.Conn) State {
 		fmt.Fprintln(os.Stderr, "wmd: audio:", err)
 	}
 	s.Brightness, s.Keymap, s.Night = brightness(), keymap(), nightState()
+	s.System, s.Weather = systemState(), weatherState()
 	s.Vless, s.OpenVPN, s.Theme = vlessState(), openvpnState(conn), themeState()
 	return s
 }
@@ -84,6 +89,7 @@ func watch(conn *dbus.Conn) error {
 	conn.Signal(signals)
 	kick := make(chan struct{}, 64)
 	go hyprEvents(kick)
+	go weatherLoop(kick)
 	go audioEvents(kick)
 
 	enc := json.NewEncoder(os.Stdout)
@@ -147,6 +153,8 @@ func run(args []string) error {
 		return headset()
 	case "night":
 		return night(args[1:])
+	case "location":
+		return location(args[1:])
 	}
 	return errUsage
 }

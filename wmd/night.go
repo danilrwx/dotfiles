@@ -12,14 +12,13 @@ import (
 )
 
 // NightConfig is night light as the quick settings set it, kept in ~/.cache/night-light.json: the mode (off,
-// on, time: From to To, sun: sunset to sunrise at Lat, Lon), and the warmth in kelvin, 6500 neutral.
+// on, time: From to To, sun: sunset to sunrise where wmd location puts the machine), and the warmth in
+// kelvin, 6500 neutral.
 type NightConfig struct {
-	Mode string  `json:"mode"`
-	From string  `json:"from"`
-	To   string  `json:"to"`
-	Temp int     `json:"temp"`
-	Lat  float64 `json:"lat"`
-	Lon  float64 `json:"lon"`
+	Mode string `json:"mode"`
+	From string `json:"from"`
+	To   string `json:"to"`
+	Temp int    `json:"temp"`
 }
 
 // Night is what wmd watch reports: whether the screen is warmed now, the config, and today's sunset and
@@ -105,10 +104,11 @@ func (c NightConfig) wanted(now time.Time) bool {
 		to, err2 := clock(c.To)
 		return err1 == nil && err2 == nil && within(minute, from, to)
 	case "sun":
-		if c.Lat == 0 && c.Lon == 0 {
+		l, located := loadLocation()
+		if !located {
 			return false
 		}
-		rise, set, ok := sun(now, c.Lat, c.Lon)
+		rise, set, ok := sun(now, l.Lat, l.Lon)
 		return ok && (now.After(set) || now.Before(rise))
 	}
 	return false
@@ -191,17 +191,18 @@ func applyNight(c NightConfig) error {
 
 func nightState() Night {
 	c := loadNight()
-	n := Night{Mode: c.Mode, From: c.From, To: c.To, Temp: c.Temp, Located: c.Lat != 0 || c.Lon != 0}
+	l, located := loadLocation()
+	n := Night{Mode: c.Mode, From: c.From, To: c.To, Temp: c.Temp, Located: located}
 	n.On = strings.HasPrefix(currentShader(), shaderDir())
-	if n.Located {
-		if rise, set, ok := sun(time.Now(), c.Lat, c.Lon); ok {
+	if located {
+		if rise, set, ok := sun(time.Now(), l.Lat, l.Lon); ok {
 			n.Sunrise, n.Sunset = rise.Format("15:04"), set.Format("15:04")
 		}
 	}
 	return n
 }
 
-// night: mode off|on|time|sun, time FROM TO, temp K, location LAT LON, each saved and applied; apply alone
+// night: mode off|on|time|sun, time FROM TO, temp K, each saved and applied; apply alone
 // sets the screen as the config wants now (Hyprland's exec on every start and reload, and wmd watch's tick);
 // preview K shows a warmth at once, saving nothing, until the next apply.
 func night(args []string) error {
@@ -244,13 +245,6 @@ func night(args []string) error {
 			return errUsage
 		}
 		c.Temp = max(2500, min(6500, c.Temp))
-	case args[0] == "location" && len(args) == 3:
-		if c.Lat, err = strconv.ParseFloat(args[1], 64); err != nil {
-			return errUsage
-		}
-		if c.Lon, err = strconv.ParseFloat(args[2], 64); err != nil {
-			return errUsage
-		}
 	default:
 		return errUsage
 	}

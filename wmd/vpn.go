@@ -22,10 +22,16 @@ type Vless struct {
 	Profiles []string `json:"profiles"`
 }
 
-var api = http.Client{Timeout: 500 * time.Millisecond}
+// api is for mihomo's local API, answering at once or not running; web for the internet (the weather)
+var (
+	api = &http.Client{Timeout: 500 * time.Millisecond}
+	web = &http.Client{Timeout: 10 * time.Second}
+)
 
-func getJSON(url string, v any) error {
-	resp, err := api.Get(url)
+func getJSON(url string, v any) error { return getJSONWith(api, url, v) }
+
+func getJSONWith(c *http.Client, url string, v any) error {
+	resp, err := c.Get(url)
 	if err != nil {
 		return err
 	}

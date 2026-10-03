@@ -3,6 +3,7 @@
 // with today inverted, arrows through the months. Fades in in 100 ms; closed by a click outside it or
 // on the clock again.
 import Quickshell
+import Quickshell.Services.Mpris
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import QtQuick
@@ -24,6 +25,8 @@ PanelWindow {
     exclusiveZone: 0
     // the notifications' history (Notifications.qml), at the left as in GNOME's date menu
     property var notes
+    // the bar's ShellRoot, for wmd's weather
+    property var shell
     implicitWidth: 680
     implicitHeight: card.height
     color: "transparent"
@@ -71,6 +74,73 @@ PanelWindow {
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 6
+            // the player playing (or the first one): its art, track and artist, previous, play and next, where
+            // it is in the track; MPRIS, any app that speaks it (Chrome, Telegram, Spotify)
+            Rectangle {
+                id: media
+                readonly property var p: Mpris.players.values.find(x => x.isPlaying) ?? Mpris.players.values[0] ?? null
+                visible: p !== null
+                Layout.fillWidth: true
+                implicitHeight: mediaRow.implicitHeight + 20
+                radius: Theme.radius
+                color: Theme.card
+                border.color: Theme.rule
+                // MPRIS tells the position only when asked
+                Timer { running: media.p?.isPlaying ?? false; interval: 1000; repeat: true; onTriggered: media.p.positionChanged() }
+                RowLayout {
+                    id: mediaRow
+                    anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                    spacing: 10
+                    Rectangle {
+                        implicitWidth: 56; implicitHeight: 56; radius: Theme.radius; color: Theme.pill; clip: true
+                        Image {
+                            anchors.fill: parent
+                            source: media.p?.trackArtUrl ?? ""
+                            fillMode: Image.PreserveAspectCrop
+                            visible: status === Image.Ready
+                        }
+                        Icon { anchors.centerIn: parent; visible: !(media.p?.trackArtUrl); name: "audio-x-generic-symbolic"; implicitSize: 22 }
+                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Label { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: media.p?.trackTitle || media.p?.identity || ""; font.bold: true; elide: Text.ElideRight }
+                        Label { Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; text: media.p?.trackArtist ?? ""; color: Theme.dim; elide: Text.ElideRight; visible: text !== "" }
+                        RowLayout {
+                            spacing: 4
+                            Repeater {
+                                model: [
+                                    { icon: "media-skip-backward-symbolic", act: () => media.p.previous(), on: media.p?.canGoPrevious },
+                                    { icon: media.p?.isPlaying ? "media-playback-pause-symbolic" : "media-playback-start-symbolic", act: () => media.p.togglePlaying(), on: media.p?.canTogglePlaying },
+                                    { icon: "media-skip-forward-symbolic", act: () => media.p.next(), on: media.p?.canGoNext }
+                                ]
+                                MouseArea {
+                                    id: mb
+                                    required property var modelData
+                                    implicitWidth: 28; implicitHeight: 28
+                                    enabled: modelData.on ?? false
+                                    opacity: enabled ? 1 : 0.4
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: mb.modelData.act()
+                                    Rectangle { anchors.fill: parent; radius: Theme.radius; color: mb.containsMouse ? Theme.hover : "transparent" }
+                                    Icon { anchors.centerIn: parent; name: mb.modelData.icon }
+                                }
+                            }
+                        }
+                        Rectangle {
+                            visible: (media.p?.lengthSupported ?? false) && (media.p?.length ?? 0) > 0
+                            Layout.fillWidth: true
+                            implicitHeight: 3; radius: 1.5
+                            color: Theme.rule
+                            Rectangle {
+                                height: parent.height; radius: 1.5; color: Theme.accent
+                                width: parent.width * Math.min(1, (media.p?.position ?? 0) / Math.max(1, media.p?.length ?? 1))
+                            }
+                        }
+                    }
+                }
+            }
             Label {
                 Layout.fillWidth: true; horizontalAlignment: Text.AlignLeft; leftPadding: 6
                 text: "Notifications"; font.bold: true
@@ -252,6 +322,50 @@ PanelWindow {
                                 text: parent.day
                                 font.bold: parent.today
                                 color: parent.today ? Theme.inverse : parent.month === popup.shown.getMonth() ? Theme.fg : "#444444"
+                            }
+                        }
+                    }
+                }
+            }
+            // the weather where wmd location has put the machine: now, the day's high and low, the next hours
+            Rectangle {
+                id: weatherCard
+                readonly property var w: popup.shell?.net?.weather ?? null
+                visible: w !== null
+                Layout.fillWidth: true
+                Layout.topMargin: 6
+                implicitHeight: wcol.implicitHeight + 20
+                radius: Theme.radius
+                color: Theme.card
+                border.color: Theme.rule
+                ColumnLayout {
+                    id: wcol
+                    anchors { left: parent.left; right: parent.right; top: parent.top; margins: 10 }
+                    spacing: 8
+                    RowLayout {
+                        spacing: 10
+                        Icon { name: weatherCard.w?.icon ?? ""; implicitSize: 28 }
+                        ColumnLayout {
+                            spacing: 0
+                            Label { horizontalAlignment: Text.AlignLeft; text: (weatherCard.w?.temp ?? "") + "°  " + (weatherCard.w?.text ?? ""); font.bold: true }
+                            Label {
+                                horizontalAlignment: Text.AlignLeft; color: Theme.dim; font.pointSize: 8.5
+                                text: (weatherCard.w?.place ?? "") + "   ↑" + (weatherCard.w?.high ?? "") + "° ↓" + (weatherCard.w?.low ?? "") + "°"
+                            }
+                        }
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Repeater {
+                            model: weatherCard.w?.hours ?? []
+                            ColumnLayout {
+                                id: hour
+                                required property var modelData
+                                Layout.fillWidth: true
+                                spacing: 2
+                                Label { Layout.fillWidth: true; text: hour.modelData.time; color: Theme.dim; font.pointSize: 8.5 }
+                                Icon { Layout.alignment: Qt.AlignHCenter; name: hour.modelData.icon }
+                                Label { Layout.fillWidth: true; text: hour.modelData.temp + "°" }
                             }
                         }
                     }

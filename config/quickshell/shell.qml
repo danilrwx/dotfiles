@@ -113,7 +113,7 @@ ShellRoot {
 
     // the panels, one at a time (QuickSettings.qml, CalendarPopup.qml)
     QuickSettings { id: qs; shell: root }
-    CalendarPopup { id: cal; notes: notes }
+    CalendarPopup { id: cal; notes: notes; shell: root }
     function panel(which) {
         (which === qs ? cal : qs).open = false
         which.toggle()
@@ -374,6 +374,9 @@ ShellRoot {
                 anchors.centerIn: parent
                 lit: cal.open
                 onClicked: root.panel(cal)
+                // the weather first, where wmd location has put the machine
+                Icon { visible: root.net.weather ? true : false; name: root.net.weather?.icon ?? "" }
+                BarText { visible: root.net.weather ? true : false; text: (root.net.weather?.temp ?? "") + "°"; color: Theme.fg }
                 BarText { text: Qt.formatDateTime(clock.date, "ddd MMM d  hh:mm"); color: Theme.fg }
             }
 
