@@ -90,7 +90,11 @@
 (defwidget ctl []
   (eventbox :onhoverlost "~/dotfiles/bin/wm-panel ctl close"
     (box :class "panel" :orientation "v" :space-evenly false
-      (label :class "title" :halign "start" :text "Output")
+      ; the Bluetooth headset's mode, there while one is connected: a click flips it
+      (box :class "title" :space-evenly false
+        (label :halign "start" :hexpand true :text "Output")
+        (button :class "choice" :visible {(audio.headset ?: "") != ""}
+                :onclick "~/dotfiles/bin/wm-ctl headset &" "🎧 ${audio.headset ?: ''}"))
       (level :icon {status.volmute ? "🔇" : "🔊"} :value {status.vol ?: 0}
              :onclick "~/dotfiles/bin/wm-fnkeys vol-mute" :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%")
       (devices :list {audio.sinks ?: []})
@@ -105,7 +109,6 @@
         (for p in '["power-saver", "balanced", "performance"]'
           (button :class "choice ${profile == p ? 'def' : ''}" :onclick "powerprofilesctl set ${p}" p)))
       (box :class "choices"
-        (button :class "choice" :onclick "~/dotfiles/bin/wm-ctl headset &" "headset mode")
         (button :class "choice" :onclick "~/dotfiles/bin/wm-ctl wifi &" "wi-fi")
         (button :class "choice" :onclick "~/dotfiles/bin/wm-ctl bluetooth &" "bluetooth")))))
 
