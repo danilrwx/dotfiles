@@ -99,6 +99,17 @@ ShellRoot {
         const t = Math.min(1, Math.max(0, (0.30 - battery.percentage) / 0.20))
         return Qt.rgba(1, 1 - t * 0.89, 1 - t * 0.86, 1)
     }
+    // the battery's time as UPower reckons it: "2 h 05 min left", "full in 40 min", "" while it cannot tell
+    function duration(s) {
+        const h = Math.floor(s / 3600), m = Math.round(s % 3600 / 60)
+        return h > 0 ? h + " h " + String(m).padStart(2, "0") + " min" : m + " min"
+    }
+    readonly property string batteryTime: {
+        if (battery.state === UPowerDeviceState.Charging)
+            return battery.timeToFull > 0 ? "full in " + duration(battery.timeToFull) : "charging"
+        if (battery.state === UPowerDeviceState.FullyCharged) return "full"
+        return battery.timeToEmpty > 0 ? duration(battery.timeToEmpty) + " left" : ""
+    }
     readonly property bool vpn: (net.vless?.how ?? "off") !== "off" || (net.openvpn?.profile ?? "") !== ""
 
     // the panels, one at a time (QuickSettings.qml, CalendarPopup.qml)
@@ -373,7 +384,39 @@ ShellRoot {
                     Icon { visible: (root.net.bt.connected ?? "") !== ""; name: "bluetooth-active-symbolic" }
                     Icon { name: root.volumeIcon(root.sink) }
                     Icon { visible: root.source?.muted ?? false; name: "microphone-disabled-symbolic" }
-                    Icon { visible: root.battery.isLaptopBattery; name: root.batteryIcon(); tint: root.batteryTint }
+                    Icon {
+                        id: batIcon
+                        visible: root.battery.isLaptopBattery
+                        name: root.batteryIcon()
+                        tint: root.batteryTint
+                        HoverHandler { id: batHover }
+                        // under the pointer: the percentage and the time left, in a tip under the icon
+                        PopupWindow {
+                            visible: batHover.hovered
+                            anchor.item: batIcon
+                            anchor.edges: Edges.Bottom
+                            anchor.gravity: Edges.Bottom
+                            anchor.margins.top: 8
+                            implicitWidth: tip.implicitWidth + 20
+                            implicitHeight: tip.implicitHeight + 12
+                            color: "transparent"
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: Theme.radius
+                                color: Theme.popover
+                                border.color: Theme.fg
+                                Text {
+                                    id: tip
+                                    anchors.centerIn: parent
+                                    text: Math.round(root.battery.percentage * 100) + "%"
+                                        + (root.batteryTime ? ", " + root.batteryTime : "")
+                                    color: Theme.fg
+                                    font.family: Theme.font
+                                    font.pointSize: 10
+                                }
+                            }
+                        }
+                    }
                 }
 
             }

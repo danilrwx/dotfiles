@@ -363,6 +363,7 @@ PanelWindow {
                         spacing: 8
                         Icon { name: panel.shell.batteryIcon(); tint: panel.shell.batteryTint }
                         Label { text: Math.round(panel.shell.battery.percentage * 100) + "%"; font.bold: true }
+                        Label { visible: panel.shell.batteryTime !== ""; text: panel.shell.batteryTime; color: Theme.dim }
                     }
                 }
                 Item { Layout.fillWidth: true }
