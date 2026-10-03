@@ -225,6 +225,8 @@ desktop_session() {
   # wmd (wmd/), the bar's Wi-Fi and Bluetooth straight from D-Bus, into ~/go/bin
   command -v go > /dev/null && (cd "$HOME/dotfiles/wmd" && go install .) || log "Failed to install wmd. Continue installation."
   link config/dunst "$HOME/.config/dunst"
+  # ...but not started by D-Bus: under Hyprland ostrov serves notifications (config/dbus-1)
+  link config/dbus-1/services/org.knopwob.dunst.service "$HOME/.local/share/dbus-1/services/org.knopwob.dunst.service"
   link .Xresources "$HOME/.Xresources"
   # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE, GDK_SCALE), and .profile the session
   for e in config/environment.d/*.conf; do link "$e" "$HOME/.config/environment.d/${e##*/}"; done
