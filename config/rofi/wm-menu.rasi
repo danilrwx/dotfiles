@@ -1,16 +1,18 @@
-/* bin/wm-menu's rofi: a dmenu-like line over the i3 bar; bin/wm-menu sets bg (the colour the bar
- * shows, ~/.cache/theme/barbg) and the height (the bar's) */
+/* bin/wm-menu's rofi: a dmenu-like line in the bar (config/eww), in its empty span and see-through, so the
+ * bar's own ground shows under it and its workspaces and status stay in sight; bin/wm-menu sets the height
+ * (the bar's). ponytail: from 240px, past a handful of workspaces, half the screen wide, clear of the status
+ * with VLESS on; measure the bar's free span in bin/wm-menu should either outgrow it */
 * {
-    bg:               #000000ff;
     background-color: transparent;
     text-color:       #ffffff;
     font:             "Iosevka 11";
 }
 window {
-    anchor:           north;
-    location:         north;
-    width:            100%;
-    background-color: @bg;
+    anchor:           north west;
+    location:         north west;
+    x-offset:         240px;
+    width:            50%;
+    background-color: transparent;
     children:         [ horibox ];
 }
 horibox {
@@ -39,7 +41,7 @@ element {
 }
 element selected {
     background-color: #ffffff;
-    text-color:       @bg;
+    text-color:       #000000;
 }
 element-text {
     background-color: inherit;

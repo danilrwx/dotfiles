@@ -1,17 +1,14 @@
 #!/bin/sh
-# rofi for i3, a dmenu-like line over the bar (config/rofi/wm-menu.rasi), matching case-insensitively:
+# rofi for i3, a dmenu-like line in the bar's middle, see-through (config/rofi/wm-menu.rasi), matching case-insensitively:
 #   wm-menu             launch an app: rofi's own list of the .desktop entries (drun), with its history of
 #                       what was launched first
 #   wm-menu pick PROMPT choose a line of stdin, print it
 export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
-# the background: the colour the see-through bar shows over the wallpaper (bin/theme), black without one;
-# solid, as the bar's own see-through over a see-through menu muddies both
-bg=$(cat "${XDG_CACHE_HOME:-$HOME/.cache}/theme/barbg" 2>/dev/null || echo '#000000')
 # as tall as the bar (config/eww); the DPI rofi does not take from Xft.dpi itself
 h=$(xwininfo -root -tree | awk '/"Eww - bar"/ { split($(NF-1), g, /[x+]/); print g[2]; exit }')
 rofi() {
 	command rofi -i -dpi "$(xrdb -get Xft.dpi 2>/dev/null || echo 96)" -theme "$HOME/dotfiles/config/rofi/wm-menu.rasi" \
-		-theme-str "* { bg: $bg; } window { height: ${h:-50}px; }" "$@"
+		-theme-str "window { height: ${h:-50}px; }" "$@"
 }
 if [ "${1:-}" = pick ]; then
 	rofi -dmenu -p "$2"
