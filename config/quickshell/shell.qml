@@ -85,6 +85,9 @@ ShellRoot {
         target: Hyprland
         function onRawEvent(event) {
             if (event.name === "activelayout") root.ru = /Russian/.test(event.data)
+            // a Super combination done (a workspace, a window): Hyprland skips the release bind after
+            // another key, so the peek ends here instead
+            else if (root.peeking && root.comboEvents.indexOf(event.name) >= 0) root.peeking = false
         }
     }
     readonly property bool vpn: (q.vless ?? "off") !== "off" || (status.openvpn ?? "") !== ""
@@ -106,11 +109,14 @@ ShellRoot {
     // quickshell ipc call bar toggle ($mod+b), peek and unpeek (Super down and up, config/hypr)
     property bool docked: true
     property bool peeking: false
+    readonly property var comboEvents: ["workspacev2", "focusedmonv2", "activewindowv2", "openwindow", "closewindow",
+        "movewindowv2", "changefloatingmode", "fullscreen"]
     IpcHandler {
         target: "bar"
         function toggle(): void { root.docked = !root.docked }
         function peek(): void { root.peeking = true }
         function unpeek(): void { root.peeking = false }
+        function state(): string { return (root.docked ? "docked" : "hidden") + (root.peeking ? " peeking" : "") }
     }
 
     // a pill of the bar: rounded, lit under the pointer, what it holds in a row; clicks and the wheel given
