@@ -7,7 +7,7 @@
 export LC_NUMERIC=C
 
 # osd ICON TITLE [TEXT], bar ICON LEVEL: the card or the level, with an Adwaita symbolic icon (the OSD of the
-# Quickshell bar and dunst both show it)
+# ostrov and dunst both show it)
 osd() { notify-send -a fnkeys -r 9912 -t 1500 -i "$1" "$2" "${3:-}"; }
 bar() { notify-send -a fnkeys -r 9913 -t 1000 -i "$1" -h "int:value:$2" "$2%"; }
 # "Volume: 0.45 [MUTED]" -> 45, or 0 while muted

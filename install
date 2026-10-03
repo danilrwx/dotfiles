@@ -55,14 +55,8 @@ X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit x11-xserver-utils 
 # take swayidle and swaylock), screenshots (grim, slurp), the clipboard, the screen-sharing portal, X apps
 # under Xwayland
 WAYLAND_PKGS=(sway hyprland swaybg swayidle swaylock grim slurp wl-clipboard xdg-desktop-portal-wlr xwayland)
-# Quickshell's build, the bar under Hyprland: Qt 6 with its private headers, the services it talks to
-# (PipeWire, PAM, polkit), and the QML modules the bar runs on
-QUICKSHELL_PKGS=(cmake ninja-build pkg-config qt6-base-dev qt6-base-private-dev qt6-declarative-dev
-  qt6-declarative-private-dev qt6-shadertools-dev spirv-tools libcli11-dev libdrm-dev libjemalloc-dev libgbm-dev
-  libvulkan-dev libwayland-dev wayland-protocols libpipewire-0.3-dev libpam0g-dev libpolkit-agent-1-dev
-  libglib2.0-dev qt6-svg-dev qt6-wayland qt6-wayland-dev qt6-wayland-private-dev qml6-module-qtquick
-  qml6-module-qtquick-layouts qml6-module-qtquick-controls qml6-module-qtqml-workerscript
-  qml6-module-qtquick-window qml6-module-qt5compat-graphicaleffects qml6-module-qtquick-effects)
+# ostrov's build, the shell under Hyprland (~/w/ostrov): GTK 4, its layer shell and session lock, PAM
+OSTROV_PKGS=(pkg-config libgtk-4-dev libgtk4-layer-shell-dev libpam0g-dev)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
 
 # Helpers ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -161,7 +155,7 @@ desktop_system() {
   log "Installing the desktop base"
   pkg "${DESKTOP_PKGS[@]}"
   sudo apt install -y --no-install-recommends "${X11_PKGS[@]}" "${WAYLAND_PKGS[@]}"
-  pkg "${QUICKSHELL_PKGS[@]}"
+  pkg "${OSTROV_PKGS[@]}"
 
   # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
   # netplan, DNS by systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
@@ -223,22 +217,11 @@ desktop_session() {
   link config/i3 "$HOME/.config/i3"
   link config/sway "$HOME/.config/sway"
   link config/hypr "$HOME/.config/hypr"
-  # the bar under Hyprland, Quickshell (config/quickshell; bin/wl-autostart starts it), built into /usr/local:
-  # not in the archive. Rebuilt when the version changes
-  link config/quickshell "$HOME/.config/quickshell"
+  # the shell under Hyprland, ostrov (~/w/ostrov; bin/wl-autostart starts it), into ~/.cargo/bin
+  [ -d "$HOME/w/ostrov" ] && command -v cargo > /dev/null \
+    && cargo install -q --path "$HOME/w/ostrov" || log "Failed to install ostrov. Continue installation."
   # wmd (wmd/), the bar's Wi-Fi and Bluetooth straight from D-Bus, into ~/go/bin
   command -v go > /dev/null && (cd "$HOME/dotfiles/wmd" && go install .) || log "Failed to install wmd. Continue installation."
-  local qs_ver=0.3.1 tmp
-  if ! quickshell --version 2> /dev/null | grep -q "^Quickshell $qs_ver "; then
-    log "Building Quickshell $qs_ver"
-    tmp=$(mktemp -d)
-    git clone -q --depth 1 --branch "v$qs_ver" https://github.com/quickshell-mirror/quickshell "$tmp" \
-      && cmake -S "$tmp" -B "$tmp/build" -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCRASH_HANDLER=OFF \
-        -DDISTRIBUTOR=dotfiles -DINSTALL_QML_PREFIX=lib/x86_64-linux-gnu/qt6/qml > /dev/null \
-      && cmake --build "$tmp/build" && sudo cmake --install "$tmp/build" > /dev/null \
-      || log "Failed to build Quickshell. Continue installation."
-    rm -rf "$tmp"
-  fi
   link config/dunst "$HOME/.config/dunst"
   link .Xresources "$HOME/.Xresources"
   # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE, GDK_SCALE), and .profile the session

@@ -1,4 +1,4 @@
-// wmd: the desktop's state and switches for the bar (config/quickshell), from the services themselves rather
+// wmd: the desktop's state and switches for the bar (ostrov), from the services themselves rather
 // than their command-line tools: Wi-Fi through iwd and Bluetooth through BlueZ (D-Bus), the radios through
 // /dev/rfkill, the power profile through power-profiles-daemon, the backlight through logind, the keyboard
 // layout through Hyprland's sockets, the sound devices through pw-dump, VLESS through mihomo's API, OpenVPN

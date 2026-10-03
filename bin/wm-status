@@ -1,5 +1,5 @@
 #!/bin/bash
-# The bar's status (config/eww under i3, config/quickshell under Hyprland): memory, volume, mic, battery,
+# The bar's status (config/eww under i3, ostrov under Hyprland): memory, volume, mic, battery,
 # brightness, keyboard layout, date, and VLESS and OpenVPN while on. A JSON object a line, once a second;
 # the bar draws the icons.
 

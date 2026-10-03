@@ -73,8 +73,8 @@ wall() {
 apply() {
 	local mode=$1 a
 	if [ "$mode" = dark ]; then a=1; else a=$ALPHA; fi
-	# the bar's alpha (config/eww, config/quickshell), read at its start, pushed to a running eww, watched by
-	# Quickshell
+	# the bar's alpha (config/eww, ostrov), read at its start, pushed to a running eww, watched by
+	# ostrov
 	echo "$a" > "$state/alpha"
 	eww update alpha="$a" 2> /dev/null
 	# alacritty's opacity, the file its config imports; it reloads it in every open window

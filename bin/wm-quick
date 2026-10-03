@@ -1,5 +1,5 @@
 #!/bin/bash
-# The bar panel's toggles and their lists (config/eww under i3, config/quickshell under Hyprland), as one
+# The bar panel's toggles and their lists (config/eww under i3, ostrov under Hyprland), as one
 # JSON object:
 #   {"wifi": ON, "ssid": NAME, "networks": [{ssid, signal, known, on}],
 #    "bt": ON, "btdev": NAME, "devices": [{mac, name, on}],

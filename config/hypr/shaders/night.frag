@@ -1,6 +1,6 @@
 #version 300 es
 // Night light: the screen warmed to about 4000 K, blue cut most and green some, as a gamma ramp would; set as
-// Hyprland's screen shader by the quick settings' Night Light (config/quickshell), unset to turn it off
+// Hyprland's screen shader by the quick settings' Night Light (ostrov), unset to turn it off
 precision highp float;
 in vec2 v_texcoord;
 uniform sampler2D tex;

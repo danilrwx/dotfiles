@@ -189,7 +189,7 @@ client.unfocused               $bg        $bg       $darkgray      $bg          
 client.urgent                  $accent    $bg       $accent        $accent      $accent
 
 
-# a stand-in until the Quickshell bar: the workspaces and the tray (StatusNotifierItem, Discord's menu)
+# sway's own bar, ostrov being Hyprland's: the workspaces and the tray (StatusNotifierItem, Discord's menu)
 bar {
   position top
   font pango:Iosevka 11
