@@ -29,7 +29,7 @@ mute() {
 }
 light() { brightnessctl -q set "$1" && bar display-brightness-symbolic "$(brightnessctl -m | cut -d, -f4 | tr -d %)"; }
 
-# on, off or toggle: through Hyprland's or sway's input settings under them, else through xinput, the pad
+# on, off or toggle: through Hyprland's input settings under it, else through xinput, the pad
 # by its id: xinput lists a disabled one's name as "∼ NAME", which no xinput command then finds, so it could
 # not be turned back on. One at a time (flock), a toggle within half a second of the last one dropped,
 # should the key arrive twice
@@ -55,16 +55,6 @@ touchpad() {
 		echo "$state" > "$lock.state"
 		[ "$state" = on ] && set -- true || set -- false
 		hyprctl -q keyword "device[$pad]:enabled" "$1"
-	elif [ -n "${SWAYSOCK:-}" ]; then
-		# sway's own input settings, the touchpad by its type
-		state=$(swaymsg -t get_inputs -r | jq -r '[.[] | select(.type == "touchpad")][0].libinput.send_events
-			| if . == "enabled" then "on" else "off" end')
-		case $1 in
-		toggle) [ "$state" = on ] && state=off || state=on ;;
-		*)      state=$1 ;;
-		esac
-		[ "$state" = on ] && set -- enabled || set -- disabled
-		swaymsg -q input type:touchpad events "$1"
 	else
 		dev=$(xinput list | grep -i -m1 touchpad | sed -n 's/.*id=\([0-9]*\).*/\1/p')
 		state=$(xinput list-props "$dev" | awk '/Device Enabled/ {print $NF == 1 ? "on" : "off"}')

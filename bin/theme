@@ -44,7 +44,7 @@ chrome() {
 	if [ -n "${1:-}" ]; then printf '{ "BrowserThemeColor": "%s" }\n' "$1"; else echo '{}'; fi > "$CHROME_POLICY"
 }
 
-# background IMG|COLOUR: the root under X11 (hsetroot); under Wayland (Hyprland, sway) ostrov draws it,
+# background IMG|COLOUR: the root under X11 (hsetroot); under Wayland (Hyprland) ostrov draws it,
 # following the pick written to $state (mode, wallpaper), so nothing to do here
 background() {
 	if [ -n "${WAYLAND_DISPLAY:-}" ]; then

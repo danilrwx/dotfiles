@@ -11,7 +11,7 @@ export VISUAL='nvim'
 export FZF_DEFAULT_OPTS="--height 40% --input-border=sharp --list-border=sharp --preview-border=sharp --prompt='> ' --pointer='>' --marker='>' --gutter=' ' --info=inline-right --bind ctrl-f:page-down,ctrl-b:page-up --color=fg:-1,bg:-1,hl:12,fg+:2,bg+:-1,hl+:2,info:12,border:8,label:7,prompt:7,pointer:2,marker:2,gutter:-1,spinner:12"
 
 export PI_OFFLINE=1
-# Electron apps (Discord) on Wayland under sway, sharp at 2x where Xwayland blurs; X11 under i3 all the same
+# Electron apps (Discord) on Wayland under Hyprland, sharp at 2x where Xwayland blurs; X11 under i3 all the same
 export ELECTRON_OZONE_PLATFORM_HINT=auto
 
 # None of the sessions gets the systemd --user environment, so they take it here: the socket of

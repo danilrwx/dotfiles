@@ -1,6 +1,6 @@
 #!/bin/sh
-# The Wayland sessions' daemons, run once by config/sway/config and config/hypr/hyprland.conf (bin/x-autostart
-# is i3's): portals and systemd user units told it is a Wayland session and which (wl-autostart sway|Hyprland),
+# The Wayland session's daemons, run once by config/hypr/hyprland.conf (bin/x-autostart is i3's): portals and
+# systemd user units told it is a Wayland session and which (wl-autostart Hyprland),
 # the shell (ostrov: the bar, notifications, the wallpaper, the lock screen, idle and sleep: locked at 10 min
 # idle and before sleep, the screen off at 15; the polkit agent, ssh's askpass, the clipboard's history)
 desktop=${1:-$XDG_CURRENT_DESKTOP}
