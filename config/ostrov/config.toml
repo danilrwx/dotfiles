@@ -1,0 +1,17 @@
+# ostrov's config (~/w/ostrov, src/config.rs), linked to ~/.config/ostrov by install. A key left out keeps its
+# default; the colours are taken as the file is saved, the rest at ostrov's start.
+
+# the bar's blocks, left, middle and right: workspaces, clock, layout, tray, status
+[bar]
+left = ["workspaces"]
+center = ["clock"]
+right = ["layout", "tray", "status"]
+
+# seconds without input to the lock, and to the screens off; 0 for never
+[idle]
+lock = 600
+screens_off = 900
+
+# any colour of the palette (src/style.rs) over its own: fg, dim, ink, accent, surface, hover, raised, card,
+# well, sunk, rule, idle, urgent, ...
+[colors]
