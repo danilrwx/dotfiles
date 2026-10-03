@@ -35,7 +35,8 @@ Scope {
         onTriggered: notes.toasts = notes.toasts.filter(t => !t.until || t.until > Date.now())
     }
 
-    // the OSD's notification, and how long it stays
+    // the OSD's text and level (a copy: a notification left untracked is gone once its handler returns), and how
+    // long it stays
     property var osd: null
     Timer { id: osdTimer; interval: 1500; onTriggered: notes.osd = null }
 
@@ -48,7 +49,7 @@ Scope {
         persistenceSupported: true
         onNotification: n => {
             if (n.appName === "fnkeys") {
-                notes.osd = n
+                notes.osd = { summary: n.summary, body: n.body, level: n.hints?.value }
                 osdTimer.interval = n.expireTimeout > 0 ? n.expireTimeout : 1500
                 osdTimer.restart()
                 return
@@ -141,7 +142,7 @@ Scope {
             color: Theme.popover
             border.color: Theme.fg
             border.width: 1
-            readonly property var level: notes.osd?.hints?.value
+            readonly property var level: notes.osd?.level
             ColumnLayout {
                 anchors { fill: parent; margins: 12 }
                 spacing: 8
