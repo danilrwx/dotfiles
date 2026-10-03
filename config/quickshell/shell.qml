@@ -1,8 +1,9 @@
 // The bar under Hyprland (config/eww is i3's): Hyprland's workspaces, the tray (StatusNotifierItem, Discord's
 // menu included), and the status, i3bar's look. Sound, battery, tray, workspaces and the clock from
 // Quickshell's own services, live; memory, brightness, the layout and VLESS and OpenVPN from bin/wm-status,
-// once a second. The wheel on the volume, mic and brightness turns them, a right click mutes (bin/wm-fnkeys,
-// for its card). bin/wl-autostart starts it; linked to ~/.config/quickshell by install.
+// once a second. A click on the sound, mic, battery or brightness opens the control panel, on the clock the
+// calendar; the wheel on the volume, mic and brightness turns them, a right click mutes (bin/wm-fnkeys, for
+// its card). bin/wl-autostart starts it; linked to ~/.config/quickshell by install.
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
@@ -46,6 +47,21 @@ ShellRoot {
 
     // run CMD...: a command, detached
     function run(cmd) { Quickshell.execDetached(cmd) }
+
+    // the panels the blocks open (ControlCenter.qml, CalendarPopup.qml), one at a time
+    ControlCenter { id: ctl; shell: root }
+    CalendarPopup { id: cal }
+    function panel(which) {
+        const other = which === ctl ? cal : ctl
+        other.open = false
+        which.toggle()
+    }
+    // and from outside: quickshell ipc call panel ctl|calendar (a key, a script)
+    IpcHandler {
+        target: "panel"
+        function ctl(): void { root.panel(ctl) }
+        function calendar(): void { root.panel(cal) }
+    }
 
     // a block: an emoji a size below the text, then the text; the wheel and clicks run what is given
     component Block: MouseArea {
@@ -126,8 +142,14 @@ ShellRoot {
                 anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
                 spacing: 12
 
-                Block { visible: (root.status.vless ?? "") !== ""; text: root.status.vless ?? "" }
-                Block { visible: (root.status.openvpn ?? "") !== ""; text: root.status.openvpn ?? "" }
+                Block {
+                    visible: (root.status.vless ?? "") !== ""; text: root.status.vless ?? ""
+                    onLeft: () => root.panel(ctl)
+                }
+                Block {
+                    visible: (root.status.openvpn ?? "") !== ""; text: root.status.openvpn ?? ""
+                    onLeft: () => root.run([Quickshell.env("HOME") + "/dotfiles/bin/wm-ctl", "openvpn"])
+                }
                 Block {
                     icon: "🧠"; text: root.status.mem ?? ""
                     onLeft: () => root.run(["alacritty", "-e", "htop"])
@@ -135,6 +157,7 @@ ShellRoot {
                 Block {
                     icon: root.sink?.muted ? "🔇" : "🔊"
                     text: Math.round((root.sink?.volume ?? 0) * 100) + "%"
+                    onLeft: () => root.panel(ctl)
                     onWheelUp: () => root.run([root.fnkeys, "vol-up"])
                     onWheelDown: () => root.run([root.fnkeys, "vol-down"])
                     onRight: () => root.run([root.fnkeys, "vol-mute"])
@@ -142,6 +165,7 @@ ShellRoot {
                 Block {
                     icon: root.source?.muted ? "🙊" : "🎙️"
                     text: Math.round((root.source?.volume ?? 0) * 100) + "%"
+                    onLeft: () => root.panel(ctl)
                     onWheelUp: () => root.run([root.fnkeys, "mic-up"])
                     onWheelDown: () => root.run([root.fnkeys, "mic-down"])
                     onRight: () => root.run([root.fnkeys, "mic"])
@@ -151,9 +175,11 @@ ShellRoot {
                     visible: dev.isLaptopBattery
                     icon: dev.state === UPowerDeviceState.Charging ? "⚡" : dev.percentage < 0.2 ? "🪫" : "🔋"
                     text: Math.round(dev.percentage * 100) + "%"
+                    onLeft: () => root.panel(ctl)
                 }
                 Block {
                     icon: "🌞"; text: (root.status.bri ?? 0) + "%"
+                    onLeft: () => root.panel(ctl)
                     onWheelUp: () => root.run([root.fnkeys, "bright-up"])
                     onWheelDown: () => root.run([root.fnkeys, "bright-down"])
                 }
@@ -161,7 +187,10 @@ ShellRoot {
                     icon: root.status.ru ? "🇷🇺" : "🇺🇸"
                     text: root.status.ru ? "RU" : "US"
                 }
-                Block { text: Qt.formatDateTime(clock.date, "dd/MM/yyyy hh:mm") }
+                Block {
+                    text: Qt.formatDateTime(clock.date, "dd/MM/yyyy hh:mm")
+                    onLeft: () => root.panel(cal)
+                }
 
                 // the tray: a click activates, a right click opens the item's menu
                 Repeater {
