@@ -442,28 +442,54 @@ PanelWindow {
                                 }
                             }
                         }
-                        // the passphrase: Enter joins, Escape gives up
+                        // the passphrase, lined up with the network's name above: Enter or the button joins,
+                        // Escape gives up
                         ColumnLayout {
                             visible: nw.asked
                             Layout.fillWidth: true
-                            Layout.leftMargin: 36; Layout.rightMargin: 6; Layout.bottomMargin: 6
+                            // the row's padding, its icon and their gap: under the name
+                            Layout.leftMargin: 36; Layout.rightMargin: 10; Layout.bottomMargin: 6
                             spacing: 4
-                            Rectangle {
+                            RowLayout {
                                 Layout.fillWidth: true
-                                implicitHeight: 30
-                                color: Theme.popover
-                                border.color: pass.activeFocus ? Theme.fg : Theme.rule
-                                TextInput {
-                                    id: pass
-                                    anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
-                                    verticalAlignment: TextInput.AlignVCenter
-                                    echoMode: TextInput.Password
-                                    color: Theme.fg
-                                    font.family: Theme.font
-                                    font.pointSize: 10
-                                    enabled: !join.running
-                                    onAccepted: panel.connect(nw.modelData.ssid, text)
-                                    Keys.onEscapePressed: panel.asking = ""
+                                spacing: 6
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    implicitHeight: 30
+                                    color: Theme.popover
+                                    border.color: pass.activeFocus ? Theme.fg : Theme.rule
+                                    TextInput {
+                                        id: pass
+                                        anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
+                                        verticalAlignment: TextInput.AlignVCenter
+                                        echoMode: TextInput.Password
+                                        color: Theme.fg
+                                        font.family: Theme.font
+                                        font.pointSize: 10
+                                        enabled: !join.running
+                                        onAccepted: panel.connect(nw.modelData.ssid, text)
+                                        Keys.onEscapePressed: panel.asking = ""
+                                    }
+                                }
+                                MouseArea {
+                                    id: go
+                                    implicitWidth: goText.implicitWidth + 20
+                                    implicitHeight: 30
+                                    enabled: !join.running && pass.text !== ""
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: panel.connect(nw.modelData.ssid, pass.text)
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        color: !go.enabled ? Theme.pill : go.containsMouse ? "#d0d0d0" : Theme.accent
+                                    }
+                                    Label {
+                                        id: goText
+                                        anchors.centerIn: parent
+                                        text: "Connect"
+                                        font.bold: true
+                                        color: go.enabled ? Theme.inverse : Theme.dim
+                                    }
                                 }
                             }
                             Label {
