@@ -17,9 +17,10 @@ set $darkgray #888888
 
 # alacritty (config/alacritty)
 set $term alacritty
-# dmenu-like launcher (rofi) in the bar's colour, PATH fixed up for ~/.local/bin (bin/wm-menu)
-set $menu $HOME/dotfiles/bin/wm-menu
-set $lock swaylock -f -c 000000
+# the shell, as under Hyprland (~/w/ostrov): the bar, its panels, the launcher and the clipboard's picker in
+# the bar, notifications, the lock screen; ostrov ARGS reaches the running one
+set $ostrov $HOME/.cargo/bin/ostrov
+set $lock $ostrov lock
 
 font pango:Iosevka 11
 
@@ -44,14 +45,14 @@ input type:touchpad {
 }
 
 # autostart ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# once per session: notifications, polkit, idle/lock, the bar
+# once per session: the shell (ostrov), polkit, idle/lock
 exec $HOME/dotfiles/bin/wl-autostart sway
 
 default_border pixel 1
 smart_borders  on
 
 # keys ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-# levels as a dunst progress card, mute and the HONOR Fn keys as a card (bin/wm-fnkeys)
+# levels as an OSD card, mute and the HONOR Fn keys as a card (bin/wm-fnkeys)
 set $fn $HOME/dotfiles/bin/wm-fnkeys
 bindsym XF86AudioRaiseVolume      exec $fn vol-up
 bindsym XF86AudioLowerVolume      exec $fn vol-down
@@ -78,15 +79,18 @@ bindsym XF86AudioNext             exec playerctl next
 bindsym XF86AudioPrev             exec playerctl previous
 
 bindsym $mod+Shift+s exec $HOME/dotfiles/bin/screenshot-select
-bindsym $mod+d       exec $menu
+bindsym $mod+d       exec $ostrov run
+bindsym $mod+Shift+v exec $ostrov clip
 bindsym $mod+Shift+x exec $lock
-# Wi-Fi, Bluetooth, sound output and input, power profile: a menu pick (bin/wm-ctl)
-bindsym $mod+x       exec $HOME/dotfiles/bin/wm-ctl
+# the quick settings: Wi-Fi, Bluetooth, sound, power, VLESS, OpenVPN
+bindsym $mod+x       exec $ostrov panel
+# the bar: $mod+b flips it between docked and hidden, hidden it shows while Super is held (i3's bar mode hide)
+bindsym $mod+b                  exec $ostrov bar toggle
+bindsym --no-repeat Super_L     exec $ostrov bar peek
+bindsym --release Super_L       exec $ostrov bar unpeek
 
 bindsym Control+Mod1+s exec $HOME/dotfiles/bin/sys-notify
 bindsym Control+Mod1+c exec $HOME/dotfiles/bin/cal-notify
-bindsym $mod+n         exec dunstctl close
-bindsym $mod+Shift+n   exec dunstctl close-all
 
 floating_modifier $mod
 
@@ -180,27 +184,9 @@ for_window [class="steam" title="^Steam$"]  floating disable
 for_window [class="(?i).*telegram.*"]       floating enable, border none
 for_window [app_id="(?i).*telegram.*"]      floating enable, border none
 for_window [title="^SSH Askpass$"]          floating enable
-for_window [app_id="wm-ctl"]                floating enable, resize set 60 ppt 70 ppt, move position center
 
 
 client.focused                 $bg        $bg       $fg            $accent      $accent
 client.focused_inactive        $bg        $bg       $darkgray      $bg          $bg
 client.unfocused               $bg        $bg       $darkgray      $bg          $bg
 client.urgent                  $accent    $bg       $accent        $accent      $accent
-
-
-# sway's own bar, ostrov being Hyprland's: the workspaces and the tray (StatusNotifierItem, Discord's menu)
-bar {
-  position top
-  font pango:Iosevka 11
-  tray_padding 5
-  status_command while date +'%d/%m/%Y %H:%M'; do sleep 30; done
-  colors {
-    background $bg
-    statusline $darkgray
-    focused_workspace  $bg $bg $fg
-    inactive_workspace $bg $bg $darkgray
-    active_workspace   $bg $bg $darkgray
-    urgent_workspace   $bg $bg $accent
-  }
-}

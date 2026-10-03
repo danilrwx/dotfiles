@@ -1,24 +1,21 @@
 #!/bin/sh
 # The Wayland sessions' daemons, run once by config/sway/config and config/hypr/hyprland.conf (bin/x-autostart
 # is i3's): portals and systemd user units told it is a Wayland session and which (wl-autostart sway|Hyprland),
-# the polkit agent, notifications (dunst under sway, ostrov under Hyprland), the bar under Hyprland, then
+# the polkit agent, the shell (ostrov: the bar, notifications, the lock screen), the clipboard's history, then
 # lock at 10 min idle and before sleep, the screen off at 15
 desktop=${1:-$XDG_CURRENT_DESKTOP}
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK HYPRLAND_INSTANCE_SIGNATURE \
 	XDG_CURRENT_DESKTOP="$desktop" 2>/dev/null
 lxpolkit &
+# the shell: the bar, its panels, the launcher, notifications, the lock screen (~/w/ostrov, install builds it)
+"$HOME/.cargo/bin/ostrov" &
+# the clipboard's history for the bar's picker ($mod+Shift+v): text and images as they are copied
+wl-paste --type text --watch cliphist store &
+wl-paste --type image --watch cliphist store &
+lock="$HOME/.cargo/bin/ostrov lock"
 if [ "$desktop" = Hyprland ]; then
-	# the shell: the bar, its panels, the launcher, notifications, the lock screen (~/w/ostrov, install
-	# builds it)
-	"$HOME/.cargo/bin/ostrov" &
-	# the clipboard's history for the bar's picker ($mod+Shift+v): text and images as they are copied
-	wl-paste --type text --watch cliphist store &
-	wl-paste --type image --watch cliphist store &
-	lock="$HOME/.cargo/bin/ostrov lock"
 	off='hyprctl dispatch dpms off' on='hyprctl dispatch dpms on'
 else
-	dunst &
-	lock='swaylock -f -c 000000'
 	off='swaymsg "output * power off"' on='swaymsg "output * power on"'
 fi
 # lock: logind's lock-session too (loginctl lock-session)

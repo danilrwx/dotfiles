@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -39,8 +40,12 @@ func hyprctl(req string) (string, error) {
 	return string(b), err
 }
 
-// keymap is the main keyboard's active layout as Hyprland names it ("English (US)", "Russian"), "" outside it.
+// keymap is the main keyboard's active layout as the compositor names it ("English (US)", "Russian"): Hyprland's
+// main keyboard, sway's first one; "" under neither.
 func keymap() string {
+	if os.Getenv("SWAYSOCK") != "" {
+		return swayKeymap()
+	}
 	out, err := hyprctl("j/devices")
 	if err != nil {
 		return ""
@@ -62,8 +67,13 @@ func keymap() string {
 	return ""
 }
 
-// hyprEvents kicks on every layout switch, Hyprland's activelayout event; nothing outside Hyprland.
+// hyprEvents kicks on every layout switch, Hyprland's activelayout event or sway's input one; nothing under
+// neither.
 func hyprEvents(kick chan<- struct{}) {
+	if os.Getenv("SWAYSOCK") != "" {
+		swayEvents(kick)
+		return
+	}
 	sock := hyprSocket(".socket2.sock")
 	if sock == "" {
 		return
@@ -78,4 +88,39 @@ func hyprEvents(kick chan<- struct{}) {
 			kick <- struct{}{}
 		}
 	}
+}
+
+// swayKeymap is the first keyboard's active layout under sway.
+func swayKeymap() string {
+	out, err := exec.Command("swaymsg", "-r", "-t", "get_inputs").Output()
+	if err != nil {
+		return ""
+	}
+	var inputs []struct {
+		Type   string `json:"type"`
+		Layout string `json:"xkb_active_layout_name"`
+	}
+	if json.Unmarshal(out, &inputs) != nil {
+		return ""
+	}
+	for _, i := range inputs {
+		if i.Type == "keyboard" && i.Layout != "" {
+			return i.Layout
+		}
+	}
+	return ""
+}
+
+// swayEvents kicks on sway's input events (a layout switch among them), for as long as swaymsg runs.
+func swayEvents(kick chan<- struct{}) {
+	cmd := exec.Command("swaymsg", "-m", "-t", "subscribe", `["input"]`)
+	out, err := cmd.StdoutPipe()
+	if err != nil || cmd.Start() != nil {
+		return
+	}
+	s := bufio.NewScanner(out)
+	for s.Scan() {
+		kick <- struct{}{}
+	}
+	_ = cmd.Wait()
 }
