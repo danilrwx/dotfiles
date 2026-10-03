@@ -1,5 +1,6 @@
 // The old look of the bar and its panels (i3bar's, rofi's): black, white for what is on or picked, gray for
-// the rest, green only for urgent; Iosevka, square corners, 1px rules. What is on is inverted, black on white
+// the rest, green only for urgent; Iosevka, 1px rules, corners rounded a little. What is on is inverted,
+// black on white
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -17,4 +18,6 @@ Singleton {
     readonly property color pill: "#1a1a1a"
     readonly property string font: "Iosevka"
     readonly property int quick: 100   // ms, every motion
+    readonly property int radius: 6    // buttons, fields, cards, rows
+    readonly property int round: 10    // the panels themselves
 }

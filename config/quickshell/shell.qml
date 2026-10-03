@@ -1,6 +1,6 @@
 //@ pragma IconTheme Adwaita
-// The bar under Hyprland (config/eww is i3's), the old look (Theme.qml): the workspaces by number at the left as
-// i3bar had them, the clock in the middle as GNOME has it (a click: the calendar), at the right the keyboard
+// The bar under Hyprland (config/eww is i3's), the old look (Theme.qml): the workspaces as GNOME's dots, square,
+// at the left, the clock in the middle as GNOME has it (a click: the calendar), at the right the keyboard
 // layout, the tray (StatusNotifierItem, Discord's menu included) and the status as one block, Wi-Fi, VPN, sound
 // and battery in Adwaita's symbolic icons (a click: the quick settings, the wheel: the volume). Sound, battery,
 // tray, workspaces and the clock from Quickshell's own services and the layout from Hyprland's event, live;
@@ -97,7 +97,7 @@ ShellRoot {
 
     // the panels, one at a time (QuickSettings.qml, CalendarPopup.qml)
     QuickSettings { id: qs; shell: root }
-    CalendarPopup { id: cal }
+    CalendarPopup { id: cal; notes: notes }
     function panel(which) {
         (which === qs ? cal : qs).open = false
         which.toggle()
@@ -108,6 +108,9 @@ ShellRoot {
         function ctl(): void { root.panel(qs) }
         function calendar(): void { root.panel(cal) }
     }
+    // notifications, their history and the OSD (Notifications.qml)
+    Notifications { id: notes }
+
     // the lock screen (Lock.qml): quickshell ipc call lock lock
     Lock { id: lockScreen }
     function lockNow() { lockScreen.engage() }
@@ -172,7 +175,8 @@ ShellRoot {
         onWheel: w => w.angleDelta.y > 0 ? wheelUp() : wheelDown()
         Rectangle {
             anchors.fill: parent
-            radius: 0
+            anchors.margins: 2
+            radius: Theme.radius
             color: pill.lit || pill.containsMouse ? Theme.hover : "transparent"
             Behavior on color { ColorAnimation { duration: Theme.quick } }
         }
@@ -214,30 +218,29 @@ ShellRoot {
                 color: Qt.rgba(0, 0, 0, root.alpha)
             }
 
-            // the workspaces by number as i3bar had them: the focused one white, the rest gray, an urgent one green;
-            // a click to go there
+            // the workspaces as GNOME's dots, made square: a small block each, the focused one a longer bar, an
+            // urgent one green, the one under the pointer white; a click to go there, the wheel through them
             Row {
                 id: workspaces
-                anchors { left: parent.left; leftMargin: 6; top: parent.top; bottom: parent.bottom }
+                anchors { left: parent.left; leftMargin: 12; verticalCenter: parent.verticalCenter }
+                spacing: 6
                 Repeater {
                     model: Hyprland.workspaces.values.filter(w => w.id > 0).sort((a, b) => a.id - b.id)
                     MouseArea {
                         id: ws
                         required property var modelData
                         readonly property bool focused: modelData.id === Hyprland.focusedWorkspace?.id
-                        width: num.implicitWidth + 12
-                        height: parent.height
+                        width: focused ? 28 : 8
+                        height: 8
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: Hyprland.dispatch("workspace " + modelData.id)
                         onWheel: w => Hyprland.dispatch(w.angleDelta.y > 0 ? "workspace e-1" : "workspace e+1")
-                        Text {
-                            id: num
-                            anchors.centerIn: parent
-                            text: ws.modelData.name
-                            color: ws.modelData.urgent ? Theme.urgent : ws.focused || ws.containsMouse ? Theme.fg : Theme.dim
-                            font.family: Theme.font
-                            font.pointSize: 11
+                        Behavior on width { NumberAnimation { duration: Theme.quick } }
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 2
+                            color: ws.modelData.urgent ? Theme.urgent : ws.focused || ws.containsMouse ? Theme.fg : "#666666"
                         }
                     }
                 }
@@ -365,10 +368,6 @@ ShellRoot {
                     Icon { name: root.volumeIcon(root.sink) }
                     Icon { visible: root.source?.muted ?? false; name: "microphone-disabled-symbolic" }
                     Icon { visible: root.battery.isLaptopBattery; name: root.batteryIcon() }
-                    BarText {
-                        visible: root.battery.isLaptopBattery
-                        text: Math.round(root.battery.percentage * 100) + "%"
-                    }
                 }
 
             }

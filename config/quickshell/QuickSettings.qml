@@ -117,7 +117,7 @@ PanelWindow {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         Rectangle {
-            anchors.fill: parent; radius: 0
+            anchors.fill: parent; radius: Theme.radius
             color: rb.lit ? Theme.accent : rb.containsMouse ? Theme.hover : Theme.pill
             border.color: Theme.rule
             Behavior on color { ColorAnimation { duration: Theme.quick } }
@@ -133,7 +133,7 @@ PanelWindow {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         Rectangle {
-            anchors.fill: parent; radius: 0
+            anchors.fill: parent; radius: Theme.radius
             color: ar.unfolded ? Theme.accent : ar.containsMouse ? Theme.hover : "transparent"
         }
         Icon {
@@ -157,7 +157,7 @@ PanelWindow {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: sl.iconClicked()
-            Rectangle { anchors.fill: parent; radius: 0; color: parent.containsMouse ? Theme.hover : "transparent" }
+            Rectangle { anchors.fill: parent; radius: Theme.radius; color: parent.containsMouse ? Theme.hover : "transparent" }
             Icon { anchors.centerIn: parent; name: sl.icon }
         }
         Item {
@@ -167,12 +167,12 @@ PanelWindow {
             readonly property real shown: Math.min(1, Math.max(0, drag.pressed ? drag.v : sl.value))
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width; height: 14; radius: 0
+                width: parent.width; height: 14; radius: Theme.radius
                 color: Theme.rule
             }
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                width: track.shown * parent.width; height: 14; radius: 0
+                width: track.shown * parent.width; height: 14; radius: Theme.radius
                 color: Theme.accent
             }
             MouseArea {
@@ -206,7 +206,7 @@ PanelWindow {
         Layout.preferredWidth: 1
         implicitHeight: 48
         Rectangle {
-            anchors.fill: parent; radius: 0
+            anchors.fill: parent; radius: Theme.radius
             color: tg.on ? Theme.accent : Theme.pill
             border.color: tg.on ? Theme.accent : Theme.rule
             Behavior on color { ColorAnimation { duration: Theme.quick } }
@@ -218,7 +218,7 @@ PanelWindow {
             cursorShape: Qt.PointingHandCursor
             onClicked: tg.flip()
             Rectangle {
-                anchors.fill: parent; radius: 0
+                anchors.fill: parent; radius: Theme.radius
                 color: main.containsMouse ? (tg.on ? "#d0d0d0" : Theme.hover) : "transparent"
             }
             RowLayout {
@@ -245,7 +245,7 @@ PanelWindow {
             cursorShape: Qt.PointingHandCursor
             onClicked: panel.flip(tg.menuName)
             Rectangle {
-                anchors.fill: parent; radius: 0
+                anchors.fill: parent; radius: Theme.radius
                 color: side.containsMouse || panel.menu === tg.menuName ? (tg.on ? "#d0d0d0" : Theme.hover) : "transparent"
             }
             Rectangle {
@@ -279,7 +279,7 @@ PanelWindow {
             id: box
             y: 4; width: parent.width
             implicitHeight: col.implicitHeight + 20
-            radius: 0
+            radius: Theme.radius
             color: Theme.card
             border.color: Theme.rule
             ColumnLayout {
@@ -291,7 +291,7 @@ PanelWindow {
                     spacing: 10
                     Layout.bottomMargin: 6
                     Rectangle {
-                        implicitWidth: 32; implicitHeight: 32; radius: 0; color: Theme.accent
+                        implicitWidth: 32; implicitHeight: 32; radius: Theme.radius; color: Theme.accent
                         Icon { anchors.centerIn: parent; name: mn.icon; tint: Theme.inverse }
                     }
                     Label { text: mn.title; font.bold: true; font.pointSize: 11 }
@@ -322,7 +322,7 @@ PanelWindow {
         implicitHeight: 34
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        Rectangle { anchors.fill: parent; radius: 0; color: it.on ? Theme.accent : it.containsMouse ? Theme.hover : "transparent" }
+        Rectangle { anchors.fill: parent; radius: Theme.radius; color: it.on ? Theme.accent : it.containsMouse ? Theme.hover : "transparent" }
         RowLayout {
             anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
             spacing: 10
@@ -337,7 +337,7 @@ PanelWindow {
         id: pop
         width: parent.width
         height: col.implicitHeight + 28
-        radius: 0
+        radius: Theme.round
         color: Theme.popover
         border.color: Theme.fg
         border.width: 1
@@ -355,7 +355,7 @@ PanelWindow {
                 spacing: 8
                 Rectangle {
                     visible: panel.shell.battery.isLaptopBattery
-                    implicitWidth: bat.implicitWidth + 28; implicitHeight: 40; radius: 0
+                    implicitWidth: bat.implicitWidth + 28; implicitHeight: 40; radius: Theme.radius
                     color: Theme.pill
                     RowLayout {
                         id: bat

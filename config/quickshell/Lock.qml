@@ -70,6 +70,7 @@ Scope {
                     Layout.alignment: Qt.AlignHCenter
                     implicitWidth: 320
                     implicitHeight: 40
+                    radius: Theme.radius
                     color: "#000000"
                     border.color: pam.active ? Theme.dim : Theme.fg
                     border.width: 1

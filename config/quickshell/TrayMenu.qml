@@ -47,6 +47,7 @@ PopupWindow {
 
     Rectangle {
         anchors.fill: parent
+        radius: Theme.round
         color: Theme.popover
         border.color: Theme.fg
         border.width: 1
@@ -88,7 +89,7 @@ PopupWindow {
                                 menu.close()
                             }
                         }
-                        Rectangle { anchors.fill: parent; color: area.containsMouse ? Theme.accent : "transparent" }
+                        Rectangle { anchors.fill: parent; anchors.margins: 3; radius: Theme.radius; color: area.containsMouse ? Theme.accent : "transparent" }
                         RowLayout {
                             id: row
                             anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
