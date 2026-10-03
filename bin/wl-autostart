@@ -9,6 +9,9 @@ dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK HYPRLAND_I
 lxpolkit &
 if [ "$desktop" = Hyprland ]; then
 	quickshell &   # the bar, notifications and the lock screen (config/quickshell); sway keeps its own
+	# the clipboard's history for the bar's picker ($mod+Shift+v): text and images as they are copied
+	wl-paste --type text --watch cliphist store &
+	wl-paste --type image --watch cliphist store &
 	lock='quickshell ipc call lock lock'
 	off='hyprctl dispatch dpms off' on='hyprctl dispatch dpms on'
 else

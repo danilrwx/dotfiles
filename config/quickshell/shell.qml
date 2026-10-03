@@ -136,11 +136,44 @@ ShellRoot {
         function lock(): void { root.lockNow() }
     }
 
-    // the launcher in the bar, dmenu's way: open while launching ($mod+d: quickshell ipc call launcher toggle)
-    property bool launching: false
+    // the launcher in the bar, dmenu's way, over the apps ($mod+d: quickshell ipc call launcher toggle) or the
+    // clipboard's history ($mod+Shift+v: quickshell ipc call launcher clipboard); "" while closed
+    property string mode: ""
+    readonly property bool launching: mode !== ""
+    function close() { mode = "" }
     IpcHandler {
         target: "launcher"
-        function toggle(): void { root.launching = !root.launching }
+        function toggle(): void { root.mode = root.mode === "apps" ? "" : "apps" }
+        function clipboard(): void {
+            if (root.mode === "clip") { root.mode = ""; return }
+            clipList.running = true
+            root.mode = "clip"
+        }
+    }
+    // the clipboard's history, newest first, from cliphist (wl-paste stores into it, bin/wl-autostart): its
+    // lines "ID<tab>PREVIEW", as cliphist decode and delete take them back
+    property var clips: []
+    Process {
+        id: clipList
+        command: ["cliphist", "list"]
+        stdout: StdioCollector {
+            onStreamFinished: root.clips = text.split("\n").filter(l => l !== "")
+                .map(l => ({ line: l, name: l.replace(/^[0-9]+\t/, "").replace(/\s+/g, " ").slice(0, 60) }))
+        }
+    }
+    function clipHits(query) {
+        const q = query.toLowerCase()
+        return clips.filter(c => c.name.toLowerCase().includes(q))
+    }
+    // a history entry back on the clipboard, or out of the history
+    function copyClip(c) {
+        close()
+        if (c) run(["sh", "-c", 'printf "%s" "$1" | cliphist decode | wl-copy', "sh", c.line])
+    }
+    function deleteClip(c) {
+        if (!c) return
+        run(["sh", "-c", 'printf "%s" "$1" | cliphist delete', "sh", c.line])
+        clips = clips.filter(x => x !== c)
     }
     // the apps an app menu shows, by name, a name starting with the query first, then one holding it
     function apps(query) {
@@ -154,7 +187,7 @@ ShellRoot {
     }
     // launch an app, a terminal one in alacritty; or, with none picked, what was typed as a command
     function launch(entry, typed) {
-        launching = false
+        close()
         if (entry) {
             if (entry.runInTerminal) run(["alacritty", "-e"].concat(entry.command))
             else entry.execute()
@@ -264,19 +297,26 @@ ShellRoot {
             }
 
             // the launcher, dmenu in the bar: from past the workspaces to the status, what is typed, then the
-            // apps it matches in a row, the picked one inverted. Left, Right and Tab move, Enter launches,
-            // Escape closes
+            // apps (or clipboard entries) it matches in a row, the picked one inverted. Left, Right and Tab
+            // move, Enter launches (or copies), Delete drops a clipboard entry, Escape closes
             Item {
                 id: launcher
                 visible: root.launching
                 anchors { left: workspaces.right; leftMargin: 12; right: status.left; rightMargin: 12; top: parent.top; bottom: parent.bottom }
-                property var hits: root.apps(query.text)
+                readonly property bool clip: root.mode === "clip"
+                property var hits: clip ? root.clipHits(query.text) : root.apps(query.text)
+                function pick(i, typed) {
+                    if (clip) root.copyClip(hits[i])
+                    else root.launch(hits[i], typed)
+                }
                 property int picked: 0
                 onVisibleChanged: if (visible) { query.text = ""; picked = 0; query.forceActiveFocus() }
+                // a switch between apps and the clipboard while open starts afresh too
+                onClipChanged: { query.text = ""; picked = 0 }
                 Text {
                     id: prompt
                     anchors { left: parent.left; verticalCenter: parent.verticalCenter }
-                    text: "run"
+                    text: launcher.clip ? "clip" : "run"
                     color: Theme.dim
                     font.family: Theme.font
                     font.pointSize: 11
@@ -291,8 +331,9 @@ ShellRoot {
                     onTextChanged: launcher.picked = 0
                     Keys.onPressed: e => {
                         const n = launcher.hits.length
-                        if (e.key === Qt.Key_Escape) { root.launching = false }
-                        else if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter) { root.launch(launcher.hits[launcher.picked], text) }
+                        if (e.key === Qt.Key_Escape) { root.close() }
+                        else if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter) { launcher.pick(launcher.picked, text) }
+                        else if (e.key === Qt.Key_Delete && launcher.clip) { root.deleteClip(launcher.hits[launcher.picked]) }
                         else if ((e.key === Qt.Key_Right || e.key === Qt.Key_Tab) && n > 0) { launcher.picked = (launcher.picked + 1) % n }
                         else if ((e.key === Qt.Key_Left || e.key === Qt.Key_Backtab) && n > 0) { launcher.picked = (launcher.picked - 1 + n) % n }
                         else return
@@ -317,7 +358,7 @@ ShellRoot {
                         height: list.height
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.launch(modelData, "")
+                        onClicked: launcher.pick(index, "")
                         Rectangle { anchors.fill: parent; color: hit.picked ? Theme.accent : hit.containsMouse ? Theme.hover : "transparent" }
                         Text {
                             id: name
