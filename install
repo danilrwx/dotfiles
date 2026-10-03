@@ -51,9 +51,10 @@ DESKTOP_PKGS=(iwd bluez rfkill
 # media keys (bin/wm-fnkeys), the polkit agent
 X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit x11-xserver-utils xinput
   i3-wm i3lock xss-lock dunst rofi maim xclip hsetroot xcompmgr brightnessctl playerctl lxpolkit libnotify-bin)
-# the Wayland session next to i3, Hyprland, without its recommends (ostrov draws the wallpaper and keeps idle,
-# sleep and the lock): screenshots (grim, slurp), the clipboard, X apps under Xwayland
-WAYLAND_PKGS=(hyprland grim slurp wl-clipboard xwayland)
+# the Wayland session next to i3, Hyprland, without its recommends (ostrov draws the wallpaper, takes
+# screenshots, keeps idle, sleep, the lock and the clipboard's history): wl-clipboard for the scripts, X apps
+# under Xwayland
+WAYLAND_PKGS=(hyprland wl-clipboard xwayland)
 # ostrov's build, the shell under Hyprland (~/w/ostrov): GTK 4, its layer shell and session lock, PAM
 OSTROV_PKGS=(pkg-config libgtk-4-dev libgtk4-layer-shell-dev libpam0g-dev)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)

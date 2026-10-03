@@ -1,9 +1,7 @@
 #!/bin/sh
-# region screenshot into the clipboard through bin/clip: slurp's selection by grim under Wayland, maim's
-# under X11
+# region screenshot into the clipboard: ostrov's under Wayland, maim's through bin/clip under X11 (i3)
 if [ -n "${WAYLAND_DISPLAY:-}" ]; then
-	region=$(slurp) || exit 0
-	grim -g "$region" - | "$HOME/dotfiles/bin/clip" -t image/png
+	exec "$HOME/.cargo/bin/ostrov" screenshot
 else
 	maim -s | "$HOME/dotfiles/bin/clip" -t image/png
 fi
