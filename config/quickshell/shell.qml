@@ -1,6 +1,6 @@
 //@ pragma IconTheme Adwaita
-// The bar under Hyprland (config/eww is i3's), the old look (Theme.qml): the workspaces as GNOME's dots, square,
-// at the left, the clock in the middle as GNOME has it (a click: the calendar), at the right the keyboard
+// The bar under Hyprland (config/eww is i3's), the old look (Theme.qml): the workspaces as GNOME's dots at the
+// left, the clock in the middle as GNOME has it (a click: the calendar), at the right the keyboard
 // layout, the tray (StatusNotifierItem, Discord's menu included) and the status as one block, Wi-Fi, VPN, sound
 // and battery in Adwaita's symbolic icons (a click: the quick settings, the wheel: the volume). Sound, battery,
 // tray, workspaces and the clock from Quickshell's own services and the layout from Hyprland's event, live;
@@ -93,6 +93,12 @@ ShellRoot {
         onFileChanged: reload()
     }
     readonly property real alpha: parseFloat(alphaFile.text()) || 1
+    // the battery's icon colour: white, turning red from 30% down, all red at 10%; white while charging
+    readonly property color batteryTint: {
+        if (battery.state === UPowerDeviceState.Charging) return Theme.fg
+        const t = Math.min(1, Math.max(0, (0.30 - battery.percentage) / 0.20))
+        return Qt.rgba(1, 1 - t * 0.89, 1 - t * 0.86, 1)
+    }
     readonly property bool vpn: (net.vless?.how ?? "off") !== "off" || (net.openvpn?.profile ?? "") !== ""
 
     // the panels, one at a time (QuickSettings.qml, CalendarPopup.qml)
@@ -218,8 +224,8 @@ ShellRoot {
                 color: Qt.rgba(0, 0, 0, root.alpha)
             }
 
-            // the workspaces as GNOME's dots, made square: a small block each, the focused one a longer bar, an
-            // urgent one green, the one under the pointer white; a click to go there, the wheel through them
+            // the workspaces as GNOME's dots: a dot each, the focused one a longer pill, an urgent one green, the
+            // one under the pointer white; a click to go there, the wheel through them
             Row {
                 id: workspaces
                 anchors { left: parent.left; leftMargin: 12; verticalCenter: parent.verticalCenter }
@@ -239,7 +245,7 @@ ShellRoot {
                         Behavior on width { NumberAnimation { duration: Theme.quick } }
                         Rectangle {
                             anchors.fill: parent
-                            radius: 2
+                            radius: height / 2
                             color: ws.modelData.urgent ? Theme.urgent : ws.focused || ws.containsMouse ? Theme.fg : "#666666"
                         }
                     }
@@ -367,7 +373,7 @@ ShellRoot {
                     Icon { visible: (root.net.bt.connected ?? "") !== ""; name: "bluetooth-active-symbolic" }
                     Icon { name: root.volumeIcon(root.sink) }
                     Icon { visible: root.source?.muted ?? false; name: "microphone-disabled-symbolic" }
-                    Icon { visible: root.battery.isLaptopBattery; name: root.batteryIcon() }
+                    Icon { visible: root.battery.isLaptopBattery; name: root.batteryIcon(); tint: root.batteryTint }
                 }
 
             }

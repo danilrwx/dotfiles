@@ -49,7 +49,9 @@ Scope {
         persistenceSupported: true
         onNotification: n => {
             if (n.appName === "fnkeys") {
-                notes.osd = { summary: n.summary, body: n.body, level: n.hints?.value }
+                // notify-send -i hands an icon name over as the image, image://icon/NAME
+                const icon = n.appIcon || (n.image ?? "").replace(/^image:\/\/icon\//, "")
+                notes.osd = { icon: icon, summary: n.summary, body: n.body, level: n.hints?.value }
                 osdTimer.interval = n.expireTimeout > 0 ? n.expireTimeout : 1500
                 osdTimer.restart()
                 return
@@ -143,12 +145,21 @@ Scope {
             border.color: Theme.fg
             border.width: 1
             readonly property var level: notes.osd?.level
-            ColumnLayout {
-                anchors { fill: parent; margins: 12 }
+            RowLayout {
+              anchors { fill: parent; margins: 12; leftMargin: 16 }
+              spacing: 14
+              // what it is about: the speaker, the mic, the backlight, the touchpad...
+              Icon {
+                  visible: (notes.osd?.icon ?? "") !== ""
+                  name: notes.osd?.icon ?? ""
+                  implicitSize: 22
+              }
+              ColumnLayout {
+                Layout.fillWidth: true
                 spacing: 8
                 Label {
                     Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignHCenter
+                    horizontalAlignment: osdBox.level !== undefined ? Text.AlignLeft : Text.AlignHCenter
                     text: (notes.osd?.summary ?? "") + (notes.osd?.body ? "  " + notes.osd.body : "")
                     font.bold: true
                 }
@@ -165,6 +176,7 @@ Scope {
                         color: Theme.accent
                     }
                 }
+            }
             }
         }
     }

@@ -361,7 +361,7 @@ PanelWindow {
                         id: bat
                         anchors.centerIn: parent
                         spacing: 8
-                        Icon { name: panel.shell.batteryIcon() }
+                        Icon { name: panel.shell.batteryIcon(); tint: panel.shell.batteryTint }
                         Label { text: Math.round(panel.shell.battery.percentage * 100) + "%"; font.bold: true }
                     }
                 }

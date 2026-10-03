@@ -6,16 +6,28 @@
 # wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0
 export LC_NUMERIC=C
 
-osd() { notify-send -a fnkeys -r 9912 -t 1500 "$1" "${2:-}"; }
-bar() { notify-send -a fnkeys -r 9913 -t 1000 -h "int:value:$1" "$1%"; }
+# osd ICON TITLE [TEXT], bar ICON LEVEL: the card or the level, with an Adwaita symbolic icon (the OSD of the
+# Quickshell bar and dunst both show it)
+osd() { notify-send -a fnkeys -r 9912 -t 1500 -i "$1" "$2" "${3:-}"; }
+bar() { notify-send -a fnkeys -r 9913 -t 1000 -i "$1" -h "int:value:$2" "$2%"; }
 # "Volume: 0.45 [MUTED]" -> 45, or 0 while muted
 level() { wpctl get-volume "$1" | awk '{print /MUTED/ ? 0 : int($2 * 100 + 0.5)}'; }
-vol() { wpctl set-volume -l 1.0 "$1" "$2" && bar "$(level "$1")"; }
+# icon SINK|SOURCE LEVEL: the speaker's or the mic's, by how loud, muted at 0
+icon() {
+	local kind=audio-volume
+	[ "$1" = "$SOURCE" ] && kind=microphone-sensitivity
+	if [ "$2" -eq 0 ]; then echo "$kind-muted-symbolic"
+	elif [ "$2" -lt 34 ]; then echo "$kind-low-symbolic"
+	elif [ "$2" -lt 67 ]; then echo "$kind-medium-symbolic"
+	else echo "$kind-high-symbolic"; fi
+}
+vol() { wpctl set-volume -l 1.0 "$1" "$2" && { l=$(level "$1"); bar "$(icon "$1" "$l")" "$l"; }; }
 mute() {
 	wpctl set-mute "$1" toggle
-	wpctl get-volume "$1" | grep -q MUTED && osd "$2" "muted" || { osd "$2" "on"; bar "$(level "$1")"; }
+	if wpctl get-volume "$1" | grep -q MUTED; then osd "$(icon "$1" 0)" "$2" "muted"
+	else l=$(level "$1"); osd "$(icon "$1" "$l")" "$2" "on"; bar "$(icon "$1" "$l")" "$l"; fi
 }
-light() { brightnessctl -q set "$1" && bar "$(brightnessctl -m | cut -d, -f4 | tr -d %)"; }
+light() { brightnessctl -q set "$1" && bar display-brightness-symbolic "$(brightnessctl -m | cut -d, -f4 | tr -d %)"; }
 
 # on, off or toggle: through Hyprland's or sway's input settings under them, else through xinput, the pad
 # by its id: xinput lists a disabled one's name as "∼ NAME", which no xinput command then finds, so it could
@@ -62,7 +74,8 @@ touchpad() {
 		esac
 		[ "$state" = on ] && xinput enable "$dev" || xinput disable "$dev"
 	fi
-	osd "Touchpad" "$state"
+	if [ "$state" = on ]; then osd input-touchpad-symbolic "Touchpad" "$state"
+	else osd touchpad-disabled-symbolic "Touchpad" "$state"; fi
 }
 
 SINK=@DEFAULT_AUDIO_SINK@ SOURCE=@DEFAULT_AUDIO_SOURCE@
@@ -80,10 +93,11 @@ touchpad-off)    touchpad off ;;
 touchpad-toggle) touchpad toggle ;;
 profile)
 	sleep 0.3
-	osd "Power profile" "$(powerprofilesctl get)" ;;
+	p=$(powerprofilesctl get)
+	osd "power-profile-$p-symbolic" "Power profile" "$p" ;;
 camera)
 	sleep 0.5
-	[ -e /dev/video0 ] && osd "Camera" "on" || osd "Camera" "off" ;;
+	[ -e /dev/video0 ] && osd camera-web-symbolic "Camera" "on" || osd camera-disabled-symbolic "Camera" "off" ;;
 *)
 	echo "usage: wm-fnkeys vol-up|vol-down|vol-mute|mic-up|mic-down|mic|bright-up|bright-down|" >&2
 	echo "       touchpad-on|touchpad-off|touchpad-toggle|profile|camera" >&2
