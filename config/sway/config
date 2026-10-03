@@ -45,7 +45,7 @@ input type:touchpad {
 
 # autostart ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # once per session: notifications, polkit, idle/lock, the bar
-exec $HOME/dotfiles/bin/wl-autostart
+exec $HOME/dotfiles/bin/wl-autostart sway
 
 default_border pixel 1
 smart_borders  on

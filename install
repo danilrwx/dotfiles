@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ./install [--desktop] [--ru-mirror] [--skip-go] [--skip-ts]
-#   --desktop    the i3 and sway sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
+#   --desktop    the i3, sway and Hyprland sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
 #                Discord, Steam.
 #                Then ./debloat strips GNOME and snapd
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
@@ -51,9 +51,10 @@ DESKTOP_PKGS=(iwd bluez rfkill
 # media keys (bin/wm-fnkeys), the polkit agent
 X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit x11-xserver-utils xinput
   i3-wm i3lock xss-lock dunst rofi maim xclip hsetroot xcompmgr brightnessctl playerctl lxpolkit libnotify-bin)
-# sway, the Wayland session next to i3, without its recommends: wallpaper, idle and lock, screenshots
-# (grim, slurp), the clipboard, the screen-sharing portal, X apps under Xwayland
-SWAY_PKGS=(sway swaybg swayidle swaylock grim slurp wl-clipboard xdg-desktop-portal-wlr xwayland)
+# the Wayland sessions next to i3, sway and Hyprland, without their recommends: wallpaper, idle and lock (both
+# take swayidle and swaylock), screenshots (grim, slurp), the clipboard, the screen-sharing portal, X apps
+# under Xwayland
+WAYLAND_PKGS=(sway hyprland swaybg swayidle swaylock grim slurp wl-clipboard xdg-desktop-portal-wlr xwayland)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
 
 # Helpers ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -151,7 +152,7 @@ base() {
 desktop_system() {
   log "Installing the desktop base"
   pkg "${DESKTOP_PKGS[@]}"
-  sudo apt install -y --no-install-recommends "${X11_PKGS[@]}" "${SWAY_PKGS[@]}"
+  sudo apt install -y --no-install-recommends "${X11_PKGS[@]}" "${WAYLAND_PKGS[@]}"
 
   # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
   # netplan, DNS by systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
@@ -212,6 +213,7 @@ desktop_system() {
 desktop_session() {
   link config/i3 "$HOME/.config/i3"
   link config/sway "$HOME/.config/sway"
+  link config/hypr "$HOME/.config/hypr"
   link config/dunst "$HOME/.config/dunst"
   link .Xresources "$HOME/.Xresources"
   # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE, GDK_SCALE), and .profile the session
