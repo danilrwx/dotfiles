@@ -44,14 +44,11 @@ chrome() {
 	if [ -n "${1:-}" ]; then printf '{ "BrowserThemeColor": "%s" }\n' "$1"; else echo '{}'; fi > "$CHROME_POLICY"
 }
 
-# background IMG|COLOUR: the root under X11 (hsetroot), swaybg under Wayland (Hyprland, sway), the last one
-# replaced; under Wayland black is no swaybg at all, the compositor's own ground being black
+# background IMG|COLOUR: the root under X11 (hsetroot); under Wayland (Hyprland, sway) ostrov draws it,
+# following the pick written to $state (mode, wallpaper), so nothing to do here
 background() {
 	if [ -n "${WAYLAND_DISPLAY:-}" ]; then
-		pkill -x swaybg
-		[ -f "$1" ] || return 0
-		swaybg -m fill -i "$1" > /dev/null 2>&1 &
-		disown
+		return 0
 	elif [ -f "$1" ]; then
 		hsetroot -fill "$1" > /dev/null
 	else
