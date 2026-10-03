@@ -19,6 +19,7 @@
 //	wmd night time FROM TO | temp K | preview K
 //	wmd night apply                           the screen as the night light config wants now
 //	wmd location CITY | LAT LON               where the machine is, for the weather and sunset and sunrise
+//	wmd media play-pause|next|previous        the MPRIS player playing, else the first
 //
 // Installed by `go install github.com/danilrwx/dotfiles/wmd@latest`.
 package main
@@ -35,7 +36,7 @@ import (
 
 var errUsage = errors.New("usage: wmd watch | wifi on|off|scan|disconnect|connect SSID|forget SSID | " +
 	"bt on|off|scan|connect ADDR|disconnect ADDR|pair ADDR|forget ADDR | headset | power set PROFILE | " +
-	"brightness PERCENT | night mode off|on|time|sun|time FROM TO|temp K|preview K|apply | location CITY|LAT LON")
+	"brightness PERCENT | night mode off|on|time|sun|time FROM TO|temp K|preview K|apply | location CITY|LAT LON | media play-pause|next|previous")
 
 // State is what wmd watch prints.
 type State struct {
@@ -51,6 +52,7 @@ type State struct {
 	Night      Night     `json:"night"`
 	Weather    *Weather  `json:"weather"`
 	Battery    Battery   `json:"battery"`
+	Media      Media     `json:"media"`
 }
 
 func state(conn *dbus.Conn) State {
@@ -69,7 +71,7 @@ func state(conn *dbus.Conn) State {
 		fmt.Fprintln(os.Stderr, "wmd: audio:", err)
 	}
 	s.Brightness, s.Keymap, s.Night = brightness(), keymap(), nightState()
-	s.Weather = weatherState()
+	s.Weather, s.Media = weatherState(), mediaState()
 	if s.Battery, err = batteryState(conn); err != nil {
 		fmt.Fprintln(os.Stderr, "wmd: battery:", err)
 	}
@@ -92,6 +94,7 @@ func watch(conn *dbus.Conn) error {
 	kick := make(chan struct{}, 64)
 	go hyprEvents(kick)
 	go weatherLoop(kick)
+	go mediaEvents(kick)
 	go audioEvents(kick)
 
 	enc := json.NewEncoder(os.Stdout)
@@ -157,6 +160,8 @@ func run(args []string) error {
 		return night(args[1:])
 	case "location":
 		return location(args[1:])
+	case "media":
+		return media(args[1:])
 	}
 	return errUsage
 }
