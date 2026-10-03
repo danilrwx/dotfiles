@@ -1,6 +1,7 @@
 #!/bin/bash
-# The bar's status (config/eww): memory, volume, mic, battery, brightness, keyboard layout, date, and VLESS
-# and OpenVPN while on. A JSON object a line, once a second; the bar draws the icons.
+# The bar's status (config/eww under i3, config/quickshell under Hyprland): memory, volume, mic, battery,
+# brightness, keyboard layout, date, and VLESS and OpenVPN while on. A JSON object a line, once a second;
+# the bar draws the icons.
 
 # wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0
 export LC_NUMERIC=C
@@ -46,8 +47,14 @@ openvpn() {
 while true; do
   read -r vp vm < <(vol SINK)
   read -r mp mm < <(vol SOURCE)
-  # grp_led:scroll lights Scroll Lock (bit 2 of xset's LED mask) while the second layout is on
-  ru=0; (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && ru=1
+  # Hyprland names the main keyboard's layout; under X11 grp_led:scroll lights Scroll Lock (bit 2 of xset's
+  # LED mask) while the second layout is on
+  ru=0
+  if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+    hyprctl devices -j | jq -e '.keyboards[] | select(.main) | .active_keymap | test("Russian")' > /dev/null && ru=1
+  else
+    (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && ru=1
+  fi
   bri=$(( $(brightnessctl get) * 100 / $(brightnessctl max) ))
   # the strings through jq: a subscription's profile names carry anything
   jq -nc --arg vless "$(vless)" --arg openvpn "$(openvpn)" --arg mem "$(free -h | awk '/Mem/ {print $3}')" \

@@ -1,13 +1,14 @@
 #!/bin/sh
 # The Wayland sessions' daemons, run once by config/sway/config and config/hypr/hyprland.conf (bin/x-autostart
 # is i3's): portals and systemd user units told it is a Wayland session and which (wl-autostart sway|Hyprland),
-# notifications, the polkit agent, then lock at 10 min idle and before sleep, the screen off at 15
+# notifications, the polkit agent, the bar under Hyprland, then lock at 10 min idle and before sleep, the screen off at 15
 desktop=${1:-$XDG_CURRENT_DESKTOP}
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK HYPRLAND_INSTANCE_SIGNATURE \
 	XDG_CURRENT_DESKTOP="$desktop" 2>/dev/null
 dunst &
 lxpolkit &
 if [ "$desktop" = Hyprland ]; then
+	quickshell &   # the bar (config/quickshell); sway keeps its own
 	off='hyprctl dispatch dpms off' on='hyprctl dispatch dpms on'
 else
 	off='swaymsg "output * power off"' on='swaymsg "output * power on"'
