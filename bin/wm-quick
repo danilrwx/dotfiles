@@ -1,0 +1,13 @@
+#!/bin/sh
+# The bar panel's toggles (config/eww), their state as one JSON object:
+#   {"wifi": ON, "ssid": NAME, "bt": ON, "btdev": NAME, "vless": ON}
+# ON true or false; NAME the network or device connected, "" without one. Wi-Fi and Bluetooth as rfkill
+# blocks them (the toggles flip that, /dev/rfkill being the session's), the network from iwd, the device from
+# bluez, VLESS from bin/vless
+blocked() { rfkill -rno TYPE,SOFT | awk -v t="$1" '$1 == t {print $2; exit}'; }
+ssid=$(iwctl station wlan0 show 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | awk '/Connected network/ {sub(/.*Connected network +/, ""); sub(/ +$/, ""); print}')
+btdev=$(bluetoothctl devices Connected 2>/dev/null | awk 'NR == 1 {$1 = $2 = ""; sub(/^ +/, ""); print}')
+vless=$("$HOME/dotfiles/bin/vless" status | awk '{print $1}')
+jq -nc --arg wifi "$(blocked wlan)" --arg ssid "$ssid" --arg bt "$(blocked bluetooth)" --arg btdev "$btdev" \
+	--arg vless "$vless" \
+	'{wifi: ($wifi != "blocked"), $ssid, bt: ($bt != "blocked"), $btdev, vless: ($vless != "off")}'

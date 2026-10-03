@@ -14,6 +14,7 @@
 (defvar calendar false)
 (defpoll audio :interval "2s" :run-while ctl :initial "{}" "~/dotfiles/bin/wm-audio json")
 (defpoll profile :interval "2s" :run-while ctl "powerprofilesctl get")
+(defpoll quick :interval "2s" :run-while ctl :initial "{}" "~/dotfiles/bin/wm-quick")
 
 ; the bar ───────────────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -73,55 +74,84 @@
 ; the panels: under the bar at its right end, out of i3's hands (wm-ignore), closed on a click on their block
 ; again or as the pointer leaves them ──────────────────────────────────────────────────────────────────────────
 
-; level: an icon (a button: what it runs on a click), and a slider from 0 to 100 that runs onchange with {}
-(defwidget level [icon value onchange ?onclick]
-  (box :class "level" :space-evenly false
-    (button :class "icon" :onclick {onclick ?: ""} icon)
-    (scale :hexpand true :min 0 :max 101 :value value :onchange onchange)
-    (label :class "pct" :text "${value}%")))
+; the panel, macOS's Control Center: cards on a see-through ground. Toggles up top, Wi-Fi, Bluetooth and
+; VLESS (the circle flips one, its name opens the tool behind it), the power profile and the headset beside
+; them; then a card a level: the display, the output, the input, each with its slider and devices
 
-; devices: PipeWire's sinks or sources, the default one marked, a click makes one the default
+; toggle: a circle lit while on, a click on it runs ontoggle; the name and what it is on to, a click on them
+; runs onopen
+(defwidget toggle [icon name sub on ontoggle onopen]
+  (box :class "toggle" :space-evenly false
+    (button :class "circle ${on ? 'on' : ''}" :onclick ontoggle icon)
+    (eventbox :cursor "pointer" :onclick onopen :hexpand true
+      (box :orientation "v" :valign "center" :space-evenly false
+        (label :class "name" :halign "start" :text name)
+        (label :class "sub" :halign "start" :limit-width 16 :text sub)))))
+
+; slider: a thick bar from 0 to 100 that runs onchange with {}, an icon before it (a button: onclick)
+(defwidget slider [icon value onchange ?onclick]
+  (box :class "slider" :space-evenly false
+    (button :class "slider-icon" :onclick {onclick ?: ""} icon)
+    (scale :hexpand true :min 0 :max 101 :value value :onchange onchange)))
+
+; devices: PipeWire's sinks or sources, the default one ticked, a click makes one the default
 (defwidget devices [list]
   (box :orientation "v" :class "devices"
     (for d in list
       (button :class "device ${d.def ? 'def' : ''}" :onclick "wpctl set-default ${d.id}"
-        (label :halign "start" :text "${d.def ? '●' : '○'} ${d.name}")))))
+        (box :space-evenly false
+          (label :class "tick" :text {d.def ? "✓" : ""})
+          (label :halign "start" :limit-width 30 :text {d.name}))))))
 
 (defwidget ctl []
   (eventbox :onhoverlost "~/dotfiles/bin/wm-panel ctl close"
     (box :class "panel" :orientation "v" :space-evenly false
-      ; the Bluetooth headset's mode, there while one is connected: a click flips it
-      (box :class "title" :space-evenly false
-        (label :halign "start" :hexpand true :text "Output")
-        (button :class "choice" :visible {(audio.headset ?: "") != ""}
-                :onclick "~/dotfiles/bin/wm-ctl headset &" "🎧 ${audio.headset ?: ''}"))
-      (level :icon {status.volmute ? "🔇" : "🔊"} :value {status.vol ?: 0}
-             :onclick "~/dotfiles/bin/wm-fnkeys vol-mute" :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%")
-      (devices :list {audio.sinks ?: []})
-      (label :class "title" :halign "start" :text "Input")
-      (level :icon {status.micmute ? "🙊" : "🎙️"} :value {status.mic ?: 0}
-             :onclick "~/dotfiles/bin/wm-fnkeys mic" :onchange "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ {}%")
-      (devices :list {audio.sources ?: []})
-      (label :class "title" :halign "start" :text "Brightness")
-      (level :icon "🌞" :value {status.bri ?: 0} :onchange "brightnessctl -q set {}%")
-      (label :class "title" :halign "start" :text "Power")
-      (box :class "choices"
-        (for p in '["power-saver", "balanced", "performance"]'
-          (button :class "choice ${profile == p ? 'def' : ''}" :onclick "powerprofilesctl set ${p}" p)))
-      (box :class "choices"
-        (button :class "choice" :onclick "~/dotfiles/bin/wm-ctl wifi &" "wi-fi")
-        (button :class "choice" :onclick "~/dotfiles/bin/wm-ctl bluetooth &" "bluetooth")))))
+      (box :class "row" :space-evenly true :spacing 10
+        (box :class "card" :orientation "v" :space-evenly false
+          (toggle :icon "📶" :name "Wi-Fi" :on {quick.wifi ?: false}
+                  :sub {(quick.wifi ?: false) ? (quick.ssid ?: "") : "Off"}
+                  :ontoggle "rfkill ${(quick.wifi ?: false) ? 'block' : 'unblock'} wlan"
+                  :onopen "~/dotfiles/bin/wm-ctl wifi &")
+          (toggle :icon "🔵" :name "Bluetooth" :on {quick.bt ?: false}
+                  :sub {(quick.bt ?: false) ? (quick.btdev ?: "On") : "Off"}
+                  :ontoggle "rfkill ${(quick.bt ?: false) ? 'block' : 'unblock'} bluetooth"
+                  :onopen "~/dotfiles/bin/wm-ctl bluetooth &")
+          (toggle :icon "🛡️" :name "VLESS" :on {quick.vless ?: false}
+                  :sub {status.vless != "" ? status.vless : "Off"}
+                  :ontoggle "~/dotfiles/bin/vless ${(quick.vless ?: false) ? 'off' : 'on tun'}"
+                  :onopen "~/dotfiles/bin/wm-ctl vless &"))
+        (box :orientation "v" :space-evenly false :spacing 10
+          (box :class "card"
+            (toggle :icon "⚡" :name "Power" :on {profile == "performance"} :sub profile
+                    :ontoggle "powerprofilesctl set ${profile == 'power-saver' ? 'balanced' : profile == 'balanced' ? 'performance' : 'power-saver'}"
+                    :onopen "~/dotfiles/bin/wm-ctl power &"))
+          (box :class "card" :visible {(audio.headset ?: "") != ""}
+            (toggle :icon "🎧" :name "Headset" :on {audio.headset == "handsfree"} :sub {audio.headset ?: ""}
+                    :ontoggle "~/dotfiles/bin/wm-ctl headset &" :onopen "~/dotfiles/bin/wm-ctl headset &"))))
+      (box :class "card" :orientation "v" :space-evenly false
+        (label :class "title" :halign "start" :text "Display")
+        (slider :icon "🌞" :value {status.bri ?: 0} :onchange "brightnessctl -q set {}%"))
+      (box :class "card" :orientation "v" :space-evenly false
+        (label :class "title" :halign "start" :text "Sound")
+        (slider :icon {status.volmute ? "🔇" : "🔊"} :value {status.vol ?: 0}
+                :onclick "~/dotfiles/bin/wm-fnkeys vol-mute" :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%")
+        (devices :list {audio.sinks ?: []}))
+      (box :class "card" :orientation "v" :space-evenly false
+        (label :class "title" :halign "start" :text "Microphone")
+        (slider :icon {status.micmute ? "🙊" : "🎙️"} :value {status.mic ?: 0}
+                :onclick "~/dotfiles/bin/wm-fnkeys mic" :onchange "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ {}%")
+        (devices :list {audio.sources ?: []})))))
 
 (defwindow ctl
   :monitor 0
-  :geometry (geometry :x "-6px" :y "27px" :width "300px" :anchor "top right")
+  :geometry (geometry :x "-6px" :y "29px" :width "320px" :anchor "top right")
   :stacking "fg"
   :wm-ignore true
   (ctl))
 
 (defwindow calendar
   :monitor 0
-  :geometry (geometry :x "-6px" :y "27px" :anchor "top right")
+  :geometry (geometry :x "-6px" :y "29px" :anchor "top right")
   :stacking "fg"
   :wm-ignore true
   (eventbox :onhoverlost "~/dotfiles/bin/wm-panel calendar close"

@@ -37,55 +37,95 @@ menuitem {
   &:hover { background-color: #ffffff; color: #000000; }
 }
 
-// the panels
+// the panels, macOS's Control Center: a see-through dark ground, rounded cards a shade lighter, the circles
+// of what is on filled in, thick white sliders. Noto Sans, the panels being text to read rather than a status
+// line; no blur under xcompmgr, so the ground is darker than macOS's
 .panel {
-  background-color: #000000;
+  background-color: rgba(28, 28, 30, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 10px;
   color: #ffffff;
+}
+// every widget of a panel, as * sets the bar's font on each
+.panel * {
+  font-family: "Noto Sans";
+  font-size: 10pt;
+}
+.row {
+  margin-bottom: 10px;
+}
+.card {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   padding: 8px 10px;
-  border: 1px solid #333333;
+  margin-bottom: 10px;
+}
+.row .card, .card:last-child {
+  margin-bottom: 0;
 }
 .title {
-  color: #888888;
-  margin-top: 6px;
+  font-weight: bold;
+  margin-bottom: 6px;
 }
-.level {
-  margin: 2px 0;
-  .icon { margin-right: 6px; }
-  .pct { min-width: 32px; margin-left: 6px; }
+.toggle {
+  padding: 3px 0;
+  .circle * {
+    font-family: "Noto Color Emoji";
+    font-size: 11pt;
+  }
+  .circle {
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 17px;
+    background-color: rgba(255, 255, 255, 0.14);
+    margin-right: 8px;
+    &.on { background-color: #0a84ff; }
+  }
+  .name { font-weight: bold; }
+  .sub { color: rgba(255, 255, 255, 0.55); font-size: 8.5pt; }
 }
-scale trough {
-  background-color: #333333;
-  min-height: 3px;
-  margin: 0 4px;
-  highlight { background-color: #ffffff; }
-  slider {
-    background-color: #ffffff;
-    min-width: 10px;
-    min-height: 10px;
-    border-radius: 5px;
-    margin: -4px 0;
+.slider {
+  .slider-icon * {
+    font-family: "Noto Color Emoji";
+    font-size: 10pt;
+  }
+  .slider-icon {
+    margin-right: 8px;
   }
 }
+scale trough {
+  background-color: rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  min-height: 20px;
+  highlight {
+    background-color: #ffffff;
+    border-radius: 10px;
+  }
+  slider {
+    background-color: #ffffff;
+    min-width: 20px;
+    min-height: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  }
+}
+.devices {
+  margin-top: 6px;
+}
 .device {
-  color: #888888;
-  padding: 2px 0;
+  padding: 3px 4px;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.75);
   &.def { color: #ffffff; }
-  &:hover { color: #ffffff; }
-}
-.choices {
-  margin-top: 2px;
-}
-.choice {
-  color: #888888;
-  padding: 2px 4px;
-  &.def { background-color: #ffffff; color: #000000; }
-  &:hover { color: #ffffff; }
-  &.def:hover { color: #000000; }
+  &:hover { background-color: rgba(255, 255, 255, 0.10); }
+  .tick { min-width: 16px; color: #0a84ff; }
 }
 calendar {
-  padding: 4px;
-  &:selected { background-color: #ffffff; color: #000000; }
-  &.header { color: #ffffff; }
-  &.highlight { color: #888888; }
-  &:indeterminate { color: #444444; }
+  font-family: "Noto Sans";
+  padding: 6px;
+  &:selected { background-color: #0a84ff; color: #ffffff; border-radius: 10px; }
+  &.header { color: #ffffff; font-weight: bold; }
+  &.highlight { color: rgba(255, 255, 255, 0.55); }
+  &:indeterminate { color: rgba(255, 255, 255, 0.25); }
 }
