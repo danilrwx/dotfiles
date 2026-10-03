@@ -233,15 +233,6 @@ ShellRoot {
             color: pill.lit || pill.containsMouse ? Theme.hover : "transparent"
             Behavior on color { ColorAnimation { duration: Theme.quick } }
         }
-        // a white rule under what it holds while its panel is open, as long as that, inside the hover's ground
-        Rectangle {
-            anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 3 }
-            width: row.width
-            height: 2
-            radius: 1
-            color: Theme.accent
-            visible: pill.lit
-        }
         RowLayout { id: row; anchors.centerIn: parent; spacing: 7 }
     }
     component BarText: Text {
