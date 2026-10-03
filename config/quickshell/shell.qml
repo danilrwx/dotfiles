@@ -233,10 +233,12 @@ ShellRoot {
             color: pill.lit || pill.containsMouse ? Theme.hover : "transparent"
             Behavior on color { ColorAnimation { duration: Theme.quick } }
         }
-        // a white rule under it while its panel is open
+        // a white rule under what it holds while its panel is open, as long as that, inside the hover's ground
         Rectangle {
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+            anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 3 }
+            width: row.width
             height: 2
+            radius: 1
             color: Theme.accent
             visible: pill.lit
         }
