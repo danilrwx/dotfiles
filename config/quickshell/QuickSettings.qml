@@ -1,10 +1,11 @@
 // The quick settings, GNOME's layout in the old look (Theme.qml): a popover under the bar's status. Up top the
 // battery and round buttons for a screenshot, the lock and the power menu; then the sliders, volume and mic
 // (their device lists behind an arrow) and brightness; then the toggles, two a row, GNOME's split pills:
-// Wi-Fi, Bluetooth, the power mode, VLESS, OpenVPN, the wallpaper and the headset's mode, the left side flips
-// one (inverted while on), the arrow opens its menu. A menu unfolds in place under its row, one at a time, in
-// 100 ms; a new Wi-Fi network asks its passphrase right there. Closed by a click outside (Hyprland's focus
-// grab) or on the pill again. The state from the bar's wmd, volume and mute straight through PipeWire.
+// Wi-Fi, Bluetooth, the power mode, VLESS, OpenVPN, the wallpaper, night light and the headset's mode, the left
+// side flips one (inverted while on), the arrow opens its menu. A menu unfolds in place under its row, one at
+// a time, in 100 ms; a new Wi-Fi network asks its passphrase right there. Closed by a click outside
+// (Hyprland's focus grab) or on the pill again. The state from the bar's wmd, volume and mute straight through
+// PipeWire.
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
@@ -666,16 +667,22 @@ PanelWindow {
             }
 
             RowLayout {
-                visible: (panel.audio.headset ?? "") !== ""
                 Layout.fillWidth: true
                 spacing: 10
+                // the screen warmed (Hyprland's screen shader through wmd), kept across reloads
                 Toggle {
+                    icon: "night-light-symbolic"; title: "Night Light"
+                    on: panel.net.night ?? false
+                    onFlip: panel.act([panel.wmd, "night", on ? "off" : "on"])
+                }
+                Toggle {
+                    visible: (panel.audio.headset ?? "") !== ""
                     icon: "audio-headphones-symbolic"; title: "Headset"
                     sub: panel.audio.headset === "handsfree" ? "Handsfree, with the mic" : "Headphones"
                     on: panel.audio.headset === "handsfree"
                     onFlip: panel.act([panel.wmd, "headset"])
                 }
-                Item { Layout.fillWidth: true; Layout.preferredWidth: 1 }
+                Item { visible: (panel.audio.headset ?? "") === ""; Layout.fillWidth: true; Layout.preferredWidth: 1 }
             }
             Menu {
                 names: ["openvpn"]; icon: "network-vpn-symbolic"; title: "OpenVPN"
