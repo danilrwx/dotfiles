@@ -18,7 +18,7 @@ set_from_resource $barbg theme.barbg #000000
 
 # alacritty (config/alacritty)
 set $term alacritty
-# dmenu-like launcher with the old dmenu colours, PATH fixed up for ~/.local/bin (bin/wm-menu)
+# dmenu-like launcher (rofi) in the bar's colour, PATH fixed up for ~/.local/bin (bin/wm-menu)
 set $menu $HOME/dotfiles/bin/wm-menu
 set $lock i3lock -c 000000
 
@@ -63,7 +63,7 @@ bindsym XF86AudioPrev             exec --no-startup-id playerctl previous
 bindsym $mod+Shift+s exec --no-startup-id $HOME/dotfiles/bin/screenshot-select
 bindsym $mod+d       exec --no-startup-id $menu
 bindsym $mod+Shift+x exec --no-startup-id $lock
-# Wi-Fi, Bluetooth, sound output and input, power profile: a dmenu pick (bin/wm-ctl)
+# Wi-Fi, Bluetooth, sound output and input, power profile: a menu pick (bin/wm-ctl)
 bindsym $mod+x       exec --no-startup-id $HOME/dotfiles/bin/wm-ctl
 
 bindsym Control+Mod1+s exec --no-startup-id $HOME/dotfiles/bin/sys-notify

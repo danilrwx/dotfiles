@@ -1,44 +1,20 @@
 #!/bin/sh
-# dmenu for i3, in the old dmenu colours, matching case-insensitively.
-#   wm-menu             launch an app: the ones with a .desktop entry, by name, through gtk-launch (which
-#                       opens alacritty for the terminal ones); a name not in the list runs as a command
+# rofi for i3, a dmenu-like line over the bar (config/rofi/wm-menu.rasi), matching case-insensitively:
+#   wm-menu             launch an app: rofi's own list of the .desktop entries (drun), with its history of
+#                       what was launched first
 #   wm-menu pick PROMPT choose a line of stdin, print it
 export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
-# the background: the colour the see-through bar shows over the wallpaper (bin/theme), black without one
+# the background: the colour the see-through bar shows over the wallpaper (bin/theme), black without one;
+# solid, as the bar's own see-through over a see-through menu muddies both
 bg=$(cat "${XDG_CACHE_HOME:-$HOME/.cache}/theme/barbg" 2>/dev/null || echo '#000000')
-# as tall as the i3 bar, through the line-height patch of the dmenu install builds into /usr/local
-# (the archive's knows no -h)
-h=''
-if [ -x /usr/local/bin/dmenu ]; then
-	h=$(xwininfo -root -tree | awk '/i3bar for output/ { split($(NF-1), g, /[x+]/); print g[2]; exit }')
-fi
-dmenu() { command dmenu -i -fn 'Iosevka-11' ${h:+-h "$h"} -nb "$bg" -nf '#ffffff' -sb '#ffffff' -sf "$bg" "$@"; }
-[ "${1:-}" = pick ] && { dmenu -p "$2"; exit; }
-
-# apps: "NAME<tab>ID" per entry an app launcher shows, an ID in ~/.local/share/applications hiding the
-# system one of that name (as Steam's own steam.desktop does the installer's), Hidden and NoDisplay left out
-apps() {
-	dirs=''
-	for dir in "$HOME/.local/share/applications" /usr/local/share/applications /usr/share/applications; do
-		[ -d "$dir" ] && dirs="$dirs $dir"
-	done
-	# shellcheck disable=SC2086 # the dirs, none with a space, word by word
-	find $dirs -maxdepth 1 -name '*.desktop' -print0 | xargs -0 awk '
-		function emit() { if (!(id in seen)) { seen[id] = 1; if (app && !skip && name != "") print name "\t" id } }
-		FNR == 1 { if (file) emit(); file = FILENAME; id = file; sub(/.*\//, "", id); sec = ""; name = ""; skip = 0; app = 0 }
-		/^\[/ { sec = $0; next }
-		sec == "[Desktop Entry]" && /^Name=/ && name == "" { name = substr($0, 6) }
-		sec == "[Desktop Entry]" && /^Type=Application/ { app = 1 }
-		sec == "[Desktop Entry]" && /^(Hidden|NoDisplay)=true/ { skip = 1 }
-		END { if (file) emit() }
-	' | sort -f
+# as tall as the i3 bar; the DPI rofi does not take from Xft.dpi itself
+h=$(xwininfo -root -tree | awk '/i3bar for output/ { split($(NF-1), g, /[x+]/); print g[2]; exit }')
+rofi() {
+	command rofi -i -dpi "$(xrdb -get Xft.dpi 2>/dev/null || echo 96)" -theme "$HOME/dotfiles/config/rofi/wm-menu.rasi" \
+		-theme-str "* { bg: $bg; } window { height: ${h:-50}px; }" "$@"
 }
-
-list=$(apps)
-choice=$(printf '%s\n' "$list" | cut -f1 | dmenu) || exit 0
-id=$(printf '%s\n' "$list" | awk -F '\t' -v c="$choice" '$1 == c { print $2; exit }')
-if [ -n "$id" ]; then
-	exec gtk-launch "${id%.desktop}"
+if [ "${1:-}" = pick ]; then
+	rofi -dmenu -p "$2"
 else
-	exec sh -c "$choice"
+	rofi -show drun -display-drun '' -drun-display-format '{name}'
 fi

@@ -36,20 +36,19 @@ BASE_PKGS=(build-essential git wget zip unzip curl file procps zsh tmux gnupg2 h
 # the desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop (installed by hand, so
 # debloat's autoremove keeps it): the Intel GPU's video decode and encode (VA-API, iHD), Wi-Fi by iwd,
 # Bluetooth, sound, fingerprint, power profiles, firmware updates, the file dialogs' portal, the keyring
-# Chrome keeps passwords in, fonts, printing; then the login, virtualization, ssh's askpass, the terminal,
-# and dmenu's build headers
+# Chrome keeps passwords in, fonts, printing; then the login, virtualization, ssh's askpass, the terminal
 DESKTOP_PKGS=(iwd bluez rfkill
   pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
   udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
   intel-media-va-driver-non-free
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
-  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome alacritty libx11-dev libxft-dev libxinerama-dev
+  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome alacritty
   openvpn openvpn-systemd-resolved)
-# X11 and i3 without their recommends: dmenu, dunst, i3lock/xss-lock, maim and xclip for screenshots, the
+# X11 and i3 without their recommends: rofi (bin/wm-menu), dunst, i3lock/xss-lock, maim and xclip for screenshots, the
 # media keys (bin/wm-fnkeys), the polkit agent
 X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit x11-xserver-utils xinput
-  i3-wm i3lock xss-lock dunst suckless-tools maim xclip hsetroot xcompmgr brightnessctl playerctl lxpolkit libnotify-bin)
+  i3-wm i3lock xss-lock dunst rofi maim xclip hsetroot xcompmgr brightnessctl playerctl lxpolkit libnotify-bin)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
 
 # Helpers ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -204,7 +203,7 @@ desktop_system() {
     -e 's|^FONTSIZE=.*|FONTSIZE="16x32"|' /etc/default/console-setup
 }
 
-# Desktop, user side: the session's configs, dmenu, ssh-agent────────────────────────────────────────────────────────────
+# Desktop, user side: the session's configs, ssh-agent───────────────────────────────────────────────────────────────────
 desktop_session() {
   link config/i3 "$HOME/.config/i3"
   link config/dunst "$HOME/.config/dunst"
@@ -220,18 +219,6 @@ desktop_session() {
   # Emoji rather than a monochrome fallback (config/fontconfig)
   link config/alacritty "$HOME/.config/alacritty"
   link config/fontconfig/fonts.conf "$HOME/.config/fontconfig/fonts.conf"
-  # dmenu 5.4 with the line-height patch (patches/dmenu-lineheight.diff) into /usr/local, ahead of the
-  # archive's: -h, so bin/wm-menu opens it exactly as tall as the i3 bar. Built once per version
-  local dmenu_ver=5.4 tmp
-  if [ "$(/usr/local/bin/dmenu -v 2>&1)" != "dmenu-$dmenu_ver" ]; then
-    log "Building dmenu $dmenu_ver with line-height"
-    tmp=$(mktemp -d)
-    git clone -q --depth 1 --branch "$dmenu_ver" https://git.suckless.org/dmenu "$tmp" \
-      && git -C "$tmp" apply "$HOME/dotfiles/patches/dmenu-lineheight.diff" \
-      && make -s -C "$tmp" && sudo make -s -C "$tmp" install || log "Failed to build dmenu. Continue installation."
-    rm -rf "$tmp"
-  fi
-
   # alacritty as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim); the
   # package registers it, st's and bin/term's entries from older installs go
   sudo update-alternatives --remove x-terminal-emulator /usr/local/bin/st 2>/dev/null

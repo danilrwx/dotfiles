@@ -38,6 +38,8 @@ REMOVE=(
   snapd wayland-scroll-factor ghostty foot
   # Firefox, Mozilla's .deb an older install put in, Chrome being the browser
   firefox
+  # dmenu and bemenu, rofi being the menu (bin/wm-menu), and the headers dmenu's and st's builds took
+  suckless-tools bemenu libx11-dev libxft-dev libxinerama-dev
   # the sway session, given up for i3 on X11, and pavucontrol (bin/wm-ctl picks the devices)
   sway swaybg swayidle swaylock wmenu mako-notifier grim slurp wl-clipboard xdg-desktop-portal-wlr wob xwayland
   pavucontrol
@@ -114,9 +116,12 @@ log "Removing configs of the removed apps"
 for c in "${STALE[@]}"; do rm -rf "${HOME:?}/.config/$c"; done
 # the links install made for sway, mako and kitty point at nothing now
 for l in sway mako kitty; do [ -L "$HOME/.config/$l" ] && [ ! -e "$HOME/.config/$l" ] && rm "$HOME/.config/$l"; done
-# dwm and st, built into /usr/local by older installs (alacritty is the terminal now), and dwm's session
+# dwm, st and dmenu, built into /usr/local by older installs (alacritty is the terminal, rofi the menu now),
+# and dwm's session
 sudo rm -f /usr/local/bin/dwm /usr/local/share/man/man1/dwm.1 /usr/share/xsessions/dwm.desktop \
-  /usr/local/bin/st /usr/local/share/man/man1/st.1
+  /usr/local/bin/st /usr/local/share/man/man1/st.1 \
+  /usr/local/bin/dmenu /usr/local/bin/dmenu_path /usr/local/bin/dmenu_run /usr/local/bin/stest \
+  /usr/local/share/man/man1/dmenu.1 /usr/local/share/man/man1/stest.1
 
 # What older installs left ───────────────────────────────────────────────────────────────────────────────────────────
 # fonts downloaded before the archive's fonts-iosevka, fonts-font-awesome and fonts-noto-color-emoji: the

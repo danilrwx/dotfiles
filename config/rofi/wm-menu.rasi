@@ -1,0 +1,48 @@
+/* bin/wm-menu's rofi: a dmenu-like line over the i3 bar; bin/wm-menu sets bg (the colour the bar
+ * shows, ~/.cache/theme/barbg) and the height (the bar's) */
+* {
+    bg:               #000000ff;
+    background-color: transparent;
+    text-color:       #ffffff;
+    font:             "Iosevka 11";
+}
+window {
+    anchor:           north;
+    location:         north;
+    width:            100%;
+    background-color: @bg;
+    children:         [ horibox ];
+}
+horibox {
+    orientation:      horizontal;
+    children:         [ prompt, entry, listview ];
+}
+prompt {
+    vertical-align:   0.5;
+    padding:          0 0.5em;
+}
+entry {
+    expand:           false;
+    width:            10em;
+    vertical-align:   0.5;
+    placeholder:      "";
+}
+listview {
+    layout:           horizontal;
+    lines:            100;
+    spacing:          0;
+}
+/* the highlight as tall as the bar, as dmenu's: Iosevka 11 at 192 dpi is 37px, the bar 50
+ * ponytail: tied to that font and bar; derive it in bin/wm-menu if either changes */
+element {
+    padding:          6px 0.5em 7px;
+}
+element selected {
+    background-color: #ffffff;
+    text-color:       @bg;
+}
+element-text {
+    background-color: inherit;
+    text-color:       inherit;
+    vertical-align:   0.5;
+}
