@@ -101,6 +101,12 @@ ShellRoot {
         function ctl(): void { root.panel(qs) }
         function calendar(): void { root.panel(cal) }
     }
+    // the bar itself, hidden and shown: quickshell ipc call bar toggle ($mod+b, config/hypr)
+    property bool shown: true
+    IpcHandler {
+        target: "bar"
+        function toggle(): void { root.shown = !root.shown }
+    }
 
     // a pill of the bar: rounded, lit under the pointer, what it holds in a row; clicks and the wheel given
     component Pill: MouseArea {
@@ -137,6 +143,7 @@ ShellRoot {
             id: bar
             required property var modelData
             screen: modelData
+            visible: root.shown
             anchors { top: true; left: true; right: true }
             implicitHeight: 25
             color: "#000000"
