@@ -7,8 +7,8 @@ export PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOM
 # the background: the colour the see-through bar shows over the wallpaper (bin/theme), black without one;
 # solid, as the bar's own see-through over a see-through menu muddies both
 bg=$(cat "${XDG_CACHE_HOME:-$HOME/.cache}/theme/barbg" 2>/dev/null || echo '#000000')
-# as tall as the i3 bar; the DPI rofi does not take from Xft.dpi itself
-h=$(xwininfo -root -tree | awk '/i3bar for output/ { split($(NF-1), g, /[x+]/); print g[2]; exit }')
+# as tall as the bar (config/eww); the DPI rofi does not take from Xft.dpi itself
+h=$(xwininfo -root -tree | awk '/"Eww - bar"/ { split($(NF-1), g, /[x+]/); print g[2]; exit }')
 rofi() {
 	command rofi -i -dpi "$(xrdb -get Xft.dpi 2>/dev/null || echo 96)" -theme "$HOME/dotfiles/config/rofi/wm-menu.rasi" \
 		-theme-str "* { bg: $bg; } window { height: ${h:-50}px; }" "$@"

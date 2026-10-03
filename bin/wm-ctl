@@ -6,32 +6,13 @@
 # headphones (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vless: on through
 # TUN or as the system proxy, off, the rule or global mode, the profile. theme picks bin/theme's dark, or
 # dark-wall and then the wallpaper, a random one or by name. openvpn brings a profile of bin/openvpn-ctl up,
-# or the one up down.
+# or the one up down. A pick given as the argument skips the first menu (the bar's blocks, config/eww).
 menu="$HOME/dotfiles/bin/wm-menu"
 # term TITLE CMD: alacritty with class wm-ctl
 term() { exec alacritty --class wm-ctl -T "$1" -e "$2"; }
-# devices Sink|Source: "ID<tab>NAME" per PipeWire audio sink or source, the default one first. Only the
-# nodes of class Audio/Sink or Audio/Source: wpctl status lists WirePlumber's internal Bluetooth nodes as the
-# sinks, while the headset's real one sits under its filters. Left out unless the default: those whose every
-# port the card reports unplugged ("available": "no", the HDMI outputs with no display on them; a port ALSA
-# cannot sense, the speaker or a mic, says "unknown")
-devices() {
-	pw-dump | jq -r --arg class "Audio/$1" --arg key "default.audio.$(echo "$1" | tr '[:upper:]' '[:lower:]')" '
-		([.[] | select(.type == "PipeWire:Interface:Metadata" and .props["metadata.name"] == "default")
-			| .metadata[] | select(.key == $key) | .value.name][0] // "") as $default
-		| (map(select(.type == "PipeWire:Interface:Device"))
-			| map({key: (.id | tostring), value: [.info.params.EnumRoute[]?]}) | from_entries) as $routes
-		| [.[] | select(.type == "PipeWire:Interface:Node" and .info.props["media.class"] == $class)
-			| .info.props as $p
-			| ($p["node.name"] == $default) as $def
-			| (($routes[$p["device.id"] | tostring] // []) | map(select(.devices | index($p["card.profile.device"])))) as $r
-			| select($def or ($r | length) == 0 or any($r[]; .available != "no"))
-			| {def: $def, id, name: ($p["node.nick"] // $p["node.description"])}]
-		| sort_by(.def | not) | .[] | "\(.id)\t\(.name)"'
-}
 # sound Sink|Source TITLE: pick a device by name, make it the default
 sound() {
-	list=$(devices "$1")
+	list=$("$HOME/dotfiles/bin/wm-audio" "$1")
 	name=$(printf '%s\n' "$list" | cut -f2- | "$menu" pick "$2") || exit 0
 	id=$(printf '%s\n' "$list" | awk -F '\t' -v n="$name" '$2 == n {print $1; exit}')
 	[ -n "$id" ] || exit 0
@@ -124,7 +105,9 @@ theme() {
 		notify-send -a fnkeys -r 9912 -u critical "Theme" "$err"
 	fi
 }
-choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\nopenvpn\ntheme\npower\n' | "$menu" pick ctl) || exit 0
+# the pick given (the bar's blocks and panel: wm-ctl vless), else from the menu
+choice=${1:-}
+[ -n "$choice" ] || choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\nopenvpn\ntheme\npower\n' | "$menu" pick ctl) || exit 0
 case "$choice" in
 power)
 	cur=$(powerprofilesctl get)

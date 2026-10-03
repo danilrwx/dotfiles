@@ -10,6 +10,8 @@ setxkbmap -layout us,ru -option '' -option grp:ctrl_space_toggle,grp_led:scroll
 # portals and systemd user units see this session
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP 2>/dev/null
 
+# the bar (config/eww): GTK at the panel's 2x, the daemon, then its window
+GDK_SCALE=2 GDK_DPI_SCALE=0.5 eww daemon && eww open bar
 dunst &                    # notifications (config/dunst)
 lxpolkit &                 # polkit agent: virt-manager, udisks, ...
 # lock at 10 min idle and before sleep; screens off at 15 min through DPMS

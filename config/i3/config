@@ -13,8 +13,6 @@ set $bg       #000000
 set $fg       #ffffff
 set $accent   #00cd00
 set $darkgray #888888
-# the bar's background: black, see-through over a wallpaper under bin/theme's dark-wall (the X resource)
-set_from_resource $barbg theme.barbg #000000
 
 # alacritty (config/alacritty)
 set $term alacritty
@@ -90,7 +88,8 @@ bindsym $mod+Shift+$right move right
 bindsym $mod+v split v
 bindsym $mod+c split h
 
-bindsym $mod+b bar mode toggle
+# the bar (config/eww), shown and hidden
+bindsym $mod+b exec --no-startup-id eww open --toggle bar
 
 bindsym $mod+f fullscreen toggle
 
@@ -168,24 +167,4 @@ client.focused                 $bg        $bg       $fg            $accent      
 client.focused_inactive        $bg        $bg       $darkgray      $bg          $bg
 client.unfocused               $bg        $bg       $darkgray      $bg          $bg
 client.urgent                  $accent    $bg       $accent        $accent      $accent
-
-bar {
-  # Nerd Font icons a size below the text (bin/wm-status), 24px clear of the panel's rounded corners at
-  # either end (12 logical px, i3 doubles them at Xft.dpi 192); the tray takes no padding
-  status_command $HOME/dotfiles/bin/wm-status
-  # RGBA colours, for $barbg's alpha under xcompmgr (bin/theme dark-wall)
-  i3bar_command i3bar --transparency
-  padding 0 12px
-  tray_padding 5
-  position top
-  colors {
-     background $barbg
-     statusline $darkgray
-     #class               border  backgr. text
-     focused_workspace    $barbg     $barbg     $fg
-     inactive_workspace   $barbg     $barbg     $darkgray
-     active_workspace     $barbg     $barbg     $darkgray
-     urgent_workspace     $barbg     $barbg     $accent
-  }
-}
 

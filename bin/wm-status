@@ -1,111 +1,59 @@
 #!/bin/bash
-# i3bar's status line (config/i3/config), ported from the old i3 baraction: memory, volume, mic,
-# battery, brightness, keyboard layout, date. i3bar's JSON protocol with pango markup, once a second.
+# The bar's status (config/eww): memory, volume, mic, battery, brightness, keyboard layout, date, and VLESS
+# and OpenVPN while on. A JSON object a line, once a second; the bar draws the icons.
 
 # wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0
 export LC_NUMERIC=C
 
-# Icons: Noto Color Emoji (fonts-noto-color-emoji), each a size below the text so the bar keeps its height.
-# glyph EMOJI [PX]: the emoji between its two spaces. A narrow one (the mic, the battery) leaves blank on
-# both sides of its square, so PX comes off each space: Pango letter-spacing, 1024 of its units a px in
-# i3bar at Xft.dpi 192 (Iosevka has no narrower space to swap in, its thin ones are as wide as the plain)
-glyph() {
-  local sp=' '
-  [ "${2:-0}" -gt 0 ] && sp="<span letter_spacing='-$(( $2 * 1024 ))'> </span>"
-  printf "%s<span font='Noto Color Emoji 9'>%s</span>%s" "$sp" "$1" "$sp"
-}
-I_MEM=$(glyph 🧠) I_VOL=$(glyph 🔊) I_MUTE=$(glyph 🔇) I_MIC=$(glyph 🎙️ 4) I_MICOFF=$(glyph 🙊)
-I_BRI=$(glyph 🌞) I_RU=$(glyph 🇷🇺) I_US=$(glyph 🇺🇸)
-
+# vol SINK|SOURCE: "PCT MUTED" from wpctl's "Volume: 0.45 [MUTED]"
 vol() {
-  local icon=$I_VOL out
-  out=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)   # "Volume: 0.45 [MUTED]"
-  [[ $out == *MUTED* ]] && icon=$I_MUTE
-  echo -e "$icon$(awk '{printf "%d%%", $2*100}' <<<"$out")"
+  wpctl get-volume "@DEFAULT_AUDIO_$1@" 2>/dev/null | awk '{printf "%d %s", $2 * 100, ($3 == "[MUTED]")}'
 }
 
-mic() {
-  local icon=$I_MIC out
-  out=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null)
-  [[ $out == *MUTED* ]] && icon=$I_MICOFF
-  echo -e "$icon$(awk '{printf "%d%%", $2*100}' <<<"$out")"
+# batteries: [{pct, icon}], ⚡ while charging, 🪫 below 20%, 🔋 otherwise
+bats() {
+  local b out=()
+  for b in /sys/class/power_supply/BAT*; do
+    [ -d "$b" ] || continue
+    local pct icon=🔋
+    pct=$(cat "$b/capacity")
+    if [ "$(cat "$b/status")" = Charging ]; then icon=⚡; elif (( pct < 20 )); then icon=🪫; fi
+    out+=("{\"pct\":$pct,\"icon\":\"$icon\"}")
+  done
+  local IFS=,; echo "[${out[*]}]"
 }
 
-# bat_icon N: ⚡ while charging, 🪫 below 20%, 🔋 otherwise
-bat_icon() {
-  local bat="/sys/class/power_supply/BAT$1"
-  if [[ $(cat "$bat/status") = "Charging" ]]; then printf ⚡
-  elif (( $(cat "$bat/capacity") < 20 )); then printf 🪫
-  else printf 🔋; fi
-}
-
-bat() {
-  local n=$1
-  if [[ -d /sys/class/power_supply/BAT$n/ ]]; then
-    local icon trim=0
-    icon=$(bat_icon "$n")
-    [ "$icon" = 🔋 ] && trim=6   # the battery stands narrow in its square, ⚡ and 🪫 less so
-    echo -e "$(del)$(glyph "$icon" $trim)$(cat /sys/class/power_supply/BAT$n/capacity)%"
-  fi
-}
-
-bri() {
-  if command -v brightnessctl &>/dev/null; then
-    local c m
-    c=$(brightnessctl get)
-    m=$(brightnessctl max)
-    echo -e "$(del)$I_BRI$(( c * 100 / m ))%"
-  fi
-}
-
-del() {
-  echo -e " "
-}
-
-datef() {
-  date +'%d/%m/%Y %H:%M'
-}
-
-# vless: bin/vless's state while on, nothing while off: 🛡️ TUN or 🔀 the system proxy, the profile, and
-# "global" in that mode. The profile's name escaped for the markup and the JSON line: a subscription's
-# names carry anything
+# vless: bin/vless's state, "" while off: 🛡️ TUN or 🔀 the system proxy, the profile, "global" in that mode
 vless() {
   local how mode profile
   read -r how mode profile < <("$HOME/dotfiles/bin/vless" status)
   [ "$how" = off ] && return
-  profile=$(printf %s "${profile:0:16}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/["\\]//g')
-  [ "$mode" = global ] && profile+=" global"
-  if [ "$how" = tun ]; then echo -e "$(glyph 🛡️)$profile$(del)"; else echo -e "$(glyph 🔀)$profile$(del)"; fi
+  [ "$mode" = global ] && profile="${profile:0:16} global" || profile=${profile:0:16}
+  if [ "$how" = tun ]; then echo "🛡️ $profile"; else echo "🔀 $profile"; fi
 }
 
-# openvpn: bin/openvpn-ctl's profile while one is up, nothing while off; ⏳ while it connects
+# openvpn: bin/openvpn-ctl's profile while one is up, "" while off; ⏳ while it connects
 openvpn() {
   local s
   s=$("$HOME/dotfiles/bin/openvpn-ctl" status)
   [ "$s" = off ] && return
-  s=$(printf %s "${s:0:20}" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/["\\]//g')
   case "$s" in
-  *" connecting") echo -e "$(glyph ⏳)${s% connecting}$(del)" ;;
-  *)              echo -e "$(glyph 🔒)$s$(del)" ;;
+  *" connecting") echo "⏳ ${s% connecting}" ;;
+  *)              echo "🔒 ${s:0:20}" ;;
   esac
 }
 
-mem() {
-  echo -e "$I_MEM$(free -h | awk '/Mem/{print $3}')"
-}
-
-keyboard() {
-  # grp_led:scroll lights Scroll Lock (bit 2 of xset's LED mask) while the second layout is on
-  local ru=0
-  (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && ru=1
-  (( ru )) && echo -e "${I_RU}RU" || echo -e "${I_US}US"
-}
-
-# one block per line in an endless array; the line has no " or \ to escape
-echo '{"version":1}'
-echo '['
 while true; do
-  line="$(vless)$(openvpn)$(mem)$(del)$(vol)$(del)$(mic)$(bat 0)$(bat 1)$(bri)$(del)$(keyboard)$(del)$(datef)"
-  printf '[{"full_text":"%s","markup":"pango"}],\n' "$line"
+  read -r vp vm < <(vol SINK)
+  read -r mp mm < <(vol SOURCE)
+  # grp_led:scroll lights Scroll Lock (bit 2 of xset's LED mask) while the second layout is on
+  ru=0; (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && ru=1
+  bri=$(( $(brightnessctl get) * 100 / $(brightnessctl max) ))
+  # the strings through jq: a subscription's profile names carry anything
+  jq -nc --arg vless "$(vless)" --arg openvpn "$(openvpn)" --arg mem "$(free -h | awk '/Mem/ {print $3}')" \
+    --argjson vol "${vp:-0}" --argjson volmute "${vm:-0}" --argjson mic "${mp:-0}" --argjson micmute "${mm:-0}" \
+    --argjson bats "$(bats)" --argjson bri "$bri" --argjson ru "$ru" --arg date "$(date +'%d/%m/%Y %H:%M')" \
+    '{$vless, $openvpn, $mem, $vol, volmute: ($volmute == 1), $mic, micmute: ($micmute == 1), $bats, $bri,
+      ru: ($ru == 1), $date}'
   sleep 1
 done

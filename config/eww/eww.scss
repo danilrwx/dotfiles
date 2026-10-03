@@ -1,0 +1,91 @@
+// The bar's look (eww.yuck): i3bar's, Iosevka on black (see-through under bin/theme's dark-wall), white for
+// the focused workspace, gray for the rest and the status, green for urgent. The panels solid black, white
+// for what is on, as rofi's pick
+* {
+  all: unset;
+  font-family: "Iosevka";
+  font-size: 11pt;
+}
+.bar {
+  color: #888888;
+  padding: 0 12px;
+}
+.ws {
+  padding: 0 6px;
+  &.focused { color: #ffffff; }
+  &.urgent { color: #00cd00; }
+}
+.block {
+  margin-left: 12px;
+}
+.icon {
+  font-family: "Noto Color Emoji";
+  font-size: 9pt;
+  margin-right: 4px;
+}
+.tray {
+  margin-left: 12px;
+}
+// the tray's menus (Discord's): black, the item under the pointer white, as rofi's pick
+menu {
+  background-color: #000000;
+  padding: 4px 0;
+}
+menuitem {
+  color: #ffffff;
+  padding: 4px 12px;
+  &:hover { background-color: #ffffff; color: #000000; }
+}
+
+// the panels
+.panel {
+  background-color: #000000;
+  color: #ffffff;
+  padding: 8px 10px;
+  border: 1px solid #333333;
+}
+.title {
+  color: #888888;
+  margin-top: 6px;
+}
+.level {
+  margin: 2px 0;
+  .icon { margin-right: 6px; }
+  .pct { min-width: 32px; margin-left: 6px; }
+}
+scale trough {
+  background-color: #333333;
+  min-height: 3px;
+  margin: 0 4px;
+  highlight { background-color: #ffffff; }
+  slider {
+    background-color: #ffffff;
+    min-width: 10px;
+    min-height: 10px;
+    border-radius: 5px;
+    margin: -4px 0;
+  }
+}
+.device {
+  color: #888888;
+  padding: 2px 0;
+  &.def { color: #ffffff; }
+  &:hover { color: #ffffff; }
+}
+.choices {
+  margin-top: 2px;
+}
+.choice {
+  color: #888888;
+  padding: 2px 4px;
+  &.def { background-color: #ffffff; color: #000000; }
+  &:hover { color: #ffffff; }
+  &.def:hover { color: #000000; }
+}
+calendar {
+  padding: 4px;
+  &:selected { background-color: #ffffff; color: #000000; }
+  &.header { color: #ffffff; }
+  &.highlight { color: #888888; }
+  &:indeterminate { color: #444444; }
+}

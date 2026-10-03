@@ -36,7 +36,8 @@ BASE_PKGS=(build-essential git wget zip unzip curl file procps zsh tmux gnupg2 h
 # the desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop (installed by hand, so
 # debloat's autoremove keeps it): the Intel GPU's video decode and encode (VA-API, iHD), Wi-Fi by iwd,
 # Bluetooth, sound, fingerprint, power profiles, firmware updates, the file dialogs' portal, the keyring
-# Chrome keeps passwords in, fonts, printing; then the login, virtualization, ssh's askpass, the terminal
+# Chrome keeps passwords in, fonts, printing; then the login, virtualization, ssh's askpass, the terminal,
+# and the bar's build (eww: Rust, GTK3, the tray's menus)
 DESKTOP_PKGS=(iwd bluez rfkill
   pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
@@ -44,6 +45,7 @@ DESKTOP_PKGS=(iwd bluez rfkill
   intel-media-va-driver-non-free
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
   greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome alacritty
+  rustc cargo libgtk-3-dev libdbusmenu-gtk3-dev
   openvpn openvpn-systemd-resolved)
 # X11 and i3 without their recommends: rofi (bin/wm-menu), dunst, i3lock/xss-lock, maim and xclip for screenshots, the
 # media keys (bin/wm-fnkeys), the polkit agent
@@ -218,6 +220,18 @@ desktop_session() {
   # the terminal, alacritty (config/alacritty), and what Iosevka lacks, the emoji above all, from Noto Color
   # Emoji rather than a monochrome fallback (config/fontconfig)
   link config/alacritty "$HOME/.config/alacritty"
+  # the bar, eww (config/eww; bin/x-autostart starts it), built into /usr/local with the X11 backend alone:
+  # not in the archive and without release binaries. Pinned to a commit, rebuilt when it changes
+  link config/eww "$HOME/.config/eww"
+  local eww_rev=48f5aa8b379adf29da0b0bb9ca04164f65d8bdaa tmp
+  if [ "$(eww --version 2> /dev/null)" != "eww 0.6.0 $eww_rev" ]; then
+    log "Building eww"
+    tmp=$(mktemp -d)
+    git clone -q https://github.com/elkowar/eww "$tmp" && git -C "$tmp" checkout -q "$eww_rev" \
+      && cargo build -q --release --no-default-features --features x11 --manifest-path "$tmp/Cargo.toml" \
+      && sudo install -m 755 "$tmp/target/release/eww" /usr/local/bin/eww || log "Failed to build eww. Continue installation."
+    rm -rf "$tmp"
+  fi
   link config/fontconfig/fonts.conf "$HOME/.config/fontconfig/fonts.conf"
   # alacritty as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim); the
   # package registers it, st's and bin/term's entries from older installs go
