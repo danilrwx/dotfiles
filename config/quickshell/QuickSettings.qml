@@ -419,50 +419,62 @@ PanelWindow {
                 names: ["wifi"]; icon: "network-wireless-symbolic"; title: "Wi-Fi"
                 Repeater {
                     model: panel.net.wifi.networks ?? []
-                    Item_ {
+                    // a network, and right under it its passphrase while it is the one asked for
+                    ColumnLayout {
+                        id: nw
                         required property var modelData
-                        icon: "network-wireless-signal-" + ["none", "weak", "ok", "good", "excellent"][modelData.signal] + "-symbolic"
-                        text: modelData.ssid; on: modelData.connected
-                        note: modelData.known || modelData.security === "open" ? "" : "🔒"
-                        // a known or open network joins; a new one asks its passphrase below
-                        onClicked: {
-                            if (modelData.known || modelData.security === "open") panel.act([panel.wmd, "wifi", "connect", modelData.ssid])
-                            else { panel.asking = modelData.ssid; panel.wifiError = ""; pass.text = ""; pass.forceActiveFocus() }
-                        }
-                    }
-                }
-                // the passphrase of the network asked for: Enter joins, Escape gives up
-                ColumnLayout {
-                    visible: panel.asking !== ""
-                    Layout.fillWidth: true
-                    Layout.margins: 6
-                    spacing: 4
-                    Label { text: "Passphrase for " + panel.asking; color: Theme.dim; font.pointSize: 9 }
-                    Rectangle {
+                        readonly property bool asked: panel.asking === modelData.ssid
                         Layout.fillWidth: true
-                        implicitHeight: 32
-                        color: Theme.popover
-                        border.color: pass.activeFocus ? Theme.fg : Theme.rule
-                        TextInput {
-                            id: pass
-                            anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
-                            verticalAlignment: TextInput.AlignVCenter
-                            echoMode: TextInput.Password
-                            color: Theme.fg
-                            font.family: Theme.font
-                            font.pointSize: 10
-                            enabled: !join.running
-                            onAccepted: panel.connect(panel.asking, text)
-                            Keys.onEscapePressed: panel.asking = ""
+                        spacing: 0
+                        Item_ {
+                            icon: "network-wireless-signal-" + ["none", "weak", "ok", "good", "excellent"][nw.modelData.signal] + "-symbolic"
+                            text: nw.modelData.ssid; on: nw.modelData.connected
+                            note: nw.modelData.known || nw.modelData.security === "open" ? "" : "🔒"
+                            // a known or open network joins; a new one asks its passphrase
+                            onClicked: {
+                                if (nw.modelData.known || nw.modelData.security === "open") {
+                                    panel.act([panel.wmd, "wifi", "connect", nw.modelData.ssid])
+                                } else {
+                                    panel.asking = nw.asked ? "" : nw.modelData.ssid
+                                    panel.wifiError = ""
+                                    pass.text = ""
+                                    if (panel.asking !== "") pass.forceActiveFocus()
+                                }
+                            }
                         }
-                    }
-                    Label {
-                        visible: join.running || panel.wifiError !== ""
-                        text: join.running ? "Joining…" : panel.wifiError
-                        color: join.running ? Theme.dim : Theme.urgent
-                        font.pointSize: 9
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
+                        // the passphrase: Enter joins, Escape gives up
+                        ColumnLayout {
+                            visible: nw.asked
+                            Layout.fillWidth: true
+                            Layout.leftMargin: 36; Layout.rightMargin: 6; Layout.bottomMargin: 6
+                            spacing: 4
+                            Rectangle {
+                                Layout.fillWidth: true
+                                implicitHeight: 30
+                                color: Theme.popover
+                                border.color: pass.activeFocus ? Theme.fg : Theme.rule
+                                TextInput {
+                                    id: pass
+                                    anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
+                                    verticalAlignment: TextInput.AlignVCenter
+                                    echoMode: TextInput.Password
+                                    color: Theme.fg
+                                    font.family: Theme.font
+                                    font.pointSize: 10
+                                    enabled: !join.running
+                                    onAccepted: panel.connect(nw.modelData.ssid, text)
+                                    Keys.onEscapePressed: panel.asking = ""
+                                }
+                            }
+                            Label {
+                                visible: join.running || panel.wifiError !== ""
+                                text: join.running ? "Joining…" : panel.wifiError
+                                color: join.running ? Theme.dim : Theme.urgent
+                                font.pointSize: 9
+                                wrapMode: Text.Wrap
+                                Layout.fillWidth: true
+                            }
+                        }
                     }
                 }
                 Separator {}
