@@ -2,8 +2,7 @@
 // than their command-line tools: Wi-Fi through iwd and Bluetooth through BlueZ (D-Bus), the radios through
 // /dev/rfkill, the power profile through power-profiles-daemon, the backlight through logind, the keyboard
 // layout through Hyprland's sockets, the sound devices through pw-dump, VLESS through mihomo's API, OpenVPN
-// through systemd, bin/theme's pick from its state files, the load from /proc and hwmon, the weather from
-// open-meteo.
+// through systemd, bin/theme's pick from its state files, the weather from open-meteo.
 //
 //	wmd watch                                 the state as a JSON line, again on every change
 //	wmd wifi on|off|scan|disconnect           the radio, a scan, leave the network
@@ -50,7 +49,6 @@ type State struct {
 	OpenVPN    OpenVPN   `json:"openvpn"`
 	Theme      Theme     `json:"theme"`
 	Night      Night     `json:"night"`
-	System     System    `json:"system"`
 	Weather    *Weather  `json:"weather"`
 }
 
@@ -70,7 +68,7 @@ func state(conn *dbus.Conn) State {
 		fmt.Fprintln(os.Stderr, "wmd: audio:", err)
 	}
 	s.Brightness, s.Keymap, s.Night = brightness(), keymap(), nightState()
-	s.System, s.Weather = systemState(), weatherState()
+	s.Weather = weatherState()
 	s.Vless, s.OpenVPN, s.Theme = vlessState(), openvpnState(conn), themeState()
 	return s
 }

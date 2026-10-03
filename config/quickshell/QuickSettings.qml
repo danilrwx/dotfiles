@@ -512,43 +512,6 @@ PanelWindow {
                 }
             }
 
-            // the machine's load (wmd): CPU, memory, the CPU's temperature, the battery's draw, the fans
-            Rectangle {
-                id: sysCard
-                readonly property var sys: panel.net.system ?? ({})
-                Layout.fillWidth: true
-                implicitHeight: sysRow.implicitHeight + 16
-                radius: Theme.radius
-                color: Theme.card
-                border.color: Theme.rule
-                component Stat: ColumnLayout {
-                    property string name
-                    property string value
-                    property real level: -1
-                    Layout.fillWidth: true
-                    spacing: 3
-                    Label { text: parent.name; color: Theme.dim; font.pointSize: 8.5 }
-                    Label { text: parent.value; font.bold: true }
-                    Rectangle {
-                        visible: parent.level >= 0
-                        Layout.fillWidth: true; implicitHeight: 3; radius: 1.5; color: Theme.rule
-                        Rectangle { height: parent.height; radius: 1.5; color: Theme.accent; width: parent.width * Math.min(1, Math.max(0, parent.parent.level)) }
-                    }
-                }
-                RowLayout {
-                    id: sysRow
-                    anchors { left: parent.left; right: parent.right; top: parent.top; margins: 8; leftMargin: 12; rightMargin: 12 }
-                    spacing: 12
-                    Stat { name: "CPU"; value: (sysCard.sys.cpu ?? 0) + "%"; level: (sysCard.sys.cpu ?? 0) / 100 }
-                    Stat { name: "Memory"; value: (sysCard.sys.memGiB ?? 0) + " GiB"; level: (sysCard.sys.memory ?? 0) / 100 }
-                    Stat { name: "Temp"; value: (sysCard.sys.temp ?? 0) + "°C"; level: ((sysCard.sys.temp ?? 0) - 30) / 70 }
-                    Stat {
-                        name: (sysCard.sys.watts ?? 0) > 0 ? "Draw" : "Fans"
-                        value: (sysCard.sys.watts ?? 0) > 0 ? sysCard.sys.watts + " W" : (sysCard.sys.fans ?? []).join(" / ") + " rpm"
-                    }
-                }
-            }
-
             // the toggles, two a row, each row's menu under it
             RowLayout {
                 Layout.fillWidth: true
