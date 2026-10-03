@@ -100,6 +100,33 @@ ShellRoot {
         function ctl(): void { root.panel(qs) }
         function calendar(): void { root.panel(cal) }
     }
+    // the launcher in the bar, dmenu's way: open while launching ($mod+d: quickshell ipc call launcher toggle)
+    property bool launching: false
+    IpcHandler {
+        target: "launcher"
+        function toggle(): void { root.launching = !root.launching }
+    }
+    // the apps an app menu shows, by name, a name starting with the query first, then one holding it
+    function apps(query) {
+        const q = query.toLowerCase()
+        const all = DesktopEntries.applications.values.filter(e => !e.noDisplay)
+        const hit = all.filter(e => e.name.toLowerCase().includes(q))
+        const starts = hit.filter(e => e.name.toLowerCase().startsWith(q))
+        const rest = hit.filter(e => !e.name.toLowerCase().startsWith(q))
+        const byName = (a, b) => a.name.localeCompare(b.name)
+        return starts.sort(byName).concat(rest.sort(byName))
+    }
+    // launch an app, a terminal one in alacritty; or, with none picked, what was typed as a command
+    function launch(entry, typed) {
+        launching = false
+        if (entry) {
+            if (entry.runInTerminal) run(["alacritty", "-e"].concat(entry.command))
+            else entry.execute()
+        } else if (typed.trim() !== "") {
+            run(["sh", "-c", typed])
+        }
+    }
+
     // the bar's mode, i3's bar mode toggle: docked, or hidden and shown over the windows while Super is held.
     // quickshell ipc call bar toggle ($mod+b), peek and unpeek (Super down and up, config/hypr)
     property bool docked: true
@@ -155,7 +182,9 @@ ShellRoot {
             id: bar
             required property var modelData
             screen: modelData
-            visible: root.docked || root.peeking
+            visible: root.docked || root.peeking || root.launching
+            // the keyboard while the launcher is open, and only then
+            WlrLayershell.keyboardFocus: root.launching ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
             anchors { top: true; left: true; right: true }
             implicitHeight: 25
             // docked it takes its strip from the windows; hidden it comes over them
@@ -166,6 +195,7 @@ ShellRoot {
             // the workspaces by number as i3bar had them: the focused one white, the rest gray, an urgent one green;
             // a click to go there
             Row {
+                id: workspaces
                 anchors { left: parent.left; leftMargin: 6; top: parent.top; bottom: parent.bottom }
                 Repeater {
                     model: Hyprland.workspaces.values.filter(w => w.id > 0).sort((a, b) => a.id - b.id)
@@ -191,8 +221,77 @@ ShellRoot {
                 }
             }
 
-            // the clock in the middle, GNOME's "Sat Oct 3  13:31"
+            // the launcher, dmenu in the bar: from past the workspaces to the status, what is typed, then the
+            // apps it matches in a row, the picked one inverted. Left, Right and Tab move, Enter launches,
+            // Escape closes
+            Item {
+                id: launcher
+                visible: root.launching
+                anchors { left: workspaces.right; leftMargin: 12; right: status.left; rightMargin: 12; top: parent.top; bottom: parent.bottom }
+                property var hits: root.apps(query.text)
+                property int picked: 0
+                onVisibleChanged: if (visible) { query.text = ""; picked = 0; query.forceActiveFocus() }
+                Text {
+                    id: prompt
+                    anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+                    text: "run"
+                    color: Theme.dim
+                    font.family: Theme.font
+                    font.pointSize: 11
+                }
+                TextInput {
+                    id: query
+                    anchors { left: prompt.right; leftMargin: 10; verticalCenter: parent.verticalCenter }
+                    width: 220
+                    color: Theme.fg
+                    font.family: Theme.font
+                    font.pointSize: 11
+                    onTextChanged: launcher.picked = 0
+                    Keys.onPressed: e => {
+                        const n = launcher.hits.length
+                        if (e.key === Qt.Key_Escape) { root.launching = false }
+                        else if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter) { root.launch(launcher.hits[launcher.picked], text) }
+                        else if ((e.key === Qt.Key_Right || e.key === Qt.Key_Tab) && n > 0) { launcher.picked = (launcher.picked + 1) % n }
+                        else if ((e.key === Qt.Key_Left || e.key === Qt.Key_Backtab) && n > 0) { launcher.picked = (launcher.picked - 1 + n) % n }
+                        else return
+                        e.accepted = true
+                    }
+                }
+                ListView {
+                    id: list
+                    anchors { left: query.right; leftMargin: 10; right: parent.right; top: parent.top; bottom: parent.bottom }
+                    orientation: ListView.Horizontal
+                    clip: true
+                    model: launcher.hits
+                    currentIndex: launcher.picked
+                    highlightMoveDuration: 0
+                    boundsBehavior: Flickable.StopAtBounds
+                    delegate: MouseArea {
+                        id: hit
+                        required property var modelData
+                        required property int index
+                        readonly property bool picked: index === launcher.picked
+                        width: name.implicitWidth + 20
+                        height: list.height
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.launch(modelData, "")
+                        Rectangle { anchors.fill: parent; color: hit.picked ? Theme.accent : hit.containsMouse ? Theme.hover : "transparent" }
+                        Text {
+                            id: name
+                            anchors.centerIn: parent
+                            text: hit.modelData.name
+                            color: hit.picked ? Theme.inverse : Theme.fg
+                            font.family: Theme.font
+                            font.pointSize: 11
+                        }
+                    }
+                }
+            }
+
+            // the clock in the middle, GNOME's "Sat Oct 3  13:31"; gone while the launcher takes the bar
             Pill {
+                visible: !root.launching
                 anchors.centerIn: parent
                 lit: cal.open
                 onClicked: root.panel(cal)
@@ -200,6 +299,7 @@ ShellRoot {
             }
 
             RowLayout {
+                id: status
                 anchors { right: parent.right; rightMargin: 6; verticalCenter: parent.verticalCenter }
                 spacing: 2
 
