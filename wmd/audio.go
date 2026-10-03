@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"math"
 	"os/exec"
 	"slices"
 	"sort"
@@ -24,6 +25,11 @@ type Audio struct {
 	Sinks   []Sound `json:"sinks"`
 	Sources []Sound `json:"sources"`
 	Headset string  `json:"headset"`
+	// the default output's and input's level, 0 to 1 as wpctl puts it, and whether muted
+	Volume  float64 `json:"volume"`
+	Muted   bool    `json:"muted"`
+	Mic     float64 `json:"mic"`
+	MicMute bool    `json:"micMuted"`
 }
 
 // pwObject is the part of a pw-dump object read here.
@@ -45,6 +51,10 @@ type pwObject struct {
 			Profile []struct {
 				Name string `json:"name"`
 			} `json:"Profile"`
+			Props []struct {
+				ChannelVolumes []float64 `json:"channelVolumes"`
+				Mute           bool      `json:"mute"`
+			} `json:"Props"`
 			EnumProfile []struct {
 				Index    int    `json:"index"`
 				Name     string `json:"name"`
@@ -139,6 +149,19 @@ func audioState() (Audio, error) {
 			name = str(p, "node.description")
 		}
 		*list = append(*list, Sound{ID: o.ID, Name: name, Def: def})
+		// the default's level: wpctl's is the cube root of the first channel's volume
+		if def && len(o.Info.Params.Props) > 0 {
+			pr := o.Info.Params.Props[0]
+			level := 0.0
+			if len(pr.ChannelVolumes) > 0 {
+				level = math.Round(math.Cbrt(pr.ChannelVolumes[0])*100) / 100
+			}
+			if key == "default.audio.sink" {
+				a.Volume, a.Muted = level, pr.Mute
+			} else {
+				a.Mic, a.MicMute = level, pr.Mute
+			}
+		}
 	}
 	for _, l := range [][]Sound{a.Sinks, a.Sources} {
 		sort.Slice(l, func(i, j int) bool { return l[i].Name < l[j].Name })

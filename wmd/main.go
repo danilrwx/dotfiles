@@ -50,6 +50,7 @@ type State struct {
 	Theme      Theme     `json:"theme"`
 	Night      Night     `json:"night"`
 	Weather    *Weather  `json:"weather"`
+	Battery    Battery   `json:"battery"`
 }
 
 func state(conn *dbus.Conn) State {
@@ -69,6 +70,9 @@ func state(conn *dbus.Conn) State {
 	}
 	s.Brightness, s.Keymap, s.Night = brightness(), keymap(), nightState()
 	s.Weather = weatherState()
+	if s.Battery, err = batteryState(conn); err != nil {
+		fmt.Fprintln(os.Stderr, "wmd: battery:", err)
+	}
 	s.Vless, s.OpenVPN, s.Theme = vlessState(), openvpnState(conn), themeState()
 	return s
 }
@@ -78,7 +82,7 @@ func state(conn *dbus.Conn) State {
 // pw-dump's monitor. Every 3 s besides, for what tells nothing: a network's strength, the backlight, VLESS,
 // OpenVPN, the theme. Only a state that differs from the last one printed goes out.
 func watch(conn *dbus.Conn) error {
-	for _, sender := range []string{iwd, bluez, ppd} {
+	for _, sender := range []string{iwd, bluez, ppd, upower} {
 		if err := conn.AddMatchSignal(dbus.WithMatchSender(sender)); err != nil {
 			return err
 		}
