@@ -14,7 +14,7 @@ Singleton {
     readonly property color popover: "#000000"
     readonly property color card: "#0d0d0d"
     readonly property color rule: "#333333"       // borders and tracks
-    readonly property color hover: "#262626"
+    readonly property color hover: Qt.rgba(1, 1, 1, 0.15)   // see-through: over the bar's wallpaper too
     readonly property color pill: "#1a1a1a"
     readonly property string font: "Iosevka"
     readonly property int quick: 100   // ms, every motion

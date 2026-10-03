@@ -122,6 +122,37 @@ PanelWindow {
                                     visible: text !== ""; text: note.modelData.body
                                     wrapMode: Text.Wrap; maximumLineCount: 3; elide: Text.ElideRight
                                 }
+                                // its actions beside the default one, a button each
+                                Flow {
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: 4
+                                    spacing: 6
+                                    visible: (note.modelData.actions ?? []).some(a => a.identifier !== "default")
+                                    Repeater {
+                                        model: (note.modelData.actions ?? []).filter(a => a.identifier !== "default")
+                                        MouseArea {
+                                            id: act
+                                            required property var modelData
+                                            implicitWidth: actText.implicitWidth + 20
+                                            implicitHeight: 24
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: { act.modelData.invoke(); note.modelData.dismiss() }
+                                            Rectangle {
+                                                anchors.fill: parent
+                                                radius: Theme.radius
+                                                color: act.containsMouse ? Theme.accent : Theme.pill
+                                                border.color: Theme.rule
+                                            }
+                                            Label {
+                                                id: actText
+                                                anchors.centerIn: parent
+                                                text: act.modelData.text; font.pointSize: 9
+                                                color: act.containsMouse ? Theme.inverse : Theme.fg
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

@@ -1,6 +1,7 @@
 // Notifications under Hyprland, in the bar's look, Quickshell being the notification server (dunst stays i3's
 // and sway's). Toasts at the top right under the bar: the app, the summary, the body; a click runs its default
-// action, a right click dismisses it; gone after its timeout (5 s unless it says), a critical one stays. What
+// action and the buttons under it the others, a right click dismisses it; gone after its timeout (5 s unless
+// it says), a critical one stays. What
 // bin/wm-fnkeys sends (app "fnkeys": volume, mic, brightness as a level, the touchpad, power profile and camera
 // as a word) is the OSD instead, a box at the bottom centre. Every other notification stays in the history the
 // quick settings list until dismissed; Do Not Disturb keeps the toasts back, not the history.
@@ -62,6 +63,43 @@ Scope {
         }
     }
 
+    // the actions a notification offers beside its default one (a click on it), as buttons; each runs its
+    // action and dismisses the notification
+    component Actions: Flow {
+        id: actions
+        property var n
+        Layout.fillWidth: true
+        Layout.topMargin: 6
+        spacing: 6
+        visible: (n?.actions ?? []).some(a => a.identifier !== "default")
+        Repeater {
+            model: (actions.n?.actions ?? []).filter(a => a.identifier !== "default")
+            MouseArea {
+                id: btn
+                required property var modelData
+                implicitWidth: btnText.implicitWidth + 20
+                implicitHeight: 26
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: { btn.modelData.invoke(); actions.n.dismiss() }
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Theme.radius
+                    color: btn.containsMouse ? Theme.accent : Theme.pill
+                    border.color: Theme.rule
+                }
+                Text {
+                    id: btnText
+                    anchors.centerIn: parent
+                    text: btn.modelData.text
+                    color: btn.containsMouse ? Theme.inverse : Theme.fg
+                    font.family: Theme.font
+                    font.pointSize: 9.5
+                }
+            }
+        }
+    }
+
     component Label: Text {
         color: Theme.fg
         font.family: Theme.font
@@ -119,6 +157,7 @@ Scope {
                             text: toast.n.body; Layout.fillWidth: true; visible: text !== ""
                             maximumLineCount: 4; elide: Text.ElideRight
                         }
+                        Actions { n: toast.n }
                     }
                 }
             }
