@@ -2,10 +2,10 @@
 // The bar under Hyprland (config/eww is i3's), the old look (Theme.qml): the workspaces by number at the left as
 // i3bar had them, the clock in the middle as GNOME has it (a click: the calendar), at the right the keyboard
 // layout, the tray (StatusNotifierItem, Discord's menu included) and the status as one block, Wi-Fi, VPN, sound
-// and battery in Adwaita's symbolic icons (a click: the quick settings, the wheel: the volume). Sound, battery, tray, workspaces and the clock from
-// Quickshell's own services and the layout from Hyprland's event, live; brightness from bin/wm-status once a
-// second, Wi-Fi, Bluetooth, VLESS and the power profile from bin/wm-quick every 3 s. bin/wl-autostart starts it; linked to
-// ~/.config/quickshell by install.
+// and battery in Adwaita's symbolic icons (a click: the quick settings, the wheel: the volume). Sound, battery,
+// tray, workspaces and the clock from Quickshell's own services and the layout from Hyprland's event, live;
+// Wi-Fi and Bluetooth from wmd's D-Bus events; brightness from bin/wm-status once a second, VLESS and the power
+// profile from bin/wm-quick every 3 s. bin/wl-autostart starts it; linked to ~/.config/quickshell by install.
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
@@ -30,7 +30,15 @@ ShellRoot {
         running: true
         stdout: SplitParser { onRead: line => { try { root.status = JSON.parse(line) } catch (e) {} } }
     }
-    // bin/wm-quick's: Wi-Fi, Bluetooth, VLESS, the power profile and their lists
+    // Wi-Fi and Bluetooth from wmd (wmd/, go install), its state on every change iwd and BlueZ signal
+    readonly property string wmd: Quickshell.env("HOME") + "/go/bin/wmd"
+    property var net: ({ wifi: {}, bt: {} })
+    Process {
+        command: [root.wmd, "watch"]
+        running: true
+        stdout: SplitParser { onRead: line => { try { root.net = JSON.parse(line) } catch (e) {} } }
+    }
+    // bin/wm-quick's: VLESS and the power profile
     property var q: ({})
     Process {
         id: quickProc
@@ -67,10 +75,10 @@ ShellRoot {
              : a.volume < 0.67 ? "microphone-sensitivity-medium-symbolic" : "microphone-sensitivity-high-symbolic"
     }
     function wifiIcon() {
-        if (!q.wifi) return "network-wireless-disabled-symbolic"
-        const on = (q.networks ?? []).find(n => n.on)
-        if (!on) return "network-wireless-offline-symbolic"
-        return "network-wireless-signal-" + ["none", "weak", "ok", "good", "excellent"][on.signal] + "-symbolic"
+        const w = net.wifi
+        if (!w.on) return "network-wireless-disabled-symbolic"
+        if (!w.ssid) return "network-wireless-offline-symbolic"
+        return "network-wireless-signal-" + ["none", "weak", "ok", "good", "excellent"][w.signal] + "-symbolic"
     }
     function batteryIcon() {
         const level = Math.round(battery.percentage * 10) * 10
@@ -243,7 +251,7 @@ ShellRoot {
                     onWheelDown: root.run([root.fnkeys, "vol-down"])
                     Icon { name: root.wifiIcon() }
                     Icon { visible: root.vpn; name: "network-vpn-symbolic" }
-                    Icon { visible: (root.q.btdev ?? "") !== ""; name: "bluetooth-active-symbolic" }
+                    Icon { visible: (root.net.bt.connected ?? "") !== ""; name: "bluetooth-active-symbolic" }
                     Icon { name: root.volumeIcon(root.sink) }
                     Icon { visible: root.source?.muted ?? false; name: "microphone-disabled-symbolic" }
                     Icon { visible: root.battery.isLaptopBattery; name: root.batteryIcon() }

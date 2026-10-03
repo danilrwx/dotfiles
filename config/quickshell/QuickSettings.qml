@@ -1,10 +1,10 @@
 // The quick settings, GNOME's layout in the old look (Theme.qml): a popover under the bar's status. Up top the battery and round buttons for a
 // screenshot, the lock and the power menu; then the sliders, volume and mic (their device lists behind an arrow)
 // and brightness; then the toggles, two a row, GNOME's split pills: Wi-Fi, Bluetooth, the power mode, VLESS
-// and the headset's mode, the left side flips one (inverted while on), the arrow opens its menu. A menu unfolds in place under its
-// row, one at a time, in 100 ms. Closed by a click outside (Hyprland's focus grab) or on the pill again. The
-// toggles' state from the bar's bin/wm-quick, the devices from bin/wm-audio json every 2 s while open, volume
-// and mute straight through PipeWire.
+// and the headset's mode, the left side flips one (inverted while on), the arrow opens its menu. A menu
+// unfolds in place under its row, one at a time, in 100 ms. Closed by a click outside (Hyprland's focus grab)
+// or on the pill again. The toggles' state from the bar's wmd (Wi-Fi, Bluetooth) and bin/wm-quick (VLESS,
+// power), the devices from bin/wm-audio json every 2 s while open, volume and mute straight through PipeWire.
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
@@ -20,6 +20,7 @@ PanelWindow {
     property bool open: false
     function toggle() { open = !open }
     readonly property var q: shell.q
+    readonly property var net: shell.net
     readonly property string bin: shell.bin
 
     // the menu unfolded: "", system, outs, ins, wifi, bt, power, vless; folded on every opening
@@ -388,44 +389,44 @@ PanelWindow {
                 Layout.fillWidth: true
                 spacing: 10
                 Toggle {
-                    icon: panel.shell.wifiIcon(); title: "Wi-Fi"; on: panel.q.wifi ?? false
-                    sub: on ? (panel.q.ssid ?? "") : ""
+                    icon: panel.shell.wifiIcon(); title: "Wi-Fi"; on: panel.net.wifi.on ?? false
+                    sub: on ? (panel.net.wifi.ssid ?? "") : ""
                     menuName: "wifi"
-                    onFlip: panel.act(["rfkill", on ? "block" : "unblock", "wlan"])
+                    onFlip: panel.act([panel.shell.wmd, "wifi", on ? "off" : "on"])
                 }
                 Toggle {
                     icon: on ? "bluetooth-active-symbolic" : "bluetooth-disabled-symbolic"; title: "Bluetooth"
-                    on: panel.q.bt ?? false; sub: panel.q.btdev ?? ""
+                    on: panel.net.bt.on ?? false; sub: panel.net.bt.connected ?? ""
                     menuName: "bt"
-                    onFlip: panel.act(["rfkill", on ? "block" : "unblock", "bluetooth"])
+                    onFlip: panel.act([panel.shell.wmd, "bt", on ? "off" : "on"])
                 }
             }
             Menu {
                 names: ["wifi"]; icon: "network-wireless-symbolic"; title: "Wi-Fi"
                 Repeater {
-                    model: panel.q.networks ?? []
+                    model: panel.net.wifi.networks ?? []
                     Item_ {
                         required property var modelData
                         icon: "network-wireless-signal-" + ["none", "weak", "ok", "good", "excellent"][modelData.signal] + "-symbolic"
-                        text: modelData.ssid; on: modelData.on
+                        text: modelData.ssid; on: modelData.connected
                         // a known network joins; a new one needs its passphrase, typed in impala
-                        onClicked: modelData.known ? panel.act(["iwctl", "station", "wlan0", "connect", modelData.ssid])
+                        onClicked: modelData.known ? panel.act([panel.shell.wmd, "wifi", "connect", modelData.ssid])
                                                    : panel.leave([panel.bin + "wm-ctl", "wifi"])
                     }
                 }
                 Separator {}
-                Item_ { text: "Scan"; onClicked: panel.act(["iwctl", "station", "wlan0", "scan"]) }
+                Item_ { text: "Scan"; onClicked: panel.act([panel.shell.wmd, "wifi", "scan"]) }
                 Item_ { text: "All Networks…"; onClicked: panel.leave([panel.bin + "wm-ctl", "wifi"]) }
             }
             Menu {
                 names: ["bt"]; icon: "bluetooth-active-symbolic"; title: "Bluetooth"
                 Repeater {
-                    model: panel.q.devices ?? []
+                    model: panel.net.bt.devices ?? []
                     Item_ {
                         required property var modelData
-                        icon: "audio-headphones-symbolic"
-                        text: modelData.name; on: modelData.on
-                        onClicked: panel.act(["bluetoothctl", modelData.on ? "disconnect" : "connect", modelData.mac])
+                        icon: (modelData.icon || "bluetooth") + "-symbolic"
+                        text: modelData.name; on: modelData.connected
+                        onClicked: panel.act([panel.shell.wmd, "bt", modelData.connected ? "disconnect" : "connect", modelData.address])
                     }
                 }
                 Separator {}

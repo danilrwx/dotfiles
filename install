@@ -226,6 +226,8 @@ desktop_session() {
   # the bar under Hyprland, Quickshell (config/quickshell; bin/wl-autostart starts it), built into /usr/local:
   # not in the archive. Rebuilt when the version changes
   link config/quickshell "$HOME/.config/quickshell"
+  # wmd (wmd/), the bar's Wi-Fi and Bluetooth straight from D-Bus, into ~/go/bin
+  command -v go > /dev/null && (cd "$HOME/dotfiles/wmd" && go install .) || log "Failed to install wmd. Continue installation."
   local qs_ver=0.3.1 tmp
   if ! quickshell --version 2> /dev/null | grep -q "^Quickshell $qs_ver "; then
     log "Building Quickshell $qs_ver"
