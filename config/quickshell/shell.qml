@@ -390,7 +390,7 @@ ShellRoot {
                 spacing: 2
 
                 Pill {
-                    BarText { text: root.ru ? "RU" : "US" }
+                    BarText { text: root.ru ? "RU" : "US"; color: Theme.fg }
                 }
 
                 // the tray: a click activates, a right click opens the item's menu
