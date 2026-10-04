@@ -7,6 +7,8 @@
 #   vless mode rule|global  Russia and the local networks direct (rule), or everything through the profile
 #   vless profile [NAME]  pick the profile (PROXY's server), or list them, the current one first
 #   vless status          "off", or "tun|proxy rule|global PROFILE"
+#   vless status --json   {"on", "how": off|tun|proxy, "mode", "profile", "profiles"}: ostrov's VLESS widget's
+#                       (config/ostrov/widgets/vless.kdl)
 #   vless build           merge config/mihomo/base.yaml and private/config/mihomo/desktop.yaml into
 #                       ~/.config/mihomo/config.yaml (mihomo.service's ExecStartPre)
 api=http://127.0.0.1:9090
@@ -79,10 +81,18 @@ profile)
 		call GET /proxies/PROXY | jq -r '.now as $now | ([$now] + (.all - [$now]))[]'
 	fi ;;
 status)
+	if [ "${2:-}" = --json ]; then
+		configs=$(call GET /configs 2> /dev/null) \
+			|| { echo '{"on":false,"how":"off","mode":"","profile":"","profiles":[]}'; exit 0; }
+		jq -c --argjson proxy "$(call GET /proxies/PROXY 2> /dev/null || echo '{}')" '{on: true,
+			how: (if .tun.enable then "tun" else "proxy" end), mode: .mode,
+			profile: ($proxy.now // ""), profiles: ($proxy.all // [])}' <<< "$configs"
+		exit 0
+	fi
 	configs=$(call GET /configs 2> /dev/null) || { echo off; exit 0; }
 	now=$(call GET /proxies/PROXY | jq -r .now)
 	jq -r --arg now "$now" '"\(if .tun.enable then "tun" else "proxy" end) \(.mode) \($now)"' <<< "$configs" ;;
 *)
-	echo "usage: vless on tun|proxy | off | mode rule|global | profile [NAME] | status | build" >&2
+	echo "usage: vless on tun|proxy | off | mode rule|global | profile [NAME] | status [--json] | build" >&2
 	exit 1 ;;
 esac

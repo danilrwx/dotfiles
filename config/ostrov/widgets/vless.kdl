@@ -1,0 +1,23 @@
+// VLESS through mihomo, switched by bin/vless: a click turns it on through TUN or off; its menu TUN or the system
+// proxy, then while it is up the routing (Russia direct, or everything through the profile) and the profiles.
+// In the bar while it is up.
+widget "vless" name="VLESS" icon="network-vpn-symbolic" sizes="4x1 2x1 1x1 8x1" {
+    poll "st" every="3s" exec="$HOME/dotfiles/bin/vless status --json"
+    toggle icon="network-vpn-symbolic" title="VLESS" on="{st.on}" sub="{st.profile}{st.mode == 'global' && ', global' || ''}" {
+        click exec="if [ {st.on} = true ]; then $HOME/dotfiles/bin/vless off; else $HOME/dotfiles/bin/vless on tun; fi"
+        menu {
+            row text="TUN, every app" on="{st.how == 'tun'}" { click exec="$HOME/dotfiles/bin/vless on tun" }
+            row text="System proxy" on="{st.how == 'proxy'}" { click exec="$HOME/dotfiles/bin/vless on proxy" }
+            if "{st.on}" {
+                separator
+                row text="Rule: Russia direct" on="{st.mode == 'rule'}" { click exec="$HOME/dotfiles/bin/vless mode rule" }
+                row text="Global" on="{st.mode == 'global'}" { click exec="$HOME/dotfiles/bin/vless mode global" }
+                separator
+                for "p" in="{st.profiles}" {
+                    row text="{p}" on="{p == st.profile}" { click exec="$HOME/dotfiles/bin/vless profile {p}" }
+                }
+            }
+        }
+    }
+    badge icon="network-vpn-symbolic" show="active" active="{st.on}"
+}
