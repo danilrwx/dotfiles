@@ -5,7 +5,7 @@
 [bar]
 left = ["workspaces"]
 center = ["clock"]
-right = ["layout", "tray", "status"]
+right = ["privacy", "layout", "tray", "status"]
 
 # seconds without input to the lock, and to the screens off; 0 for never
 [idle]
@@ -18,18 +18,50 @@ screens_off = 900
 
 # while a game's window has the focus, the power profile below; the one before back as it leaves
 # (classes as Hyprland names windows; a trailing * a prefix)
-[games]
+[launcher]
+# g words to Google, ?question to Claude, in the browser
+engines = { "g " = "https://www.google.com/search?q={}", "?" = "https://claude.ai/new?q={}" }
+
+[plugin.night]
+enabled = true
+
+[plugin.record]
+enabled = true
+
+[plugin.displays]
+enabled = true
+
+[plugin.drives]
+enabled = true
+open_on_mount = true
+automount = true
+
+[plugin.games]
+enabled = true
 classes = ["dota2", "cs2", "steam_app_*"]
 profile = "performance"
 
+[notifications]
+games = ["dota2", "cs2", "steam_app_*"]
+
 [appearance]
 font = "Iosevka"
-blur_size = 3
-opacity = 1.0
+blur_size = 30
+opacity = 0.7
 blur_passes = 1
-theme = "solarized"
-blur = false
-accent = "#ffffff"
+theme = "dark"
+blur = true
+font_size = 9
+bar_padding = 6
+bar_spacing = 10
+bar_height = 24
+bar_icon_size = 12
+density = "compact"
+icon_size = 16
+row_height = 40
+surface = ""
+radius = 8
+bar_opacity = 0.65
 
 [widget.wallpaper]
 # bin/theme's see-through terminal and Chrome's colour follow ostrov's wallpaper
