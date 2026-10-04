@@ -3,13 +3,13 @@
 # the same dark ones in both:
 #   theme dark            black root, everything solid: the default
 #   theme dark-wall [IMG] a wallpaper (~/Pictures/wallpapers) under a see-through terminal and bar, the
-#                         one ALPHA of both (alacritty's window.opacity, written here), through xcompmgr
+#                         one ALPHA of both (alacritty's window.opacity, written here), through picom
 #   theme apply           the last pick again (bin/x-autostart, at login)
 #   theme shuffle         under dark-wall, a random other wallpaper, the root alone touched: i3 runs it on
 #                         every start and restart (exec_always in config/i3/config)
 #   theme wallpapers      the wallpapers to pick from
 # The pick is kept in ~/.cache/theme: the bar's background alpha that config/eww reads, the root, and
-# xcompmgr, run only under a wallpaper. Chrome's theme colour follows: under a wallpaper the
+# picom under X11 (config/picom), always. Chrome's theme colour follows: under a wallpaper the
 # colour the see-through bar shows over it (black at ALPHA over the picture's top strip), set as Chrome's
 # BrowserThemeColor policy in the file install makes this user's; under dark the policy is cleared and
 # Chrome keeps its own theme. Chrome watches the policy dir and recolours as the file changes. The same
@@ -77,18 +77,23 @@ apply() {
 	# alacritty's opacity, the file its config imports; it reloads it in every open window
 	printf '# bin/theme: %s\n[window]\nopacity = %s\n' "$mode" "$a" > "$state/alacritty.toml"
 
-	# xcompmgr under X11 alone, Wayland compositors blending by themselves
-	[ -z "${WAYLAND_DISPLAY:-}" ] && pkill -x xcompmgr
+	# picom under X11 alone, always (ostrov's see-through panels want it), Wayland compositors blending by
+	# themselves; xcompmgr if picom is not there
+	if [ -z "${WAYLAND_DISPLAY:-}" ]; then
+		pkill -x xcompmgr; pkill -x picom
+		if command -v picom > /dev/null; then
+			picom --config "$HOME/.config/picom/picom.conf" > /dev/null 2>&1 &
+		else
+			xcompmgr > /dev/null 2>&1 &   # its BadRegion errors are harmless noise
+		fi
+		disown
+	fi
 	if [ "$mode" = dark ]; then
 		background '#000000'
 		echo '#000000' > "$state/barbg"
 		chrome
 	else
 		wall "$2"
-		if [ -z "${WAYLAND_DISPLAY:-}" ]; then
-			xcompmgr > /dev/null 2>&1 &   # its BadRegion errors are harmless noise
-			disown
-		fi
 	fi
 	echo "$mode" > "$state/mode"
 }
