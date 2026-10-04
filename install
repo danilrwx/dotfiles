@@ -467,6 +467,7 @@ dev_tools() {
   mkdir -p "$HOME/.local/share/completions"
   fzf --zsh              > "$HOME/.local/share/completions/fzf.zsh"     2>/dev/null || true
   kubectl completion zsh > "$HOME/.local/share/completions/kubectl.zsh" 2>/dev/null || true
+  ostrov completions zsh > "$HOME/.local/share/completions/ostrov.zsh"  2>/dev/null || true
 
   # d8 (deckhouse-cli) and claude-code by their own installers; d8's default INSTALL_DIR, /opt, is off PATH
   if ! command -v d8 &> /dev/null; then
