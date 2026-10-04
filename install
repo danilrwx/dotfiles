@@ -222,6 +222,7 @@ desktop_system() {
 desktop_session() {
   link config/i3 "$HOME/.config/i3"
   link config/hypr "$HOME/.config/hypr"
+  link config/autostart/lxpolkit.desktop "$HOME/.config/autostart/lxpolkit.desktop"
   # the shell under Hyprland, ostrov (~/w/ostrov; bin/wl-autostart starts it), into ~/.cargo/bin; its config
   link config/ostrov "$HOME/.config/ostrov"
   [ -d "$HOME/w/ostrov" ] && command -v cargo > /dev/null \
