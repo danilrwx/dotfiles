@@ -21,3 +21,13 @@ screens_off = 900
 [games]
 classes = ["dota2", "cs2", "steam_app_*"]
 profile = "performance"
+
+[appearance]
+blur_size = 3
+opacity = 0.75
+blur_passes = 1
+theme = "dark"
+
+[widget.wallpaper]
+# bin/theme's see-through terminal and Chrome's colour follow ostrov's wallpaper
+on_change = 'if [ -n "$OSTROV_WALLPAPER" ]; then ~/dotfiles/bin/theme dark-wall "$OSTROV_WALLPAPER"; else ~/dotfiles/bin/theme dark; fi'
