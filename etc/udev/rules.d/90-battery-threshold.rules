@@ -1,0 +1,4 @@
+# The battery's charge thresholds writable by the users group: ostrov's control centre sets where charging stops
+# (and starts again), keeping a laptop that lives on its charger at 80% rather than 100%
+SUBSYSTEM=="power_supply", KERNEL=="BAT*", ATTR{charge_control_end_threshold}=="?*", \
+  RUN+="/bin/sh -c 'cd /sys%p && chgrp users charge_control_*_threshold && chmod g+w charge_control_*_threshold'"

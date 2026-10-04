@@ -158,6 +158,9 @@ desktop_system() {
   pkg "${OSTROV_PKGS[@]}"
   # ostrov's lock screen checks the password by its own PAM profile (the login's)
   put /etc/pam.d/ostrov
+  # the battery's charge thresholds for ostrov to set
+  put /etc/udev/rules.d/90-battery-threshold.rules \
+    && sudo udevadm trigger --subsystem-match=power_supply
 
   # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
   # netplan, DNS by systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
