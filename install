@@ -202,15 +202,10 @@ desktop_system() {
   sudo sed -i -e 's/^XKBLAYOUT=.*/XKBLAYOUT="us,ru"/' -e 's/^XKBVARIANT=.*/XKBVARIANT=","/' \
     -e 's/^XKBOPTIONS=.*/XKBOPTIONS="grp:ctrl_space_toggle,grp_led:scroll"/' /etc/default/keyboard
 
-  # Login: greetd with ostrov's login screen under cage (tuigreet if it cannot be), i3 and Hyprland both listed;
-  # GDM goes with GNOME in ./debloat. It takes over the display-manager alias at the next boot, the running session
-  # is left alone. ostrov for the greeter user in /usr/local/bin (not in a home), its memory of the last login in
-  # /var/cache/ostrov-greet
-  sudo apt install -y --no-install-recommends cage
+  # Login: greetd with tuigreet, starting i3 through startx or Hyprland (it lists both, i3 the default); GDM goes
+  # with GNOME in ./debloat. It takes over the display-manager alias at the next boot, the running session is left
+  # alone
   put /etc/greetd/config.toml
-  put /etc/greetd/ostrov-greeter 755
-  [ -x "$HOME/.cargo/bin/ostrov" ] && sudo install -m 755 "$HOME/.cargo/bin/ostrov" /usr/local/bin/ostrov
-  sudo install -d -o _greetd -g _greetd /var/cache/ostrov-greet
   # display-manager.service points at gdm3.service, itself an alias of gdm.service, so disabling gdm3 keeps
   # the link and a plain enable (greetd's postinst too) fails on it quietly; --force replaces it
   if [ "$(readlink -f /etc/systemd/system/display-manager.service)" != /usr/lib/systemd/system/greetd.service ]; then

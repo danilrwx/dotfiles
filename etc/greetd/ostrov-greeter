@@ -1,8 +1,0 @@
-#!/bin/sh
-# The login screen: ostrov's (ostrov greet) under cage, tuigreet if that cannot be (no cage, no ostrov in
-# /usr/local/bin, a crash): never a login left without a greeter
-if command -v cage > /dev/null && [ -x /usr/local/bin/ostrov ]; then
-	cage -s -- /usr/local/bin/ostrov greet && exit 0
-fi
-exec tuigreet --time --remember --remember-session --asterisks --sessions /usr/share/wayland-sessions \
-	--xsessions /usr/share/xsessions --xsession-wrapper 'startx /usr/bin/env' --cmd 'startx /usr/bin/env i3'
