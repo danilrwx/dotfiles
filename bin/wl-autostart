@@ -6,5 +6,15 @@
 desktop=${1:-$XDG_CURRENT_DESKTOP}
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY SWAYSOCK HYPRLAND_INSTANCE_SIGNATURE \
 	XDG_CURRENT_DESKTOP="$desktop" 2>/dev/null
-# the shell: the bar, its panels, the launcher, notifications, the lock screen (~/w/ostrov, install builds it)
-"$HOME/.cargo/bin/ostrov" &
+# the shell: the bar, its panels, the launcher, notifications, the lock screen (~/w/ostrov, install builds it);
+# started again a second after it dies (locked, it locks again at once: lock.rs), not once it quits by itself
+# or the compositor is gone; its stderr in ~/.local/state/ostrov/log, the last run's in log.1
+(
+	log="$HOME/.local/state/ostrov"
+	mkdir -p "$log"
+	while [ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]; do
+		[ -f "$log/log" ] && mv "$log/log" "$log/log.1"
+		RUST_BACKTRACE=1 "$HOME/.cargo/bin/ostrov" 2>>"$log/log" && break
+		sleep 1
+	done
+) &
