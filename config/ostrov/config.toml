@@ -23,10 +23,13 @@ classes = ["dota2", "cs2", "steam_app_*"]
 profile = "performance"
 
 [appearance]
+font = "Iosevka"
 blur_size = 3
-opacity = 0.75
+opacity = 1.0
 blur_passes = 1
-theme = "dark"
+theme = "solarized"
+blur = false
+accent = "#ffffff"
 
 [widget.wallpaper]
 # bin/theme's see-through terminal and Chrome's colour follow ostrov's wallpaper
