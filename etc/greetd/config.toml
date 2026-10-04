@@ -1,8 +1,8 @@
-# dotfiles: tuigreet on vt 7, i3 by default, Hyprland beside it (F3 picks), remembering the last
-# user and session
+# dotfiles: ostrov's login screen under cage on vt 7 (etc/greetd/ostrov-greeter), tuigreet if it cannot be;
+# the last user and session remembered (ostrov's in /var/cache/ostrov-greet, the greeter user's)
 [terminal]
 vt = 7
 
 [default_session]
-command = "tuigreet --time --remember --remember-session --asterisks --sessions /usr/share/wayland-sessions --xsessions /usr/share/xsessions --xsession-wrapper 'startx /usr/bin/env' --cmd 'startx /usr/bin/env i3'"
+command = "/etc/greetd/ostrov-greeter"
 user = "_greetd"
