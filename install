@@ -227,6 +227,16 @@ desktop_session() {
   link config/ostrov "$HOME/.config/ostrov"
   [ -d "$HOME/w/ostrov" ] && command -v cargo > /dev/null \
     && cargo install -q --path "$HOME/w/ostrov" || log "Failed to install ostrov. Continue installation."
+  # its official plugins (plugins/*, but the example): each one's binary beside ostrov's, its manifest and texts in
+  # ~/.cargo/share/ostrov/plugins, where ostrov looks beside itself; off until [plugin.ID] enabled = true
+  for p in "$HOME"/w/ostrov/plugins/*/; do
+    id=$(basename "$p")
+    [ "$id" = hello ] || [ ! -f "$p/manifest.toml" ] && continue
+    cargo install -q --path "$p" || { log "Failed to install ostrov's $id plugin. Continue installation."; continue; }
+    mkdir -p "$HOME/.cargo/share/ostrov/plugins/$id"
+    cp "$p/manifest.toml" "$HOME/.cargo/share/ostrov/plugins/$id/"
+    [ -d "$p/i18n" ] && cp -r "$p/i18n" "$HOME/.cargo/share/ostrov/plugins/$id/"
+  done
   # its launcher's ?question (Claude) and g words (Google), plugins of ostrov's examples
   if [ -d "$HOME/w/ostrov/examples/plugins" ]; then
     mkdir -p "$HOME/.local/share/ostrov/plugins"
