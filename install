@@ -227,6 +227,8 @@ desktop_session() {
   link config/ostrov "$HOME/.config/ostrov"
   [ -d "$HOME/w/ostrov" ] && command -v cargo > /dev/null \
     && cargo install -q --path "$HOME/w/ostrov" || log "Failed to install ostrov. Continue installation."
+  # ostrov as xdg-desktop-portal-hyprland's share picker (config/hypr/xdph.conf), by the name it answers to as one
+  ln -sf ostrov "$HOME/.cargo/bin/ostrov-share-picker"
   # its official plugins (plugins/*, but the example): each one's binary beside ostrov's, its manifest and texts in
   # ~/.cargo/share/ostrov/plugins, where ostrov looks beside itself; off until [plugin.ID] enabled = true
   for p in "$HOME"/w/ostrov/plugins/*/; do
