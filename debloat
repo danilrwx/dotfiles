@@ -55,6 +55,9 @@ REMOVE=(
   # input methods and dictionaries the Ubuntu installer marks as manual
   ibus ibus-table-cangjie3 ibus-table-cangjie5 ibus-table-cangjie-big m17n-db
   hunspell-en-au hunspell-en-ca hunspell-en-gb hunspell-en-za wbritish zenity
+  # gvfs's backends, phones and cameras by USB (afc, mtp, gphoto2), GNOME's online accounts and the network's
+  # browsing (network, dnssd, wsdd and its python daemon) in file dialogs; gvfs-daemons stays (the trash, drives)
+  gvfs-backends
 )
 # Services of what stays that nothing here needs: no modem, no printer discovery on the network, no Ubuntu
 # Pro or MOTD news
