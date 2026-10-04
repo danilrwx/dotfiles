@@ -239,11 +239,6 @@ desktop_session() {
     cp "$p/manifest.toml" "$HOME/.cargo/share/ostrov/plugins/$id/"
     [ -d "$p/i18n" ] && cp -r "$p/i18n" "$HOME/.cargo/share/ostrov/plugins/$id/"
   done
-  # its launcher's ?question (Claude) and g words (Google), plugins of ostrov's examples
-  if [ -d "$HOME/w/ostrov/examples/plugins" ]; then
-    mkdir -p "$HOME/.local/share/ostrov/plugins"
-    cp -rL "$HOME/w/ostrov/examples/plugins/claude" "$HOME/w/ostrov/examples/plugins/google" "$HOME/.local/share/ostrov/plugins/"
-  fi
   # wmd (wmd/), the bar's Wi-Fi and Bluetooth straight from D-Bus, into ~/go/bin
   command -v go > /dev/null && (cd "$HOME/dotfiles/wmd" && go install .) || log "Failed to install wmd. Continue installation."
   link config/dunst "$HOME/.config/dunst"
