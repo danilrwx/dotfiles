@@ -1,8 +1,8 @@
 # dotfiles: tuigreet on vt 7, Hyprland by default (start-hyprland, as /usr/share/wayland-sessions/hyprland.desktop
-# runs it; F3 picks another: ~/w/dwl's dwl-session from /usr/local), remembering the last user and session
+# runs it; F3 picks another Wayland session), remembering the last user and session
 [terminal]
 vt = 7
 
 [default_session]
-command = "tuigreet --time --remember --remember-session --asterisks --sessions /usr/share/wayland-sessions:/usr/local/share/wayland-sessions --cmd start-hyprland"
+command = "tuigreet --time --remember --remember-session --asterisks --sessions /usr/share/wayland-sessions --cmd start-hyprland"
 user = "_greetd"
