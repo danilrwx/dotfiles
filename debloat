@@ -40,9 +40,9 @@ REMOVE=(
   firefox
   # dmenu and bemenu, ostrov's launcher being the menu, and the headers dmenu's and st's builds took
   suckless-tools bemenu libx11-dev libxft-dev libxinerama-dev
-  # what the old sway session had that the new one does without (foot and wmenu stay, dwl's defaults), and
+  # what the old sway session had that the new one does without (foot, wmenu and mako stay, ~/w/dwl's), and
   # pavucontrol (ostrov picks the devices)
-  mako-notifier wob
+  wob
   pavucontrol
   # Openbox and its bar, awesome: tried as sessions and dropped
   openbox dzen2 stalonetray wmctrl awesome
