@@ -1,6 +1,0 @@
-# dunst not started by D-Bus for the first notification sent: under Hyprland ostrov is the server, and a dunst
-# started while ostrov restarts would keep the name from it; i3 starts dunst itself (bin/x-autostart). Linked to
-# ~/.local/share/dbus-1/services by install, where it hides the package's file of the same name
-[D-BUS Service]
-Name=org.freedesktop.Notifications
-Exec=/bin/false

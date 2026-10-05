@@ -1,5 +1,0 @@
-#!/bin/sh
-# i3's workspaces for the bar (config/eww), a JSON array a line, again on every workspace or output event
-ws() { i3-msg -t get_workspaces | jq -c 'map({name, focused, urgent})'; }
-ws
-i3-msg -t subscribe -m '["workspace","output"]' | while read -r _; do ws; done

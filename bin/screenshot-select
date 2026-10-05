@@ -1,7 +1,0 @@
-#!/bin/sh
-# region screenshot into the clipboard: ostrov's under Wayland, maim's through bin/clip under X11 (i3)
-if [ -n "${WAYLAND_DISPLAY:-}" ]; then
-	exec "$HOME/.cargo/bin/ostrov" screenshot
-else
-	maim -s | "$HOME/dotfiles/bin/clip" -t image/png
-fi

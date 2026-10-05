@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ./install [--desktop] [--ru-mirror] [--skip-go] [--skip-ts]
-#   --desktop    the i3 and Hyprland sessions with greetd, and the GUI apps: Chrome, virt-manager, Telegram,
-#                Discord, Steam.
+#   --desktop    the Hyprland session with ostrov as its shell, greetd, and the GUI apps: Chrome, virt-manager,
+#                Telegram, Discord, Steam.
 #                Then ./debloat strips GNOME and snapd
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
 #   --skip-go    keep the Go tools in ~/go/bin as they are, no `go install`
@@ -37,7 +37,7 @@ BASE_PKGS=(build-essential git wget zip unzip curl file procps zsh tmux gnupg2 h
 # debloat's autoremove keeps it): the Intel GPU's video decode and encode (VA-API, iHD), Wi-Fi by iwd,
 # Bluetooth, sound, fingerprint, power profiles, firmware updates, the file dialogs' portal, the keyring
 # Chrome keeps passwords in, fonts, printing; then the login, virtualization, ssh's askpass, the terminal,
-# and the bar's build (eww: Rust, GTK3, the tray's menus)
+# Rust for ostrov's build
 DESKTOP_PKGS=(iwd bluez rfkill
   pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
@@ -45,16 +45,12 @@ DESKTOP_PKGS=(iwd bluez rfkill
   intel-media-va-driver-non-free
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
   greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome alacritty
-  rustc cargo libgtk-3-dev libdbusmenu-gtk3-dev
+  rustc cargo
   openvpn openvpn-systemd-resolved)
-# X11 and i3 without their recommends: rofi (bin/wm-menu), dunst, i3lock/xss-lock, maim and xclip for screenshots, the
-# media keys (bin/wm-fnkeys), the polkit agent
-X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit x11-xserver-utils xinput
-  i3-wm i3lock xss-lock dunst rofi maim xclip hsetroot picom brightnessctl playerctl lxpolkit libnotify-bin)
-# the Wayland session next to i3, Hyprland, without its recommends (ostrov draws the wallpaper, takes
+# the session, Hyprland, without its recommends (ostrov draws the wallpaper, takes
 # screenshots, keeps idle, sleep, the lock and the clipboard's history): wl-clipboard for the scripts, X apps
-# under Xwayland
-WAYLAND_PKGS=(hyprland wl-clipboard xwayland)
+# under Xwayland, xrdb (x11-xserver-utils) to load .Xresources into it
+WAYLAND_PKGS=(hyprland wl-clipboard xwayland x11-xserver-utils)
 # ostrov's build, the shell under Hyprland (~/w/ostrov): GTK 4, its layer shell and session lock, PAM
 OSTROV_PKGS=(pkg-config libgtk-4-dev libgtk4-layer-shell-dev libpam0g-dev)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
@@ -150,11 +146,11 @@ base() {
   ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
 }
 
-# Desktop, system side: network, X11, input, login ────────────────────────────────────────────────────────────────────
+# Desktop, system side: network, input, login ────────────────────────────────────────────────────────────────────
 desktop_system() {
   log "Installing the desktop base"
   pkg "${DESKTOP_PKGS[@]}"
-  sudo apt install -y --no-install-recommends "${X11_PKGS[@]}" "${WAYLAND_PKGS[@]}"
+  sudo apt install -y --no-install-recommends "${WAYLAND_PKGS[@]}"
   pkg "${OSTROV_PKGS[@]}"
   # ostrov's lock screen checks the password by its own PAM profile (the login's)
   put /etc/pam.d/ostrov
@@ -189,22 +185,16 @@ desktop_system() {
   sudo systemctl enable iwd systemd-networkd
 
   # No fingerprint login: pam_fprintd first in common-auth waits up to 10 s for a finger on every sudo,
-  # login and unlock (i3lock does not even ask for it). Its PAM profile off, which pam-auth-update keeps
-  # off across package updates; fprintd and the sensor's driver (the HONOR fixes install them) stay
+  # login and unlock. Its PAM profile off, which pam-auth-update keeps off across package updates; fprintd
+  # and the sensor's driver (the HONOR fixes install them) stay
   sudo DEBIAN_FRONTEND=noninteractive pam-auth-update --disable fprintd
 
-  # the touchpad: clicks by pressing it down only (one, two, three fingers for left, right, middle),
-  # natural scrolling at libinput's slowest, a slower pointer
-  put /etc/X11/xorg.conf.d/30-touchpad.conf
-  # the layouts and Ctrl+Space between them for keyboards plugged in later too: one that appears (the
-  # headset's AVRCP buttons are a keyboard) resets the keymap to /etc/default/keyboard, bin/x-autostart's
-  # setxkbmap with it
+  # the layouts and Ctrl+Space between them on the console too (tuigreet); Hyprland has its own (config/hypr)
   sudo sed -i -e 's/^XKBLAYOUT=.*/XKBLAYOUT="us,ru"/' -e 's/^XKBVARIANT=.*/XKBVARIANT=","/' \
     -e 's/^XKBOPTIONS=.*/XKBOPTIONS="grp:ctrl_space_toggle,grp_led:scroll"/' /etc/default/keyboard
 
-  # Login: greetd with tuigreet, starting i3 through startx or Hyprland (it lists both, i3 the default); GDM goes
-  # with GNOME in ./debloat. It takes over the display-manager alias at the next boot, the running session is left
-  # alone
+  # Login: greetd with tuigreet, starting Hyprland (etc/greetd/config.toml); GDM goes with GNOME in ./debloat.
+  # It takes over the display-manager alias at the next boot, the running session is left alone
   put /etc/greetd/config.toml
   # display-manager.service points at gdm3.service, itself an alias of gdm.service, so disabling gdm3 keeps
   # the link and a plain enable (greetd's postinst too) fails on it quietly; --force replaces it
@@ -220,11 +210,8 @@ desktop_system() {
 
 # Desktop, user side: the session's configs, ssh-agent───────────────────────────────────────────────────────────────────
 desktop_session() {
-  link config/i3 "$HOME/.config/i3"
   link config/hypr "$HOME/.config/hypr"
-  link config/picom "$HOME/.config/picom"
-  link config/autostart/lxpolkit.desktop "$HOME/.config/autostart/lxpolkit.desktop"
-  # the shell under Hyprland, ostrov (~/w/ostrov; bin/wl-autostart starts it), into ~/.cargo/bin; its config
+  # the shell, ostrov (~/w/ostrov; bin/wl-autostart starts it), into ~/.cargo/bin; its config
   link config/ostrov "$HOME/.config/ostrov"
   [ -d "$HOME/w/ostrov" ] && command -v cargo > /dev/null \
     && cargo install -q --path "$HOME/w/ostrov" || log "Failed to install ostrov. Continue installation."
@@ -240,40 +227,24 @@ desktop_session() {
     cp "$p/manifest.toml" "$HOME/.cargo/share/ostrov/plugins/$id/"
     [ -d "$p/i18n" ] && cp -r "$p/i18n" "$HOME/.cargo/share/ostrov/plugins/$id/"
   done
-  # wmd (wmd/), the bar's Wi-Fi and Bluetooth straight from D-Bus, into ~/go/bin
-  command -v go > /dev/null && (cd "$HOME/dotfiles/wmd" && go install .) || log "Failed to install wmd. Continue installation."
-  link config/dunst "$HOME/.config/dunst"
-  # ...but not started by D-Bus: under Hyprland ostrov serves notifications (config/dbus-1)
-  link config/dbus-1/services/org.knopwob.dunst.service "$HOME/.local/share/dbus-1/services/org.knopwob.dunst.service"
+  # Xft.dpi and the cursor for X apps under Xwayland, merged by config/hypr
   link .Xresources "$HOME/.Xresources"
-  # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE, GDK_SCALE), and .profile the session
+  # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE), and .profile the session
   for e in config/environment.d/*.conf; do link "$e" "$HOME/.config/environment.d/${e##*/}"; done
   # dark GTK3 and GTK4; GTK keeps bookmarks next to them, so the files are linked, not the dirs
   for g in gtk-3.0 gtk-4.0; do link "config/$g/settings.ini" "$HOME/.config/$g/settings.ini"; done
-  # the UI font at 10, as GTK's own default under X11: under Wayland GTK and Chrome take GNOME's setting (11),
-  # Chrome's tabs and menus coming out bigger than under i3
+  # the UI font at 10: under Wayland GTK and Chrome take GNOME's setting (11), Chrome's tabs and menus coming
+  # out bigger otherwise
   gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 10'
-  # the system's app entries that are tools, hidden from bin/wm-menu's list
+  # the system's app entries that are tools, hidden from ostrov's launcher
   for a in config/applications/*.desktop; do link "$a" "$HOME/.local/share/applications/${a##*/}"; done
 
   # the terminal, alacritty (config/alacritty), and what Iosevka lacks, the emoji above all, from Noto Color
   # Emoji rather than a monochrome fallback (config/fontconfig)
   link config/alacritty "$HOME/.config/alacritty"
-  # the bar, eww (config/eww; bin/x-autostart starts it), built into /usr/local with the X11 backend alone:
-  # not in the archive and without release binaries. Pinned to a commit, rebuilt when it changes
-  link config/eww "$HOME/.config/eww"
-  local eww_rev=48f5aa8b379adf29da0b0bb9ca04164f65d8bdaa tmp
-  if [ "$(eww --version 2> /dev/null)" != "eww 0.6.0 $eww_rev" ]; then
-    log "Building eww"
-    tmp=$(mktemp -d)
-    git clone -q https://github.com/elkowar/eww "$tmp" && git -C "$tmp" checkout -q "$eww_rev" \
-      && cargo build -q --release --no-default-features --features x11 --manifest-path "$tmp/Cargo.toml" \
-      && sudo install -m 755 "$tmp/target/release/eww" /usr/local/bin/eww || log "Failed to build eww. Continue installation."
-    rm -rf "$tmp"
-  fi
   link config/fontconfig/fonts.conf "$HOME/.config/fontconfig/fonts.conf"
   # alacritty as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim); the
-  # package registers it, st's and bin/term's entries from older installs go
+  # package registers it, st's and bin/term's entries from older installs go (debloat removes st itself)
   sudo update-alternatives --remove x-terminal-emulator /usr/local/bin/st 2>/dev/null
   sudo update-alternatives --remove x-terminal-emulator "$HOME/dotfiles/bin/term" 2>/dev/null
   [ -x /usr/bin/alacritty ] && sudo update-alternatives --set x-terminal-emulator /usr/bin/alacritty
@@ -378,7 +349,7 @@ EOT
   [ -f "$policy" ] || echo '{}' | sudo install -m 644 /dev/stdin "$policy"
   sudo chown "$USER" "$policy"
 
-  # GPU compositing under X11: Chrome's blocklist takes this GPU (Arc B370) for software compositing, and
+  # GPU compositing: Chrome's blocklist takes this GPU (Arc B370) for software compositing, and
   # scrolling at 3120x2080 120Hz drops frames on it; the chrome://flags switch that overrides the list,
   # put in its Local State while it is not running (it rewrites the file on exit)
   local state=$HOME/.config/google-chrome/"Local State"
@@ -392,7 +363,7 @@ EOT
   # hardware video encode (VA-API, iHD) for calls and screen sharing: a feature Chrome leaves off on
   # Linux and chrome://flags has no switch for, so its launcher entry with the flag, made from the
   # system one on every run, hiding it in ~/.local/share/applications. With it, Wayland under Hyprland
-  # (sharp at 2x where Xwayland blurs), X11 under i3
+  # (sharp at 2x where Xwayland blurs)
   local desk=/usr/share/applications/google-chrome.desktop
   [ -f "$desk" ] && sed 's|^Exec=/usr/bin/google-chrome-stable|& --enable-features=AcceleratedVideoEncoder --ozone-platform-hint=auto|' "$desk" \
     > "$HOME/.local/share/applications/google-chrome.desktop"

@@ -3,7 +3,7 @@
 # private/config/openvpn/NAME.ovpn, which install turns into /etc/openvpn/client/NAME.conf with the login
 # from NAME.auth and the server's DNS for systemd-resolved. The polkit rule
 # (etc/polkit-1/rules.d/50-openvpn-client.rules) lets these units start and stop without sudo.
-# bin/wm-ctl's openvpn menu and bin/wm-status's bar block call it.
+# ostrov's OpenVPN widget (config/ostrov/widgets/openvpn.kdl) calls it.
 #   openvpn-ctl on NAME   bring NAME up, the one up before down, and wait for the tunnel
 #   openvpn-ctl off       bring the one up down
 #   openvpn-ctl status    "off", or the profile up ("NAME"), or "NAME connecting"

@@ -1,19 +1,15 @@
 #!/bin/bash
-# The desktop's theme, picked in bin/wm-ctl's theme menu (i3) or the quick settings (Hyprland); the colours are
-# the same dark ones in both:
-#   theme dark            black root, everything solid: the default
-#   theme dark-wall [IMG] a wallpaper (~/Pictures/wallpapers) under a see-through terminal and bar, the
-#                         one ALPHA of both (alacritty's window.opacity, written here), through picom
-#   theme apply           the last pick again (bin/x-autostart, at login)
-#   theme shuffle         under dark-wall, a random other wallpaper, the root alone touched: i3 runs it on
-#                         every start and restart (exec_always in config/i3/config)
+# The see-through terminal and Chrome's colour, following ostrov's wallpaper (its [widget.wallpaper] on_change
+# in config/ostrov runs this; ostrov draws the wallpaper itself):
+#   theme dark            everything solid: the default
+#   theme dark-wall [IMG] a wallpaper (~/Pictures/wallpapers) under a see-through terminal, at the ALPHA of
+#                         ostrov's bar (alacritty's window.opacity, written here)
+#   theme apply           the last pick again (config/hypr, at login)
 #   theme wallpapers      the wallpapers to pick from
-# The pick is kept in ~/.cache/theme: the bar's background alpha that config/eww reads, the root, and
-# picom under X11 (config/picom), always. Chrome's theme colour follows: under a wallpaper the
-# colour the see-through bar shows over it (black at ALPHA over the picture's top strip), set as Chrome's
+# The pick is kept in ~/.cache/theme. Chrome's theme colour follows: under a wallpaper the colour the
+# see-through bar shows over it (black at ALPHA over the picture's top strip), set as Chrome's
 # BrowserThemeColor policy in the file install makes this user's; under dark the policy is cleared and
-# Chrome keeps its own theme. Chrome watches the policy dir and recolours as the file changes. The same
-# colour goes to ~/.cache/theme/barbg for bin/wm-menu, its rofi being solid where the bar is see-through.
+# Chrome keeps its own theme. Chrome watches the policy dir and recolours as the file changes.
 state=${XDG_CACHE_HOME:-$HOME/.cache}/theme
 walls=$HOME/Pictures/wallpapers
 ALPHA=0.65
@@ -25,8 +21,8 @@ wallpapers() {
 
 CHROME_POLICY=/etc/opt/chrome/policies/managed/dotfiles-theme.json
 
-# barcolor IMG: black at ALPHA over the mean of the picture's top strip, where the bar lies (hsetroot
-# -fill stretches the picture over the screen, the bar is about a fortieth of its height)
+# barcolor IMG: black at ALPHA over the mean of the picture's top strip, where the bar lies (the picture
+# stretched over the screen, the bar is about a fortieth of its height)
 barcolor() {
 	python3 - "$1" "$ALPHA" <<-'EOF'
 	import sys
@@ -44,53 +40,20 @@ chrome() {
 	if [ -n "${1:-}" ]; then printf '{ "BrowserThemeColor": "%s" }\n' "$1"; else echo '{}'; fi > "$CHROME_POLICY"
 }
 
-# background IMG|COLOUR: the root under X11 (hsetroot); under Wayland (Hyprland) ostrov draws it,
-# following the pick written to $state (mode, wallpaper), so nothing to do here
-background() {
-	if [ -n "${WAYLAND_DISPLAY:-}" ]; then
-		return 0
-	elif [ -f "$1" ]; then
-		hsetroot -fill "$1" > /dev/null
-	else
-		hsetroot -solid "$1" > /dev/null
-	fi
-}
-
-# wall IMG: the background, the remembered wallpaper, and the bar's colour over it for dmenu and Chrome
+# wall IMG: the remembered wallpaper, and the bar's colour over it for Chrome
 wall() {
-	local c
-	background "$1"
 	echo "$1" > "$state/wallpaper"
-	c=$(barcolor "$1")
-	echo "$c" > "$state/barbg"
-	chrome "$c"
+	chrome "$(barcolor "$1")"
 }
 
 # apply MODE [IMG]
 apply() {
 	local mode=$1 a
 	if [ "$mode" = dark ]; then a=1; else a=$ALPHA; fi
-	# the bar's alpha (config/eww, ostrov), read at its start, pushed to a running eww, watched by
-	# ostrov
-	echo "$a" > "$state/alpha"
-	eww update alpha="$a" 2> /dev/null
 	# alacritty's opacity, the file its config imports; it reloads it in every open window
 	printf '# bin/theme: %s\n[window]\nopacity = %s\n' "$mode" "$a" > "$state/alacritty.toml"
 
-	# picom under X11 alone, always (ostrov's see-through panels want it), Wayland compositors blending by
-	# themselves; xcompmgr if picom is not there
-	if [ -z "${WAYLAND_DISPLAY:-}" ]; then
-		pkill -x xcompmgr; pkill -x picom
-		if command -v picom > /dev/null; then
-			picom --config "$HOME/.config/picom/picom.conf" > /dev/null 2>&1 &
-		else
-			xcompmgr > /dev/null 2>&1 &   # its BadRegion errors are harmless noise
-		fi
-		disown
-	fi
 	if [ "$mode" = dark ]; then
-		background '#000000'
-		echo '#000000' > "$state/barbg"
 		chrome
 	else
 		wall "$2"
@@ -109,13 +72,8 @@ dark-wall)
 	apply dark-wall "$img" ;;
 apply)
 	if [ "$(cat "$state/mode" 2>/dev/null)" = dark-wall ]; then "$0" dark-wall; else apply dark; fi ;;
-shuffle)
-	[ "$(cat "$state/mode" 2>/dev/null)" = dark-wall ] || exit 0
-	last=$(cat "$state/wallpaper" 2>/dev/null)
-	img=$(wallpapers | grep -vxF "$last" | shuf -n 1)
-	[ -n "$img" ] && wall "$img" ;;
 wallpapers) wallpapers ;;
 *)
-	echo "usage: theme dark | dark-wall [IMG] | apply | shuffle | wallpapers" >&2
+	echo "usage: theme dark | dark-wall [IMG] | apply | wallpapers" >&2
 	exit 1 ;;
 esac
