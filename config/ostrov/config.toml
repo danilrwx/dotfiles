@@ -69,3 +69,7 @@ bar_opacity = 0.65
 [widget.wallpaper]
 # bin/theme's see-through terminal and Chrome's colour follow ostrov's wallpaper
 on_change = 'if [ -n "$OSTROV_WALLPAPER" ]; then ~/dotfiles/bin/theme dark-wall "$OSTROV_WALLPAPER"; else ~/dotfiles/bin/theme dark; fi'
+
+# the lock screen over the screen as it was, blurred
+[lock]
+background = "blur"
