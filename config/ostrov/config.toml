@@ -36,6 +36,9 @@ enabled = true
 open_on_mount = false
 automount = true
 
+[plugin.updates]
+enabled = true
+
 [plugin.games]
 enabled = true
 classes = ["dota2", "cs2", "steam_app_*"]
