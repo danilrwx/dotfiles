@@ -211,6 +211,8 @@ desktop_system() {
 # Desktop, user side: the session's configs, ssh-agent───────────────────────────────────────────────────────────────────
 desktop_session() {
   link config/hypr "$HOME/.config/hypr"
+  # umbriel, the compositor of noctalia (pkg.noctalia.dev: umbriel, noctalia, xdg-desktop-portal-umbriel)
+  link config/umbriel "$HOME/.config/umbriel"
   # the shell, ostrov (~/w/ostrov; bin/wl-autostart starts it), into ~/.cargo/bin; its config
   link config/ostrov "$HOME/.config/ostrov"
   [ -d "$HOME/w/ostrov" ] && command -v cargo > /dev/null \
