@@ -35,13 +35,14 @@ REMOVE=(
   gnome-shell gnome-shell-common gnome-session gnome-settings-daemon gnome-control-center
   nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
-  snapd wayland-scroll-factor ghostty foot
+  snapd wayland-scroll-factor ghostty
   # Firefox, Mozilla's .deb an older install put in, Chrome being the browser
   firefox
   # dmenu and bemenu, ostrov's launcher being the menu, and the headers dmenu's and st's builds took
   suckless-tools bemenu libx11-dev libxft-dev libxinerama-dev
-  # what the old sway session had that the new one does without, and pavucontrol (ostrov picks the devices)
-  wmenu mako-notifier wob
+  # what the old sway session had that the new one does without (foot and wmenu stay, dwl's defaults), and
+  # pavucontrol (ostrov picks the devices)
+  mako-notifier wob
   pavucontrol
   # Openbox and its bar, awesome: tried as sessions and dropped
   openbox dzen2 stalonetray wmctrl awesome

@@ -60,7 +60,7 @@ density = "compact"
 icon_size = 16
 row_height = 40
 surface = ""
-radius = 8
+radius = 20
 bar_opacity = 0.65
 
 [widget.wallpaper]
