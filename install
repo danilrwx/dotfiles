@@ -249,9 +249,9 @@ desktop_session() {
   sudo update-alternatives --remove x-terminal-emulator "$HOME/dotfiles/bin/term" 2>/dev/null
   [ -x /usr/bin/alacritty ] && sudo update-alternatives --set x-terminal-emulator /usr/bin/alacritty
 
-  # ssh: the plain ssh-agent with OpenSSH's GTK3 askpass, so AddKeysToAgent confirm shows a dialog per key
-  # use. gcr4's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh never loads the
-  # key file itself and the confirm constraint never applies; mask it, ssh-agent.socket owns SSH_AUTH_SOCK
+  # ssh: the plain ssh-agent with bin/askpass, the key's passphrase asked once a login (AddKeysToAgent yes in
+  # ~/.ssh/config). gcr4's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh never loads
+  # the key file itself; mask it, ssh-agent.socket owns SSH_AUTH_SOCK
   log "Setting up ssh-agent with ssh-askpass-gnome"
   link config/systemd/ssh-agent-askpass.conf "$HOME/.config/systemd/user/ssh-agent.service.d/askpass.conf"
   user_systemctl daemon-reload
