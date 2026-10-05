@@ -49,7 +49,7 @@ REMOVE=(
   # the i3 session on X11 and what it ran (ostrov has the bar, notifications, the polkit agent, the lock and
   # screenshots under Hyprland): Xorg itself and startx, not Xwayland (xwayland, xserver-common), which X apps
   # and Steam run on, nor x11-xserver-utils, whose xrdb loads .Xresources into it
-  i3-wm i3lock xss-lock dunst rofi maim xclip hsetroot picom xcompmgr lxpolkit
+  i3-wm i3lock xss-lock dunst rofi maim xclip hsetroot picom xcompmgr
   xinit xserver-xorg-core xserver-xorg-input-libinput xinput
   # Ubuntu's wallpapers under a black root
   ubuntu-wallpapers ubuntu-wallpapers-resolute
