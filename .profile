@@ -1,7 +1,7 @@
 # sh login profile: greetd sources it before the session (Hyprland), and
 # .zprofile sources it for zsh login shells (tmux, ssh), so terminals spawned by the WM, which run zsh as no
 # login shell, still get PATH and the rest from the session.
-PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/bin:$HOME/go/bin:$PATH"
+PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH"
 export PATH
 
 export XDG_CONFIG_HOME="$HOME/.config"
