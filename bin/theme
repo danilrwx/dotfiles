@@ -1,15 +1,13 @@
 #!/bin/bash
-# The see-through terminal and Chrome's colour, following ostrov's wallpaper (its [widget.wallpaper] on_change
-# in config/ostrov runs this; ostrov draws the wallpaper itself):
+# The wallpaper's pick remembered, following ostrov's wallpaper (its [widget.wallpaper] on_change in
+# config/ostrov runs this; ostrov draws the wallpaper itself). The terminal's colours and see-through and Chrome's
+# frame are ostrov's now (its apps.rs: ~/.local/state/ostrov/colors, the ostrov-theme.json policy); what this
+# still writes for alacritty no config imports.
 #   theme dark            everything solid: the default
-#   theme dark-wall [IMG] a wallpaper (~/Pictures/wallpapers) under a see-through terminal, at the ALPHA of
-#                         ostrov's bar (alacritty's window.opacity, written here)
+#   theme dark-wall [IMG] a wallpaper (~/Pictures/wallpapers)
 #   theme apply           the last pick again (config/hypr, at login)
 #   theme wallpapers      the wallpapers to pick from
-# The pick is kept in ~/.cache/theme. Chrome's theme colour follows: under a wallpaper the colour the
-# see-through bar shows over it (black at ALPHA over the picture's top strip), set as Chrome's
-# BrowserThemeColor policy in the file install makes this user's; under dark the policy is cleared and
-# Chrome keeps its own theme. Chrome watches the policy dir and recolours as the file changes.
+# The pick is kept in ~/.cache/theme.
 state=${XDG_CACHE_HOME:-$HOME/.cache}/theme
 walls=$HOME/Pictures/wallpapers
 ALPHA=0.65
@@ -19,31 +17,9 @@ wallpapers() {
 	find "$walls" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) 2>/dev/null | sort
 }
 
-CHROME_POLICY=/etc/opt/chrome/policies/managed/dotfiles-theme.json
-
-# barcolor IMG: black at ALPHA over the mean of the picture's top strip, where the bar lies (the picture
-# stretched over the screen, the bar is about a fortieth of its height)
-barcolor() {
-	python3 - "$1" "$ALPHA" <<-'EOF'
-	import sys
-	from PIL import Image
-	img = Image.open(sys.argv[1]).convert("RGB")
-	a = float(sys.argv[2])
-	strip = img.crop((0, 0, img.width, max(1, img.height // 40))).resize((1, 1), Image.Resampling.BOX)
-	print("#%02x%02x%02x" % tuple(round((1 - a) * c) for c in strip.getpixel((0, 0))))
-	EOF
-}
-
-# chrome [COLOUR]: Chrome's theme colour, or none (its own theme); nothing where install made no file
-chrome() {
-	[ -w "$CHROME_POLICY" ] || return 0
-	if [ -n "${1:-}" ]; then printf '{ "BrowserThemeColor": "%s" }\n' "$1"; else echo '{}'; fi > "$CHROME_POLICY"
-}
-
-# wall IMG: the remembered wallpaper, and the bar's colour over it for Chrome
+# wall IMG: the remembered wallpaper (Chrome's colour is ostrov's now, apps.rs)
 wall() {
 	echo "$1" > "$state/wallpaper"
-	chrome "$(barcolor "$1")"
 }
 
 # apply MODE [IMG]
@@ -53,11 +29,7 @@ apply() {
 	# alacritty's opacity, the file its config imports; it reloads it in every open window
 	printf '# bin/theme: %s\n[window]\nopacity = %s\n' "$mode" "$a" > "$state/alacritty.toml"
 
-	if [ "$mode" = dark ]; then
-		chrome
-	else
-		wall "$2"
-	fi
+	[ "$mode" = dark ] || wall "$2"
 	echo "$mode" > "$state/mode"
 }
 

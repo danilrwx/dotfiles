@@ -344,9 +344,9 @@ EOT
     manifest=$(curl -fsSL "$lolka/latest-linux.yml") &&
       deb_from "$lolka/$(awk '/^path:/ { print $2 }' <<< "$manifest")" "$(awk '/^sha512:/ { print $2 }' <<< "$manifest")"
   fi
-  # Chrome's theme colour, which bin/theme sets from the wallpaper (BrowserThemeColor): a policy file of
-  # this user's, so bin/theme writes it without sudo; '{}' leaves Chrome its own theme
-  local policy=/etc/opt/chrome/policies/managed/dotfiles-theme.json
+  # Chrome's theme colour, which ostrov sets to the colour its bar shows (BrowserThemeColor): a policy file of
+  # this user's, so ostrov writes it without sudo; '{}' leaves Chrome its own theme
+  local policy=/etc/opt/chrome/policies/managed/ostrov-theme.json
   sudo install -d -m 755 "$(dirname "$policy")"
   [ -f "$policy" ] || echo '{}' | sudo install -m 644 /dev/stdin "$policy"
   sudo chown "$USER" "$policy"
