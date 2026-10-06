@@ -252,6 +252,7 @@ desktop_session() {
   # the terminal, alacritty (config/alacritty), and what Iosevka lacks, the emoji above all, from Noto Color
   # Emoji rather than a monochrome fallback (config/fontconfig)
   link config/alacritty "$HOME/.config/alacritty"
+  link config/foot "$HOME/.config/foot"
   link config/fontconfig/fonts.conf "$HOME/.config/fontconfig/fonts.conf"
   # alacritty as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim); the
   # package registers it, st's and bin/term's entries from older installs go (debloat removes st itself)
