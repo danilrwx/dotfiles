@@ -213,6 +213,8 @@ desktop_session() {
   link config/hypr "$HOME/.config/hypr"
   # the shell, ostrov (~/w/ostrov; bin/wl-autostart starts it), into ~/.cargo/bin; its config
   link config/ostrov "$HOME/.config/ostrov"
+  # the file ostrov writes its blur and layer rules to, which hyprland.conf sources: there before Hyprland first reads it
+  mkdir -p "$HOME/.local/state/ostrov" && touch "$HOME/.local/state/ostrov/hyprland.conf"
   [ -d "$HOME/w/ostrov" ] && command -v cargo > /dev/null \
     && cargo install -q --path "$HOME/w/ostrov" || log "Failed to install ostrov. Continue installation."
   # ostrov as xdg-desktop-portal-hyprland's share picker (config/hypr/xdph.conf), by the name it answers to as one
