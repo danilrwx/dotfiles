@@ -1,11 +1,11 @@
-# alacritty, the terminal (in place of my st build): st's look carried over, Iosevka 12; its colours ostrov's
-# (~/.local/state/ostrov/colors/alacritty.toml, written as ostrov's appearance changes; a [colors] here would
-# hold over them). The see-through comes from bin/theme, which writes ~/.cache/theme/alacritty.toml (window.opacity:
-# 1 under dark, the bar's ALPHA under dark-wall); alacritty reloads it, imports too, in every open window.
+# alacritty, the terminal (in place of my st build): st's look carried over, Iosevka 12; its colours and its
+# see-through ostrov's, the bar's colour as solid as the bar (~/.local/state/ostrov/colors/alacritty.toml, written
+# as ostrov's appearance and wallpaper change; a [colors] or window.opacity here would hold over them); alacritty
+# reloads it, imports too, in every open window.
 # Linked to ~/.config/alacritty by install.
 
 [general]
-import = ["~/.local/state/ostrov/colors/alacritty.toml", "~/.cache/theme/alacritty.toml"]
+import = ["~/.local/state/ostrov/colors/alacritty.toml"]
 live_config_reload = true
 
 [env]
