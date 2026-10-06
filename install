@@ -211,6 +211,14 @@ desktop_system() {
 # Desktop, user side: the session's configs, ssh-agent───────────────────────────────────────────────────────────────────
 desktop_session() {
   link config/hypr "$HOME/.config/hypr"
+  # GTK3's theme, adw-gtk3 (config/gtk-3.0/settings.ini): libadwaita's look, built on the named colours ostrov
+  # writes, so GTK3 apps take its palette; not in Ubuntu's archive, its release from GitHub
+  local adw=v6.5
+  if [ ! -d "$HOME/.local/share/themes/adw-gtk3-dark" ]; then
+    mkdir -p "$HOME/.local/share/themes"
+    curl -fsSL "https://github.com/lassekongo83/adw-gtk3/releases/download/$adw/adw-gtk3$adw.tar.xz" \
+      | tar -xJ -C "$HOME/.local/share/themes" || log "Failed to install adw-gtk3. Continue installation."
+  fi
   # the shell, ostrov (~/w/ostrov; bin/wl-autostart starts it), into ~/.cargo/bin; its config
   link config/ostrov "$HOME/.config/ostrov"
   # the file ostrov writes its blur and layer rules to, which hyprland.conf sources: there before Hyprland first reads it
