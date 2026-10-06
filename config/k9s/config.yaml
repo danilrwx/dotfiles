@@ -7,6 +7,7 @@ k9s:
     enableMouse: true
     logoless: true
     headless: true
-    # every colour the terminal's default: see-through over a wallpaper and in bin/theme's palette
-    skin: transparent
+    # ostrov's colours (skins/ostrov.yaml, a link to the file ostrov writes as its look changes), its grounds the
+    # terminal's: see-through as the bar is
+    skin: ostrov
     reactive: true
