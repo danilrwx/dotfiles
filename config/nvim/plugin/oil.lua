@@ -17,8 +17,8 @@ local bufreg = {} -- bufnr -> { id -> disp }
 
 vim.api.nvim_set_hl(0, "OilDir", { link = "Directory", default = true })
 vim.api.nvim_set_hl(0, "OilLinkTarget", { link = "Comment", default = true })
-vim.api.nvim_set_hl(0, "OilLink", { fg = "#00afaf", ctermfg = 6, default = true })
-vim.api.nvim_set_hl(0, "OilExec", { fg = "#5faf5f", ctermfg = 2, default = true })
+vim.api.nvim_set_hl(0, "OilLink", { link = "Special", default = true })
+vim.api.nvim_set_hl(0, "OilExec", { link = "MoreMsg", default = true })
 
 local M = {}
 

@@ -5,23 +5,23 @@ local ns = vim.api.nvim_create_namespace("picker")
 local ns_cur = vim.api.nvim_create_namespace("picker_cur")
 local hlns = vim.api.nvim_create_namespace("picker_hl")
 
--- fzf-like palette (mirrors FZF_DEFAULT_OPTS: match=blue, accents=green,
--- border=grey). default=true lets a colorscheme override.
+-- the palette borrowed from the colorscheme's own groups, so the picker follows
+-- whatever theme is loaded (light or dark). default=true lets a colorscheme override.
 local function setup_hl()
-  local set = vim.api.nvim_set_hl
-  -- ctermfg too: termguicolors is often off, and then gui-only colours vanish.
-  set(0, "PickerBorder", { fg = "#6b7089", ctermfg = 60, default = true })
-  set(0, "PickerMatch", { fg = "#5fafff", ctermfg = 75, bold = true, default = true })
-  set(0, "PickerMatchFile", { fg = "#e0af68", ctermfg = 179, bold = true, default = true })
-  set(0, "PickerCurrent", { fg = "#00cd00", ctermfg = 40, default = true })
-  set(0, "PickerPointer", { fg = "#00cd00", ctermfg = 40, bold = true, default = true })
-  set(0, "PickerMarker", { fg = "#00cd00", ctermfg = 40, default = true })
-  set(0, "PickerCounter", { fg = "#5fafff", ctermfg = 75, default = true })
-  set(0, "PickerPrompt", { fg = "#dcdccc", ctermfg = 253, bold = true, default = true })
-  set(0, "PickerGrepFile", { fg = "#d75fd7", ctermfg = 170, default = true }) -- path
-  set(0, "PickerGrepLnum", { fg = "#5faf5f", ctermfg = 71, default = true }) -- line:col
-  -- the previewed hit's line: a faint dark bar, not the loud full-bright Visual
-  set(0, "PickerPreviewLine", { bg = "#1a1c2a", ctermbg = 235, default = true })
+  local link = function(g, to)
+    vim.api.nvim_set_hl(0, g, { link = to, default = true })
+  end
+  link("PickerBorder", "NonText") -- dim text, no ground of its own
+  link("PickerMatch", "Function")
+  link("PickerMatchFile", "Constant")
+  link("PickerCurrent", "CursorLine")
+  link("PickerPointer", "Title")
+  link("PickerMarker", "MoreMsg")
+  link("PickerCounter", "LineNr")
+  link("PickerPrompt", "Title")
+  link("PickerGrepFile", "Directory") -- path
+  link("PickerGrepLnum", "LineNr") -- line:col
+  link("PickerPreviewLine", "CursorLine") -- the previewed hit's line
 end
 setup_hl()
 vim.api.nvim_create_autocmd("ColorScheme", {
@@ -52,7 +52,7 @@ function M.new(prompt_name, hint)
       style = "minimal",
       zindex = 50,
     }, cfg or {}))
-    vim.wo[win].winhighlight = "FloatBorder:PickerBorder,FloatTitle:PickerPrompt,Normal:Normal"
+    vim.wo[win].winhighlight = "FloatBorder:PickerBorder,FloatTitle:PickerPrompt,NormalFloat:Normal"
     return win, buf
   end
 

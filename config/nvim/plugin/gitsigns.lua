@@ -7,9 +7,9 @@
 -- re-set on ColorScheme too: a :colorscheme clears these back to cleared/linked
 -- and the signs would lose their colour.
 local function set_hl()
-  vim.api.nvim_set_hl(0, "GitSignAdd", { fg = "#00af5f", ctermfg = "green", default = true })
-  vim.api.nvim_set_hl(0, "GitSignChange", { fg = "#d7af00", ctermfg = "yellow", default = true })
-  vim.api.nvim_set_hl(0, "GitSignDelete", { fg = "#d70000", ctermfg = "red", default = true })
+  vim.api.nvim_set_hl(0, "GitSignAdd", { link = "DiffAdd", default = true })
+  vim.api.nvim_set_hl(0, "GitSignChange", { link = "DiffChange", default = true })
+  vim.api.nvim_set_hl(0, "GitSignDelete", { link = "DiffDelete", default = true })
 end
 set_hl()
 vim.api.nvim_create_autocmd("ColorScheme", {
