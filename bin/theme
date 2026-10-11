@@ -257,6 +257,10 @@ sed -e '/^#/d' -e "s/\bgray\b/\"$grey\"/g; s/\bblue\b/\"$blue\"/g; s/\bfuchsia\b
 	-e "s/\byellow\b/\"$(val bright yellow)\"/g; s/\bred\b/\"$red\"/g; s/\blime\b/\"$green\"/g" \
 	-e "s/\baqua\b/\"$(val bright cyan)\"/g; s/\bsel\b/\"$sel\"/g; s/\btext\b/\"$fg\"/g; s/\bground\b/\"$bg\"/g" \
 	"$HOME/dotfiles/config/k9s/skin.yaml" > "$HOME/dotfiles/config/k9s/skins/theme.yaml"
+# htop's scheme: its own colours on a dark theme, monochrome (reversed text for the header and the cursor) on a
+# light one, where its black on green and cyan reads badly; htop writes its htoprc back on quitting, so one
+# running keeps its scheme till restarted
+sed -i "s/^color_scheme=.*/color_scheme=$([ "$mode" = light ] && echo 1 || echo 0)/" "$HOME/dotfiles/config/htop/htoprc"
 # lazygit's: its borders and selection, which it otherwise takes from the plain green and blue; a second config
 # file over config/lazygit (LG_CONFIG_FILE, .profile)
 printf 'gui:\n  theme:\n    activeBorderColor: ["%s", bold]\n    inactiveBorderColor: ["%s"]\n    searchingActiveBorderColor: ["%s", bold]\n    optionsTextColor: ["%s"]\n    selectedLineBgColor: ["%s"]\n    inactiveViewSelectedLineBgColor: [bold]\n    unstagedChangesColor: ["%s"]\n' \
