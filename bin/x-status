@@ -1,5 +1,5 @@
 #!/bin/bash
-# i3bar's status line, every second (config/i3's status_command): memory, volume, mic, battery,
+# polybar's status text, every second (config/polybar's x-status module): memory, volume, mic, battery,
 # brightness, layout, date. Plain words, no icon font.
 export LC_NUMERIC=C   # wpctl prints 0.45; awk under ru_RU reads that as 0
 

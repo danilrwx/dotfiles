@@ -1,5 +1,5 @@
-# dotfiles: tuigreet on vt 7, i3 by default (bin/x-session through startx, as /usr/share/xsessions/x-i3.desktop
-# runs it); F3 picks bspwm (x-bspwm.desktop); remembering the last user and session
+# dotfiles: tuigreet on vt 7, bspwm (bin/x-session through startx, as /usr/share/xsessions/x-bspwm.desktop
+# runs it); remembering the last user and session
 [terminal]
 vt = 7
 

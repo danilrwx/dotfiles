@@ -4,7 +4,7 @@
 # picom, started only then). alacritty imports the link and the options' file set here and reloads on its own;
 # nvim (plugin/colors.lua), Claude's dark-ansi, tmux, fzf, bat and k9s take their colours from those ANSI
 # slots, so they follow; the plain red and green (1, 2) are kept dark in every theme, the ground of Claude's
-# dark-ansi diffs, and text is coloured by the bright ones (9, 10). What draws on X wants hex: i3, polybar,
+# dark-ansi diffs, and text is coloured by the bright ones (9, 10). What draws on X wants hex: bspwm, polybar,
 # dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the ground, text,
 # grey (bright black) and green and blue (bright), and are reloaded; Chrome's theme colour is the ground when
 # it is the theme's own.
@@ -132,7 +132,7 @@ fi
 
 # dmenu's colours for bin/x-run and bin/x-ctl, sourced
 printf 'bg=%s fg=%s grey=%s green=%s blue=%s\n' "$bg" "$fg" "$grey" "$green" "$blue" > "$state/colors.sh"
-# i3's and polybar's, as X resources (theme.bg...): i3 reads them by set_from_resource, polybar by
+# bspwm's and polybar's, as X resources (theme.bg...): bspwmrc reads them by xrdb -get, polybar by
 # ${xrdb:...}; merged now and by bin/x-session at login
 printf 'theme.bg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\ntheme.blue: %s\n' \
 	"$bg" "$fg" "$grey" "$green" "$blue" > "$state/Xresources"
@@ -151,7 +151,7 @@ if [ -w "$policy" ]; then
 fi
 
 # what runs now picks them up
-pgrep -x i3 > /dev/null && i3-msg -q reload
+pgrep -x bspwm > /dev/null && bspc config focused_border_color "$green" && bspc config normal_border_color "$bg"
 # polybar anew rather than by its USR1 reload, which with the tray module can lose the bar while the old
 # process holds the tray; none of the terminal kept, or the tmux popup (pick) waits on it never closing
 if pgrep -x polybar > /dev/null; then

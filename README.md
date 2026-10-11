@@ -14,7 +14,7 @@ Personal dotfiles for Ubuntu.
 ```sh
 git clone https://github.com/danilrwx/dotfiles ~/dotfiles
 cd ~/dotfiles && ./install            # CLI tools only
-cd ~/dotfiles && ./install --desktop  # plus the i3 desktop and GUI apps
+cd ~/dotfiles && ./install --desktop  # plus the bspwm desktop and GUI apps
 ./debloat -n && ./debloat             # once, after --desktop: drop GNOME and snapd
 ```
 
@@ -43,16 +43,18 @@ once a revision has been applied.
 
 `./install --desktop` adds:
 
-- i3 on Xorg (`config/i3`, started by `bin/x-session`), the panel at 2x by `Xft.dpi` (`.Xresources`):
-  i3bar with `bin/x-status`, dmenu as the launcher (`bin/x-run`, `$mod+d`), the quick settings
+- bspwm on Xorg (`config/bspwm`, keys by sxhkd in `config/sxhkd`, started by `bin/x-session`), the panel
+  at 2x by `Xft.dpi` (`.Xresources`): polybar (`config/polybar`) with `bin/x-status` and the tray (snixembed
+  for the StatusNotifierItem ones), dmenu as the launcher (`bin/x-run`, `$mod+d`), the quick settings
   (`bin/x-ctl`, `$mod+x`: Wi-Fi, Bluetooth, drives, sound, headset, VLESS, OpenVPN, power), dunst for
   notifications and the media and HONOR Fn keys' OSD (`bin/x-fnkeys`), xss-lock with i3lock, redshift as
   the night light (`bin/x-night`), polkit-gnome as the polkit agent
-- black, white and grey everywhere: alacritty, tmux, fzf, nvim (`colors/mono.lua`), k9s, GTK
+- the colour themes (`bin/theme`, `config/alacritty/colors`): alacritty, tmux, fzf, bat, nvim, k9s, Claude
+  by the ANSI slots; bspwm, polybar, dunst, dmenu, Chrome and the root by hex; GTK black, white and grey
   (`config/gtk-3.0/gtk.css`)
 - alacritty as the terminal (`config/alacritty`); emoji from Noto Color Emoji after Iosevka
   (`config/fontconfig`)
-- greetd with tuigreet as the login, starting i3 and remembering the user; the
+- greetd with tuigreet as the login, starting bspwm and remembering the user; the
   session environment comes from `.profile`
 - iwd for Wi-Fi instead of NetworkManager (saved networks are moved over), systemd-networkd for
   the wire; impala and bluetui as the Wi-Fi and Bluetooth TUIs
@@ -81,7 +83,7 @@ anything; it refuses to run before greetd is enabled.
 
 | Path | What |
 |---|---|
-| `install` | host setup (symlinks, packages, go tools, the i3 desktop); `bin/dotfiles-update` is the same script on PATH |
+| `install` | host setup (symlinks, packages, go tools, the bspwm desktop); `bin/dotfiles-update` is the same script on PATH |
 | `etc/` | files `install` puts into `/etc` as they are: iwd, netplan, greetd, Xorg's touchpad, the Caps as Ctrl hwdb rule and polkit rules |
 | `debloat` | one-off: strip GNOME, snapd and the unused rest from a stock Ubuntu desktop |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word/path/url from the pane |
@@ -90,10 +92,10 @@ anything; it refuses to run before greetd is enabled.
 | `bin/vless` | the VLESS client: mihomo on through TUN or as the system proxy, off, rule/global, the profile |
 | `bin/openvpn-ctl` | OpenVPN: a profile from `private/config/openvpn` up or down, its state |
 | `bin/clip` | stdin to the clipboard through xclip (tmux, nvim) |
-| `bin/x-run` | i3's dmenu (`$mod+d`): apps by name, `2+2` copied, `s`/`g`/`?` web searches, else a command |
+| `bin/x-run` | the dmenu launcher (`$mod+d`): apps by name, `2+2` copied, `s`/`g`/`?` web searches, else a command |
 | `bin/x-night` | the night light, 21:00 to 07:00, by redshift's one-shot mode |
 | `bin/x-drives` | removable drives in dmenu: mount, or unmount and power off, by udisksctl |
-| `bin/x-session` | the session: i3 (`config/i3`) with alacritty, dunst, xss-lock with i3lock, no compositor; `bin/x-status` i3bar's text |
+| `bin/x-session` | the session: bspwm (`config/bspwm`) with sxhkd, polybar, dunst, xss-lock with i3lock, picom only for the theme's opacity; `bin/x-status` polybar's text |
 | `bin/x-ctl` | `$mod+x`: Wi-Fi, Bluetooth, drives, sound output and input, headset, VLESS, OpenVPN, power profile |
 | `bin/x-fnkeys` | the media and HONOR Fn keys, their levels and states as dunst cards |
 | `bin/askpass` | ssh's askpass: OpenSSH's GTK3 one, each prompt logged |

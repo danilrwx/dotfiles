@@ -1,7 +1,7 @@
 #!/bin/sh
 # $mod+x: pick Wi-Fi, Bluetooth, the removable drives (bin/x-drives), the sound output or input, the headset mode or
-# the power profile. Wi-Fi and Bluetooth are impala and bluetui in a floating alacritty of class x-ctl (for_window
-# rule in config/i3/config); output, input and power are a second pick, the current one first: PipeWire's sinks or
+# the power profile. Wi-Fi and Bluetooth are impala and bluetui in a floating alacritty of class x-ctl (a rule
+# in config/bspwm/bspwmrc); output, input and power are a second pick, the current one first: PipeWire's sinks or
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between headphones
 # (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vless: on through TUN or as the
 # system proxy, off, the rule or global mode, the profile. openvpn brings a profile of bin/openvpn-ctl up, or the

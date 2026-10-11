@@ -1,4 +1,4 @@
-/* GTK3 and libadwaita's named colours: black, white and grey, as i3 has them. Linked to
+/* GTK3 and libadwaita's named colours: black, white and grey. Linked to
  * ~/.config/gtk-3.0/gtk.css and ~/.config/gtk-4.0/gtk.css by install */
 @define-color accent_bg_color #ffffff;
 @define-color accent_color #ffffff;

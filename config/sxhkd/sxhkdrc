@@ -1,4 +1,4 @@
-# bspwm's keys (config/bspwm), config/i3's where bspwm has the same thing. Linked by install.
+# bspwm's keys (config/bspwm). Linked by install.
 
 # levels and the HONOR Fn keys as dunst cards (bin/x-fnkeys)
 XF86Audio{RaiseVolume,LowerVolume,Mute}
@@ -46,7 +46,7 @@ super + f
   bspc node -t ~fullscreen
 super + shift + space
   bspc node -t ~floating
-# monocle, bspwm's nearest to i3's tabbed
+# monocle: one window at a time, the next and back
 super + w
   bspc desktop -l next
 super + Tab

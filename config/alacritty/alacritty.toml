@@ -1,5 +1,5 @@
-# alacritty, the terminal (in place of my st build): st's look carried over, Iosevka 12; black, white and grey as
-# i3 has them; the colours from the theme in colors/ (bin/theme). Linked to ~/.config/alacritty by install.
+# alacritty, the terminal (in place of my st build): st's look carried over, Iosevka 12; the
+# colours from the theme in colors/ (bin/theme). Linked to ~/.config/alacritty by install.
 
 [general]
 live_config_reload = true

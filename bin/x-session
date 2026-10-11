@@ -1,8 +1,8 @@
 #!/bin/sh
-# The session: i3 (config/i3) on Xorg, tuigreet starting it through startx (etc/greetd/config.toml). No
-# compositor, a black root.
+# The session: bspwm (config/bspwm) on Xorg, tuigreet starting it through startx (etc/greetd/config.toml). No
+# compositor unless the theme's opacity asks for picom, the root the theme's ground.
 xrdb -merge "$HOME/.Xresources"
-# the colour theme's (bin/theme): i3's and polybar's colours
+# the colour theme's (bin/theme): bspwm's and polybar's colours
 xrdb -merge "${XDG_STATE_HOME:-$HOME/.local/state}/theme/Xresources" 2>/dev/null
 # picom for the terminal's opacity, only when the theme's below 1 (bin/theme)
 opacity=1
@@ -16,10 +16,10 @@ setxkbmap -layout us,ru -option '' -option grp:ctrl_space_toggle,grp_led:scroll
 bg=$(xrdb -get theme.bg)
 xsetroot -solid "${bg:-#000000}" -cursor_name left_ptr
 # portals, ssh-agent's askpass and the other user units see this display
-dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP=i3 2>/dev/null
+dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP=bspwm 2>/dev/null
 
 dunst &   # notifications (config/dunst)
-# the StatusNotifierItem icons (Electron's trays) in i3bar's tray; without it they quit on close
+# the StatusNotifierItem icons (Electron's trays) in polybar's tray; without it they quit on close
 "$HOME/.local/bin/snixembed" &
 # the polkit agent: virt-manager's, udisks' and the rest's password prompts
 /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 &
@@ -28,5 +28,4 @@ xset s 600 600 dpms 900 900 900
 xss-lock --transfer-sleep-lock -- i3lock -n -c 000000 &
 # the night light every minute (bin/x-night)
 (while :; do "$HOME/dotfiles/bin/x-night"; sleep 60; done) &
-# the window manager: i3, or bspwm on test (x-bspwm.desktop)
-exec "${1:-i3}"
+exec bspwm

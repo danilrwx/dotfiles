@@ -1,5 +1,5 @@
 #!/bin/bash
-# i3's dmenu (its $mod+d): over the bar, the apps by their names (the
+# the dmenu launcher (super+d, config/sxhkd): over the bar, the apps by their names (the
 # .desktop entries, not PATH's binaries; those hidden by NoDisplay, config/applications's among them, left out).
 # What is typed instead: arithmetic is calculated, its result copied; "s words" searches DuckDuckGo, "g words"
 # Google, "?question" asks Claude, in the browser; anything else runs as a command, dmenu_run's way.
