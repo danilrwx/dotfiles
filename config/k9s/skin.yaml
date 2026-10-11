@@ -1,6 +1,8 @@
 # the skin's template: bin/theme writes skins/theme.yaml from it (kept out of git), each colour name here the
-# colour theme's hex (gray its grey, blue, fuchsia, yellow, red, lime, aqua its bright ones, sel its selection)
-# and default the terminal's own text and ground; config.yaml names that skin
+# colour theme's hex (gray its grey, blue, fuchsia, yellow, red, lime, aqua its bright ones, sel its selection,
+# text and ground its own) and default the terminal's text and ground. The table's cursor is the row's colour
+# (newColor) under cursorFgColor, cursorBgColor unused, so rows are text and the cursor ground: reversed.
+# config.yaml names that skin
 k9s:
   body: {fgColor: default, bgColor: default, logoColor: blue}
   prompt: {fgColor: default, bgColor: default, suggestColor: gray}
@@ -10,14 +12,14 @@ k9s:
     border: {fgColor: gray, focusColor: default}
     menu: {fgColor: default, keyColor: blue, numKeyColor: fuchsia}
     crumbs: {fgColor: default, bgColor: sel, activeColor: blue}
-    status: {newColor: default, modifyColor: yellow, addColor: lime, pendingColor: yellow, errorColor: red, highlightColor: aqua, killColor: gray, completedColor: gray}
+    status: {newColor: text, modifyColor: yellow, addColor: lime, pendingColor: yellow, errorColor: red, highlightColor: aqua, killColor: gray, completedColor: gray}
     title: {fgColor: default, bgColor: default, highlightColor: blue, counterColor: fuchsia, filterColor: yellow}
   views:
     charts: {bgColor: default, defaultDialColors: [blue, red], defaultChartColors: [blue, red]}
     table:
       fgColor: default
       bgColor: default
-      cursorFgColor: default
+      cursorFgColor: ground
       cursorBgColor: sel
       markColor: yellow
       header: {fgColor: gray, bgColor: default, sorterColor: blue}
