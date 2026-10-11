@@ -36,14 +36,15 @@ BASE_PKGS=(build-essential git wget zip unzip curl file procps zsh tmux gnupg2 h
 # the desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop (installed by hand, so
 # debloat's autoremove keeps it): the Intel GPU's video decode and encode (VA-API, iHD), Wi-Fi by iwd,
 # Bluetooth, sound, fingerprint, power profiles, firmware updates, the file dialogs' portal, the keyring
-# Chrome keeps passwords in, fonts, printing; then the login, virtualization, ssh's askpass, the terminal
+# Chrome keeps passwords in, fonts, printing; then the login, virtualization, ssh's askpass, the terminal, the
+# file manager
 DESKTOP_PKGS=(iwd bluez rfkill
   pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
   udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
   intel-media-va-driver-non-free
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
-  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome alacritty
+  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome alacritty thunar
   openvpn openvpn-systemd-resolved)
 # the session, without recommends: Xorg and startx, xrdb, xset and xsetroot (x11-xserver-utils), bspwm with sxhkd and polybar, dmenu
 # (suckless-tools), notifications, the polkit agent, the idle lock, screenshots to the clipboard, the media keys'
@@ -257,6 +258,8 @@ desktop_session() {
   # alacritty as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim); the
   # package registers it
   [ -x /usr/bin/alacritty ] && sudo update-alternatives --set x-terminal-emulator /usr/bin/alacritty
+  # thunar for folders: Chrome's "show in folder", the portal's and the rest's
+  xdg-mime default thunar.desktop inode/directory
 
   # ssh: the plain ssh-agent with OpenSSH's GTK3 askpass, so AddKeysToAgent confirm shows a dialog per key
   # use. gcr4's gcr-ssh-agent sits in front of the agent and pre-lists ~/.ssh keys, so ssh never loads the
