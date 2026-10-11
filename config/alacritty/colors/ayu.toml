@@ -1,0 +1,22 @@
+# Ayu dark, its terminal colours.
+[colors.primary]
+background = "#0b0e14"
+foreground = "#bfbdb6"
+[colors.normal]
+black = "#01060e"
+red = "#934448"
+green = "#3c662e"
+yellow = "#f9af4f"
+blue = "#53bdfa"
+magenta = "#cda1fa"
+cyan = "#90e1c6"
+white = "#c7c7c7"
+[colors.bright]
+black = "#686868"
+red = "#f07178"
+green = "#aad94c"
+yellow = "#ffb454"
+blue = "#59c2ff"
+magenta = "#d2a6ff"
+cyan = "#95e6cb"
+white = "#ffffff"

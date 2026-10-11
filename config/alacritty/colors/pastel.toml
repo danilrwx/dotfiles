@@ -1,0 +1,22 @@
+# pastel ANSI colours after Alabaster's dark one, softer than kitty, on a black ground.
+[colors.primary]
+background = "#000000"
+foreground = "#ffffff"
+[colors.normal]
+black = "#1c1c1c"
+red = "#8b4a4c"
+green = "#45633b"
+yellow = "#e3d98a"
+blue = "#7aaee8"
+magenta = "#c991d6"
+cyan = "#6fc2c2"
+white = "#c8c8c8"
+[colors.bright]
+black = "#6b6b6b"
+red = "#f09a9b"
+green = "#addf9c"
+yellow = "#efe6a8"
+blue = "#9cc4f0"
+magenta = "#dbb0e4"
+cyan = "#93d4d4"
+white = "#ffffff"

@@ -1,0 +1,28 @@
+# theme: the terminal's ANSI slots by tcell's names (gray 8, red 9, lime 10, yellow 11, blue 12, fuchsia 13,
+# aqua 14, white 15, black 0) and its own text (default), so k9s follows the colour theme (bin/theme)
+k9s:
+  body: {fgColor: default, bgColor: default, logoColor: blue}
+  prompt: {fgColor: default, bgColor: default, suggestColor: gray}
+  info: {fgColor: gray, sectionColor: default}
+  dialog: {fgColor: default, bgColor: default, buttonFgColor: black, buttonBgColor: gray, buttonFocusFgColor: black, buttonFocusBgColor: white, labelFgColor: blue, fieldFgColor: default}
+  frame:
+    border: {fgColor: gray, focusColor: default}
+    menu: {fgColor: gray, keyColor: blue, numKeyColor: fuchsia}
+    crumbs: {fgColor: black, bgColor: gray, activeColor: white}
+    status: {newColor: blue, modifyColor: yellow, addColor: lime, pendingColor: yellow, errorColor: red, highlightColor: aqua, killColor: gray, completedColor: gray}
+    title: {fgColor: default, bgColor: default, highlightColor: blue, counterColor: fuchsia, filterColor: yellow}
+  views:
+    charts: {bgColor: default, defaultDialColors: [blue, red], defaultChartColors: [blue, red]}
+    table:
+      fgColor: default
+      bgColor: default
+      cursorFgColor: black
+      cursorBgColor: white
+      markColor: yellow
+      header: {fgColor: gray, bgColor: default, sorterColor: default}
+    xray: {fgColor: default, bgColor: default, cursorColor: blue, graphicColor: gray, showIcons: false}
+    yaml: {keyColor: blue, colonColor: gray, valueColor: default}
+    logs:
+      fgColor: default
+      bgColor: default
+      indicator: {fgColor: default, bgColor: default, toggleOnColor: lime, toggleOffColor: gray}

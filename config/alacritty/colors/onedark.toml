@@ -1,0 +1,22 @@
+# One Dark, as alacritty had it before the themes.
+[colors.primary]
+background = "#282c34"
+foreground = "#ffffff"
+[colors.normal]
+black = "#282c34"
+red = "#8f454b"
+green = "#4e633e"
+yellow = "#e5c07b"
+blue = "#61afef"
+magenta = "#c678dd"
+cyan = "#56b6c2"
+white = "#abb2bf"
+[colors.bright]
+black = "#5c6370"
+red = "#e88389"
+green = "#a9d18e"
+yellow = "#ecc98f"
+blue = "#7cbcf2"
+magenta = "#d08fe4"
+cyan = "#6ec6d0"
+white = "#dcdfe4"

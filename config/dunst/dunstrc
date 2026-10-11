@@ -1,4 +1,5 @@
-# dunst under i3 (bin/x-session starts it): white cards, black text, thin blue frame, top right.
+# dunst under i3 (bin/x-session starts it): cards in the theme's text colour, its ground for the text, a thin
+# frame in its blue, top right; those colours from dunstrc.d/theme.conf (bin/theme), these the fallback.
 # bin/x-fnkeys sends volume/brightness with a value hint, drawn as the progress bar. Linked to ~/.config/dunst
 # by install --desktop.
 [global]

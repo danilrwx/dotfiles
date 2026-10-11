@@ -3,3 +3,6 @@
 *.log
 
 config/k9s/clusters
+
+# bin/theme's colours for dunst
+config/dunst/dunstrc.d/

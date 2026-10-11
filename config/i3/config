@@ -9,10 +9,11 @@ set $up    k
 set $right l
 
 # base ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-set $bg       #000000
-set $fg       #ffffff
-set $accent   #00cd00
-set $darkgray #888888
+# the colour theme's (bin/theme merges them into the X resources), these the fallback
+set_from_resource $bg       theme.bg    #000000
+set_from_resource $fg       theme.fg    #ffffff
+set_from_resource $accent   theme.green #00cd00
+set_from_resource $darkgray theme.grey  #888888
 
 # alacritty (config/alacritty)
 set $term alacritty

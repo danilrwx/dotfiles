@@ -1,0 +1,22 @@
+# Zenbones dark, its terminal colours: muted, warm.
+[colors.primary]
+background = "#1c1917"
+foreground = "#b4bdc3"
+[colors.normal]
+black = "#1c1917"
+red = "#8e464f"
+green = "#516242"
+yellow = "#b77e64"
+blue = "#6099c0"
+magenta = "#b279a7"
+cyan = "#66a5ad"
+white = "#b4bdc3"
+[colors.bright]
+black = "#403833"
+red = "#e8838f"
+green = "#8bae68"
+yellow = "#d68c67"
+blue = "#61abda"
+magenta = "#cf86c1"
+cyan = "#65b8c1"
+white = "#888f94"

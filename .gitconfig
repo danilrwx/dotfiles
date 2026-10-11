@@ -32,6 +32,17 @@
 [difftool]
     prompt = false
 
+# the bright red and green: the plain ones are dark in the colour themes, the ground of Claude's diffs
+[color "diff"]
+  old = brightred
+  new = brightgreen
+[color "status"]
+  added = brightgreen
+  changed = brightred
+  untracked = brightred
+[color "branch"]
+  current = brightgreen
+
 [merge]
 	tool = nvimdiff
 [mergetool]

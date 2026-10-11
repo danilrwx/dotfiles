@@ -1,8 +1,12 @@
 # alacritty, the terminal (in place of my st build): st's look carried over, Iosevka 12; black, white and grey as
-# i3 has them, One Dark's ANSI colours. Linked to ~/.config/alacritty by install.
+# i3 has them; the colours from the theme in colors/ (bin/theme). Linked to ~/.config/alacritty by install.
 
 [general]
 live_config_reload = true
+# the theme: a link to one of colors/ (its ground, text and ANSI colours), and its options over it (the ground
+# black, the opacity), both set by bin/theme; nvim and Claude take their colours from these ANSI slots, so the
+# theme is theirs too
+import = ["~/.local/state/theme/alacritty.toml", "~/.local/state/theme/options.toml"]
 
 [env]
 # what ssh hosts and tmux know, alacritty's own terminfo being rare out there
@@ -23,30 +27,9 @@ history = 10000
 [cursor]
 style = { shape = "Block" }
 
-[colors.primary]
-background = "#000000"
-foreground = "#ffffff"
 [colors.cursor]
 cursor = "#ffffff"
 text = "#000000"
 [colors.selection]
 background = "#ffffff"
 text = "#000000"
-[colors.normal]
-black = "#282c34"
-red = "#e06c75"
-green = "#98c379"
-yellow = "#e5c07b"
-blue = "#61afef"
-magenta = "#c678dd"
-cyan = "#56b6c2"
-white = "#abb2bf"
-[colors.bright]
-black = "#5c6370"
-red = "#e88389"
-green = "#a9d18e"
-yellow = "#ecc98f"
-blue = "#7cbcf2"
-magenta = "#d08fe4"
-cyan = "#6ec6d0"
-white = "#dcdfe4"

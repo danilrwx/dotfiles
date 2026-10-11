@@ -20,8 +20,11 @@ for d in "${XDG_DATA_HOME:-$HOME/.local/share}/applications" /usr/local/share/ap
   done
 done
 
+# the colour theme's ground and text (bin/theme)
+bg=#000000 fg=#ffffff
+. "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
 q=$(printf '%s\n' "${!app[@]}" | sort -f | dmenu -i -p run -fn 'Iosevka:size=11' \
-  -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000') || exit 0
+  -nb "$bg" -nf "$fg" -sb "$fg" -sf "$bg") || exit 0
 web() { xdg-open "$1$(jq -rn --arg q "$2" '$q | @uri')" & }
 case $q in
   "s "*) web 'https://duckduckgo.com/?q=' "${q#s }" ;;

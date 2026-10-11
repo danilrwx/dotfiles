@@ -39,6 +39,8 @@ setopt SHARE_HISTORY HIST_IGNORE_DUPS
 alias k=kubectl
 compdef k=kubectl
 
+# ls's colours with the bright red and green (executables, archives): the plain ones are dark in the colour themes
+eval "$(dircolors -b | sed 's/;3\([12]\):/;9\1:/g')"
 alias ls='ls --color=auto'
 alias ll='ls -lah'
 
@@ -60,4 +62,4 @@ alias vim=nvim
 alias lg='lazygit'
 
 setopt PROMPT_SUBST
-PROMPT='[%F{11}%*%f] %F{green}%~%f %F{12}❯%f '
+PROMPT='[%F{11}%*%f] %F{10}%~%f %F{12}❯%f '

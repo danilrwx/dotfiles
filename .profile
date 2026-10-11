@@ -8,7 +8,12 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export EDITOR='nvim'
 export VISUAL='nvim'
 
-export FZF_DEFAULT_OPTS="--height 40% --input-border=sharp --list-border=sharp --preview-border=sharp --prompt='> ' --pointer='>' --marker='>' --gutter=' ' --info=inline-right --bind ctrl-f:page-down,ctrl-b:page-up --color=fg:#ffffff,fg+:#ffffff,bg:-1,bg+:#141414,hl:#ffffff,hl+:#ffffff,info:#888888,marker:#ffffff,prompt:#ffffff,spinner:#ffffff,pointer:#ffffff,header:#888888,border:#888888,gutter:-1"
+export FZF_DEFAULT_OPTS="--height 40% --input-border=sharp --list-border=sharp --preview-border=sharp --prompt='> ' --pointer='>' --marker='>' --gutter=' ' --info=inline-right --bind ctrl-f:page-down,ctrl-b:page-up --color=fg:-1,fg+:-1,bg:-1,bg+:236,hl:10,hl+:10,info:8,marker:13,prompt:-1,spinner:8,pointer:13,header:8,border:8,gutter:-1"
+# fzf's colours are ANSI slots and the terminal's own text (-1), so they follow the theme (bin/theme): the
+# matches bright green as in nvim's menus, the pointer and marks magenta, the rest grey. Ctrl-T previews the
+# file by bat in its ansi theme (the same slots), Alt-C the directory
+export FZF_CTRL_T_OPTS="--preview 'batcat --color=always --style=numbers --theme=ansi --line-range=:300 {} 2>/dev/null || ls -1 {}'"
+export FZF_ALT_C_OPTS="--preview 'ls -1 --color=always {}'"
 
 export PI_OFFLINE=1
 

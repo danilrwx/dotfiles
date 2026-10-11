@@ -5,9 +5,12 @@
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between headphones
 # (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vless: on through TUN or as the
 # system proxy, off, the rule or global mode, the profile. openvpn brings a profile of bin/openvpn-ctl up, or the
-# one up down.
+# one up down. theme picks the colour theme (bin/theme), the current one first.
 # pick PROMPT: a line of stdin by dmenu, bin/x-run's look (as tall as the bar)
-pick() { dmenu -i -p "$1" -fn 'Iosevka:size=11' -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000'; }
+# the colour theme's ground and text (bin/theme)
+bg=#000000 fg=#ffffff
+. "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
+pick() { dmenu -i -p "$1" -fn 'Iosevka:size=11' -nb "$bg" -nf "$fg" -sb "$fg" -sf "$bg"; }
 # term TITLE CMD: alacritty with class x-ctl
 term() { exec alacritty --class x-ctl -T "$1" -e "$2"; }
 # devices Sink|Source: "ID<tab>NAME" per PipeWire audio sink or source, the default one first. Only the
@@ -101,7 +104,7 @@ openvpn() {
 		notify-send -a fnkeys -r 9912 -u critical "OpenVPN" "$err"
 	fi
 }
-choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\nopenvpn\ndrives\npower\n' | pick ctl) || exit 0
+choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\nopenvpn\ndrives\npower\ntheme\n' | pick ctl) || exit 0
 case "$choice" in
 power)
 	cur=$(powerprofilesctl get)
@@ -115,4 +118,8 @@ input)     sound Source input ;;
 headset)   headset ;;
 vless)     vless ;;
 openvpn)   openvpn ;;
+theme)
+	t="$HOME/dotfiles/bin/theme"
+	name=$("$t" | sort -k2 -r | cut -d' ' -f1 | pick theme) || exit 0
+	exec "$t" "$name" ;;
 esac

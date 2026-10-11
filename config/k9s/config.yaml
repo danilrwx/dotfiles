@@ -7,6 +7,6 @@ k9s:
     enableMouse: true
     logoless: true
     headless: true
-    # black, white and grey (skins/mono.yaml), its grounds the terminal's
-    skin: mono
+    # the colour theme's ANSI slots (skins/theme.yaml, bin/theme)
+    skin: theme
     reactive: true

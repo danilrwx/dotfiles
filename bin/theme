@@ -1,0 +1,163 @@
+#!/bin/sh
+# theme [NAME]: the colour theme, one of config/alacritty/colors/: its ground, text and 16 ANSI colours, and two
+# options over it: the ground black or the theme's own (bg), and the terminal's opacity (opacity, below 1 by
+# picom, started only then). alacritty imports the link and the options' file set here and reloads on its own;
+# nvim (plugin/colors.lua), Claude's dark-ansi, tmux, fzf, bat and k9s take their colours from those ANSI
+# slots, so they follow; the plain red and green (1, 2) are kept dark in every theme, the ground of Claude's
+# dark-ansi diffs, and text is coloured by the bright ones (9, 10). What draws on X wants hex: i3, polybar,
+# dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the ground, text,
+# grey (bright black) and green and blue (bright), and are reloaded; Chrome's theme colour is the ground when
+# it is the theme's own.
+#   theme                 the themes, the current one marked
+#   theme NAME            set it
+#   theme set bg black|theme|toggle, theme set opacity 0.1-1|cycle
+#                         an option, the current theme set again with it
+#   theme pick            an fzf of them (tmux's prefix T, in a popup): the one under the cursor tried on the
+#                         terminal at once, ctrl-b the ground, ctrl-o the opacity; Enter sets it, Esc puts
+#                         the old one back
+#   theme quick NAME      the terminal's colours only, no X reloads (pick's tries)
+#   theme preview NAME    its 16 colours and a piece of C coloured as nvim colours it (plugin/colors.lua)
+dir=$HOME/dotfiles/config/alacritty/colors
+state=${XDG_STATE_HOME:-$HOME/.local/state}/theme
+mkdir -p "$state"
+cur=$(basename "$(readlink "$state/alacritty.toml")" .toml 2>/dev/null)
+# the options, kept as shell: bg_mode=black|theme opacity=1
+bg_mode=black opacity=1
+[ -f "$state/options" ] && . "$state/options"
+
+case $1 in
+"")
+	for f in "$dir"/*.toml; do
+		n=$(basename "$f" .toml)
+		[ "$n" = "$cur" ] && echo "$n *" || echo "$n"
+	done
+	exit 0 ;;
+pick)
+	old="$bg_mode $opacity"
+	name=$("$0" | sort -k2 -r | cut -d' ' -f1 | fzf --prompt='theme> ' --no-sort --height=100% \
+		--header 'ctrl-b: ground black/theme   ctrl-o: opacity' \
+		--bind "focus:execute-silent($0 quick {})" \
+		--bind "ctrl-b:execute-silent($0 set bg toggle quick; $0 quick {})+refresh-preview" \
+		--bind "ctrl-o:execute-silent($0 set opacity cycle quick; $0 quick {})+refresh-preview" \
+		--preview "$0 preview {}" --preview-window=right,70%) || {
+		set -- $old
+		printf 'bg_mode=%s opacity=%s\n' "$1" "$2" > "$state/options"
+		[ -n "$cur" ] && "$0" quick "$cur"
+		exit 0
+	}
+	exec "$0" "$name" ;;
+set)
+	case $2 in
+	bg)
+		case $3 in
+		toggle) [ "$bg_mode" = black ] && bg_mode=theme || bg_mode=black ;;
+		black|theme) bg_mode=$3 ;;
+		*) echo "theme: bg is black or theme" >&2; exit 1 ;;
+		esac ;;
+	opacity)
+		case $3 in
+		cycle) case $opacity in 1) opacity=0.9 ;; 0.9) opacity=0.8 ;; 0.8) opacity=0.7 ;; *) opacity=1 ;; esac ;;
+		0.[1-9]|0.[1-9][0-9]|1) opacity=$3 ;;
+		*) echo "theme: opacity is 0.1-1" >&2; exit 1 ;;
+		esac ;;
+	*) echo "theme: set bg|opacity VALUE" >&2; exit 1 ;;
+	esac
+	printf 'bg_mode=%s opacity=%s\n' "$bg_mode" "$opacity" > "$state/options"
+	# pick's tries leave setting the theme to it
+	[ "$4" = quick ] && exit 0
+	[ -n "$cur" ] && exec "$0" "$cur"
+	exit 0 ;;
+preview) preview=1; shift ;;
+quick) quick=1; shift ;;
+esac
+f=$dir/$1.toml
+[ -f "$f" ] || { echo "theme: no $1 in $dir" >&2; exit 1; }
+
+# val SECTION KEY: a colour of the theme, "#rrggbb"
+val() { sed -n "/^\[colors\.$1\]/,/^\[/s/^$2 = \"\(#[0-9a-fA-F]*\)\"/\1/p" "$f"; }
+bg=$(val primary background) fg=$(val primary foreground)
+grey=$(val bright black) green=$(val bright green) blue=$(val bright blue)
+[ "$bg_mode" = black ] && bg=#000000
+
+if [ -n "$preview" ]; then
+	# rgb HEX: "R;G;B" of it, for truecolor (the theme's own colours, not the terminal's current ones)
+	rgb() { printf '%d;%d;%d' "0x$(echo "$1" | cut -c2-3)" "0x$(echo "$1" | cut -c4-5)" "0x$(echo "$1" | cut -c6-7)"; }
+	c() { printf '\033[38;2;%sm' "$(rgb "$1")"; }
+	# the theme's ground under it all, \033[K carrying it to the line's end
+	r=$(printf '\033[0m\033[48;2;%sm' "$(rgb "$bg")")$(c "$fg") e=$(printf '\033[K')
+	printf '%s ground %s, opacity %s%s\n%s\n' "$r" "$bg_mode" "$opacity" "$e" "$e"
+	for n in black red green yellow blue magenta cyan white; do
+		printf ' %s%-8s %s%-8s%s%s\n' "$(c "$(val normal $n)")" "$n" "$(c "$(val bright $n)")" "bright" "$r" "$e"
+	done
+	# nvim's roles: comments grey (8), definitions and flow magenta (13), calls blue (12), types cyan (14),
+	# strings green (10), the rest the text
+	cm=$(c "$grey") df=$(c "$(val bright magenta)") cl=$(c "$blue") ty=$(c "$(val bright cyan)") st=$(c "$green")
+	cat <<-EOF
+	$e
+	 ${cm}// the bar's window${r}$e
+	 ${df}#ifndef${r} PLANKA_BAR_H$e
+	 static ${ty}int${r} ${df}bar_create${r}(struct ${ty}bar${r} *bar)$e
+	 {$e
+	     ${ty}xcb_generic_error_t${r} *err = ${cl}xcb_request_check${r}(bar->conn, cookie);$e
+	     ${df}if${r} (err != NULL) {$e
+	         ${cl}fprintf${r}(stderr, ${st}"planka: code %d\\\\n"${r}, err->error_code);$e
+	         ${df}return${r} -1;$e
+	     }$e
+	     ${df}return${r} 0;$e
+	 }$e
+	 ${df}#endif${r}$e
+	EOF
+	printf '\033[0m'
+	exit 0
+fi
+
+ln -sfn "$f" "$state/alacritty.toml"
+# the options over the theme, imported after it
+{
+	[ "$bg_mode" = black ] && printf '[colors.primary]\nbackground = "#000000"\n'
+	printf '[window]\nopacity = %s\n' "$opacity"
+} > "$state/options.toml"
+# alacritty watches the files it read, not a link swapped under it: a touch of its own config reloads it
+touch "$HOME/dotfiles/config/alacritty/alacritty.toml"
+# picom for the opacity, only while it is below 1
+if [ -n "$DISPLAY" ]; then
+	if [ "$opacity" = 1 ]; then
+		pkill -x picom
+	elif ! pgrep -x picom > /dev/null; then
+		picom -b --backend xrender < /dev/null > /dev/null 2>&1
+	fi
+fi
+# quick: the terminal only, and what takes the terminal's colours (nvim, tmux, fzf, k9s)
+[ -n "$quick" ] && exit 0
+
+# dmenu's colours for bin/x-run and bin/x-ctl, sourced
+printf 'bg=%s fg=%s grey=%s green=%s blue=%s\n' "$bg" "$fg" "$grey" "$green" "$blue" > "$state/colors.sh"
+# i3's and polybar's, as X resources (theme.bg...): i3 reads them by set_from_resource, polybar by
+# ${xrdb:...}; merged now and by bin/x-session at login
+printf 'theme.bg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\ntheme.blue: %s\n' \
+	"$bg" "$fg" "$grey" "$green" "$blue" > "$state/Xresources"
+[ -n "$DISPLAY" ] && xrdb -merge "$state/Xresources" && xsetroot -solid "$bg"
+# dunst's: its cards in the theme's text colour, the text in its ground, the frame its blue; a drop-in, kept
+# out of git (.gitignore)
+mkdir -p "$HOME/.config/dunst/dunstrc.d"
+printf '[global]\n    frame_color = "%s"\n    background = "%s"\n    foreground = "%s"\n    highlight = "%s"\n' \
+	"$blue" "$fg" "$bg" "$bg" > "$HOME/.config/dunst/dunstrc.d/theme.conf"
+
+# Chrome's: its theme colour the ground when the theme's own shows (bg theme), its own theme under black; the
+# policy file install makes this user's, which Chrome watches
+policy=/etc/opt/chrome/policies/managed/dotfiles-theme.json
+if [ -w "$policy" ]; then
+	if [ "$bg_mode" = theme ]; then printf '{ "BrowserThemeColor": "%s" }\n' "$bg"; else echo '{}'; fi > "$policy"
+fi
+
+# what runs now picks them up
+pgrep -x i3 > /dev/null && i3-msg -q reload
+# polybar anew rather than by its USR1 reload, which with the tray module can lose the bar while the old
+# process holds the tray; none of the terminal kept, or the tmux popup (pick) waits on it never closing
+if pgrep -x polybar > /dev/null; then
+	pkill -x polybar
+	while pgrep -x polybar > /dev/null; do sleep 0.1; done
+	setsid -f polybar main < /dev/null > /dev/null 2>&1
+fi
+pgrep -x dunst > /dev/null && dunstctl reload
+exit 0

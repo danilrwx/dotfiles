@@ -2,11 +2,19 @@
 # The session: i3 (config/i3) on Xorg, tuigreet starting it through startx (etc/greetd/config.toml). No
 # compositor, a black root.
 xrdb -merge "$HOME/.Xresources"
+# the colour theme's (bin/theme): i3's and polybar's colours
+xrdb -merge "${XDG_STATE_HOME:-$HOME/.local/state}/theme/Xresources" 2>/dev/null
+# picom for the terminal's opacity, only when the theme's below 1 (bin/theme)
+opacity=1
+. "${XDG_STATE_HOME:-$HOME/.local/state}/theme/options" 2>/dev/null
+[ "$opacity" = 1 ] || picom -b --backend xrender 2>/dev/null
 # the cursor's size for the apps that take it from the environment alone (Steam)
 export XCURSOR_SIZE="$(xrdb -get Xcursor.size)"
 # us and ru, Ctrl+Space between them, Scroll Lock's LED on ru (bin/x-status reads it); Caps as Ctrl is the hwdb's
 setxkbmap -layout us,ru -option '' -option grp:ctrl_space_toggle,grp_led:scroll
-xsetroot -solid '#000000' -cursor_name left_ptr
+# the ground the colour theme's (bin/theme), black without one
+bg=$(xrdb -get theme.bg)
+xsetroot -solid "${bg:-#000000}" -cursor_name left_ptr
 # portals, ssh-agent's askpass and the other user units see this display
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP=i3 2>/dev/null
 

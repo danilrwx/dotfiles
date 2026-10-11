@@ -1,0 +1,22 @@
+# Solarized dark, its accents in both rows (its own bright row is greys).
+[colors.primary]
+background = "#002b36"
+foreground = "#93a1a1"
+[colors.normal]
+black = "#073642"
+red = "#b02826"
+green = "#556200"
+yellow = "#b58900"
+blue = "#268bd2"
+magenta = "#d33682"
+cyan = "#2aa198"
+white = "#eee8d5"
+[colors.bright]
+black = "#586e75"
+red = "#cb4b16"
+green = "#859900"
+yellow = "#b58900"
+blue = "#268bd2"
+magenta = "#6c71c4"
+cyan = "#2aa198"
+white = "#fdf6e3"
