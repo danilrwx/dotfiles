@@ -28,9 +28,11 @@ history = 10000
 [cursor]
 style = { shape = "Block" }
 
+# the cursor and the selection the cell reversed, its text's colour its ground, so they show on dark themes
+# and light alike
 [colors.cursor]
-cursor = "#ffffff"
-text = "#000000"
+cursor = "CellForeground"
+text = "CellBackground"
 [colors.selection]
-background = "#ffffff"
-text = "#000000"
+background = "CellForeground"
+text = "CellBackground"
