@@ -25,7 +25,34 @@ vim.api.nvim_create_autocmd("LspAttach", {
     -- colors.lua links to Normal. Dropping the capability here, before nvim
     -- starts the token requests, keeps the highlighting treesitter-only.
     client.server_capabilities.semanticTokensProvider = nil
-    vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, { autotrigger = true })
+    -- the menu's items cut or padded to one width, so the menu keeps it and
+    -- the documentation popup (completeopt popup) has the room on its right
+    -- rather than a sliver left of a menu as wide as the longest signature
+    local w = 40
+    vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, {
+      autotrigger = true,
+      convert = function(item)
+        local s = item.label:gsub("^[%s•]+", "")
+        if vim.fn.strdisplaywidth(s) > w then
+          s = vim.fn.strcharpart(s, 0, w - 1) .. "…"
+        end
+        return { abbr = s .. string.rep(" ", w - vim.fn.strdisplaywidth(s)) }
+      end,
+    })
+    -- autotrigger fires on the server's trigger characters alone ("." "->"),
+    -- so the menu also opens on any word character typed while it is closed;
+    -- once open, nvim narrows it itself. One per-buffer augroup, as below.
+    if client:supports_method("textDocument/completion") then
+      vim.api.nvim_create_autocmd("InsertCharPre", {
+        group = vim.api.nvim_create_augroup("lsp_compl_" .. ev.buf, { clear = true }),
+        buffer = ev.buf,
+        callback = function()
+          if vim.fn.pumvisible() == 0 and vim.v.char:match("[%w_]") then
+            vim.schedule(vim.lsp.completion.get)
+          end
+        end,
+      })
+    end
 
     -- code lenses (gopls shows a "run go generate" lens above //go:generate
     -- directives): enable() renders them and owns its own debounced refresh on
