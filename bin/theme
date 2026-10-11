@@ -3,9 +3,9 @@
 # options over it: the ground black or the theme's own (bg), and the terminal's opacity (opacity, below 1 by
 # picom, started only then). alacritty imports the link and the options' file set here and reloads on its own;
 # nvim (plugin/colors.lua), Claude's dark-ansi, tmux, fzf, bat and k9s take their colours from those ANSI
-# slots, so they follow; the plain red and green (1, 2) are kept dark in every theme, the ground of Claude's
-# dark-ansi diffs, and text is coloured by the bright ones (9, 10). What draws on X wants hex: bspwm, polybar,
-# dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the ground, text,
+# slots, so they follow (Claude by its own theme too, "dotfiles", written here); the plain red and green (1, 2)
+# are kept dark in every theme, the ground of dark-ansi's diffs, and text is coloured by the bright ones (9,
+# 10). What draws on X wants hex: bspwm, polybar, dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the ground, text,
 # grey (bright black) and green and blue (bright), and are reloaded; Chrome's theme colour is the ground when
 # it is the theme's own.
 #   theme                 the themes, the current one marked
@@ -165,6 +165,35 @@ sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
 	printf '@define-color theme_selected_bg_color %s;\n@define-color theme_selected_fg_color %s;\n' "$sel" "$fg"
 	printf '@define-color theme_unfocused_selected_bg_color %s;\n@define-color theme_unfocused_selected_fg_color %s;\n' "$sel" "$fg"
 } > "$state/gtk.css"
+# Claude Code's: a theme of its own over dark-ansi (/theme, "dotfiles"), its diffs a tint of the ground toward
+# green and red rather than the plain slots, its message grounds a shade up, its greys the theme's
+claude=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
+if [ -d "$claude" ]; then
+	gr=$(val bright green) up=$(mix "$bg" "$fg" 8)
+	mkdir -p "$claude/themes"
+	cat > "$claude/themes/dotfiles.json" <<-EOF
+	{
+	  "name": "dotfiles",
+	  "base": "dark-ansi",
+	  "overrides": {
+	    "diffAdded": "$(mix "$bg" "$gr" 22)",
+	    "diffRemoved": "$(mix "$bg" "$red" 22)",
+	    "diffAddedDimmed": "$(mix "$bg" "$gr" 10)",
+	    "diffRemovedDimmed": "$(mix "$bg" "$red" 10)",
+	    "diffAddedWord": "$(mix "$bg" "$gr" 45)",
+	    "diffRemovedWord": "$(mix "$bg" "$red" 45)",
+	    "userMessageBackground": "$up",
+	    "userMessageBackgroundHover": "$(mix "$bg" "$fg" 12)",
+	    "bashMessageBackgroundColor": "$up",
+	    "memoryBackgroundColor": "$up",
+	    "selectionBg": "$sel",
+	    "inactive": "$grey",
+	    "subtle": "$grey",
+	    "promptBorder": "$grey"
+	  }
+	}
+	EOF
+fi
 # lazygit's: its borders and selection, which it otherwise takes from the plain green and blue; a second config
 # file over config/lazygit (LG_CONFIG_FILE, .profile)
 printf 'gui:\n  theme:\n    activeBorderColor: ["%s", bold]\n    inactiveBorderColor: ["%s"]\n    searchingActiveBorderColor: ["%s", bold]\n    optionsTextColor: ["%s"]\n    selectedLineBgColor: ["%s"]\n    inactiveViewSelectedLineBgColor: [bold]\n    unstagedChangesColor: ["%s"]\n' \

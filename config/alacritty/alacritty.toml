@@ -14,7 +14,8 @@ TERM = "xterm-256color"
 
 [window]
 padding = { x = 2, y = 2 }
-dynamic_padding = false
+# what the window has over whole lines split between the top and the bottom, not all of it at the bottom
+dynamic_padding = true
 resize_increments = false
 
 [font]
