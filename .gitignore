@@ -6,3 +6,5 @@ config/k9s/clusters
 
 # bin/theme's colours for dunst
 config/dunst/dunstrc.d/
+# bin/theme's skin for k9s, from config/k9s/skin.yaml
+config/k9s/skins/

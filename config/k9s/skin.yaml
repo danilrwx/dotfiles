@@ -1,15 +1,15 @@
-# theme: the terminal's ANSI slots by tcell's names (gray 8, red 9, lime 10, yellow 11, blue 12, fuchsia 13,
-# aqua 14) and its own text (default), no black or white, which swap places between dark themes and light; so
-# k9s follows the colour theme (bin/theme)
+# the skin's template: bin/theme writes skins/theme.yaml from it (kept out of git), each colour name here the
+# colour theme's hex (gray its grey, blue, fuchsia, yellow, red, lime, aqua its bright ones, sel its selection)
+# and default the terminal's own text and ground; config.yaml names that skin
 k9s:
   body: {fgColor: default, bgColor: default, logoColor: blue}
   prompt: {fgColor: default, bgColor: default, suggestColor: gray}
   info: {fgColor: gray, sectionColor: default}
-  dialog: {fgColor: default, bgColor: default, buttonFgColor: default, buttonBgColor: default, buttonFocusFgColor: default, buttonFocusBgColor: gray, labelFgColor: blue, fieldFgColor: default}
+  dialog: {fgColor: default, bgColor: default, buttonFgColor: default, buttonBgColor: default, buttonFocusFgColor: default, buttonFocusBgColor: sel, labelFgColor: blue, fieldFgColor: default}
   frame:
     border: {fgColor: gray, focusColor: default}
     menu: {fgColor: default, keyColor: blue, numKeyColor: fuchsia}
-    crumbs: {fgColor: default, bgColor: gray, activeColor: blue}
+    crumbs: {fgColor: default, bgColor: sel, activeColor: blue}
     status: {newColor: default, modifyColor: yellow, addColor: lime, pendingColor: yellow, errorColor: red, highlightColor: aqua, killColor: gray, completedColor: gray}
     title: {fgColor: default, bgColor: default, highlightColor: blue, counterColor: fuchsia, filterColor: yellow}
   views:
@@ -18,7 +18,7 @@ k9s:
       fgColor: default
       bgColor: default
       cursorFgColor: default
-      cursorBgColor: gray
+      cursorBgColor: sel
       markColor: yellow
       header: {fgColor: gray, bgColor: default, sorterColor: blue}
     xray: {fgColor: default, bgColor: default, cursorColor: blue, graphicColor: gray, showIcons: false}

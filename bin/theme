@@ -251,6 +251,12 @@ if [ -d "$claude" ]; then
 	}
 	EOF
 fi
+# k9s's: config/k9s/skin.yaml's colour names the theme's hex, into the skin config.yaml names (skins/, out of
+# git); hex rather than the names as ANSI, which tcell sends as its own fixed RGB on a truecolor terminal
+sed -e '/^#/d' -e "s/\bgray\b/\"$grey\"/g; s/\bblue\b/\"$blue\"/g; s/\bfuchsia\b/\"$(val bright magenta)\"/g" \
+	-e "s/\byellow\b/\"$(val bright yellow)\"/g; s/\bred\b/\"$red\"/g; s/\blime\b/\"$green\"/g" \
+	-e "s/\baqua\b/\"$(val bright cyan)\"/g; s/\bsel\b/\"$sel\"/g" \
+	"$HOME/dotfiles/config/k9s/skin.yaml" > "$HOME/dotfiles/config/k9s/skins/theme.yaml"
 # lazygit's: its borders and selection, which it otherwise takes from the plain green and blue; a second config
 # file over config/lazygit (LG_CONFIG_FILE, .profile)
 printf 'gui:\n  theme:\n    activeBorderColor: ["%s", bold]\n    inactiveBorderColor: ["%s"]\n    searchingActiveBorderColor: ["%s", bold]\n    optionsTextColor: ["%s"]\n    selectedLineBgColor: ["%s"]\n    inactiveViewSelectedLineBgColor: [bold]\n    unstagedChangesColor: ["%s"]\n' \
