@@ -142,6 +142,33 @@ printf 'theme.bg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\ntheme.blue:
 mkdir -p "$HOME/.config/dunst/dunstrc.d"
 printf '[global]\n    frame_color = "%s"\n    background = "%s"\n    foreground = "%s"\n    highlight = "%s"\n' \
 	"$blue" "$fg" "$bg" "$bg" > "$HOME/.config/dunst/dunstrc.d/theme.conf"
+# mix A B PERCENT: A with that much of B, "#rrggbb"
+mix() {
+	printf '#'
+	for i in 2 4 6; do
+		a=$(printf %d "0x$(echo "$1" | cut -c$i-$((i + 1)))") b=$(printf %d "0x$(echo "$2" | cut -c$i-$((i + 1)))")
+		printf %02x $((a + (b - a) * $3 / 100))
+	done
+}
+sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
+# GTK's: adw-gtk3's and libadwaita's named colours (config/gtk-3.0/settings.ini), the ground and text, the
+# views and popovers a shade up, the accent its blue; ~/.config/gtk-{3,4}.0/gtk.css link here (install), read
+# by each app as it starts
+{
+	for k in window headerbar theme; do printf '@define-color %s_bg_color %s;\n' "$k" "$bg"; done
+	for k in view popover dialog; do printf '@define-color %s_bg_color %s;\n' "$k" "$(mix "$bg" "$fg" 5)"; done
+	printf '@define-color sidebar_bg_color %s;\n@define-color card_bg_color %s;\n' "$(mix "$bg" "$fg" 3)" "$(mix "$bg" "$fg" 8)"
+	for k in window view headerbar sidebar card popover dialog theme; do printf '@define-color %s_fg_color %s;\n' "$k" "$fg"; done
+	printf '@define-color theme_base_color %s;\n@define-color theme_text_color %s;\n' "$(mix "$bg" "$fg" 5)" "$fg"
+	printf '@define-color accent_bg_color %s;\n@define-color accent_color %s;\n@define-color accent_fg_color %s;\n' "$blue" "$blue" "$bg"
+	printf '@define-color destructive_bg_color %s;\n@define-color error_color %s;\n' "$red" "$red"
+	printf '@define-color theme_selected_bg_color %s;\n@define-color theme_selected_fg_color %s;\n' "$sel" "$fg"
+	printf '@define-color theme_unfocused_selected_bg_color %s;\n@define-color theme_unfocused_selected_fg_color %s;\n' "$sel" "$fg"
+} > "$state/gtk.css"
+# lazygit's: its borders and selection, which it otherwise takes from the plain green and blue; a second config
+# file over config/lazygit (LG_CONFIG_FILE, .profile)
+printf 'gui:\n  theme:\n    activeBorderColor: ["%s", bold]\n    inactiveBorderColor: ["%s"]\n    searchingActiveBorderColor: ["%s", bold]\n    optionsTextColor: ["%s"]\n    selectedLineBgColor: ["%s"]\n    inactiveViewSelectedLineBgColor: [bold]\n    unstagedChangesColor: ["%s"]\n' \
+	"$green" "$grey" "$blue" "$blue" "$sel" "$red" > "$state/lazygit.yml"
 
 # Chrome's: its theme colour the ground when the theme's own shows (bg theme), its own theme under black; the
 # policy file install makes this user's, which Chrome watches

@@ -129,7 +129,9 @@ base() {
   log "Linking configs"
   mkdir -p "$HOME/.local/bin" "$HOME/.local/share"
   for f in .gitconfig .gitignore_global .profile .tmux.conf .zprofile .zshrc; do link "$f" "$HOME/$f"; done
-  for c in k9s htop lazygit nvim; do link "config/$c" "$HOME/.config/$c"; done
+  for c in k9s htop lazygit nvim bat; do link "config/$c" "$HOME/.config/$c"; done
+  # bat's own theme (config/bat/themes) into its cache
+  batcat cache --build > /dev/null 2>&1 || true
   # the private CLI configs (claude, pi, CLAUDE.md), kept out of this public repo
   if [ -f private/install ]; then
     log "Running private install"
@@ -214,8 +216,8 @@ desktop_system() {
 desktop_session() {
   link config/dunst "$HOME/.config/dunst"
   for c in bspwm sxhkd polybar; do link "config/$c" "$HOME/.config/$c"; done
-  # GTK3's theme, adw-gtk3 (config/gtk-3.0/settings.ini): libadwaita's look, built on the named colours of
-  # config/gtk-3.0/gtk.css; not in Ubuntu's archive, its release from GitHub
+  # GTK3's theme, adw-gtk3 (config/gtk-3.0/settings.ini): libadwaita's look, built on the named colours
+  # bin/theme writes; not in Ubuntu's archive, its release from GitHub
   local adw=v6.5
   if [ ! -d "$HOME/.local/share/themes/adw-gtk3-dark" ]; then
     mkdir -p "$HOME/.local/share/themes"
@@ -237,8 +239,11 @@ desktop_session() {
   # dark GTK3 (GTK4 follows the portal's color-scheme); GTK keeps bookmarks next to it, so the file is linked,
   # not the dir
   link config/gtk-3.0/settings.ini "$HOME/.config/gtk-3.0/settings.ini"
-  # their named colours, black, white and grey, for libadwaita (GTK4) too
-  for g in gtk-3.0 gtk-4.0; do link config/gtk-3.0/gtk.css "$HOME/.config/$g/gtk.css"; done
+  # their named colours, the colour theme's, for libadwaita (GTK4) too: bin/theme writes them
+  for g in gtk-3.0 gtk-4.0; do
+    mkdir -p "$HOME/.config/$g"
+    ln -snf "${XDG_STATE_HOME:-$HOME/.local/state}/theme/gtk.css" "$HOME/.config/$g/gtk.css"
+  done
   # the system's app entries that are tools, hidden from bin/x-run's list
   for a in config/applications/*.desktop; do link "$a" "$HOME/.local/share/applications/${a##*/}"; done
 

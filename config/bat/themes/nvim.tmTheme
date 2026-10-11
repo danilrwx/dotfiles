@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- nvim: bat on the terminal's ANSI slots in the roles of config/nvim/plugin/colors.lua: comments grey (8),
+     definitions and control flow magenta (13), calls blue (12), types cyan (14), strings green (10), the rest
+     the text; so it follows the colour theme (bin/theme). #RR000000 is the slot RR, #00000001 the text.
+     Linked to ~/.config/bat by install, built by `batcat cache --build`. -->
+<plist version="1.0"><dict>
+<key>name</key><string>nvim</string>
+<key>settings</key><array>
+<dict><key>settings</key><dict><key>foreground</key><string>#00000001</string><key>background</key><string>#00000001</string><key>gutter</key><string>#00000001</string><key>gutterForeground</key><string>#08000000</string><key>lineHighlight</key><string>#00000001</string><key>selection</key><string>#00000001</string></dict></dict>
+<dict><key>name</key><string>Comment</string><key>scope</key><string>comment, punctuation.definition.comment</string><key>settings</key><dict><key>foreground</key><string>#08000000</string></dict></dict>
+<dict><key>name</key><string>String</string><key>scope</key><string>string, constant.character, punctuation.definition.string</string><key>settings</key><dict><key>foreground</key><string>#0a000000</string></dict></dict>
+<dict><key>name</key><string>Definition</string><key>scope</key><string>entity.name.function, entity.name.macro, entity.name.constant.preprocessor, meta.function entity.name, entity.name.struct, entity.name.enum, entity.name.union, entity.name.class, entity.name.type</string><key>settings</key><dict><key>foreground</key><string>#0d000000</string></dict></dict>
+<dict><key>name</key><string>Control flow</string><key>scope</key><string>keyword.control, keyword.control.flow, keyword.other.preprocessor, meta.preprocessor keyword</string><key>settings</key><dict><key>foreground</key><string>#0d000000</string></dict></dict>
+<dict><key>name</key><string>Plain keywords</string><key>scope</key><string>keyword.control.import, meta.preprocessor.include keyword</string><key>settings</key><dict><key>foreground</key><string>#00000001</string></dict></dict>
+<dict><key>name</key><string>Call</string><key>scope</key><string>meta.function-call variable.function, meta.function-call entity.name.function, variable.function, support.function</string><key>settings</key><dict><key>foreground</key><string>#0c000000</string></dict></dict>
+<dict><key>name</key><string>Type</string><key>scope</key><string>storage.type, support.type, entity.name.type.typedef, support.class</string><key>settings</key><dict><key>foreground</key><string>#0e000000</string></dict></dict>
+<dict><key>name</key><string>Diff added</string><key>scope</key><string>markup.inserted</string><key>settings</key><dict><key>foreground</key><string>#0a000000</string></dict></dict>
+<dict><key>name</key><string>Diff removed</string><key>scope</key><string>markup.deleted</string><key>settings</key><dict><key>foreground</key><string>#09000000</string></dict></dict>
+<dict><key>name</key><string>Diff changed</string><key>scope</key><string>markup.changed, meta.diff.range</string><key>settings</key><dict><key>foreground</key><string>#0b000000</string></dict></dict>
+<dict><key>name</key><string>Heading</string><key>scope</key><string>markup.heading</string><key>settings</key><dict><key>foreground</key><string>#0c000000</string></dict></dict>
+</array>
+</dict></plist>

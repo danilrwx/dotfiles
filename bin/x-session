@@ -21,9 +21,10 @@ dunst &   # notifications (config/dunst)
 "$HOME/.local/bin/snixembed" &
 # the polkit agent: virt-manager's, udisks' and the rest's password prompts
 /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 &
-# locked at 10 min idle and before sleep (loginctl lock-session too), the screen off at 15
+# locked at 10 min idle and before sleep (loginctl lock-session too), on the colour theme's ground; the screen
+# off at 15
 xset s 600 600 dpms 900 900 900
-xss-lock --transfer-sleep-lock -- i3lock -n -c 000000 &
+xss-lock --transfer-sleep-lock -- sh -c 'bg=$(xrdb -get theme.bg | tr -d "#"); exec i3lock -n -c "${bg:-000000}"' &
 # the night light every minute (bin/x-night)
 (while :; do "$HOME/dotfiles/bin/x-night"; sleep 60; done) &
 exec bspwm
