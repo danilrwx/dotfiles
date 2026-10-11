@@ -8,4 +8,17 @@ mkdir -p "${log%/*}"
 printf '%s %s %s | %s < %s\n' "$(date '+%F %T')" "${SSH_ASKPASS_PROMPT:-passphrase}" "$*" \
 	"$(tr '\0' ' ' < /proc/$PPID/cmdline 2>/dev/null)" \
 	"$(tr '\0' ' ' < /proc/$(awk '{print $4}' /proc/$PPID/stat 2>/dev/null)/cmdline 2>/dev/null)" >> "$log"
+# sudo -A (SUDO_ASKPASS) asks with its bare "[sudo: authenticate] Password:": the dialog shows the command
+# instead, sudo's own options cut off, and who runs it when that is Claude Code (an ancestor named claude)
+if [ "$(cat /proc/$PPID/comm 2>/dev/null)" = sudo ]; then
+	cmd=$(tr '\0' ' ' < /proc/$PPID/cmdline | sed -E 's/^[^ ]*sudo +(-[A-Za-z]+ +)*//; s/ +$//')
+	[ ${#cmd} -gt 400 ] && cmd="$(printf '%s' "$cmd" | cut -c1-400)…"
+	who=sudo p=$PPID
+	while [ "$p" -gt 1 ] 2>/dev/null; do
+		[ "$(cat /proc/$p/comm 2>/dev/null)" = claude ] && { who="Claude Code через sudo"; break; }
+		# the parent's pid, the field after the name, which may hold spaces ("tmux: server")
+		p=$(sed 's/.*) //' /proc/$p/stat 2>/dev/null | cut -d' ' -f2)
+	done
+	exec /usr/lib/openssh/gnome-ssh-askpass "$(printf '%s хочет выполнить от root:\n\n%s\n\nПароль %s:' "$who" "$cmd" "$USER")"
+fi
 exec /usr/lib/openssh/gnome-ssh-askpass "$@"
