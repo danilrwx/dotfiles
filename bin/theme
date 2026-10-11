@@ -112,10 +112,24 @@ if [ -n "$preview" ]; then
 fi
 
 ln -sfn "$f" "$state/alacritty.toml"
-# the options over the theme, imported after it
+# mix A B PERCENT: A with that much of B, "#rrggbb"
+mix() {
+	printf '#'
+	for i in 2 4 6; do
+		a=$(printf %d "0x$(echo "$1" | cut -c$i-$((i + 1)))") b=$(printf %d "0x$(echo "$2" | cut -c$i-$((i + 1)))")
+		printf %02x $((a + (b - a) * $3 / 100))
+	done
+}
+# the options over the theme, imported after it; and the 256 palette's darkest greys (235-238: nvim's
+# selection, LSP references and columns, fzf's current line, tmux's pane borders) a tint of the ground toward
+# the text rather than neutral grey
 {
 	[ "$bg_mode" = black ] && printf '[colors.primary]\nbackground = "#000000"\n'
 	printf '[window]\nopacity = %s\n' "$opacity"
+	for i in "235 6" "236 10" "237 14" "238 20"; do
+		set -- $i
+		printf '[[colors.indexed_colors]]\nindex = %s\ncolor = "%s"\n' "$1" "$(mix "$bg" "$fg" "$2")"
+	done
 } > "$state/options.toml"
 # alacritty watches the files it read, not a link swapped under it: a touch of its own config reloads it
 touch "$HOME/dotfiles/config/alacritty/alacritty.toml"
@@ -142,14 +156,6 @@ printf 'theme.bg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\ntheme.blue:
 mkdir -p "$HOME/.config/dunst/dunstrc.d"
 printf '[global]\n    frame_color = "%s"\n    background = "%s"\n    foreground = "%s"\n    highlight = "%s"\n' \
 	"$blue" "$fg" "$bg" "$bg" > "$HOME/.config/dunst/dunstrc.d/theme.conf"
-# mix A B PERCENT: A with that much of B, "#rrggbb"
-mix() {
-	printf '#'
-	for i in 2 4 6; do
-		a=$(printf %d "0x$(echo "$1" | cut -c$i-$((i + 1)))") b=$(printf %d "0x$(echo "$2" | cut -c$i-$((i + 1)))")
-		printf %02x $((a + (b - a) * $3 / 100))
-	done
-}
 sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
 # GTK's: adw-gtk3's and libadwaita's named colours (config/gtk-3.0/settings.ini), the ground and text, the
 # views and popovers a shade up, the accent its blue; ~/.config/gtk-{3,4}.0/gtk.css link here (install), read
