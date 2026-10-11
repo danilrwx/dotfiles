@@ -4,9 +4,9 @@
 pgrep -x sxhkd > /dev/null || sxhkd &
 pkill -x polybar; polybar main &
 # a wallpaper at random from ~/Pictures/wallpapers at each start and restart, while the theme has one at all
-# (bin/theme set wallpaper)
+# and its opacity, below 1, shows it (bin/theme set wallpaper, set opacity)
 . ~/.local/state/theme/options 2>/dev/null
-if [ -n "$wallpaper" ]; then
+if [ -n "$wallpaper" ] && [ "$opacity" != 1 ]; then
   w=$(find ~/Pictures/wallpapers -type f | shuf -n 1)
   [ -n "$w" ] && ~/dotfiles/bin/theme set wallpaper "$w" quick && xwallpaper --zoom "$w"
 fi

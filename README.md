@@ -95,7 +95,7 @@ anything; it refuses to run before greetd is enabled.
 | `bin/x-run` | the dmenu launcher (`$mod+d`): apps by name, `2+2` copied, `s`/`g`/`?` web searches, else a command |
 | `bin/x-night` | the night light, 21:00 to 07:00, by redshift's one-shot mode |
 | `bin/x-drives` | removable drives in dmenu: mount, or unmount and power off, by udisksctl |
-| `bin/x-session` | the session: bspwm (`config/bspwm`) with sxhkd, polybar, dunst, xss-lock with i3lock, picom only for the theme's opacity; `bin/x-status` polybar's text |
+| `bin/x-session` | the session: bspwm (`config/bspwm`) with sxhkd, polybar, dunst, xss-lock with i3lock, xcompmgr only for the theme's opacity; `bin/x-status` polybar's text |
 | `bin/x-ctl` | `$mod+x`: Wi-Fi, Bluetooth, drives, sound output and input, headset, VLESS, OpenVPN, power profile |
 | `bin/x-fnkeys` | the media and HONOR Fn keys, their levels and states as dunst cards |
 | `bin/askpass` | ssh's askpass: OpenSSH's GTK3 one, each prompt logged |

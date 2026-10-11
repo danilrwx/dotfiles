@@ -1,7 +1,8 @@
 #!/bin/sh
 # theme [NAME]: the colour theme, one of config/alacritty/colors/: its ground, text and 16 ANSI colours, and two
 # options over it: the ground black or the theme's own (bg), and the terminal's opacity (opacity, below 1 by
-# picom, started only then). alacritty imports the link and the options' file set here and reloads on its own;
+# xcompmgr, started only then). alacritty imports the link and the options' file set here and reloads on its
+# own;
 # nvim (plugin/colors.lua), tmux, fzf, bat and k9s take their colours from those ANSI slots, so they follow;
 # Claude has its own theme, "dotfiles", over dark-ansi, written here. What draws on X wants hex: bspwm,
 # polybar, dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the ground,
@@ -11,7 +12,8 @@
 #   theme NAME            set it
 #   theme set bg black|theme|toggle, theme set opacity 0.1-1|cycle, theme set wallpaper FILE|none
 #                         an option, the current theme set again with it; the wallpaper, an image zoomed over
-#                         the root (xwallpaper), is what the opacity shows through, the ground's colour without it
+#                         the root (xwallpaper) while the opacity is below 1, is what it shows through; the
+#                         ground's colour without it
 #   theme pick            an fzf of them (tmux's prefix T, in a popup): the one under the cursor tried on the
 #                         terminal at once, ctrl-b the ground, ctrl-o the opacity; Enter sets it, Esc puts
 #                         the old one back
@@ -140,12 +142,12 @@ mix() {
 } > "$state/options.toml"
 # alacritty watches the files it read, not a link swapped under it: a touch of its own config reloads it
 touch "$HOME/dotfiles/config/alacritty/alacritty.toml"
-# picom for the opacity, only while it is below 1
+# xcompmgr for the opacity, only while it is below 1
 if [ -n "$DISPLAY" ]; then
 	if [ "$opacity" = 1 ]; then
-		pkill -x picom
-	elif ! pgrep -x picom > /dev/null; then
-		picom -b --backend xrender < /dev/null > /dev/null 2>&1
+		pkill -x xcompmgr
+	elif ! pgrep -x xcompmgr > /dev/null; then
+		setsid -f xcompmgr < /dev/null > /dev/null 2>&1
 	fi
 fi
 # quick: the terminal only, and what takes the terminal's colours (nvim, tmux, fzf, k9s)
@@ -160,9 +162,9 @@ barbg=$(awk -v o="$opacity" -v c="${bg#\#}" 'BEGIN { printf "#%02x%s", o * 255, 
 printf 'theme.bg: %s\ntheme.barbg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\ntheme.blue: %s\n' \
 	"$bg" "$barbg" "$fg" "$grey" "$green" "$blue" > "$state/Xresources"
 [ -n "$DISPLAY" ] && xrdb -merge "$state/Xresources"
-# the root: the wallpaper, or the ground's colour
+# the root: the wallpaper while the opacity shows it (below 1), else the ground's colour
 if [ -n "$DISPLAY" ]; then
-	if [ -f "$wallpaper" ]; then xwallpaper --zoom "$wallpaper"; else xsetroot -solid "$bg"; fi
+	if [ "$opacity" != 1 ] && [ -f "$wallpaper" ]; then xwallpaper --zoom "$wallpaper"; else xsetroot -solid "$bg"; fi
 fi
 # dunst's: its cards in the theme's text colour, the text in its ground, the frame its blue; a drop-in, kept
 # out of git (.gitignore)
