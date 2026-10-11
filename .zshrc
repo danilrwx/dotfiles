@@ -42,7 +42,7 @@ alias k=kubectl
 alias k9s='TCELL_TRUECOLOR=disable k9s'
 compdef k=kubectl
 
-# ls's colours with the bright red and green (executables, archives): the plain ones are dark in the colour themes
+# ls's colours with the bright red and green (executables, archives), as git and the prompt have them
 eval "$(dircolors -b | sed 's/;3\([12]\):/;9\1:/g')"
 alias ls='ls --color=auto'
 alias ll='ls -lah'
