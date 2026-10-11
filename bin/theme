@@ -2,12 +2,11 @@
 # theme [NAME]: the colour theme, one of config/alacritty/colors/: its ground, text and 16 ANSI colours, and two
 # options over it: the ground black or the theme's own (bg), and the terminal's opacity (opacity, below 1 by
 # picom, started only then). alacritty imports the link and the options' file set here and reloads on its own;
-# nvim (plugin/colors.lua), Claude's dark-ansi, tmux, fzf, bat and k9s take their colours from those ANSI
-# slots, so they follow (Claude by its own theme too, "dotfiles", written here); the plain red and green (1, 2)
-# are kept dark in every theme, the ground of dark-ansi's diffs, and text is coloured by the bright ones (9,
-# 10). What draws on X wants hex: bspwm, polybar, dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the ground, text,
-# grey (bright black) and green and blue (bright), and are reloaded; Chrome's theme colour is the ground when
-# it is the theme's own.
+# nvim (plugin/colors.lua), tmux, fzf, bat and k9s take their colours from those ANSI slots, so they follow;
+# Claude has its own theme, "dotfiles", over dark-ansi, written here. What draws on X wants hex: bspwm,
+# polybar, dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the ground,
+# text, grey (bright black) and green and blue (bright), and are reloaded; Chrome's theme colour is the ground
+# when it is the theme's own.
 #   theme                 the themes, the current one marked
 #   theme NAME            set it
 #   theme set bg black|theme|toggle, theme set opacity 0.1-1|cycle, theme set wallpaper FILE|none
@@ -155,9 +154,11 @@ fi
 # dmenu's colours for bin/x-run and bin/x-ctl, sourced
 printf 'bg=%s fg=%s grey=%s green=%s blue=%s\n' "$bg" "$fg" "$grey" "$green" "$blue" > "$state/colors.sh"
 # bspwm's and polybar's, as X resources (theme.bg...): bspwmrc reads them by xrdb -get, polybar by
-# ${xrdb:...}; merged now and by bin/x-session at login
-printf 'theme.bg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\ntheme.blue: %s\n' \
-	"$bg" "$fg" "$grey" "$green" "$blue" > "$state/Xresources"
+# ${xrdb:...}; merged now and by bin/x-session at login. theme.barbg the bar's, as see-through as the
+# terminal: #aarrggbb, the alpha the opacity's
+barbg=$(awk -v o="$opacity" -v c="${bg#\#}" 'BEGIN { printf "#%02x%s", o * 255, c }')
+printf 'theme.bg: %s\ntheme.barbg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\ntheme.blue: %s\n' \
+	"$bg" "$barbg" "$fg" "$grey" "$green" "$blue" > "$state/Xresources"
 [ -n "$DISPLAY" ] && xrdb -merge "$state/Xresources"
 # the root: the wallpaper, or the ground's colour
 if [ -n "$DISPLAY" ]; then
