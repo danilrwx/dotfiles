@@ -159,14 +159,16 @@ local function apply()
   end
 
   -- the UI: text colours over no background, dark grey for selections, green for
-  -- what is picked or current
+  -- what is picked or current; what stands out is bold in the terminal's own
+  -- text and search hits reversed, never white (15) or black (0), which swap
+  -- places in the light themes
   local UI = {
-    StatusLine = { ctermfg = 15 },
+    StatusLine = { bold = true },
     StatusLineNC = { ctermfg = 8 },
-    StatusLineTerm = { ctermfg = 15 },
+    StatusLineTerm = { bold = true },
     StatusLineTermNC = { ctermfg = 8 },
     TabLine = { ctermfg = 8 },
-    TabLineSel = { ctermfg = 15, bold = true },
+    TabLineSel = { bold = true },
     TabLineFill = {},
     WinSeparator = { ctermfg = 8 },
     VertSplit = { ctermfg = 8 },
@@ -178,7 +180,7 @@ local function apply()
     LineNr = { ctermfg = 8 },
     CursorLine = {},
     CursorColumn = { ctermbg = 235 },
-    CursorLineNr = { ctermfg = 15, bold = true },
+    CursorLineNr = { bold = true },
     CursorLineSign = {},
     CursorLineFold = {},
     ColorColumn = { ctermbg = 235 },
@@ -207,16 +209,16 @@ local function apply()
     WildMenu = { ctermfg = 10, ctermbg = 237, bold = true },
 
     Search = { ctermfg = 10, ctermbg = 237 },
-    CurSearch = { ctermfg = 0, ctermbg = 10 },
-    IncSearch = { ctermfg = 0, ctermbg = 10 },
-    Substitute = { ctermfg = 0, ctermbg = 10 },
+    CurSearch = { ctermfg = 10, reverse = true },
+    IncSearch = { ctermfg = 10, reverse = true },
+    Substitute = { ctermfg = 10, reverse = true },
 
     DiffAdd = { ctermfg = 10 },
     DiffChange = { ctermfg = 11 },
     DiffDelete = { ctermfg = 9 },
     DiffText = { ctermfg = 11, bold = true, underline = true },
 
-    Title = { ctermfg = 15, bold = true },
+    Title = { bold = true },
     Directory = { ctermfg = 14 },
     ErrorMsg = { ctermfg = 9 },
     Error = { ctermfg = 9 },
@@ -224,7 +226,7 @@ local function apply()
     Todo = { ctermfg = 11, bold = true },
     Question = { ctermfg = 10 },
     MoreMsg = { ctermfg = 10 },
-    ModeMsg = { ctermfg = 15, bold = true },
+    ModeMsg = { bold = true },
     TrailingSpace = { ctermbg = 1 },
   }
   for g, opts in pairs(UI) do

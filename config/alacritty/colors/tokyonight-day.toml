@@ -1,0 +1,22 @@
+# Tokyo Night Day, its terminal colours; black and white in their usual places.
+[colors.primary]
+background = "#e1e2e7"
+foreground = "#3760bf"
+[colors.normal]
+black = "#343b58"
+red = "#f52a65"
+green = "#587539"
+yellow = "#8c6c3e"
+blue = "#2e7de9"
+magenta = "#9854f1"
+cyan = "#007197"
+white = "#a8aecb"
+[colors.bright]
+black = "#8990b3"
+red = "#f52a65"
+green = "#587539"
+yellow = "#8c6c3e"
+blue = "#2e7de9"
+magenta = "#9854f1"
+cyan = "#007197"
+white = "#e9e9ed"

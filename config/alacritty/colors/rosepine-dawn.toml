@@ -1,0 +1,22 @@
+# Rosé Pine Dawn, its terminal colours; black and white in their usual places.
+[colors.primary]
+background = "#faf4ed"
+foreground = "#575279"
+[colors.normal]
+black = "#575279"
+red = "#b4637a"
+green = "#286983"
+yellow = "#ea9d34"
+blue = "#56949f"
+magenta = "#907aa9"
+cyan = "#d7827e"
+white = "#dfdad9"
+[colors.bright]
+black = "#9893a5"
+red = "#b4637a"
+green = "#286983"
+yellow = "#ea9d34"
+blue = "#56949f"
+magenta = "#907aa9"
+cyan = "#d7827e"
+white = "#f2e9e1"

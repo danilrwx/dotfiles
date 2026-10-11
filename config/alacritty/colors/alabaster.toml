@@ -1,0 +1,23 @@
+# Alabaster, light, the scheme nvim's roles follow; its bright row the darker accents, readable on the
+# light ground.
+[colors.primary]
+background = "#f7f7f7"
+foreground = "#000000"
+[colors.normal]
+black = "#000000"
+red = "#aa3731"
+green = "#448c27"
+yellow = "#cb9000"
+blue = "#325cc0"
+magenta = "#7a3e9d"
+cyan = "#0083b2"
+white = "#bbbbbb"
+[colors.bright]
+black = "#777777"
+red = "#aa3731"
+green = "#448c27"
+yellow = "#cb9000"
+blue = "#325cc0"
+magenta = "#7a3e9d"
+cyan = "#0083b2"
+white = "#ffffff"

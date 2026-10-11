@@ -1,16 +1,17 @@
 #!/bin/sh
 # theme [NAME]: the colour theme, one of config/alacritty/colors/: its ground, text and 16 ANSI colours, and two
-# options over it: the ground black or the theme's own (bg), and the terminal's opacity (opacity, below 1 by
-# xcompmgr, started only then). alacritty imports the link and the options' file set here and reloads on its
-# own;
-# nvim (plugin/colors.lua), tmux, fzf, bat and k9s take their colours from those ANSI slots, so they follow;
-# Claude has its own theme, "dotfiles", over dark-ansi, written here. What draws on X wants hex: bspwm,
+# options over it: the ground plain (black, white on a light theme) or the theme's own (bg), and the terminal's
+# opacity (opacity, below 1 by xcompmgr, started only then). A theme is dark or light by its ground's
+# luminance, and what has the two modes takes it: Claude's base, GTK's theme, the portal's color-scheme.
+# alacritty imports the link and the options' file set here and reloads on its own; nvim (plugin/colors.lua),
+# tmux, fzf, bat and k9s take their colours from those ANSI slots, so they follow; Claude has its own theme,
+# "dotfiles", written here. What draws on X wants hex: bspwm,
 # polybar, dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the ground,
 # text, grey (bright black) and green and blue (bright), and are reloaded; Chrome's theme colour is the ground
 # when it is the theme's own.
 #   theme                 the themes, the current one marked
 #   theme NAME            set it
-#   theme set bg black|theme|toggle, theme set opacity 0.1-1|cycle, theme set wallpaper FILE|none
+#   theme set bg plain|theme|toggle, theme set opacity 0.1-1|cycle, theme set wallpaper FILE|none
 #                         an option, the current theme set again with it; the wallpaper, an image zoomed over
 #                         the root (xwallpaper) while the opacity is below 1, is what it shows through; the
 #                         ground's colour without it
@@ -23,9 +24,10 @@ dir=$HOME/dotfiles/config/alacritty/colors
 state=${XDG_STATE_HOME:-$HOME/.local/state}/theme
 mkdir -p "$state"
 cur=$(basename "$(readlink "$state/alacritty.toml")" .toml 2>/dev/null)
-# the options, kept as shell: bg_mode=black|theme opacity=1 wallpaper=FILE
-bg_mode=black opacity=1 wallpaper=
+# the options, kept as shell: bg_mode=plain|theme opacity=1 wallpaper=FILE (black, plain's old name, read as it)
+bg_mode=plain opacity=1 wallpaper=
 [ -f "$state/options" ] && . "$state/options"
+[ "$bg_mode" = black ] && bg_mode=plain
 # ponytail: the wallpaper's path single-quoted, one with a ' in it breaks the file
 save() { printf "bg_mode=%s opacity=%s wallpaper='%s'\n" "$bg_mode" "$opacity" "$wallpaper" > "$state/options"; }
 
@@ -39,7 +41,7 @@ case $1 in
 pick)
 	old="$bg_mode $opacity"
 	name=$("$0" | sort -k2 -r | cut -d' ' -f1 | fzf --prompt='theme> ' --no-sort --height=100% \
-		--header 'ctrl-b: ground black/theme   ctrl-o: opacity' \
+		--header 'ctrl-b: ground plain/theme   ctrl-o: opacity' \
 		--bind "focus:execute-silent($0 quick {})" \
 		--bind "ctrl-b:execute-silent($0 set bg toggle quick; $0 quick {})+refresh-preview" \
 		--bind "ctrl-o:execute-silent($0 set opacity cycle quick; $0 quick {})+refresh-preview" \
@@ -54,9 +56,10 @@ set)
 	case $2 in
 	bg)
 		case $3 in
-		toggle) [ "$bg_mode" = black ] && bg_mode=theme || bg_mode=black ;;
-		black|theme) bg_mode=$3 ;;
-		*) echo "theme: bg is black or theme" >&2; exit 1 ;;
+		toggle) [ "$bg_mode" = plain ] && bg_mode=theme || bg_mode=plain ;;
+		plain|theme) bg_mode=$3 ;;
+		black) bg_mode=plain ;;
+		*) echo "theme: bg is plain or theme" >&2; exit 1 ;;
 		esac ;;
 	opacity)
 		case $3 in
@@ -86,7 +89,18 @@ f=$dir/$1.toml
 val() { sed -n "/^\[colors\.$1\]/,/^\[/s/^$2 = \"\(#[0-9a-fA-F]*\)\"/\1/p" "$f"; }
 bg=$(val primary background) fg=$(val primary foreground)
 grey=$(val bright black) green=$(val bright green) blue=$(val bright blue)
-[ "$bg_mode" = black ] && bg=#000000
+# dark or light, by the theme's own ground's relative luminance
+mode=$(echo "$bg" | awk '{
+	for (i = 0; i < 3; i++) {
+		c = index("0123456789abcdef", tolower(substr($0, 2 + 2 * i, 1))) * 16 - 16
+		c = (c + index("0123456789abcdef", tolower(substr($0, 3 + 2 * i, 1))) - 1) / 255
+		v[i] = c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ^ 2.4
+	}
+	print ((0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2] > 0.4) ? "light" : "dark")
+}')
+if [ "$bg_mode" = plain ]; then
+	[ "$mode" = light ] && bg=#ffffff || bg=#000000
+fi
 
 if [ -n "$preview" ]; then
 	# rgb HEX: "R;G;B" of it, for truecolor (the theme's own colours, not the terminal's current ones)
@@ -133,7 +147,7 @@ mix() {
 # selection, LSP references and columns, fzf's current line, tmux's pane borders) a tint of the ground toward
 # the text rather than neutral grey
 {
-	[ "$bg_mode" = black ] && printf '[colors.primary]\nbackground = "#000000"\n'
+	[ "$bg_mode" = plain ] && printf '[colors.primary]\nbackground = "%s"\n' "$bg"
 	printf '[window]\nopacity = %s\n' "$opacity"
 	for i in "235 6" "236 10" "237 14" "238 20"; do
 		set -- $i
@@ -186,7 +200,14 @@ sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
 	printf '@define-color theme_selected_bg_color %s;\n@define-color theme_selected_fg_color %s;\n' "$sel" "$fg"
 	printf '@define-color theme_unfocused_selected_bg_color %s;\n@define-color theme_unfocused_selected_fg_color %s;\n' "$sel" "$fg"
 } > "$state/gtk.css"
-# Claude Code's: a theme of its own over dark-ansi (/theme, "dotfiles"), its diffs a tint of the ground toward
+# GTK3's theme: outside GNOME it reads no color-scheme, only settings.ini, so adw-gtk3 (install puts it in
+# ~/.local/share/themes, libadwaita's look built on the named colours above) in the theme's mode;
+# ~/.config/gtk-3.0/settings.ini links here (install). The portal's color-scheme for GTK4 and Chrome
+if [ "$mode" = dark ]; then gtk=adw-gtk3-dark scheme=prefer-dark dark=1; else gtk=adw-gtk3 scheme=prefer-light dark=0; fi
+printf '[Settings]\ngtk-theme-name=%s\ngtk-application-prefer-dark-theme=%s\n' "$gtk" "$dark" > "$state/settings.ini"
+gsettings set org.gnome.desktop.interface color-scheme "$scheme" 2> /dev/null ||
+	gsettings set org.gnome.desktop.interface color-scheme default 2> /dev/null
+# Claude Code's: a theme of its own over dark-ansi or light-ansi by the mode (/theme, "dotfiles"), its diffs a tint of the ground toward
 # green and red rather than the plain slots, its message grounds a shade up, its greys the theme's
 claude=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
 if [ -d "$claude" ]; then
@@ -195,7 +216,7 @@ if [ -d "$claude" ]; then
 	cat > "$claude/themes/dotfiles.json" <<-EOF
 	{
 	  "name": "dotfiles",
-	  "base": "dark-ansi",
+	  "base": "$mode-ansi",
 	  "overrides": {
 	    "diffAdded": "$(mix "$bg" "$gr" 22)",
 	    "diffRemoved": "$(mix "$bg" "$red" 22)",
@@ -220,7 +241,7 @@ fi
 printf 'gui:\n  theme:\n    activeBorderColor: ["%s", bold]\n    inactiveBorderColor: ["%s"]\n    searchingActiveBorderColor: ["%s", bold]\n    optionsTextColor: ["%s"]\n    selectedLineBgColor: ["%s"]\n    inactiveViewSelectedLineBgColor: [bold]\n    unstagedChangesColor: ["%s"]\n' \
 	"$green" "$grey" "$blue" "$blue" "$sel" "$red" > "$state/lazygit.yml"
 
-# Chrome's: its theme colour the ground when the theme's own shows (bg theme), its own theme under black; the
+# Chrome's: its theme colour the ground when the theme's own shows (bg theme), its own theme under plain; the
 # policy file install makes this user's, which Chrome watches
 policy=/etc/opt/chrome/policies/managed/dotfiles-theme.json
 if [ -w "$policy" ]; then

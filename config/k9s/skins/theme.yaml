@@ -1,14 +1,15 @@
 # theme: the terminal's ANSI slots by tcell's names (gray 8, red 9, lime 10, yellow 11, blue 12, fuchsia 13,
-# aqua 14, white 15, black 0) and its own text (default), so k9s follows the colour theme (bin/theme)
+# aqua 14) and its own text (default), no black or white, which swap places between dark themes and light; so
+# k9s follows the colour theme (bin/theme)
 k9s:
   body: {fgColor: default, bgColor: default, logoColor: blue}
   prompt: {fgColor: default, bgColor: default, suggestColor: gray}
   info: {fgColor: gray, sectionColor: default}
-  dialog: {fgColor: default, bgColor: default, buttonFgColor: black, buttonBgColor: gray, buttonFocusFgColor: black, buttonFocusBgColor: white, labelFgColor: blue, fieldFgColor: default}
+  dialog: {fgColor: default, bgColor: default, buttonFgColor: default, buttonBgColor: default, buttonFocusFgColor: default, buttonFocusBgColor: gray, labelFgColor: blue, fieldFgColor: default}
   frame:
     border: {fgColor: gray, focusColor: default}
     menu: {fgColor: gray, keyColor: blue, numKeyColor: fuchsia}
-    crumbs: {fgColor: black, bgColor: gray, activeColor: white}
+    crumbs: {fgColor: default, bgColor: gray, activeColor: blue}
     status: {newColor: blue, modifyColor: yellow, addColor: lime, pendingColor: yellow, errorColor: red, highlightColor: aqua, killColor: gray, completedColor: gray}
     title: {fgColor: default, bgColor: default, highlightColor: blue, counterColor: fuchsia, filterColor: yellow}
   views:
@@ -16,8 +17,8 @@ k9s:
     table:
       fgColor: default
       bgColor: default
-      cursorFgColor: black
-      cursorBgColor: white
+      cursorFgColor: default
+      cursorBgColor: gray
       markColor: yellow
       header: {fgColor: gray, bgColor: default, sorterColor: default}
     xray: {fgColor: default, bgColor: default, cursorColor: blue, graphicColor: gray, showIcons: false}

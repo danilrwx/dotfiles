@@ -49,9 +49,9 @@ once a revision has been applied.
   (`bin/x-ctl`, `$mod+x`: Wi-Fi, Bluetooth, drives, sound, headset, VLESS, OpenVPN, power), dunst for
   notifications and the media and HONOR Fn keys' OSD (`bin/x-fnkeys`), xss-lock with i3lock, redshift as
   the night light (`bin/x-night`), polkit-gnome as the polkit agent
-- the colour themes (`bin/theme`, `config/alacritty/colors`): alacritty, tmux, fzf, bat, nvim, k9s, Claude
-  by the ANSI slots; bspwm, polybar, dunst, dmenu, Chrome and the root by hex; GTK black, white and grey
-  (`config/gtk-3.0/gtk.css`)
+- the colour themes (`bin/theme`, `config/alacritty/colors`), dark and light: alacritty, tmux, fzf, bat,
+  nvim, k9s by the ANSI slots; Claude, GTK, bspwm, polybar, dunst, dmenu, lazygit, Chrome, i3lock and the
+  root by hex; the opacity by xcompmgr over a wallpaper
 - alacritty as the terminal (`config/alacritty`); emoji from Noto Color Emoji after Iosevka
   (`config/fontconfig`)
 - greetd with tuigreet as the login, starting bspwm and remembering the user; the
