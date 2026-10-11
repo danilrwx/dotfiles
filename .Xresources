@@ -1,4 +1,4 @@
-! X apps under bspwm (bin/x-session merges it): the HONOR's 3120x2080 panel at 2x.
+! X apps under bspwm (bin/x-session merges it): the HONOR 3120x2080 panel at 2x.
 ! Xft.dpi scales text and the toolkits that follow it (GTK, Qt, Chrome, alacritty) natively, no blur
 Xft.dpi: 192
 Xft.antialias: 1
@@ -6,4 +6,7 @@ Xft.hinting: 1
 Xft.hintstyle: hintslight
 Xft.rgba: rgb
 Xft.lcdfilter: lcddefault
+! the cursor at 2x, its theme named: without one the Chromium in Steam (no GTK to ask) falls back to the small
+! core cursors of X
 Xcursor.size: 48
+Xcursor.theme: Adwaita
