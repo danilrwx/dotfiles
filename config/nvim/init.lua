@@ -4,6 +4,9 @@ vim.g.mapleader = " "
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+-- .h is C, not C++ (nvim's default): there is a C parser, none for C++
+vim.g.c_syntax_for_h = true
+
 vim.o.autoindent = true
 vim.o.expandtab = true
 vim.o.tabstop = 2

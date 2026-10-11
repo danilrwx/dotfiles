@@ -1,15 +1,17 @@
--- Colours: match Claude Code's dark-ansi palette. termguicolors is off, so syntax
--- colour comes from the terminal's 16 ANSI slots (the same source dark-ansi uses):
--- keywords/builtins/nil/bool → magenta, strings → green, comments → grey, types →
--- cyan, rune literals → red, everything else (functions, numbers, variables) →
--- default fg. A few structural groups (menus/floats/markup) are linked underneath
--- and the ANSI palette overrides any capture it recognises.
+-- Colours after Alabaster: only a few things coloured, all the rest the plain
+-- fg, so colour means something. termguicolors is off, so they come from the
+-- terminal's 16 ANSI slots (alacritty's colors/, Claude's dark-ansi the same),
+-- the bright ones only: comments → grey, definitions (where a function or type
+-- is declared: after/queries) and control flow (branches, loops, return, goto,
+-- the preprocessor's #if/#ifdef/#endif) → magenta, calls → blue, types → cyan,
+-- strings → green. Literals, other keywords (struct, const) and variables stay
+-- plain. Menus/floats/markup are linked underneath.
 --
 -- No borrowed colorscheme: `hi clear` (nvim's own defaults) and the UI groups set
 -- here. The UI has no background of its own (statusline, tabs, splits, folds), so
--- the editor stays see-through over bin/theme's wallpaper like the terminal and
--- the bar; selections are a dark grey, the picked menu item and the current match
--- the bar's green (ANSI 2), diffs coloured by their text.
+-- the editor stays see-through like the terminal and the bar; selections are a
+-- dark grey, the picked menu item and the matches bright green (ANSI 10),
+-- diffs coloured by their text.
 vim.o.termguicolors = false
 
 vim.api.nvim_create_autocmd("TextYankPost", {
@@ -35,35 +37,37 @@ vim.api.nvim_create_autocmd({ "BufWinEnter", "TermOpen" }, {
 })
 
 local PALETTE = {
-  keyword = { ctermfg = 13 }, -- magenta
-  builtin = { ctermfg = 13 }, -- magenta: len, nil, true/false
-  string = { ctermfg = 10 }, -- green
   comment = { ctermfg = 8 }, -- grey
-  type = { ctermfg = 14 }, -- cyan
-  character = { ctermfg = 9 }, -- red: rune literals
-  plain = {}, -- default fg: functions, numbers, variables
+  definition = { ctermfg = 13 }, -- bright magenta
+  call = { ctermfg = 12 }, -- bright blue: function and method calls
+  type = { ctermfg = 14 }, -- bright cyan: every type name, builtin ones too
+  string = { ctermfg = 10 }, -- bright green
+  flow = { ctermfg = 13 }, -- bright magenta, as definitions: if/else/switch, loops, break/continue, return, goto
+  plain = {}, -- default fg: keywords, types, calls, variables
 }
 
--- classify a treesitter capture (or standard group) into a palette bucket.
--- builtins checked before keyword/plain so @function.builtin wins over @function.
+-- classify a treesitter capture (or standard group) into a palette bucket; nil
+-- leaves a capture on its link (Normal, or LINKS below).
 local function bucket(g)
-  if g:match("^@function%.builtin") or g:match("^@constant%.builtin")
-    or g:match("^@variable%.builtin") or g:match("^@boolean") then
-    return "builtin"
-  elseif g:match("^@keyword") or g == "Keyword" or g == "Statement"
-    or g == "Conditional" or g == "Repeat" or g == "Operator" then
-    return "keyword"
-  elseif g:match("^@character") or g == "Character" then
-    return "character"
+  if g:match("^@comment") or g == "Comment" or g == "SpecialComment" then
+    return "comment"
+  elseif g:match("^@definition") then
+    return "definition"
+  -- control flow, where execution branches, loops or leaves; not the ternary's
+  -- ? and :, which read as operators
+  elseif (g:match("^@keyword%.conditional") and not g:match("ternary"))
+    or g:match("^@keyword%.repeat") or g:match("^@keyword%.return")
+    or g:match("^@keyword%.exception") then
+    return "flow"
+  elseif g:match("^@function%.call") or g:match("^@function%.method%.call")
+    or g:match("^@function%.builtin") then
+    return "call"
+  elseif (g:match("^@type") and not g:match("qualifier")) or g == "Type"
+    or g == "Typedef" or g == "Structure" then
+    return "type"
   elseif g:match("^@string") or g == "String" then
     return "string"
-  elseif g:match("^@comment") or g == "Comment" then
-    return "comment"
-  elseif g:match("^@type") or g == "Type" then
-    return "type"
-  elseif g:match("^@function") or g:match("^@method") or g:match("^@number")
-    or g:match("^@variable") or g:match("^@constant") or g == "Function"
-    or g == "Number" or g == "Float" or g == "Constant" or g == "Identifier" then
+  elseif not g:match("^@") then
     return "plain"
   end
   return nil
@@ -75,11 +79,10 @@ end
 local LINKS = {
   Pmenu = "Normal",
   NormalFloat = "Normal",
-  ["@property.yaml"] = "Type",
-  ["@markup.heading"] = "Keyword",
+  ["@property.yaml"] = "@definition", -- a key is what the file defines
+  ["@markup.heading"] = "Title",
   ["@markup.raw"] = "String",
-  ["@markup.link"] = "Type",
-  ["@punctuation.special.markdown"] = "Type",
+  ["@markup.link"] = "Underlined",
 }
 
 local function target_for(g)
@@ -110,11 +113,32 @@ local function apply()
   end
 
   -- 2) ANSI palette on base + syntax groups, overriding the links it recognises.
-  hl("Normal", { ctermfg = 15, ctermbg = "NONE" }) -- bright white, not the dull 7
+  -- the terminal's own text colour, the theme's foreground (bin/theme): slot 15 is not it everywhere
+  hl("Normal", { ctermfg = "NONE", ctermbg = "NONE" })
+  -- not in captures until a query uses them, so set by name
+  hl("@definition", PALETTE.definition)
+  -- the preprocessor's #if/#ifdef/#else/#endif branch too, at compile time
+  for _, g in ipairs({ "@keyword.conditional", "@keyword.repeat", "@keyword.return", "@keyword.exception", "@keyword.directive" }) do
+    hl(g, PALETTE.flow)
+  end
+  -- #define, and #pragma/#error (after/queries/c), would fall back to the
+  -- magenta parent if left empty
+  for _, g in ipairs({ "@keyword.directive.define", "@keyword.directive.other" }) do
+    hl(g, { link = "Normal" })
+  end
+  for _, g in ipairs({ "@function.call", "@function.method.call", "@function.builtin" }) do
+    hl(g, PALETTE.call)
+  end
+  for _, g in ipairs({ "@type", "@type.builtin", "@type.definition" }) do
+    hl(g, PALETTE.type)
+  end
+  hl("@keyword.conditional.ternary", { link = "Normal" }) -- an empty group would fall back to the yellow parent
   local groups = vim.list_extend(vim.deepcopy(captures), {
     "Keyword", "Statement", "Conditional", "Repeat", "Operator", "Character",
-    "String", "Comment", "Type", "Function", "Number", "Float", "Constant",
-    "Identifier",
+    "String", "Comment", "SpecialComment", "Type", "Function", "Number", "Float",
+    "Boolean", "Constant", "Identifier", "PreProc", "Include", "Define", "Macro",
+    "PreCondit", "StorageClass", "Structure", "Typedef", "Label", "Exception",
+    "Special", "SpecialChar", "Delimiter", "Tag",
   })
   for _, g in ipairs(groups) do
     local b = bucket(g)
@@ -173,19 +197,19 @@ local function apply()
     MatchParen = { bold = true, underline = true },
     QuickFixLine = { ctermbg = 237, bold = true },
 
-    PmenuSel = { ctermfg = 2, ctermbg = 237, bold = true },
-    PmenuKindSel = { ctermfg = 2, ctermbg = 237 },
-    PmenuExtraSel = { ctermfg = 2, ctermbg = 237 },
-    PmenuMatch = { ctermfg = 2 },
-    PmenuMatchSel = { ctermfg = 2, ctermbg = 237, bold = true },
+    PmenuSel = { ctermfg = 10, ctermbg = 237, bold = true },
+    PmenuKindSel = { ctermfg = 10, ctermbg = 237 },
+    PmenuExtraSel = { ctermfg = 10, ctermbg = 237 },
+    PmenuMatch = { ctermfg = 10 },
+    PmenuMatchSel = { ctermfg = 10, ctermbg = 237, bold = true },
     PmenuSbar = {},
     PmenuThumb = { ctermbg = 8 },
-    WildMenu = { ctermfg = 2, ctermbg = 237, bold = true },
+    WildMenu = { ctermfg = 10, ctermbg = 237, bold = true },
 
-    Search = { ctermfg = 11, ctermbg = 237 },
-    CurSearch = { ctermfg = 0, ctermbg = 2 },
-    IncSearch = { ctermfg = 0, ctermbg = 2 },
-    Substitute = { ctermfg = 0, ctermbg = 2 },
+    Search = { ctermfg = 10, ctermbg = 237 },
+    CurSearch = { ctermfg = 0, ctermbg = 10 },
+    IncSearch = { ctermfg = 0, ctermbg = 10 },
+    Substitute = { ctermfg = 0, ctermbg = 10 },
 
     DiffAdd = { ctermfg = 10 },
     DiffChange = { ctermfg = 11 },
@@ -198,8 +222,8 @@ local function apply()
     Error = { ctermfg = 9 },
     WarningMsg = { ctermfg = 11 },
     Todo = { ctermfg = 11, bold = true },
-    Question = { ctermfg = 2 },
-    MoreMsg = { ctermfg = 2 },
+    Question = { ctermfg = 10 },
+    MoreMsg = { ctermfg = 10 },
     ModeMsg = { ctermfg = 15, bold = true },
     TrailingSpace = { ctermbg = 1 },
   }

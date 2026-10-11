@@ -36,7 +36,7 @@ plugin/             feature modules, auto-sourced on start
   session.lua         auto save/restore per-cwd sessions
   playbook.lua        run playbook.sh lines in a tmux pane
   clipboard.lua       yank mirroring to bin/clip (wl-copy)
-  colors.lua          dark-ansi palette (terminal ANSI colours)
+  colors.lua          Alabaster-style highlighting on the terminal's ANSI colours
   treesitter.lua      enable TS + :TSBuild parser compiler
 lua/                engine code (picker/*, git.lua, session.lua)
 lsp/                per-server configs (mostly vendored from nvim-lspconfig)
@@ -222,9 +222,11 @@ vendored under `queries/`.
 
 ## Notes
 
-- Colours come from the terminal's 16 ANSI slots (`termguicolors` off), matching
-  Claude Code's `dark-ansi`: keywords/builtins magenta, strings green, comments
-  grey, types cyan. See `plugin/colors.lua`.
+- Colours come from the terminal's 16 ANSI slots (`termguicolors` off, alacritty's
+  `colors/`), the bright ones, highlighted after Alabaster: comments grey,
+  definitions (`after/queries/`) and control flow (with `#if`/`#ifdef`) magenta,
+  calls blue, types cyan, strings green; the rest plain. `.h` opens as C. See
+  `plugin/colors.lua`.
 - No statusline (`laststatus=0`) and no bufferline — deliberately minimal. The
   line number column doubles as the git-sign column (`statuscolumn`).
 - Git signs diff the **live buffer** against the index, so they update before you
