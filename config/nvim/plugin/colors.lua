@@ -208,7 +208,7 @@ local function apply()
     PmenuThumb = { ctermbg = 8 },
     WildMenu = { ctermfg = 10, ctermbg = 237, bold = true },
 
-    Search = { ctermfg = 10, ctermbg = 237 },
+    Search = { ctermfg = 10, bold = true, underline = true },
     CurSearch = { ctermfg = 10, reverse = true },
     IncSearch = { ctermfg = 10, reverse = true },
     Substitute = { ctermfg = 10, reverse = true },
