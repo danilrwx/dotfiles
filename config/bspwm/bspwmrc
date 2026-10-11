@@ -3,6 +3,13 @@
 # ~/.config/bspwm by install.
 pgrep -x sxhkd > /dev/null || sxhkd &
 pkill -x polybar; polybar main &
+# a wallpaper at random from ~/Pictures/wallpapers at each start and restart, while the theme has one at all
+# (bin/theme set wallpaper)
+. ~/.local/state/theme/options 2>/dev/null
+if [ -n "$wallpaper" ]; then
+  w=$(find ~/Pictures/wallpapers -type f | shuf -n 1)
+  [ -n "$w" ] && ~/dotfiles/bin/theme set wallpaper "$w" quick && xwallpaper --zoom "$w"
+fi
 
 bspc monitor -d 1 2 3 4 5 6 7 8 9 10
 

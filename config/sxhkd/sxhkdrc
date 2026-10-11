@@ -34,9 +34,12 @@ super + Return
 # sxhkd's config again
 super + shift + c
   pkill -USR1 -x sxhkd
-# bspwm: quit (ends the X session), restart
-super + shift + {e,r}
-  bspc {quit,wm -r}
+# bspwm: quit (ends the X session) once a dmenu in the theme's colours says yes; restart
+super + shift + e
+  . ~/.local/state/theme/colors.sh; [ "$(printf 'no\nyes\n' | dmenu -i -p 'quit bspwm?' -fn 'Iosevka:size=11' \
+    -nb "$bg" -nf "$fg" -sb "$fg" -sf "$bg")" = yes ] && bspc quit
+super + shift + r
+  bspc wm -r
 
 super + shift + q
   bspc node -c
