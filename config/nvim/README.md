@@ -13,7 +13,7 @@ to start, nothing to lock or break on update.
 |------|----------|
 | `git`, `bash` | git signs, git helper, blame |
 | `ugrep` (or `grep`) | live grep picker and `:Grepq` (ugrep preferred, falls back to grep) |
-| `fd` (optional) | `<leader>F` file list (fall back to `git ls-files`; `fdfind` on Ubuntu, `install` links it as `fd`) |
+| `fd` (optional) | `<leader>F` file list and `:find` (fall back to `git ls-files`; `fdfind` on Ubuntu, `install` links it as `fd`) |
 | `gh` / `glab` (optional) | open PR/MR for a commit (GitHub / GitLab) |
 | `tmux` (optional) | `<leader>gg` lazygit, playbook runner |
 | `lazygit` (optional) | `<leader>gg` |
@@ -31,11 +31,11 @@ plugin/             feature modules, auto-sourced on start
   gitsigns.lua        native git signs + hunk actions
   lsp.lua             enable servers, completion, code lens, format-on-save
   diagnostics.lua     workspace diagnostics picker, :Lint -> quickfix
-  quickfix.lua        :Grepq / quickfix toggle
+  find.lua            :find / :Grepq / quickfix toggle
   oil.lua             file manager (edit the dir like a buffer)
   session.lua         auto save/restore per-cwd sessions
   playbook.lua        run playbook.sh lines in a tmux pane
-  clipboard.lua       yank mirroring to bin/clip (xclip)
+  clipboard.lua       yank mirroring to bin/clip (wl-copy)
   colors.lua          dark-ansi palette (terminal ANSI colours)
   treesitter.lua      enable TS + :TSBuild parser compiler
 lua/                engine code (picker/*, git.lua, session.lua)
@@ -71,6 +71,7 @@ lsp/                per-server configs (mostly vendored from nvim-lspconfig)
 | `<leader>?` | live grep the word under the cursor |
 | `<leader>'` | resume last picker (query + list position restored) |
 | `<leader>"` | resume the picker before that |
+| `<leader>e` | `:find ` (native, prompt-completed) |
 
 ### In-picker keys
 
@@ -140,8 +141,7 @@ Uses Neovim's **built-in** LSP defaults, plus two added maps (`grf` format,
 | `grc` | run the code lens under the cursor (e.g. gopls "go generate") |
 | `[d` / `]d` | previous / next diagnostic |
 
-Completion is native (`vim.lsp.completion`, autotrigger), opening on any word
-character too, not only the server's trigger characters, with
+Completion is native (`vim.lsp.completion`, autotrigger) with
 `completeopt=menuone,noselect,noinsert,fuzzy,popup`.
 
 ### Diagnostics & quickfix
@@ -187,7 +187,7 @@ Commands: `:SessionSave`, `:SessionRestore`, `:SessionDelete`.
 
 ### Clipboard
 
-Every yank is mirrored to the desktop clipboard through `bin/clip` (`xclip`). `<leader>dd` copies `path:line` of the current position.
+Every yank is mirrored to the desktop clipboard through `bin/clip` (`wl-copy`). `<leader>dd` copies `path:line` of the current position.
 
 ## Commands
 
