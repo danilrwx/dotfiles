@@ -37,6 +37,9 @@ SAVEHIST=1000000
 setopt SHARE_HISTORY HIST_IGNORE_DUPS
 
 alias k=kubectl
+# k9s's skin names ANSI colours (config/k9s/skins/theme.yaml); tcell, on a truecolor terminal, sends them as its
+# fixed RGB (blue #0000ff) rather than the slots, which the colour theme sets
+alias k9s='TCELL_TRUECOLOR=disable k9s'
 compdef k=kubectl
 
 # ls's colours with the bright red and green (executables, archives): the plain ones are dark in the colour themes
