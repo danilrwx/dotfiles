@@ -7,7 +7,6 @@ k9s:
     enableMouse: true
     logoless: true
     headless: true
-    # ostrov's colours (skins/ostrov.yaml, a link to the file ostrov writes as its look changes), its grounds the
-    # terminal's: see-through as the bar is
-    skin: ostrov
+    # black, white and grey (skins/mono.yaml), its grounds the terminal's
+    skin: mono
     reactive: true

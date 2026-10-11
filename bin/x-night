@@ -1,0 +1,12 @@
+#!/bin/bash
+# The night light: the screens warmer from FROM to TO (across midnight when TO comes first), through redshift's
+# one-shot mode, which sets their gamma and exits. bin/x-session runs it every minute; the gamma is set only when
+# the warmth changes.
+FROM=21:00 TO=07:00 TEMP=4500
+# HH:MM as minutes into the day
+min() { echo $((10#${1%:*} * 60 + 10#${1#*:})); }
+n=$(min "$(date +%H:%M)") f=$(min "$FROM") e=$(min "$TO")
+if (( f < e ? n >= f && n < e : n >= f || n < e )); then t=$TEMP; else t=6500; fi
+was=${XDG_RUNTIME_DIR:-/tmp}/x-night
+[ "$(cat "$was" 2>/dev/null)" = "$t" ] && exit 0
+redshift -P -O "$t" > /dev/null 2>&1 && echo "$t" > "$was"

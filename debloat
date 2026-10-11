@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ./debloat [-n]
-#   Strip a stock Ubuntu desktop down to what the Hyprland session from `./install --desktop` runs on:
-#   every snap and snapd itself (blocked from coming back), GNOME, GDM and the Ubuntu desktop extras, what
-#   the old sway and i3 sessions had (Xorg itself; Xwayland stays), NetworkManager (iwd has Wi-Fi), the
-#   services nothing here uses and the configs the removed apps left in ~/.config.
+#   Strip a stock Ubuntu desktop down to what the i3 session from `./install --desktop` runs on:
+#   every snap and snapd itself (blocked from coming back), GNOME, GDM and the Ubuntu desktop extras,
+#   NetworkManager (iwd has Wi-Fi), the services nothing here uses and the configs the removed apps left in
+#   ~/.config.
 #   Run `./install --desktop` first, so greetd is there to log in with once GDM is gone.
 #   -n  dry run: show what apt would remove, change nothing
 set -euo pipefail
@@ -35,21 +35,9 @@ REMOVE=(
   gnome-shell gnome-shell-common gnome-session gnome-settings-daemon gnome-control-center
   nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
-  snapd wayland-scroll-factor ghostty foot
-  # Firefox, Mozilla's .deb an older install put in, Chrome being the browser
-  firefox
-  # dmenu and bemenu, ostrov's launcher being the menu, and the headers dmenu's and st's builds took
-  suckless-tools bemenu libx11-dev libxft-dev libxinerama-dev
-  # what the old sway session had that the new one does without, and pavucontrol (ostrov picks the devices)
-  wmenu mako-notifier wob
-  pavucontrol
-  # Openbox and its bar, awesome: tried as sessions and dropped
-  openbox dzen2 stalonetray wmctrl awesome
-  # the i3 session on X11 and what it ran (ostrov has the bar, notifications, the polkit agent, the lock and
-  # screenshots under Hyprland): Xorg itself and startx, not Xwayland (xwayland, xserver-common), which X apps
-  # and Steam run on, nor x11-xserver-utils, whose xrdb loads .Xresources into it
-  i3-wm i3lock xss-lock dunst rofi maim xclip hsetroot picom xcompmgr lxpolkit
-  xinit xserver-xorg-core xserver-xorg-input-libinput xinput
+  snapd
+  # Firefox, Chrome being the browser; pavucontrol, bin/x-ctl picking the devices
+  firefox pavucontrol
   # Ubuntu's wallpapers under a black root
   ubuntu-wallpapers ubuntu-wallpapers-resolute
   # the heavy terminals, alacritty is the one; not xterm, steam-libs depends on it
@@ -71,9 +59,7 @@ DISABLE=(ModemManager.service cups-browsed.service motd-news.timer ua-timer.time
 STALE=(org.gnome.Ptyxis nautilus evolution goa-1.0 gnome-initial-setup gnome-initial-setup-done
   tiling-assistant ubuntu-insights yelp ibus update-notifier gnome-xdg-terminals.list
   ubuntu-xdg-terminals.list xdg-terminals.list monitors.xml monitors.xml~
-  BraveSoftware chromium microsoft-edge opera vivaldi
-  # and the links install made for the i3 session
-  i3 eww dunst rofi picom autostart/lxpolkit.desktop environment.d/gdk-scale.conf)
+  BraveSoftware chromium microsoft-edge opera vivaldi)
 installed() { dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null | grep -qx installed; }
 remove=(); for p in "${REMOVE[@]}"; do installed "$p" && remove+=("$p"); done
 
@@ -124,51 +110,8 @@ log "Disabling unused services"
 for u in "${DISABLE[@]}"; do sudo systemctl disable --now "$u" 2>/dev/null || true; done
 log "Removing configs of the removed apps"
 for c in "${STALE[@]}"; do rm -rf "${HOME:?}/.config/$c"; done
-# the links install made for mako and kitty point at nothing now
-for l in mako kitty; do [ -L "$HOME/.config/$l" ] && [ ! -e "$HOME/.config/$l" ] && rm "$HOME/.config/$l"; done
-# the rest of the i3 session's: the links outside ~/.config and wmd, its bar's helper
-rm -f "$HOME/.local/share/dbus-1/services/org.knopwob.dunst.service" "$HOME/.local/share/applications/rofi.desktop" \
-  "$HOME/.local/share/applications/rofi-theme-selector.desktop" "$HOME/go/bin/wmd" \
-  "$HOME/.cache/theme/alpha" "$HOME/.cache/theme/barbg"
-# and the touchpad's Xorg config install put in
-sudo rm -f /etc/X11/xorg.conf.d/30-touchpad.conf
-# dwm, st and dmenu, built into /usr/local by older installs, and eww, the i3 bar install built there
-# (alacritty is the terminal, ostrov the bar and the menu now), and dwm's session
-sudo rm -f /usr/local/bin/eww /usr/local/bin/dwm /usr/local/share/man/man1/dwm.1 /usr/share/xsessions/dwm.desktop \
-  /usr/local/bin/st /usr/local/share/man/man1/st.1 \
-  /usr/local/bin/dmenu /usr/local/bin/dmenu_path /usr/local/bin/dmenu_run /usr/local/bin/stest \
-  /usr/local/share/man/man1/dmenu.1 /usr/local/share/man/man1/stest.1
-
-# What older installs left ───────────────────────────────────────────────────────────────────────────────────────────
-# fonts downloaded before the archive's fonts-iosevka, fonts-font-awesome and fonts-noto-color-emoji: the
-# patched Iosevka Nerd Fonts, Symbols Nerd Font Mono, Apple Color Emoji
-rm -f "$HOME"/.local/share/fonts/IosevkaNerdFont*.ttf "$HOME"/.local/share/fonts/SymbolsNerdFontMono-Regular.ttf \
-  "$HOME"/.local/share/fonts/AppleColorEmoji.ttf
-fc-cache -f
-# Docker Inc's docker-ce and its apt repo (get.docker.com), for the archive's docker.io that install puts in;
-# /var/lib/docker, the images and containers, stays for it
-if dpkg-query -W -f='${db:Status-Status}' docker-ce 2>/dev/null | grep -qx installed; then
-  log "Moving from Docker Inc's docker-ce to the archive's docker.io"
-  sudo apt remove -y docker-ce docker-ce-cli docker-ce-rootless-extras containerd.io docker-buildx-plugin \
-    docker-compose-plugin docker-model-plugin
-  sudo rm -f /etc/apt/sources.list.d/docker.list /etc/apt/sources.list.d/docker.sources /etc/apt/keyrings/docker.asc
-  sudo apt update -y && sudo apt install -y docker.io docker-compose-v2 docker-buildx
-  sudo systemctl enable --now docker.socket
-fi
-# Mozilla's apt repo, its pin and key, put in with that Firefox, and its profiles
-sudo rm -f /etc/apt/sources.list.d/mozilla.sources /etc/apt/preferences.d/mozilla /etc/apt/keyrings/packages.mozilla.org.asc
-rm -rf "$HOME/.mozilla" "$HOME/.cache/mozilla" "$HOME/.config/mozilla"
-# the dpkg leftovers of what went (the "rc" packages: their configs), and the diversion an older run put on
-# i3's debug-log session, i3 gone with it
+# the dpkg leftovers of what went (the "rc" packages: their configs)
 rc=$(dpkg -l | awk '/^rc/ {print $2}')
 [ -n "$rc" ] && sudo apt purge -y $rc
-if dpkg-divert --list /usr/share/xsessions/i3-with-shmlog.desktop | grep -q .; then
-  sudo dpkg-divert --quiet --local --rename --remove /usr/share/xsessions/i3-with-shmlog.desktop
-  sudo rm -f /usr/share/xsessions/i3-with-shmlog.desktop
-fi
-
-# the document portal and its permission store, which an older install masked: xdg-desktop-portal exits
-# without them
-[ -n "${XDG_RUNTIME_DIR:-}" ] && systemctl --user unmask xdg-document-portal.service xdg-permission-store.service
 
 log "Done. Reboot: greetd takes over the login."

@@ -1,8 +1,6 @@
 #!/bin/sh
 # ssh's askpass (SSH_ASKPASS: config/environment.d, ssh-agent's drop-in): the key's passphrase, or a yes to use a
-# key (SSH_ASKPASS_PROMPT=confirm), asked by ostrov in its own look; where ostrov is not running, by
-# OpenSSH's GTK3 askpass as before. A new host's key ("... (yes/no/[fingerprint])?") is a yes or a no in buttons,
-# not a word typed into a password's field.
+# key (SSH_ASKPASS_PROMPT=confirm), asked by OpenSSH's GTK3 askpass.
 # who asks and what, a line each, for when a prompt comes unexpected: the time, the kind, the prompt, the asking
 # process and its parent (ssh, ssh-add, ssh-agent, git...)
 log="${XDG_STATE_HOME:-$HOME/.local/state}/askpass.log"
@@ -10,10 +8,4 @@ mkdir -p "${log%/*}"
 printf '%s %s %s | %s < %s\n' "$(date '+%F %T')" "${SSH_ASKPASS_PROMPT:-passphrase}" "$*" \
 	"$(tr '\0' ' ' < /proc/$PPID/cmdline 2>/dev/null)" \
 	"$(tr '\0' ' ' < /proc/$(awk '{print $4}' /proc/$PPID/stat 2>/dev/null)/cmdline 2>/dev/null)" >> "$log"
-if busctl --user status dev.ostrov.Ostrov > /dev/null 2>&1; then
-	case $* in
-	*"(yes/no"*) "$HOME/.cargo/bin/ostrov" askpass --confirm "$*" && echo yes || echo no; exit 0 ;;
-	esac
-	exec "$HOME/.cargo/bin/ostrov" askpass ${SSH_ASKPASS_PROMPT:+--$SSH_ASKPASS_PROMPT} "$*"
-fi
 exec /usr/lib/openssh/gnome-ssh-askpass "$@"

@@ -1,0 +1,21 @@
+#!/bin/sh
+# bspwm, the second session on test (bin/x-session bspwm, tuigreet's F3): i3's keys in config/sxhkd, its bar
+# as polybar (config/polybar). Linked to ~/.config/bspwm by install.
+pgrep -x sxhkd > /dev/null || sxhkd &
+pkill -x polybar; polybar main &
+
+bspc monitor -d 1 2 3 4 5 6 7 8 9 10
+
+# config/i3's colours: a 1px green border on the focused window, none when it is alone
+bspc config border_width         1
+bspc config window_gap           0
+bspc config borderless_monocle   true
+bspc config gapless_monocle      true
+bspc config single_monocle       true
+bspc config focused_border_color '#00cd00'
+bspc config normal_border_color  '#000000'
+bspc config focus_follows_pointer true
+
+bspc rule -a steam state=floating
+bspc rule -a TelegramDesktop state=floating border=off
+bspc rule -a x-ctl state=floating center=true

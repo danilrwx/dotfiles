@@ -1,11 +1,7 @@
-# alacritty, the terminal (in place of my st build): st's look carried over, Iosevka 12; its colours and its
-# see-through ostrov's, the bar's colour as solid as the bar (~/.local/state/ostrov/colors/alacritty.toml, written
-# as ostrov's appearance and wallpaper change; a [colors] or window.opacity here would hold over them); alacritty
-# reloads it, imports too, in every open window.
-# Linked to ~/.config/alacritty by install.
+# alacritty, the terminal (in place of my st build): st's look carried over, Iosevka 12; black, white and grey as
+# i3 has them, One Dark's ANSI colours. Linked to ~/.config/alacritty by install.
 
 [general]
-import = ["~/.local/state/ostrov/colors/alacritty.toml"]
 live_config_reload = true
 
 [env]
@@ -26,3 +22,31 @@ history = 10000
 
 [cursor]
 style = { shape = "Block" }
+
+[colors.primary]
+background = "#000000"
+foreground = "#ffffff"
+[colors.cursor]
+cursor = "#ffffff"
+text = "#000000"
+[colors.selection]
+background = "#ffffff"
+text = "#000000"
+[colors.normal]
+black = "#282c34"
+red = "#e06c75"
+green = "#98c379"
+yellow = "#e5c07b"
+blue = "#61afef"
+magenta = "#c678dd"
+cyan = "#56b6c2"
+white = "#abb2bf"
+[colors.bright]
+black = "#5c6370"
+red = "#e88389"
+green = "#a9d18e"
+yellow = "#ecc98f"
+blue = "#7cbcf2"
+magenta = "#d08fe4"
+cyan = "#6ec6d0"
+white = "#dcdfe4"

@@ -1,0 +1,61 @@
+# bspwm's keys (config/bspwm), config/i3's where bspwm has the same thing. Linked by install.
+
+# levels and the HONOR Fn keys as dunst cards (bin/x-fnkeys)
+XF86Audio{RaiseVolume,LowerVolume,Mute}
+  x-fnkeys vol-{up,down,mute}
+super + XF86Audio{RaiseVolume,LowerVolume}
+  x-fnkeys mic-{up,down}
+{super + shift + m,XF86AudioMicMute}
+  x-fnkeys mic
+XF86MonBrightness{Up,Down}
+  x-fnkeys bright-{up,down}
+XF86Touchpad{On,Off,Toggle}
+  x-fnkeys touchpad-{on,off,toggle}
+XF86Launch1
+  x-fnkeys profile
+XF86CameraAccessToggle
+  x-fnkeys camera
+XF86Audio{Play,Next,Prev}
+  playerctl {play-pause,next,previous}
+
+{Print,super + shift + s}
+  maim -s | xclip -selection clipboard -t image/png
+super + d
+  x-run
+super + x
+  x-ctl
+super + shift + x
+  loginctl lock-session
+super + {_,shift + }n
+  dunstctl {close,close-all}
+super + Return
+  alacritty
+
+# sxhkd's config again
+super + shift + c
+  pkill -USR1 -x sxhkd
+# bspwm: quit (ends the X session), restart
+super + shift + {e,r}
+  bspc {quit,wm -r}
+
+super + shift + q
+  bspc node -c
+super + {_,shift + }{h,j,k,l}
+  bspc node -{f,s} {west,south,north,east}
+super + f
+  bspc node -t ~fullscreen
+super + shift + space
+  bspc node -t ~floating
+# monocle, bspwm's nearest to i3's tabbed
+super + w
+  bspc desktop -l next
+super + Tab
+  bspc desktop -f last
+super + {_,shift + }{1-9,0}
+  bspc {desktop -f,node -d} '^{1-9,10}'
+
+# resize: grow with super+alt, shrink with super+alt+shift
+super + alt + {h,j,k,l}
+  bspc node -z {left -40 0,bottom 0 40,top 0 -40,right 40 0}
+super + alt + shift + {h,j,k,l}
+  bspc node -z {right -40 0,top 0 40,bottom 0 -40,left 40 0}

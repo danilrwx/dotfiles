@@ -1,8 +1,8 @@
-# dotfiles: tuigreet on vt 7, Hyprland by default (start-hyprland, as /usr/share/wayland-sessions/hyprland.desktop
-# runs it; F3 picks another Wayland session), remembering the last user and session
+# dotfiles: tuigreet on vt 7, i3 by default (bin/x-session through startx, as /usr/share/xsessions/x-i3.desktop
+# runs it); F3 picks bspwm (x-bspwm.desktop); remembering the last user and session
 [terminal]
 vt = 7
 
 [default_session]
-command = "tuigreet --time --remember --remember-session --asterisks --sessions /usr/share/wayland-sessions --cmd start-hyprland"
+command = "tuigreet --time --remember --remember-session --asterisks --xsessions /usr/share/xsessions --cmd 'startx /home/danil/dotfiles/bin/x-session'"
 user = "_greetd"

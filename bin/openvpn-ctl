@@ -3,12 +3,10 @@
 # private/config/openvpn/NAME.ovpn, which install turns into /etc/openvpn/client/NAME.conf with the login
 # from NAME.auth and the server's DNS for systemd-resolved. The polkit rule
 # (etc/polkit-1/rules.d/50-openvpn-client.rules) lets these units start and stop without sudo.
-# ostrov's OpenVPN widget (config/ostrov/widgets/openvpn.kdl) calls it.
+# bin/x-ctl's openvpn calls it.
 #   openvpn-ctl on NAME   bring NAME up, the one up before down, and wait for the tunnel
 #   openvpn-ctl off       bring the one up down
 #   openvpn-ctl status    "off", or the profile up ("NAME"), or "NAME connecting"
-#   openvpn-ctl status --json  {"on", "profile", "ready", "profiles"}: ostrov's OpenVPN widget's
-#                         (config/ostrov/widgets/openvpn.kdl)
 #   openvpn-ctl list      the profiles, the one up first
 profiles=$HOME/dotfiles/private/config/openvpn
 
@@ -56,17 +54,11 @@ off)
 	[ -n "$cur" ] && systemctl stop "openvpn-client@$cur.service" ;;
 status)
 	cur=$(up)
-	if [ "${2:-}" = --json ]; then
-		r=false; [ -n "$cur" ] && ready "$cur" && r=true
-		find "$profiles" -maxdepth 1 -name '*.ovpn' -printf '%f\n' 2>/dev/null | sed 's/\.ovpn$//' | sort \
-			| jq -Rnc --arg cur "$cur" --argjson r "$r" '{on: ($cur != ""), profile: $cur, ready: $r, profiles: [inputs]}'
-		exit 0
-	fi
 	if [ -z "$cur" ]; then echo off
 	elif ready "$cur"; then echo "$cur"
 	else echo "$cur connecting"; fi ;;
 list) list ;;
 *)
-	echo "usage: openvpn-ctl on NAME | off | status [--json] | list" >&2
+	echo "usage: openvpn-ctl on NAME | off | status | list" >&2
 	exit 1 ;;
 esac

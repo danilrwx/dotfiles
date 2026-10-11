@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ./install [--desktop] [--ru-mirror] [--skip-go] [--skip-ts]
-#   --desktop    the Hyprland session with ostrov as its shell, greetd, and the GUI apps: Chrome, virt-manager,
-#                Telegram, Discord, Steam.
+#   --desktop    the i3 session on Xorg (alacritty, dmenu, dunst, i3lock), greetd, and the GUI apps: Chrome,
+#                virt-manager, Telegram, Discord, Steam.
 #                Then ./debloat strips GNOME and snapd
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
 #   --skip-go    keep the Go tools in ~/go/bin as they are, no `go install`
@@ -36,8 +36,7 @@ BASE_PKGS=(build-essential git wget zip unzip curl file procps zsh tmux gnupg2 h
 # the desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop (installed by hand, so
 # debloat's autoremove keeps it): the Intel GPU's video decode and encode (VA-API, iHD), Wi-Fi by iwd,
 # Bluetooth, sound, fingerprint, power profiles, firmware updates, the file dialogs' portal, the keyring
-# Chrome keeps passwords in, fonts, printing; then the login, virtualization, ssh's askpass, the terminal,
-# Rust for ostrov's build
+# Chrome keeps passwords in, fonts, printing; then the login, virtualization, ssh's askpass, the terminal
 DESKTOP_PKGS=(iwd bluez rfkill
   pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
   fprintd libpam-fprintd power-profiles-daemon thermald switcheroo-control iio-sensor-proxy bolt upower
@@ -45,14 +44,17 @@ DESKTOP_PKGS=(iwd bluez rfkill
   intel-media-va-driver-non-free
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
   greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome alacritty
-  rustc cargo
   openvpn openvpn-systemd-resolved)
-# the session, Hyprland, without its recommends (ostrov draws the wallpaper, takes
-# screenshots, keeps idle, sleep, the lock and the clipboard's history): wl-clipboard for the scripts, X apps
-# under Xwayland, xrdb (x11-xserver-utils) to load .Xresources into it
-WAYLAND_PKGS=(hyprland wl-clipboard xwayland x11-xserver-utils)
-# ostrov's build, the shell under Hyprland (~/w/ostrov): GTK 4, its layer shell and session lock, PAM
-OSTROV_PKGS=(pkg-config libgtk-4-dev libgtk4-layer-shell-dev libpam0g-dev)
+# the session, without recommends: Xorg and startx, xrdb, xset and xsetroot (x11-xserver-utils), i3, dmenu
+# (suckless-tools), notifications, the polkit agent, the idle lock, screenshots to the clipboard, the media keys'
+# tools; bin/x-run's gtk-launch, the night light (redshift: bin/x-night)
+X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit xinput x11-xserver-utils i3-wm
+  suckless-tools dunst libnotify-bin policykit-1-gnome xss-lock i3lock maim xclip brightnessctl playerctl
+  libgtk-3-bin redshift
+  # bspwm on test, the second session
+  bspwm sxhkd polybar
+  # snixembed's build (desktop_session)
+  valac libgtk-3-dev libdbusmenu-gtk3-dev)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
 
 # Helpers ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -150,13 +152,8 @@ base() {
 desktop_system() {
   log "Installing the desktop base"
   pkg "${DESKTOP_PKGS[@]}"
-  sudo apt install -y --no-install-recommends "${WAYLAND_PKGS[@]}"
-  pkg "${OSTROV_PKGS[@]}"
-  # ostrov's lock screen checks the password by its own PAM profile (the login's)
-  put /etc/pam.d/ostrov
-  # the battery's charge thresholds for ostrov to set
-  put /etc/udev/rules.d/90-battery-threshold.rules \
-    && sudo udevadm trigger --subsystem-match=power_supply
+  sudo apt install -y --no-install-recommends "${X11_PKGS[@]}"
+  put /etc/X11/xorg.conf.d/30-touchpad.conf || true
 
   # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
   # netplan, DNS by systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
@@ -189,13 +186,21 @@ desktop_system() {
   # and the sensor's driver (the HONOR fixes install them) stay
   sudo DEBIAN_FRONTEND=noninteractive pam-auth-update --disable fprintd
 
-  # the layouts and Ctrl+Space between them on the console too (tuigreet); Hyprland has its own (config/hypr)
+  # the layouts and Ctrl+Space between them on the console too (tuigreet); bin/x-session sets them for X
   sudo sed -i -e 's/^XKBLAYOUT=.*/XKBLAYOUT="us,ru"/' -e 's/^XKBVARIANT=.*/XKBVARIANT=","/' \
     -e 's/^XKBOPTIONS=.*/XKBOPTIONS="grp:ctrl_space_toggle,grp_led:scroll"/' /etc/default/keyboard
 
-  # Login: greetd with tuigreet, starting Hyprland (etc/greetd/config.toml); GDM goes with GNOME in ./debloat.
+  # Login: greetd with tuigreet, starting i3 (etc/greetd/config.toml); GDM goes with GNOME in ./debloat.
   # It takes over the display-manager alias at the next boot, the running session is left alone
   put /etc/greetd/config.toml
+  # i3's entry for tuigreet, started through startx with the session's setup (bin/x-session); i3's own entries
+  # (no setup) out of its list
+  printf '[Desktop Entry]\nName=i3\nExec=%s\nType=Application\n' "$HOME/dotfiles/bin/x-session" \
+    | sudo install -D -m 644 /dev/stdin /usr/share/xsessions/x-i3.desktop
+  # bspwm on test the same way, bin/x-session given its name (config/bspwm)
+  printf '[Desktop Entry]\nName=bspwm\nExec=%s bspwm\nType=Application\n' "$HOME/dotfiles/bin/x-session" \
+    | sudo install -D -m 644 /dev/stdin /usr/share/xsessions/x-bspwm.desktop
+  sudo rm -f /usr/share/xsessions/{i3,i3-with-shmlog,bspwm}.desktop
   # display-manager.service points at gdm3.service, itself an alias of gdm.service, so disabling gdm3 keeps
   # the link and a plain enable (greetd's postinst too) fails on it quietly; --force replaces it
   if [ "$(readlink -f /etc/systemd/system/display-manager.service)" != /usr/lib/systemd/system/greetd.service ]; then
@@ -210,54 +215,43 @@ desktop_system() {
 
 # Desktop, user side: the session's configs, ssh-agent───────────────────────────────────────────────────────────────────
 desktop_session() {
-  link config/hypr "$HOME/.config/hypr"
-  # GTK3's theme, adw-gtk3 (config/gtk-3.0/settings.ini): libadwaita's look, built on the named colours ostrov
-  # writes, so GTK3 apps take its palette; not in Ubuntu's archive, its release from GitHub
+  link config/i3 "$HOME/.config/i3"
+  link config/dunst "$HOME/.config/dunst"
+  for c in bspwm sxhkd polybar; do link "config/$c" "$HOME/.config/$c"; done
+  # GTK3's theme, adw-gtk3 (config/gtk-3.0/settings.ini): libadwaita's look, built on the named colours of
+  # config/gtk-3.0/gtk.css; not in Ubuntu's archive, its release from GitHub
   local adw=v6.5
   if [ ! -d "$HOME/.local/share/themes/adw-gtk3-dark" ]; then
     mkdir -p "$HOME/.local/share/themes"
     curl -fsSL "https://github.com/lassekongo83/adw-gtk3/releases/download/$adw/adw-gtk3$adw.tar.xz" \
       | tar -xJ -C "$HOME/.local/share/themes" || log "Failed to install adw-gtk3. Continue installation."
   fi
-  # the shell, ostrov (~/w/ostrov; bin/wl-autostart starts it), into ~/.cargo/bin; its config
-  link config/ostrov "$HOME/.config/ostrov"
-  # the file ostrov writes its blur and layer rules to, which hyprland.conf sources: there before Hyprland first reads it
-  mkdir -p "$HOME/.local/state/ostrov" && touch "$HOME/.local/state/ostrov/hyprland.conf"
-  [ -d "$HOME/w/ostrov" ] && command -v cargo > /dev/null \
-    && cargo install -q --path "$HOME/w/ostrov" || log "Failed to install ostrov. Continue installation."
-  # ostrov as xdg-desktop-portal-hyprland's share picker (config/hypr/xdph.conf), by the name it answers to as one
-  ln -sf ostrov "$HOME/.cargo/bin/ostrov-share-picker"
-  # its official plugins (plugins/*, but the example): each one's binary beside ostrov's, its manifest and texts in
-  # ~/.cargo/share/ostrov/plugins, where ostrov looks beside itself; off until [plugin.ID] enabled = true
-  for p in "$HOME"/w/ostrov/plugins/*/; do
-    id=$(basename "$p")
-    [ "$id" = hello ] || [ ! -f "$p/manifest.toml" ] && continue
-    cargo install -q --path "$p" || { log "Failed to install ostrov's $id plugin. Continue installation."; continue; }
-    mkdir -p "$HOME/.cargo/share/ostrov/plugins/$id"
-    cp "$p/manifest.toml" "$HOME/.cargo/share/ostrov/plugins/$id/"
-    [ -d "$p/i18n" ] && cp -r "$p/i18n" "$HOME/.cargo/share/ostrov/plugins/$id/"
-  done
-  # Xft.dpi and the cursor for X apps under Xwayland, merged by config/hypr
+  # snixembed: the StatusNotifierItem icons (Electron's trays) in i3bar's XEmbed tray, started by
+  # bin/x-session; not in Ubuntu's archive, built from its tag
+  if [ ! -x "$HOME/.local/bin/snixembed" ]; then
+    local sni; sni=$(mktemp -d)
+    git clone -q --depth 1 --branch 0.3.3 https://git.sr.ht/~steef/snixembed "$sni" && make -C "$sni" \
+      && install -D "$sni/snixembed" "$HOME/.local/bin/snixembed" || log "Failed to build snixembed. Continue installation."
+    rm -rf "$sni"
+  fi
+  # Xft.dpi and the cursor, merged by bin/x-session
   link .Xresources "$HOME/.Xresources"
   # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE), and .profile the session
   for e in config/environment.d/*.conf; do link "$e" "$HOME/.config/environment.d/${e##*/}"; done
-  # dark GTK3 and GTK4; GTK keeps bookmarks next to them, so the files are linked, not the dirs
-  for g in gtk-3.0 gtk-4.0; do link "config/$g/settings.ini" "$HOME/.config/$g/settings.ini"; done
-  # the UI font at 10: under Wayland GTK and Chrome take GNOME's setting (11), Chrome's tabs and menus coming
-  # out bigger otherwise
-  gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 10'
-  # the system's app entries that are tools, hidden from ostrov's launcher
+  # dark GTK3 (GTK4 follows the portal's color-scheme); GTK keeps bookmarks next to it, so the file is linked,
+  # not the dir
+  link config/gtk-3.0/settings.ini "$HOME/.config/gtk-3.0/settings.ini"
+  # their named colours, black, white and grey, for libadwaita (GTK4) too
+  for g in gtk-3.0 gtk-4.0; do link config/gtk-3.0/gtk.css "$HOME/.config/$g/gtk.css"; done
+  # the system's app entries that are tools, hidden from bin/x-run's list
   for a in config/applications/*.desktop; do link "$a" "$HOME/.local/share/applications/${a##*/}"; done
 
   # the terminal, alacritty (config/alacritty), and what Iosevka lacks, the emoji above all, from Noto Color
   # Emoji rather than a monochrome fallback (config/fontconfig)
   link config/alacritty "$HOME/.config/alacritty"
-  link config/foot "$HOME/.config/foot"
   link config/fontconfig/fonts.conf "$HOME/.config/fontconfig/fonts.conf"
   # alacritty as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim); the
-  # package registers it, st's and bin/term's entries from older installs go (debloat removes st itself)
-  sudo update-alternatives --remove x-terminal-emulator /usr/local/bin/st 2>/dev/null
-  sudo update-alternatives --remove x-terminal-emulator "$HOME/dotfiles/bin/term" 2>/dev/null
+  # package registers it
   [ -x /usr/bin/alacritty ] && sudo update-alternatives --set x-terminal-emulator /usr/bin/alacritty
 
   # ssh: the plain ssh-agent with OpenSSH's GTK3 askpass, so AddKeysToAgent confirm shows a dialog per key
@@ -353,13 +347,6 @@ EOT
     manifest=$(curl -fsSL "$lolka/latest-linux.yml") &&
       deb_from "$lolka/$(awk '/^path:/ { print $2 }' <<< "$manifest")" "$(awk '/^sha512:/ { print $2 }' <<< "$manifest")"
   fi
-  # Chrome's theme colour, which ostrov sets to the colour its bar shows (BrowserThemeColor): a policy file of
-  # this user's, so ostrov writes it without sudo; '{}' leaves Chrome its own theme
-  local policy=/etc/opt/chrome/policies/managed/ostrov-theme.json
-  sudo install -d -m 755 "$(dirname "$policy")"
-  [ -f "$policy" ] || echo '{}' | sudo install -m 644 /dev/stdin "$policy"
-  sudo chown "$USER" "$policy"
-
   # GPU compositing: Chrome's blocklist takes this GPU (Arc B370) for software compositing, and
   # scrolling at 3120x2080 120Hz drops frames on it; the chrome://flags switch that overrides the list,
   # put in its Local State while it is not running (it rewrites the file on exit)
@@ -373,10 +360,9 @@ EOT
 
   # hardware video encode (VA-API, iHD) for calls and screen sharing: a feature Chrome leaves off on
   # Linux and chrome://flags has no switch for, so its launcher entry with the flag, made from the
-  # system one on every run, hiding it in ~/.local/share/applications. With it, Wayland under Hyprland
-  # (sharp at 2x where Xwayland blurs)
+  # system one on every run, hiding it in ~/.local/share/applications
   local desk=/usr/share/applications/google-chrome.desktop
-  [ -f "$desk" ] && sed 's|^Exec=/usr/bin/google-chrome-stable|& --enable-features=AcceleratedVideoEncoder --ozone-platform-hint=auto|' "$desk" \
+  [ -f "$desk" ] && sed 's|^Exec=/usr/bin/google-chrome-stable|& --enable-features=AcceleratedVideoEncoder|' "$desk" \
     > "$HOME/.local/share/applications/google-chrome.desktop"
 
   # Telegram: the official tarball in ~/.local/opt, which updates itself and writes its own .desktop file
@@ -464,7 +450,6 @@ dev_tools() {
   mkdir -p "$HOME/.local/share/completions"
   fzf --zsh              > "$HOME/.local/share/completions/fzf.zsh"     2>/dev/null || true
   kubectl completion zsh > "$HOME/.local/share/completions/kubectl.zsh" 2>/dev/null || true
-  ostrov completions zsh > "$HOME/.local/share/completions/ostrov.zsh"  2>/dev/null || true
 
   # d8 (deckhouse-cli) and claude-code by their own installers; d8's default INSTALL_DIR, /opt, is off PATH
   if ! command -v d8 &> /dev/null; then

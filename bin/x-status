@@ -1,0 +1,23 @@
+#!/bin/bash
+# i3bar's status line, every second (config/i3's status_command): memory, volume, mic, battery,
+# brightness, layout, date. Plain words, no icon font.
+export LC_NUMERIC=C   # wpctl prints 0.45; awk under ru_RU reads that as 0
+
+# "Volume: 0.45 [MUTED]" -> 45% or off
+level() { wpctl get-volume "$1" 2>/dev/null | awk '{print /MUTED/ ? "off" : int($2 * 100 + 0.5) "%"}'; }
+
+while :; do
+  s="mem $(free -h | awk '/^Mem/ {print $3}')  vol $(level @DEFAULT_AUDIO_SINK@)  mic $(level @DEFAULT_AUDIO_SOURCE@)"
+  for b in /sys/class/power_supply/BAT*; do
+    [ -d "$b" ] || continue
+    s+="  bat $(<"$b/capacity")%"
+    [ "$(<"$b/status")" == Charging ] && s+="+"
+  done
+  for l in /sys/class/backlight/*; do
+    [ -d "$l" ] && s+="  bri $(( $(<"$l/brightness") * 100 / $(<"$l/max_brightness") ))%" && break
+  done
+  # grp_led:scroll: Scroll Lock (bit 2 of the LED mask) lit while ru is on
+  (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && s+="  RU" || s+="  US"
+  echo "$s  $(date +'%d/%m %H:%M')"
+  sleep 1
+done

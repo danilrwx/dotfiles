@@ -1,2 +1,0 @@
-# ostrov's lock screen (~/w/ostrov, src/lock.rs): the password checked as the login checks it
-auth include login

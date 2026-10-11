@@ -1,0 +1,24 @@
+#!/bin/sh
+# The session: i3 (config/i3) on Xorg, tuigreet starting it through startx (etc/greetd/config.toml). No
+# compositor, a black root.
+xrdb -merge "$HOME/.Xresources"
+# the cursor's size for the apps that take it from the environment alone (Steam)
+export XCURSOR_SIZE="$(xrdb -get Xcursor.size)"
+# us and ru, Ctrl+Space between them, Scroll Lock's LED on ru (bin/x-status reads it); Caps as Ctrl is the hwdb's
+setxkbmap -layout us,ru -option '' -option grp:ctrl_space_toggle,grp_led:scroll
+xsetroot -solid '#000000' -cursor_name left_ptr
+# portals, ssh-agent's askpass and the other user units see this display
+dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP=i3 2>/dev/null
+
+dunst &   # notifications (config/dunst)
+# the StatusNotifierItem icons (Electron's trays) in i3bar's tray; without it they quit on close
+"$HOME/.local/bin/snixembed" &
+# the polkit agent: virt-manager's, udisks' and the rest's password prompts
+/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 &
+# locked at 10 min idle and before sleep (loginctl lock-session too), the screen off at 15
+xset s 600 600 dpms 900 900 900
+xss-lock --transfer-sleep-lock -- i3lock -n -c 000000 &
+# the night light every minute (bin/x-night)
+(while :; do "$HOME/dotfiles/bin/x-night"; sleep 60; done) &
+# the window manager: i3, or bspwm on test (x-bspwm.desktop)
+exec "${1:-i3}"

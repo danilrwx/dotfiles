@@ -1,4 +1,4 @@
-! X apps under Xwayland (config/hypr merges it with xrdb): the HONOR's 3120x2080 panel at 2x.
+! X apps under i3 (bin/x-session merges it): the HONOR's 3120x2080 panel at 2x.
 ! Xft.dpi scales text and the toolkits that follow it (GTK, Qt, Chrome, alacritty) natively, no blur
 Xft.dpi: 192
 Xft.antialias: 1

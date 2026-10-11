@@ -1,6 +1,6 @@
 // dotfiles: start, stop and restart the OpenVPN client units (openvpn-client@NAME.service, from
 // /etc/openvpn/client/NAME.conf) without a password, for a sudo-group user at the machine (an active local
-// session): bin/openvpn-ctl, which ostrov's OpenVPN widget runs. Nothing else of systemd's.
+// session): bin/openvpn-ctl, which bin/x-ctl runs. Nothing else of systemd's.
 polkit.addRule(function(action, subject) {
     if (action.id == "org.freedesktop.systemd1.manage-units" &&
         /^openvpn-client@[^\/]+\.service$/.test(action.lookup("unit") || "") &&
