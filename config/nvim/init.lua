@@ -18,6 +18,12 @@ vim.o.signcolumn = "yes:1"
 vim.o.statuscolumn = "%=%l%s"
 vim.o.laststatus = 0
 
+-- syntax highlighting off for now: no regex syntax by filetype ("manual" keeps
+-- :syntax itself, which oil's conceal rules need); treesitter's is skipped in
+-- plugin/treesitter.lua. Both come back by deleting these two lines.
+vim.g.no_highlight = true
+vim.cmd.syntax("manual")
+
 vim.o.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
 vim.o.winborder = "rounded"
 

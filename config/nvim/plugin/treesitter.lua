@@ -5,7 +5,10 @@ vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("treesitter_start", { clear = true }),
   callback = function()
     if vim.treesitter.get_parser(nil, nil, { error = false }) then
-      vim.treesitter.start()
+      -- highlighting off for now (init.lua's vim.g.no_highlight); folds still parse
+      if not vim.g.no_highlight then
+        vim.treesitter.start()
+      end
       -- [0][0] is :setlocal, so the folds stay with this buffer in this window
       vim.wo[0][0].foldmethod = "expr"
       vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
@@ -31,6 +34,7 @@ local GRAMMARS = {
   { "bash", "tree-sitter/tree-sitter-bash", "a06c2e4415e9bc0346c6b86d401879ffb44058f7" },
   { "python", "tree-sitter/tree-sitter-python", "v0.25.0" },
   { "rust", "tree-sitter/tree-sitter-rust", "77a3747266f4d621d0757825e6b11edcbf991ca5" },
+  { "zig", "tree-sitter-grammars/tree-sitter-zig", "6479aa13f32f701c383083d8b28360ebd682fb7d" },
   { "dockerfile", "camdencheek/tree-sitter-dockerfile", "971acdd908568b4531b0ba28a445bf0bb720aba5" },
   { "hcl", "tree-sitter-grammars/tree-sitter-hcl", "64ad62785d442eb4d45df3a1764962dafd5bc98b" },
   { "terraform", "MichaHoffmann/tree-sitter-hcl", "64ad62785d442eb4d45df3a1764962dafd5bc98b", "dialects/terraform" },
