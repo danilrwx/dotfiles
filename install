@@ -51,8 +51,8 @@ DESKTOP_PKGS=(iwd bluez rfkill
 X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit xinput x11-xserver-utils bspwm sxhkd polybar
   suckless-tools dunst libnotify-bin policykit-1-gnome xss-lock i3lock maim xclip brightnessctl playerctl
   libgtk-3-bin redshift
-  # picom: the terminal's opacity, when the theme asks for it (bin/theme)
-  picom
+  # picom: the terminal's opacity, when the theme asks for it, and xwallpaper the wallpaper it shows (bin/theme)
+  picom xwallpaper
   # snixembed's build (desktop_session)
   valac libgtk-3-dev libdbusmenu-gtk3-dev)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)

@@ -5,14 +5,15 @@ xrdb -merge "$HOME/.Xresources"
 # the colour theme's (bin/theme): bspwm's and polybar's colours
 xrdb -merge "${XDG_STATE_HOME:-$HOME/.local/state}/theme/Xresources" 2>/dev/null
 # picom for the terminal's opacity, only when the theme's below 1 (bin/theme)
-opacity=1
+opacity=1 wallpaper=
 . "${XDG_STATE_HOME:-$HOME/.local/state}/theme/options" 2>/dev/null
 [ "$opacity" = 1 ] || picom -b --backend xrender 2>/dev/null
 # us and ru, Ctrl+Space between them, Scroll Lock's LED on ru (bin/x-status reads it); Caps as Ctrl is the hwdb's
 setxkbmap -layout us,ru -option '' -option grp:ctrl_space_toggle,grp_led:scroll
-# the ground the colour theme's (bin/theme), black without one
+# the root: the colour theme's wallpaper, else its ground, black without one (bin/theme)
 bg=$(xrdb -get theme.bg)
 xsetroot -solid "${bg:-#000000}" -cursor_name left_ptr
+[ -f "$wallpaper" ] && xwallpaper --zoom "$wallpaper"
 # portals, ssh-agent's askpass and the other user units see this display
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP=bspwm 2>/dev/null
 

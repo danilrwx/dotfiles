@@ -10,8 +10,9 @@
 # it is the theme's own.
 #   theme                 the themes, the current one marked
 #   theme NAME            set it
-#   theme set bg black|theme|toggle, theme set opacity 0.1-1|cycle
-#                         an option, the current theme set again with it
+#   theme set bg black|theme|toggle, theme set opacity 0.1-1|cycle, theme set wallpaper FILE|none
+#                         an option, the current theme set again with it; the wallpaper, an image zoomed over
+#                         the root (xwallpaper), is what the opacity shows through, the ground's colour without it
 #   theme pick            an fzf of them (tmux's prefix T, in a popup): the one under the cursor tried on the
 #                         terminal at once, ctrl-b the ground, ctrl-o the opacity; Enter sets it, Esc puts
 #                         the old one back
@@ -21,9 +22,11 @@ dir=$HOME/dotfiles/config/alacritty/colors
 state=${XDG_STATE_HOME:-$HOME/.local/state}/theme
 mkdir -p "$state"
 cur=$(basename "$(readlink "$state/alacritty.toml")" .toml 2>/dev/null)
-# the options, kept as shell: bg_mode=black|theme opacity=1
-bg_mode=black opacity=1
+# the options, kept as shell: bg_mode=black|theme opacity=1 wallpaper=FILE
+bg_mode=black opacity=1 wallpaper=
 [ -f "$state/options" ] && . "$state/options"
+# ponytail: the wallpaper's path single-quoted, one with a ' in it breaks the file
+save() { printf "bg_mode=%s opacity=%s wallpaper='%s'\n" "$bg_mode" "$opacity" "$wallpaper" > "$state/options"; }
 
 case $1 in
 "")
@@ -41,7 +44,7 @@ pick)
 		--bind "ctrl-o:execute-silent($0 set opacity cycle quick; $0 quick {})+refresh-preview" \
 		--preview "$0 preview {}" --preview-window=right,70%) || {
 		set -- $old
-		printf 'bg_mode=%s opacity=%s\n' "$1" "$2" > "$state/options"
+		bg_mode=$1 opacity=$2; save
 		[ -n "$cur" ] && "$0" quick "$cur"
 		exit 0
 	}
@@ -60,9 +63,14 @@ set)
 		0.[1-9]|0.[1-9][0-9]|1) opacity=$3 ;;
 		*) echo "theme: opacity is 0.1-1" >&2; exit 1 ;;
 		esac ;;
-	*) echo "theme: set bg|opacity VALUE" >&2; exit 1 ;;
+	wallpaper)
+		case $3 in
+		none) wallpaper= ;;
+		*) [ -f "$3" ] || { echo "theme: no file $3" >&2; exit 1; }; wallpaper=$(realpath "$3") ;;
+		esac ;;
+	*) echo "theme: set bg|opacity|wallpaper VALUE" >&2; exit 1 ;;
 	esac
-	printf 'bg_mode=%s opacity=%s\n' "$bg_mode" "$opacity" > "$state/options"
+	save
 	# pick's tries leave setting the theme to it
 	[ "$4" = quick ] && exit 0
 	[ -n "$cur" ] && exec "$0" "$cur"
@@ -150,7 +158,11 @@ printf 'bg=%s fg=%s grey=%s green=%s blue=%s\n' "$bg" "$fg" "$grey" "$green" "$b
 # ${xrdb:...}; merged now and by bin/x-session at login
 printf 'theme.bg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\ntheme.blue: %s\n' \
 	"$bg" "$fg" "$grey" "$green" "$blue" > "$state/Xresources"
-[ -n "$DISPLAY" ] && xrdb -merge "$state/Xresources" && xsetroot -solid "$bg"
+[ -n "$DISPLAY" ] && xrdb -merge "$state/Xresources"
+# the root: the wallpaper, or the ground's colour
+if [ -n "$DISPLAY" ]; then
+	if [ -f "$wallpaper" ]; then xwallpaper --zoom "$wallpaper"; else xsetroot -solid "$bg"; fi
+fi
 # dunst's: its cards in the theme's text colour, the text in its ground, the frame its blue; a drop-in, kept
 # out of git (.gitignore)
 mkdir -p "$HOME/.config/dunst/dunstrc.d"
