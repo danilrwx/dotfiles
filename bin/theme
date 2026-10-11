@@ -9,15 +9,16 @@
 # polybar, dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the ground,
 # text, grey (bright black) and green and blue (bright), and are reloaded; Chrome's theme colour is the ground
 # when it is the theme's own.
-#   theme                 the themes, the current one marked
+#   theme, theme list dark|light
+#                         the themes, or those of one mode, the current one marked
 #   theme NAME            set it
 #   theme set bg plain|theme|toggle, theme set opacity 0.1-1|cycle, theme set wallpaper FILE|none
 #                         an option, the current theme set again with it; the wallpaper, an image zoomed over
 #                         the root (xwallpaper) while the opacity is below 1, is what it shows through; the
 #                         ground's colour without it
-#   theme pick            an fzf of them (tmux's prefix T, in a popup): the one under the cursor tried on the
-#                         terminal at once, ctrl-b the ground, ctrl-o the opacity; Enter sets it, Esc puts
-#                         the old one back
+#   theme pick            an fzf of them (tmux's prefix T, in a popup), the current one's mode first: the one
+#                         under the cursor tried on the terminal at once, ctrl-b the ground, ctrl-o the
+#                         opacity, ctrl-t the other mode's; Enter sets it, Esc puts the old one back
 #   theme quick NAME      the terminal's colours only, no X reloads (pick's tries)
 #   theme preview NAME    its 16 colours and a piece of C coloured as nvim colours it (plugin/colors.lua)
 dir=$HOME/dotfiles/config/alacritty/colors
@@ -30,18 +31,40 @@ bg_mode=plain opacity=1 wallpaper=
 [ "$bg_mode" = black ] && bg_mode=plain
 # ponytail: the wallpaper's path single-quoted, one with a ' in it breaks the file
 save() { printf "bg_mode=%s opacity=%s wallpaper='%s'\n" "$bg_mode" "$opacity" "$wallpaper" > "$state/options"; }
+# modeof FILE: dark or light, by the theme's own ground's relative luminance
+modeof() {
+	sed -n 's/^background = "\(#[0-9a-fA-F]*\)"/\1/p' "$1" | awk '{
+		for (i = 0; i < 3; i++) {
+			c = index("0123456789abcdef", tolower(substr($0, 2 + 2 * i, 1))) * 16 - 16
+			c = (c + index("0123456789abcdef", tolower(substr($0, 3 + 2 * i, 1))) - 1) / 255
+			v[i] = c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ^ 2.4
+		}
+		print ((0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2] > 0.4) ? "light" : "dark")
+	}'
+}
 
 case $1 in
-"")
+""|list)
+	# list dark|light|toggle: those of one mode; toggle the other one than the last list's (pick's ctrl-t)
+	m=$2
+	if [ "$m" = toggle ]; then
+		[ "$(cat "$state/list" 2>/dev/null)" = light ] && m=dark || m=light
+	fi
+	[ -n "$m" ] && echo "$m" > "$state/list"
 	for f in "$dir"/*.toml; do
+		[ -z "$m" ] || [ "$(modeof "$f")" = "$m" ] || continue
 		n=$(basename "$f" .toml)
 		[ "$n" = "$cur" ] && echo "$n *" || echo "$n"
 	done
 	exit 0 ;;
 pick)
 	old="$bg_mode $opacity"
-	name=$("$0" | sort -k2 -r | cut -d' ' -f1 | fzf --prompt='theme> ' --no-sort --height=100% \
-		--header 'ctrl-b: ground plain/theme   ctrl-o: opacity' \
+	m=dark
+	[ -n "$cur" ] && m=$(modeof "$dir/$cur.toml")
+	list="sort -k2 -r | cut -d' ' -f1"
+	name=$("$0" list "$m" | eval "$list" | fzf --prompt='theme> ' --no-sort --height=100% \
+		--header '^b ground ^o opacity ^t mode' \
+		--bind "ctrl-t:reload($0 list toggle | $list)" \
 		--bind "focus:execute-silent($0 quick {})" \
 		--bind "ctrl-b:execute-silent($0 set bg toggle quick; $0 quick {})+refresh-preview" \
 		--bind "ctrl-o:execute-silent($0 set opacity cycle quick; $0 quick {})+refresh-preview" \
@@ -89,15 +112,7 @@ f=$dir/$1.toml
 val() { sed -n "/^\[colors\.$1\]/,/^\[/s/^$2 = \"\(#[0-9a-fA-F]*\)\"/\1/p" "$f"; }
 bg=$(val primary background) fg=$(val primary foreground)
 grey=$(val bright black) green=$(val bright green) blue=$(val bright blue)
-# dark or light, by the theme's own ground's relative luminance
-mode=$(echo "$bg" | awk '{
-	for (i = 0; i < 3; i++) {
-		c = index("0123456789abcdef", tolower(substr($0, 2 + 2 * i, 1))) * 16 - 16
-		c = (c + index("0123456789abcdef", tolower(substr($0, 3 + 2 * i, 1))) - 1) / 255
-		v[i] = c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ^ 2.4
-	}
-	print ((0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2] > 0.4) ? "light" : "dark")
-}')
+mode=$(modeof "$f")
 if [ "$bg_mode" = plain ]; then
 	[ "$mode" = light ] && bg=#ffffff || bg=#000000
 fi
