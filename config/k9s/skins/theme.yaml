@@ -8,9 +8,9 @@ k9s:
   dialog: {fgColor: default, bgColor: default, buttonFgColor: default, buttonBgColor: default, buttonFocusFgColor: default, buttonFocusBgColor: gray, labelFgColor: blue, fieldFgColor: default}
   frame:
     border: {fgColor: gray, focusColor: default}
-    menu: {fgColor: gray, keyColor: blue, numKeyColor: fuchsia}
+    menu: {fgColor: default, keyColor: blue, numKeyColor: fuchsia}
     crumbs: {fgColor: default, bgColor: gray, activeColor: blue}
-    status: {newColor: blue, modifyColor: yellow, addColor: lime, pendingColor: yellow, errorColor: red, highlightColor: aqua, killColor: gray, completedColor: gray}
+    status: {newColor: default, modifyColor: yellow, addColor: lime, pendingColor: yellow, errorColor: red, highlightColor: aqua, killColor: gray, completedColor: gray}
     title: {fgColor: default, bgColor: default, highlightColor: blue, counterColor: fuchsia, filterColor: yellow}
   views:
     charts: {bgColor: default, defaultDialColors: [blue, red], defaultChartColors: [blue, red]}
@@ -20,7 +20,7 @@ k9s:
       cursorFgColor: default
       cursorBgColor: gray
       markColor: yellow
-      header: {fgColor: gray, bgColor: default, sorterColor: default}
+      header: {fgColor: gray, bgColor: default, sorterColor: blue}
     xray: {fgColor: default, bgColor: default, cursorColor: blue, graphicColor: gray, showIcons: false}
     yaml: {keyColor: blue, colonColor: gray, valueColor: default}
     logs:
