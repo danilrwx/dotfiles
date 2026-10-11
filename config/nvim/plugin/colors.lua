@@ -234,9 +234,20 @@ local function apply()
   end
 end
 
+-- also on 'background': nvim sets it when the terminal reports a new ground
+-- (bin/theme switching dark and light), and resets its own groups (Search's
+-- yellow) with it
 vim.api.nvim_create_autocmd("ColorScheme", {
   group = vim.api.nvim_create_augroup("claudelook", { clear = true }),
   callback = apply,
+})
+vim.api.nvim_create_autocmd("OptionSet", {
+  group = "claudelook",
+  pattern = "background",
+  -- after nvim's own reset, which comes once the option is set
+  callback = function()
+    vim.schedule(apply)
+  end,
 })
 
 -- nvim's own defaults underneath, then ours; the ColorScheme autocmd above
