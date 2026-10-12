@@ -1,0 +1,18 @@
+#!/bin/sh
+# term [ST_OPTS...] [-e CMD [ARGS...]]: st, the terminal (my build, github.com/danilrwx/st, by install), in the
+# colour theme: its opacity (-A, bin/theme's option, see-through by xcompmgr) and its palette, the OSC escapes
+# bin/theme keeps, printed before the shell or CMD runs, st's own colours being compiled in. super+Return
+# (config/sxhkd), bin/x-ctl's TUIs.
+state=${XDG_STATE_HOME:-$HOME/.local/state}/theme
+opacity=1
+. "$state/options" 2> /dev/null
+# st's options, up to -e, quoted into a string; what follows -e, or the shell, is the command
+q() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
+opts=
+while [ $# -gt 0 ] && [ "$1" != -e ]; do
+	opts="$opts $(q "$1")"
+	shift
+done
+[ "$1" = -e ] && shift
+[ $# -gt 0 ] || set -- "${SHELL:-/bin/sh}"
+eval "exec st -A \"\$opacity\" $opts -e /bin/sh -c 'cat \"\$0\" 2> /dev/null; exec \"\$@\"' \"\$state/osc\" \"\$@\""

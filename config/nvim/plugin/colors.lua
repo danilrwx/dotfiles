@@ -1,6 +1,6 @@
 -- Colours after Alabaster: only a few things coloured, all the rest the plain
 -- fg, so colour means something. termguicolors is off, so they come from the
--- terminal's 16 ANSI slots (alacritty's colors/, Claude's dark-ansi the same),
+-- terminal's 16 ANSI slots (config/themes, Claude's dark-ansi the same),
 -- the bright ones only: comments → grey, definitions (where a function or type
 -- is declared: after/queries) and control flow (branches, loops, return, goto,
 -- the preprocessor's #if/#ifdef/#endif) → magenta, calls → blue, types → cyan,

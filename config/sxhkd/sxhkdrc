@@ -29,7 +29,7 @@ super + shift + x
 super + {_,shift + }n
   dunstctl {close,close-all}
 super + Return
-  alacritty
+  term
 
 # sxhkd's config again
 super + shift + c

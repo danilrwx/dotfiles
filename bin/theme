@@ -1,14 +1,14 @@
 #!/bin/sh
-# theme [NAME]: the colour theme, one of config/alacritty/colors/: its ground, text and 16 ANSI colours, and two
-# options over it: the ground plain (black, white on a light theme) or the theme's own (bg), and the terminal's
-# opacity (opacity, below 1 by xcompmgr, started only then). A theme is dark or light by its ground's
-# luminance, and what has the two modes takes it: Claude's base, GTK's theme, the portal's color-scheme.
-# alacritty imports the link and the options' file set here and reloads on its own; nvim (plugin/colors.lua),
-# tmux, fzf, bat and k9s take their colours from those ANSI slots, so they follow; Claude has its own theme,
-# "dotfiles", written here. What draws on X wants hex: bspwm,
-# polybar, dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the ground,
-# text, grey (bright black) and green and blue (bright), and are reloaded; Chrome's theme colour is the ground
-# when it is the theme's own.
+# theme [NAME]: the colour theme, one of config/themes/: its ground, text and 16 ANSI colours, and two options
+# over it: the ground plain (black, white on a light theme) or the theme's own (bg), and the terminal's opacity
+# (opacity: st's -A, by bin/term, see-through by xcompmgr, started only while it is below 1). A theme is dark
+# or light by its ground's luminance, and what has the two modes takes it: Claude's base, GTK's theme, the
+# portal's color-scheme. The terminal, st, gets the palette as OSC escapes, the open windows at once and the
+# new ones by bin/term; nvim (plugin/colors.lua), tmux, fzf, bat and k9s take their colours from those ANSI
+# slots, so they follow; Claude has its own theme, "dotfiles", written here. What draws on X wants hex:
+# bspwm, polybar, dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the
+# ground, text, grey (bright black) and green and blue (bright), and are reloaded; Chrome's theme colour is
+# the ground when it is the theme's own.
 #   theme, theme list dark|light
 #                         the themes, or those of one mode, the current one marked
 #   theme NAME            set it
@@ -21,10 +21,10 @@
 #                         opacity, ctrl-t the other mode's; Enter sets it, Esc puts the old one back
 #   theme quick NAME      the terminal's colours only, no X reloads (pick's tries)
 #   theme preview NAME    its 16 colours and a piece of C coloured as nvim colours it (plugin/colors.lua)
-dir=$HOME/dotfiles/config/alacritty/colors
+dir=$HOME/dotfiles/config/themes
 state=${XDG_STATE_HOME:-$HOME/.local/state}/theme
 mkdir -p "$state"
-cur=$(basename "$(readlink "$state/alacritty.toml")" .toml 2>/dev/null)
+cur=$(basename "$(readlink "$state/theme.toml")" .toml 2>/dev/null)
 # the options, kept as shell: bg_mode=plain|theme opacity=1 wallpaper=FILE (black, plain's old name, read as it)
 bg_mode=plain opacity=1 wallpaper=
 [ -f "$state/options" ] && . "$state/options"
@@ -149,7 +149,7 @@ if [ -n "$preview" ]; then
 	exit 0
 fi
 
-ln -sfn "$f" "$state/alacritty.toml"
+ln -sfn "$f" "$state/theme.toml"
 # mix A B PERCENT: A with that much of B, "#rrggbb"
 mix() {
 	printf '#'
@@ -158,19 +158,30 @@ mix() {
 		printf %02x $((a + (b - a) * $3 / 100))
 	done
 }
-# the options over the theme, imported after it; and the 256 palette's darkest greys (235-238: nvim's
-# selection, LSP references and columns, fzf's current line, tmux's pane borders) a tint of the ground toward
-# the text rather than neutral grey
+# the terminal's (st, bin/term): its palette as OSC escapes, 4 for the 16 slots and for the 256 palette's
+# darkest greys (235-238: nvim's selection, LSP references and columns, fzf's current line, tmux's pane
+# borders) a tint of the ground toward the text rather than neutral grey, 10, 11 and 12 the text, the ground
+# and the cursor. bin/term prints it to each new st before its shell; the open ones get it on their ttys,
+# the shell's under each st, which the tmux client in it shares
+i=0
 {
-	[ "$bg_mode" = plain ] && printf '[colors.primary]\nbackground = "%s"\n' "$bg"
-	printf '[window]\nopacity = %s\n' "$opacity"
+	for r in normal bright; do
+		for n in black red green yellow blue magenta cyan white; do
+			printf '\033]4;%d;%s\007' "$i" "$(val "$r" "$n")"
+			i=$((i + 1))
+		done
+	done
 	for i in "235 6" "236 10" "237 14" "238 20"; do
 		set -- $i
-		printf '[[colors.indexed_colors]]\nindex = %s\ncolor = "%s"\n' "$1" "$(mix "$bg" "$fg" "$2")"
+		printf '\033]4;%s;%s\007' "$1" "$(mix "$bg" "$fg" "$2")"
 	done
-} > "$state/options.toml"
-# alacritty watches the files it read, not a link swapped under it: a touch of its own config reloads it
-touch "$HOME/dotfiles/config/alacritty/alacritty.toml"
+	printf '\033]10;%s\007\033]11;%s\007\033]12;%s\007' "$fg" "$bg" "$fg"
+} > "$state/osc"
+for p in $(pgrep -x st); do
+	for t in $(ps -o tty= --ppid "$p"); do
+		[ -w "/dev/$t" ] && cat "$state/osc" > "/dev/$t"
+	done
+done
 # xcompmgr for the opacity, only while it is below 1
 if [ -n "$DISPLAY" ]; then
 	if [ "$opacity" = 1 ]; then

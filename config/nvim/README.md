@@ -222,8 +222,8 @@ vendored under `queries/`.
 
 ## Notes
 
-- Colours come from the terminal's 16 ANSI slots (`termguicolors` off, alacritty's
-  `colors/`), the bright ones, highlighted after Alabaster: comments grey,
+- Colours come from the terminal's 16 ANSI slots (`termguicolors` off, the
+  colour theme's, `config/themes`), the bright ones, highlighted after Alabaster: comments grey,
   definitions (`after/queries/`) and control flow (with `#if`/`#ifdef`) magenta,
   calls blue, types cyan, strings green; the rest plain. `.h` opens as C. See
   `plugin/colors.lua`.

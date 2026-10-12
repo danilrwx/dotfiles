@@ -1,7 +1,7 @@
 #!/bin/sh
 # $mod+x: pick Wi-Fi, Bluetooth, the removable drives (bin/x-drives), the sound output or input, the headset mode or
-# the power profile. Wi-Fi and Bluetooth are impala and bluetui in a floating alacritty of class x-ctl (a rule
-# in config/bspwm/bspwmrc); output, input and power are a second pick, the current one first: PipeWire's sinks or
+# the power profile. Wi-Fi and Bluetooth are impala and bluetui in a floating st of class x-ctl (bin/term; a
+# rule in config/bspwm/bspwmrc); output, input and power are a second pick, the current one first: PipeWire's sinks or
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between headphones
 # (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vless: on through TUN or as the
 # system proxy, off, the rule or global mode, the profile. openvpn brings a profile of bin/openvpn-ctl up, or the
@@ -11,8 +11,8 @@
 bg=#000000 fg=#ffffff
 . "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
 pick() { dmenu -i -p "$1" -fn 'Iosevka:size=11' -nb "$bg" -nf "$fg" -sb "$fg" -sf "$bg"; }
-# term TITLE CMD: alacritty with class x-ctl
-term() { exec alacritty --class x-ctl -T "$1" -e "$2"; }
+# term TITLE CMD: st (bin/term) with class x-ctl
+term() { exec "$HOME/dotfiles/bin/term" -c x-ctl -t "$1" -e "$2"; }
 # devices Sink|Source: "ID<tab>NAME" per PipeWire audio sink or source, the default one first. Only the
 # nodes of class Audio/Sink or Audio/Source: wpctl status lists WirePlumber's internal Bluetooth nodes as the
 # sinks, while the headset's real one sits under its filters. Left out unless the default: those whose every
