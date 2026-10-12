@@ -27,4 +27,8 @@ bspc config focus_follows_pointer true
 
 bspc rule -a steam state=floating
 bspc rule -a TelegramDesktop state=floating border=off
-bspc rule -a x-ctl state=floating center=true
+# bin/x-ctl's TUIs (impala, bluetui...) floating at 60% of the monitor's width and 70% of its height, centred,
+# as i3 had them
+eval "$(bspc query -T -m | jq -r '.rectangle | "mw=\(.width) mh=\(.height)"')"
+w=$((mw * 60 / 100)) h=$((mh * 70 / 100))
+bspc rule -a x-ctl state=floating rectangle=${w}x${h}+$(((mw - w) / 2))+$(((mh - h) / 2))
