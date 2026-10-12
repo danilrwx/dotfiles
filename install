@@ -50,7 +50,7 @@ DESKTOP_PKGS=(iwd bluez rfkill
 # (suckless-tools), notifications, the polkit agent, the idle lock, screenshots to the clipboard, the media keys'
 # tools; bin/x-run's gtk-launch, the night light (redshift: bin/x-night)
 X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit xinput x11-xserver-utils bspwm sxhkd polybar
-  suckless-tools dunst libnotify-bin policykit-1-gnome xss-lock i3lock maim xclip brightnessctl playerctl
+  suckless-tools dunst libnotify-bin lxpolkit xss-lock i3lock maim xclip brightnessctl playerctl
   libgtk-3-bin redshift
   # xcompmgr: the terminal's opacity, when the theme asks for it, and xwallpaper the wallpaper it shows (bin/theme)
   xcompmgr xwallpaper

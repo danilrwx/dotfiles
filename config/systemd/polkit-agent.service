@@ -1,12 +1,13 @@
-# The polkit agent: virt-manager's, udisks' and the rest's password prompts. Part of the X session
-# (x-session.target); linked to ~/.config/systemd/user and enabled by install.
+# The polkit agent, LXDE's lxpolkit (some 20 MB where polkit-gnome's took 70): the password prompts of
+# virt-manager, udisks, fwupd and the rest. Part of the X session (x-session.target); linked to
+# ~/.config/systemd/user and enabled by install.
 [Unit]
 Description=polkit agent
 PartOf=graphical-session.target
 After=graphical-session.target
 
 [Service]
-ExecStart=/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1
+ExecStart=/usr/bin/lxpolkit
 Restart=on-failure
 RestartSec=1
 

@@ -48,7 +48,7 @@ once a revision has been applied.
   for the StatusNotifierItem ones), dmenu as the launcher (`bin/x-run`, `$mod+d`), the quick settings
   (`bin/x-ctl`, `$mod+x`: Wi-Fi, Bluetooth, drives, sound, headset, VLESS, OpenVPN, power), dunst for
   notifications and the media and HONOR Fn keys' OSD (`bin/x-fnkeys`), xss-lock with i3lock, redshift as
-  the night light (`bin/x-night`), polkit-gnome as the polkit agent
+  the night light (`bin/x-night`), lxpolkit as the polkit agent
 - the colour themes (`bin/theme`, `config/alacritty/colors`), dark and light: alacritty, tmux, fzf, bat,
   nvim, k9s by the ANSI slots; Claude, GTK, bspwm, polybar, dunst, dmenu, lazygit, Chrome, i3lock and the
   root by hex; the opacity by xcompmgr over a wallpaper
