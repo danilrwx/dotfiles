@@ -199,8 +199,8 @@ printf 'bg=%s fg=%s grey=%s green=%s blue=%s\n' "$bg" "$fg" "$grey" "$green" "$b
 # ${xrdb:...}; merged now and by bin/x-session at login. theme.barbg the bar's, as see-through as the
 # terminal: #aarrggbb, the alpha the opacity's
 barbg=$(awk -v o="$opacity" -v c="${bg#\#}" 'BEGIN { printf "#%02x%s", o * 255, c }')
-printf 'theme.bg: %s\ntheme.barbg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\ntheme.blue: %s\n' \
-	"$bg" "$barbg" "$fg" "$grey" "$green" "$blue" > "$state/Xresources"
+printf 'theme.bg: %s\ntheme.barbg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\n' \
+	"$bg" "$barbg" "$fg" "$grey" "$green" > "$state/Xresources"
 [ -n "$DISPLAY" ] && xrdb -merge "$state/Xresources"
 # the root: the wallpaper while the opacity shows it (below 1), else the ground's colour
 if [ -n "$DISPLAY" ]; then
@@ -212,9 +212,9 @@ mkdir -p "$HOME/.config/dunst/dunstrc.d"
 printf '[global]\n    frame_color = "%s"\n    background = "%s"\n    foreground = "%s"\n    highlight = "%s"\n' \
 	"$blue" "$fg" "$bg" "$bg" > "$HOME/.config/dunst/dunstrc.d/theme.conf"
 sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
-# GTK's: adw-gtk3's and libadwaita's named colours (config/gtk-3.0/settings.ini), the ground and text, the
-# views and popovers a shade up, the accent its blue; ~/.config/gtk-{3,4}.0/gtk.css link here (install), read
-# by each app as it starts
+# GTK's: adw-gtk3's and libadwaita's named colours (adw-gtk3 the theme xsettingsd names, below), the ground
+# and text, the views and popovers a shade up, the accent its blue; ~/.config/gtk-{3,4}.0/gtk.css link here
+# (install), read by each app as it starts
 {
 	for k in window headerbar theme; do printf '@define-color %s_bg_color %s;\n' "$k" "$bg"; done
 	for k in view popover dialog; do printf '@define-color %s_bg_color %s;\n' "$k" "$(mix "$bg" "$fg" 5)"; done

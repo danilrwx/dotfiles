@@ -1,18 +1,10 @@
 #!/bin/sh
-# The session: bspwm (config/bspwm) on Xorg, tuigreet starting it through startx (etc/greetd/config.toml). No
-# compositor unless the theme's opacity asks for xcompmgr, the root the theme's ground.
+# The session: bspwm (config/bspwm) on Xorg, tuigreet starting it through startx (etc/greetd/config.toml).
 xrdb -merge "$HOME/.Xresources"
-# the colour theme's (bin/theme): bspwm's and polybar's colours
-xrdb -merge "${XDG_STATE_HOME:-$HOME/.local/state}/theme/Xresources" 2>/dev/null
-# xcompmgr for the terminal's opacity, only when the theme's below 1 (bin/theme)
-opacity=1 wallpaper=
-. "${XDG_STATE_HOME:-$HOME/.local/state}/theme/options" 2>/dev/null
-[ "$opacity" = 1 ] || xcompmgr &
-# the root: the colour theme's wallpaper while its opacity is below 1, else its ground, black without one
-# (bin/theme)
-bg=$(xrdb -get theme.bg)
-xsetroot -solid "${bg:-#000000}" -cursor_name left_ptr
-[ "$opacity" != 1 ] && [ -f "$wallpaper" ] && xwallpaper --zoom "$wallpaper"
+# the colour theme set again (bin/theme): its X resources (polybar's and bspwm's colours), the root (its ground,
+# or the wallpaper while the opacity is below 1), xcompmgr for that opacity, and its files for the rest
+"$HOME/dotfiles/bin/theme" "$(basename "$(readlink "${XDG_STATE_HOME:-$HOME/.local/state}/theme/theme.toml")" .toml)"
+xsetroot -cursor_name left_ptr
 # portals, ssh-agent's askpass and the other user units see this display, and xss-lock.service the login
 # session
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_SESSION_ID XDG_CURRENT_DESKTOP=bspwm 2>/dev/null
