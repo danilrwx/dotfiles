@@ -366,6 +366,9 @@ EOT
   command -v google-chrome &> /dev/null && xdg-settings set default-web-browser google-chrome.desktop
   # Chrome's theme colour, which bin/theme sets to the theme's ground when it shows (BrowserThemeColor): a
   # policy file of this user's, so bin/theme writes it without sudo; '{}' leaves Chrome its own theme
+  # Memory Saver on, balanced: the tabs out of sight let go of their memory (a JSON policy can hold no
+  # comment, so this one)
+  put /etc/opt/chrome/policies/managed/dotfiles.json || true
   local policy=/etc/opt/chrome/policies/managed/dotfiles-theme.json
   sudo install -d -m 755 "$(dirname "$policy")"
   [ -f "$policy" ] || echo '{}' | sudo install -m 644 /dev/stdin "$policy"
