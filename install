@@ -272,6 +272,16 @@ desktop_session() {
   # user daemons the session has no use for: filter-chain runs with no filter configured, the at-spi bus
   # serves screen readers (not the portals: xdg-desktop-portal exits without them)
   user_systemctl mask --now filter-chain.service at-spi-dbus-bus.service
+
+  # the X session's daemons as user units (config/systemd), wanted by graphical-session.target, which
+  # bin/x-session brings up with x-session.target; dunst is its package's own, over D-Bus
+  local u
+  for u in x-session.target xsettingsd.service snixembed.service polkit-agent.service xss-lock.service \
+    x-night.service x-night.timer; do
+    link "config/systemd/$u" "$HOME/.config/systemd/user/$u"
+  done
+  user_systemctl daemon-reload
+  user_systemctl enable xsettingsd.service snixembed.service polkit-agent.service xss-lock.service x-night.timer
 }
 
 # Desktop apps ────────────────────────────────────────────────────────────────────────────────────────────────────────

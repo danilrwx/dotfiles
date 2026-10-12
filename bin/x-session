@@ -16,20 +16,12 @@ xsetroot -solid "${bg:-#000000}" -cursor_name left_ptr
 # portals, ssh-agent's askpass and the other user units see this display
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP=bspwm 2>/dev/null
 
-# XSETTINGS (config/xsettingsd, with the GTK theme bin/theme adds): the 2x GTK, Chromium and Electron take,
-# before any of them
-xs=${XDG_STATE_HOME:-$HOME/.local/state}/theme/xsettingsd.conf
-[ -f "$xs" ] || xs=$HOME/dotfiles/config/xsettingsd/xsettingsd.conf
-xsettingsd -c "$xs" &
-dunst &   # notifications (config/dunst)
-# the StatusNotifierItem icons (Electron's trays) in polybar's tray; without it they quit on close
-"$HOME/.local/bin/snixembed" &
-# the polkit agent: virt-manager's, udisks' and the rest's password prompts
-/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 &
-# locked at 10 min idle and before sleep (loginctl lock-session too), on the colour theme's ground; the screen
-# off at 15
+# locked at 10 min idle (xss-lock.service), the screen off at 15
 xset s 600 600 dpms 900 900 900
-xss-lock --transfer-sleep-lock -- sh -c 'bg=$(xrdb -get theme.bg | tr -d "#"); exec i3lock -n -c "${bg:-000000}"' &
-# the night light every minute (bin/x-night)
-(while :; do "$HOME/dotfiles/bin/x-night"; sleep 60; done) &
-exec bspwm
+# the session's daemons as user units (config/systemd): x-session.target brings up graphical-session.target and
+# what it wants, xsettingsd (the 2x, before any app), snixembed, polkit-agent, xss-lock and x-night.timer;
+# dunst comes over D-Bus with the first notification. They restart on a crash, log to journalctl --user, and
+# stop with the session, bspwm's end
+systemctl --user start x-session.target
+bspwm
+systemctl --user stop x-session.target
