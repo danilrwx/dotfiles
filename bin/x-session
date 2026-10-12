@@ -18,6 +18,8 @@ xsetroot -solid "${bg:-#000000}" -cursor_name left_ptr
 # portals, ssh-agent's askpass and the other user units see this display
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP=bspwm 2>/dev/null
 
+# XSETTINGS at 2x (config/xsettingsd): GTK's windows and Chromium's, Electron's scale, before any of them
+xsettingsd &
 dunst &   # notifications (config/dunst)
 # the StatusNotifierItem icons (Electron's trays) in polybar's tray; without it they quit on close
 "$HOME/.local/bin/snixembed" &
