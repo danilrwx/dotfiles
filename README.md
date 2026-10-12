@@ -124,7 +124,7 @@ profiles, the keyring). `-n` shows all of it first; it refuses to run before gre
 | `install` | host setup: symlinks, packages, Go tools, the desktop; `bin/dotfiles-update` is the same script |
 | `debloat` | one-off: strip GNOME, snapd and the unused rest from a stock Ubuntu desktop |
 | `etc/` | files `install` puts into `/etc`: iwd, netplan, greetd, the touchpad, Caps as Ctrl, polkit rules, Chrome's Memory Saver |
-| `config/` | the apps' configs, linked into `~/.config`; `config/systemd` the session's user units |
+| `config/` | the apps' configs, linked into `~/.config`; `config/systemd` the session's user units, `config/autorandr` the monitor profiles |
 | `bin/theme` | the colour theme, its options and the picker |
 | `bin/x-term` | st in the theme: its opacity and palette |
 | `bin/x-session` | the session: the theme, the user units, bspwm |

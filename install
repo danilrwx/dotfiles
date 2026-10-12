@@ -54,6 +54,8 @@ X11_PKGS=(xserver-xorg-core xserver-xorg-input-libinput xinit xinput x11-xserver
   libgtk-3-bin redshift
   # xcompmgr: the terminal's opacity, when the theme asks for it, and xwallpaper the wallpaper it shows (bin/theme)
   xcompmgr xwallpaper
+  # monitors plugged and unplugged by their profiles (config/autorandr), its udev rule and hook
+  autorandr
   # XSETTINGS at 2x (config/xsettingsd), the HiDPI scale GTK, Chrome and Electron take
   xsettingsd
   # snixembed's build (desktop_session)
@@ -222,6 +224,7 @@ desktop_system() {
 # Desktop, user side: the session's configs, ssh-agent───────────────────────────────────────────────────────────────────
 desktop_session() {
   link config/dunst "$HOME/.config/dunst"
+  link config/autorandr "$HOME/.config/autorandr"
   for c in bspwm sxhkd polybar; do link "config/$c" "$HOME/.config/$c"; done
   # GTK3's theme, adw-gtk3 (named by bin/theme over XSETTINGS): libadwaita's look, built on the named colours
   # bin/theme writes; not in Ubuntu's archive, its release from GitHub

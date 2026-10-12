@@ -11,7 +11,11 @@ if [ -n "$wallpaper" ] && [ "$opacity" != 1 ]; then
   [ -n "$w" ] && ~/dotfiles/bin/theme set wallpaper "$w" quick && xwallpaper --zoom "$w"
 fi
 
-bspc monitor -d 1 2 3 4 5 6 7 8 9 10
+# the desktops once, on the laptop's screen (a restart keeps them where they are); then the monitors by autorandr
+# (config/autorandr: the profile that fits, else the outputs side by side), whose hook puts 6-10 on a second
+# one
+bspc query -D --names | grep -qx 10 || bspc monitor primary -d 1 2 3 4 5 6 7 8 9 10
+autorandr --change --default horizontal > /dev/null 2>&1 &
 
 # a 1px border on the focused window in the colour theme's green, none when it is alone; the colours its X
 # resources (bin/theme sets them again on a change)
