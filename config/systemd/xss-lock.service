@@ -7,7 +7,7 @@ PartOf=graphical-session.target
 After=graphical-session.target
 
 [Service]
-ExecStart=/usr/bin/xss-lock --transfer-sleep-lock -- /bin/sh -c 'bg=$$(xrdb -get theme.bg | tr -d "#"); exec i3lock -n -c "$${bg:-000000}"'
+ExecStart=/usr/bin/xss-lock --session=${XDG_SESSION_ID} --transfer-sleep-lock -- /bin/sh -c 'bg=$$(xrdb -get theme.bg | tr -d "#"); exec i3lock -n -c "$${bg:-000000}"'
 Restart=on-failure
 RestartSec=1
 

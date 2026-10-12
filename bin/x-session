@@ -13,8 +13,9 @@ opacity=1 wallpaper=
 bg=$(xrdb -get theme.bg)
 xsetroot -solid "${bg:-#000000}" -cursor_name left_ptr
 [ "$opacity" != 1 ] && [ -f "$wallpaper" ] && xwallpaper --zoom "$wallpaper"
-# portals, ssh-agent's askpass and the other user units see this display
-dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP=bspwm 2>/dev/null
+# portals, ssh-agent's askpass and the other user units see this display, and xss-lock.service the login
+# session
+dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_SESSION_ID XDG_CURRENT_DESKTOP=bspwm 2>/dev/null
 
 # locked at 10 min idle (xss-lock.service), the screen off at 15
 xset s 600 600 dpms 900 900 900
