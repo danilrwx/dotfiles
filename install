@@ -373,9 +373,11 @@ EOT
 
   # hardware video encode (VA-API, iHD) for calls and screen sharing: a feature Chrome leaves off on
   # Linux and chrome://flags has no switch for, so its launcher entry with the flag, made from the
-  # system one on every run, hiding it in ~/.local/share/applications
+  # system one on every run, hiding it in ~/.local/share/applications. Without GDK_SCALE and
+  # GDK_DPI_SCALE too (config/environment.d/hidpi.conf): Chrome scales by Xft.dpi already, and on both
+  # it is 4x
   local desk=/usr/share/applications/google-chrome.desktop
-  [ -f "$desk" ] && sed 's|^Exec=/usr/bin/google-chrome-stable|& --enable-features=AcceleratedVideoEncoder|' "$desk" \
+  [ -f "$desk" ] && sed 's|^Exec=\(/usr/bin/google-chrome-stable\)|Exec=env -u GDK_SCALE -u GDK_DPI_SCALE \1 --enable-features=AcceleratedVideoEncoder|' "$desk" \
     > "$HOME/.local/share/applications/google-chrome.desktop"
 
   # Telegram: the official tarball in ~/.local/opt, which updates itself and writes its own .desktop file
