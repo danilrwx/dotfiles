@@ -191,7 +191,9 @@ desktop_system() {
   # and the sensor's driver (the HONOR fixes install them) stay
   sudo DEBIAN_FRONTEND=noninteractive pam-auth-update --disable fprintd
 
-  # the layouts and Ctrl+Space between them on the console too (tuigreet); bin/x-session sets them for X
+  # us and ru, Ctrl+Space between them, Scroll Lock's LED on ru (bin/x-status reads it), for the console
+  # (tuigreet) and for X alike: Xorg takes them from this file through udev (64-xorg-xkb.rules), as
+  # localectl set-x11-keymap writes them; Caps as Ctrl is the hwdb's
   sudo sed -i -e 's/^XKBLAYOUT=.*/XKBLAYOUT="us,ru"/' -e 's/^XKBVARIANT=.*/XKBVARIANT=","/' \
     -e 's/^XKBOPTIONS=.*/XKBOPTIONS="grp:ctrl_space_toggle,grp_led:scroll"/' /etc/default/keyboard
 
@@ -218,9 +220,8 @@ desktop_system() {
 # Desktop, user side: the session's configs, ssh-agent───────────────────────────────────────────────────────────────────
 desktop_session() {
   link config/dunst "$HOME/.config/dunst"
-  link config/xsettingsd "$HOME/.config/xsettingsd"
   for c in bspwm sxhkd polybar; do link "config/$c" "$HOME/.config/$c"; done
-  # GTK3's theme, adw-gtk3 (its settings.ini bin/theme's): libadwaita's look, built on the named colours
+  # GTK3's theme, adw-gtk3 (named by bin/theme over XSETTINGS): libadwaita's look, built on the named colours
   # bin/theme writes; not in Ubuntu's archive, its release from GitHub
   local adw=v6.5
   if [ ! -d "$HOME/.local/share/themes/adw-gtk3-dark" ]; then
@@ -240,10 +241,6 @@ desktop_session() {
   link .Xresources "$HOME/.Xresources"
   # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE), and .profile the session
   for e in config/environment.d/*.conf; do link "$e" "$HOME/.config/environment.d/${e##*/}"; done
-  # GTK3 dark or light by the colour theme (GTK4 follows the portal's color-scheme): bin/theme writes its
-  # settings.ini; GTK keeps bookmarks next to it, so the file is linked, not the dir
-  mkdir -p "$HOME/.config/gtk-3.0"
-  ln -snf "${XDG_STATE_HOME:-$HOME/.local/state}/theme/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
   # their named colours, the colour theme's, for libadwaita (GTK4) too: bin/theme writes them
   for g in gtk-3.0 gtk-4.0; do
     mkdir -p "$HOME/.config/$g"

@@ -8,8 +8,6 @@ xrdb -merge "${XDG_STATE_HOME:-$HOME/.local/state}/theme/Xresources" 2>/dev/null
 opacity=1 wallpaper=
 . "${XDG_STATE_HOME:-$HOME/.local/state}/theme/options" 2>/dev/null
 [ "$opacity" = 1 ] || xcompmgr &
-# us and ru, Ctrl+Space between them, Scroll Lock's LED on ru (bin/x-status reads it); Caps as Ctrl is the hwdb's
-setxkbmap -layout us,ru -option '' -option grp:ctrl_space_toggle,grp_led:scroll
 # the root: the colour theme's wallpaper while its opacity is below 1, else its ground, black without one
 # (bin/theme)
 bg=$(xrdb -get theme.bg)
@@ -18,8 +16,11 @@ xsetroot -solid "${bg:-#000000}" -cursor_name left_ptr
 # portals, ssh-agent's askpass and the other user units see this display
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP=bspwm 2>/dev/null
 
-# XSETTINGS at 2x (config/xsettingsd): GTK's windows and Chromium's, Electron's scale, before any of them
-xsettingsd &
+# XSETTINGS (config/xsettingsd, with the GTK theme bin/theme adds): the 2x GTK, Chromium and Electron take,
+# before any of them
+xs=${XDG_STATE_HOME:-$HOME/.local/state}/theme/xsettingsd.conf
+[ -f "$xs" ] || xs=$HOME/dotfiles/config/xsettingsd/xsettingsd.conf
+xsettingsd -c "$xs" &
 dunst &   # notifications (config/dunst)
 # the StatusNotifierItem icons (Electron's trays) in polybar's tray; without it they quit on close
 "$HOME/.local/bin/snixembed" &

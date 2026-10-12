@@ -215,11 +215,13 @@ sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
 	printf '@define-color theme_selected_bg_color %s;\n@define-color theme_selected_fg_color %s;\n' "$sel" "$fg"
 	printf '@define-color theme_unfocused_selected_bg_color %s;\n@define-color theme_unfocused_selected_fg_color %s;\n' "$sel" "$fg"
 } > "$state/gtk.css"
-# GTK3's theme: outside GNOME it reads no color-scheme, only settings.ini, so adw-gtk3 (install puts it in
-# ~/.local/share/themes, libadwaita's look built on the named colours above) in the theme's mode;
-# ~/.config/gtk-3.0/settings.ini links here (install). The portal's color-scheme for GTK4 and Chrome
-if [ "$mode" = dark ]; then gtk=adw-gtk3-dark scheme=prefer-dark dark=1; else gtk=adw-gtk3 scheme=prefer-light dark=0; fi
-printf '[Settings]\ngtk-theme-name=%s\ngtk-application-prefer-dark-theme=%s\n' "$gtk" "$dark" > "$state/settings.ini"
+# GTK3's theme: outside GNOME it reads no color-scheme, so adw-gtk3 (install puts it in ~/.local/share/themes,
+# libadwaita's look built on the named colours above) in the theme's mode as XSETTINGS' Net/ThemeName,
+# config/xsettingsd's settings and it written here for xsettingsd (bin/x-session) and a HUP to it: the GTK3
+# windows open now switch too. The portal's color-scheme for GTK4 and Chrome
+if [ "$mode" = dark ]; then gtk=adw-gtk3-dark scheme=prefer-dark; else gtk=adw-gtk3 scheme=prefer-light; fi
+{ sed '/^#/d' "$HOME/dotfiles/config/xsettingsd/xsettingsd.conf"; printf 'Net/ThemeName "%s"\n' "$gtk"; } > "$state/xsettingsd.conf"
+pkill -HUP -x xsettingsd
 gsettings set org.gnome.desktop.interface color-scheme "$scheme" 2> /dev/null ||
 	gsettings set org.gnome.desktop.interface color-scheme default 2> /dev/null
 # Claude Code's: a theme of its own over dark-ansi or light-ansi by the mode (/theme, "dotfiles"), its diffs a tint of the ground toward
