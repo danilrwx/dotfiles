@@ -4,9 +4,9 @@
 # isolated sockets under CLAUDE_TMUX_SOCKET_DIR (default $TMPDIR/agentic-tmux-sockets).
 # One match: use it; several: pick with fzf.
 #
-#   agent-watch       follow via capture-pane polling — zero effect on the
+#   tmux-agent-watch       follow via capture-pane polling — zero effect on the
 #                     session's geometry or process. Ctrl-C to stop.
-#   agent-watch -a    attach read-only (Detach with Ctrl-b d). Note: attaching
+#   tmux-agent-watch -a    attach read-only (Detach with Ctrl-b d). Note: attaching
 #                     resizes the agent's window to your terminal, which sends
 #                     SIGWINCH to whatever it's running.
 set -euo pipefail
@@ -15,7 +15,7 @@ follow=1
 case "${1:-}" in
   -a|--attach) follow=0 ;;
   '') ;;
-  *) echo "usage: agent-watch [-a|--attach]" >&2; exit 2 ;;
+  *) echo "usage: tmux-agent-watch [-a|--attach]" >&2; exit 2 ;;
 esac
 
 dir="${CLAUDE_TMUX_SOCKET_DIR:-${TMPDIR:-/tmp}/agentic-tmux-sockets}"

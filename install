@@ -252,7 +252,7 @@ desktop_session() {
   for a in config/applications/*.desktop; do link "$a" "$HOME/.local/share/applications/${a##*/}"; done
 
   # the terminal, st, my own build (github.com/danilrwx/st, patched, config.def.h as config) into
-  # /usr/local, run through bin/term in the colour theme; and what Iosevka lacks, the emoji above all, from
+  # /usr/local, run through bin/x-term in the colour theme; and what Iosevka lacks, the emoji above all, from
   # Noto Color Emoji rather than a monochrome fallback (config/fontconfig)
   log "Installing st"
   git_sync "$HOME/w/st" https://github.com/danilrwx/st
@@ -306,7 +306,7 @@ desktop_apps() {
     fi
   done
 
-  # mihomo, the VLESS client behind bin/vless: the static build, not in the archive, with the capability its
+  # mihomo, the VLESS client behind bin/vpn-vless: the static build, not in the archive, with the capability its
   # TUN mode needs to route the system's traffic, so it runs as a --user service (config/systemd/mihomo.service)
   local mihomo=$HOME/.local/bin/mihomo ver=v1.19.32
   if [ "$("$mihomo" -v 2>/dev/null | awk '{print $3}')" != "$ver" ]; then
@@ -318,7 +318,7 @@ desktop_apps() {
   # its TUN sets and reverts the Meta link's DNS in systemd-resolved, without a password prompt each time
   put /etc/polkit-1/rules.d/50-resolved-links.rules
 
-  # OpenVPN (bin/openvpn-ctl): each private/config/openvpn/NAME.ovpn as /etc/openvpn/client/NAME.conf for
+  # OpenVPN (bin/vpn-openvpn): each private/config/openvpn/NAME.ovpn as /etc/openvpn/client/NAME.conf for
   # openvpn-client@NAME.service, root's alone (the keys are in it). NAME.auth, the login and the password
   # line by line, goes next to it as what auth-user-pass reads, NAME.pass as the key's passphrase for
   # askpass; the server's DNS goes to systemd-resolved

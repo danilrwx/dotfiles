@@ -4,10 +4,10 @@
 # from NAME.auth and the server's DNS for systemd-resolved. The polkit rule
 # (etc/polkit-1/rules.d/50-openvpn-client.rules) lets these units start and stop without sudo.
 # bin/x-ctl's openvpn calls it.
-#   openvpn-ctl on NAME   bring NAME up, the one up before down, and wait for the tunnel
-#   openvpn-ctl off       bring the one up down
-#   openvpn-ctl status    "off", or the profile up ("NAME"), or "NAME connecting"
-#   openvpn-ctl list      the profiles, the one up first
+#   vpn-openvpn on NAME   bring NAME up, the one up before down, and wait for the tunnel
+#   vpn-openvpn off       bring the one up down
+#   vpn-openvpn status    "off", or the profile up ("NAME"), or "NAME connecting"
+#   vpn-openvpn list      the profiles, the one up first
 profiles=$HOME/dotfiles/private/config/openvpn
 
 # up: the active openvpn-client unit's profile, if any
@@ -30,11 +30,11 @@ list() {
 
 case "${1:-}" in
 on)
-	name=${2:?usage: openvpn-ctl on NAME}
-	[ -f "$profiles/$name.ovpn" ] || { echo "openvpn-ctl: no profile $profiles/$name.ovpn" >&2; exit 1; }
+	name=${2:?usage: vpn-openvpn on NAME}
+	[ -f "$profiles/$name.ovpn" ] || { echo "vpn-openvpn: no profile $profiles/$name.ovpn" >&2; exit 1; }
 	# the profile install put there (when the dir lets this user look: the package may keep it root's)
 	if [ ! -d /etc/openvpn/client ] || { [ -r /etc/openvpn/client ] && [ ! -e "/etc/openvpn/client/$name.conf" ]; }; then
-		echo "openvpn-ctl: $name is not in /etc/openvpn/client yet; run install" >&2
+		echo "vpn-openvpn: $name is not in /etc/openvpn/client yet; run install" >&2
 		exit 1
 	fi
 	cur=$(up)
@@ -45,7 +45,7 @@ on)
 		systemctl is-active -q "openvpn-client@$name.service" || break
 		sleep 0.5
 	done
-	echo "openvpn-ctl: $name did not connect: $(systemctl show -p StatusText --value "openvpn-client@$name.service")" >&2
+	echo "vpn-openvpn: $name did not connect: $(systemctl show -p StatusText --value "openvpn-client@$name.service")" >&2
 	echo "see: journalctl -u openvpn-client@$name" >&2
 	systemctl stop "openvpn-client@$name.service"
 	exit 1 ;;
@@ -59,6 +59,6 @@ status)
 	else echo "$cur connecting"; fi ;;
 list) list ;;
 *)
-	echo "usage: openvpn-ctl on NAME | off | status | list" >&2
+	echo "usage: vpn-openvpn on NAME | off | status | list" >&2
 	exit 1 ;;
 esac

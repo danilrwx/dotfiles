@@ -54,7 +54,7 @@ after a config change.
 
 | Key | Does |
 |---|---|
-| `super+Return` | terminal (st in the theme, `bin/term`) |
+| `super+Return` | terminal (st in the theme, `bin/x-term`) |
 | `super+d` | run: apps by name, `2+2` calculated and copied, `s`/`g`/`?` web searches, else a command |
 | `super+x` | quick settings (`bin/x-ctl`) |
 | `super+h/j/k/l`, `+shift` | focus, move |
@@ -105,7 +105,7 @@ With `--desktop`, also:
 - **the session**: bspwm on Xorg with sxhkd, polybar, dunst, xsettingsd, greetd; st built from my fork
 - **network**: iwd for Wi-Fi (NetworkManager's saved networks moved over), systemd-networkd for the wire,
   impala and bluetui as the Wi-Fi and Bluetooth TUIs
-- **VPN**: mihomo as the VLESS client (`bin/vless`: TUN or system proxy, rule mode with Russia direct or
+- **VPN**: mihomo as the VLESS client (`bin/vpn-vless`: TUN or system proxy, rule mode with Russia direct or
   global, profiles from `private`); OpenVPN profiles as `openvpn-client` units, started without sudo (a
   polkit rule), their DNS for systemd-resolved
 - **ssh** through the plain `ssh-agent` with a GTK askpass and a confirm per use, not gcr's agent
@@ -126,7 +126,7 @@ profiles, the keyring). `-n` shows all of it first; it refuses to run before gre
 | `etc/` | files `install` puts into `/etc`: iwd, netplan, greetd, the touchpad, Caps as Ctrl, polkit rules |
 | `config/` | the apps' configs, linked into `~/.config`; `config/systemd` the session's user units |
 | `bin/theme` | the colour theme, its options and the picker |
-| `bin/term` | st in the theme: its opacity and palette |
+| `bin/x-term` | st in the theme: its opacity and palette |
 | `bin/x-session` | the session: the theme, the user units, bspwm |
 | `bin/x-run` | the dmenu launcher (`super+d`) |
 | `bin/x-ctl` | quick settings (`super+x`) |
@@ -134,10 +134,10 @@ profiles, the keyring). `-n` shows all of it first; it refuses to run before gre
 | `bin/x-fnkeys` | media and HONOR Fn keys with dunst OSD cards |
 | `bin/x-night` | the night light by the hour |
 | `bin/x-drives` | removable drives: mount, or unmount and power off |
-| `bin/vless` | the VLESS client (mihomo) |
-| `bin/openvpn-ctl` | an OpenVPN profile up or down |
-| `bin/askpass` | ssh's and sudo's password prompt, showing the command, each prompt logged |
+| `bin/vpn-vless` | the VLESS client (mihomo) |
+| `bin/vpn-openvpn` | an OpenVPN profile up or down |
+| `bin/x-askpass` | ssh's and sudo's password prompt, showing the command, each prompt logged |
 | `bin/clip` | stdin to the clipboard (tmux, nvim) |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word, path or URL from the pane |
 | `bin/tmux-ru-keys` | the tmux bindings on the Russian layout too |
-| `bin/agent-watch` | `prefix A`: watch another tmux session in a split |
+| `bin/tmux-agent-watch` | `prefix A`: watch another tmux session in a split |

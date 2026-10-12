@@ -1,18 +1,18 @@
 #!/bin/sh
 # $mod+x: pick Wi-Fi, Bluetooth, the removable drives (bin/x-drives), the sound output or input, the headset mode or
-# the power profile. Wi-Fi and Bluetooth are impala and bluetui in a floating st of class x-ctl (bin/term; a
+# the power profile. Wi-Fi and Bluetooth are impala and bluetui in a floating st of class x-ctl (bin/x-term; a
 # rule in config/bspwm/bspwmrc); output, input and power are a second pick, the current one first: PipeWire's sinks or
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between headphones
-# (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vless: on through TUN or as the
-# system proxy, off, the rule or global mode, the profile. openvpn brings a profile of bin/openvpn-ctl up, or the
+# (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vpn-vless: on through TUN or as the
+# system proxy, off, the rule or global mode, the profile. openvpn brings a profile of bin/vpn-openvpn up, or the
 # one up down. theme picks the colour theme (bin/theme), the current one first.
 # pick PROMPT: a line of stdin by dmenu, bin/x-run's look (as tall as the bar)
 # the colour theme's ground and text (bin/theme)
 bg=#000000 fg=#ffffff
 . "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
 pick() { dmenu -i -p "$1" -fn 'Iosevka:size=11' -nb "$bg" -nf "$fg" -sb "$fg" -sf "$bg"; }
-# term TITLE CMD: st (bin/term) with class x-ctl
-term() { exec "$HOME/dotfiles/bin/term" -c x-ctl -t "$1" -e "$2"; }
+# term TITLE CMD: st (bin/x-term) with class x-ctl
+term() { exec "$HOME/dotfiles/bin/x-term" -c x-ctl -t "$1" -e "$2"; }
 # devices Sink|Source: "ID<tab>NAME" per PipeWire audio sink or source, the default one first. Only the
 # nodes of class Audio/Sink or Audio/Source: wpctl status lists WirePlumber's internal Bluetooth nodes as the
 # sinks, while the headset's real one sits under its filters. Left out unless the default: those whose every
@@ -63,9 +63,9 @@ headset() {
 	[ -n "$to" ] || { notify-send -a fnkeys -r 9912 -t 1500 "Headset" "$name has no $mode mode"; exit 0; }
 	wpctl set-profile "$id" "$to" && notify-send -a fnkeys -r 9912 -t 1500 "Headset" "$name: $mode"
 }
-# vless: the picks that change the state, bin/vless's status as the prompt
+# vless: the picks that change the state, bin/vpn-vless's status as the prompt
 vless() {
-	vless=$HOME/dotfiles/bin/vless
+	vless=$HOME/dotfiles/bin/vpn-vless
 	# off, or: tun|proxy rule|global PROFILE, the profile's name as it is, spaces and all
 	read -r how mode profile <<-EOF
 	$("$vless" status)
@@ -85,7 +85,7 @@ vless() {
 		pick=$("$vless" profile | pick profile) || exit 0
 		set -- profile "$pick" ;;
 	esac
-	# the outcome as a card: the new state, or bin/vless's error
+	# the outcome as a card: the new state, or bin/vpn-vless's error
 	if err=$("$vless" "$@" 2>&1); then
 		notify-send -a fnkeys -r 9912 -t 1500 "VLESS" "$("$vless" status)"
 	else
@@ -94,7 +94,7 @@ vless() {
 }
 # openvpn: the profiles, the one up first, and off while one is
 openvpn() {
-	ovpn=$HOME/dotfiles/bin/openvpn-ctl
+	ovpn=$HOME/dotfiles/bin/vpn-openvpn
 	cur=$("$ovpn" status)
 	pick=$({ "$ovpn" list; [ "$cur" != off ] && echo off; } | pick "openvpn $cur") || exit 0
 	if [ "$pick" = off ]; then set -- off; else set -- on "$pick"; fi

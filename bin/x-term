@@ -1,5 +1,5 @@
 #!/bin/sh
-# term [ST_OPTS...] [-e CMD [ARGS...]]: st, the terminal (my build, github.com/danilrwx/st, by install), in the
+# x-term [ST_OPTS...] [-e CMD [ARGS...]]: st, the terminal (my build, github.com/danilrwx/st, by install), in the
 # colour theme: its opacity (-A, bin/theme's option, see-through by xcompmgr) and its palette, the OSC escapes
 # bin/theme keeps, printed before the shell or CMD runs, st's own colours being compiled in. super+Return
 # (config/sxhkd), bin/x-ctl's TUIs.
