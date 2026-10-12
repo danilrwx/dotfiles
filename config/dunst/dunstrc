@@ -1,5 +1,6 @@
-# dunst under bspwm (bin/x-session starts it): cards in the theme's text colour, its ground for the text, a thin
-# frame in its blue, top right; those colours from dunstrc.d/theme.conf (bin/theme), these the fallback.
+# dunst under bspwm (over D-Bus, at the first notification): cards as the bar and bspwm look, the theme's ground
+# and text, a 1px frame green as a focused window's (grey for low urgency, red for critical), top right; those
+# colours from dunstrc.d/theme.conf (bin/theme), these the fallback.
 # bin/x-fnkeys sends volume/brightness with a value hint, drawn as the progress bar. Linked to ~/.config/dunst
 # by install --desktop.
 [global]
@@ -11,18 +12,18 @@
     padding = 8
     horizontal_padding = 8
     frame_width = 1
-    frame_color = "#83a598"
+    frame_color = "#00cd00"
     separator_height = 2
     separator_color = frame
-    background = "#ffffff"
-    foreground = "#000000"
+    background = "#000000"
+    foreground = "#ffffff"
     notification_limit = 5
     sort = update
     idle_threshold = 120
     follow = mouse
     progress_bar = true
     progress_bar_frame_width = 1
-    highlight = "#000000"
+    highlight = "#00cd00"
     mouse_left_click = close_current
 
 [urgency_low]

@@ -206,12 +206,20 @@ printf 'theme.bg: %s\ntheme.barbg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green
 if [ -n "$DISPLAY" ]; then
 	if [ "$opacity" != 1 ] && [ -f "$wallpaper" ]; then xwallpaper --zoom "$wallpaper"; else xsetroot -solid "$bg"; fi
 fi
-# dunst's: its cards in the theme's text colour, the text in its ground, the frame its blue; a drop-in, kept
-# out of git (.gitignore)
-mkdir -p "$HOME/.config/dunst/dunstrc.d"
-printf '[global]\n    frame_color = "%s"\n    background = "%s"\n    foreground = "%s"\n    highlight = "%s"\n' \
-	"$blue" "$fg" "$bg" "$bg" > "$HOME/.config/dunst/dunstrc.d/theme.conf"
 sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
+# dunst's, as the bar and bspwm look: the ground and the text, the frame green as a focused window's (grey for a
+# low urgency, red for a critical one), the progress bar green, and as see-through as the terminal (its
+# transparency, under xcompmgr); a drop-in, kept out of git (.gitignore)
+mkdir -p "$HOME/.config/dunst/dunstrc.d"
+{
+	printf '[global]\n    background = "%s"\n    foreground = "%s"\n    frame_color = "%s"\n    highlight = "%s"\n' \
+		"$bg" "$fg" "$green" "$green"
+	awk -v o="$opacity" 'BEGIN { printf "    transparency = %d\n", (1 - o) * 100 + 0.5 }'
+	for u in "low $grey" "normal $green" "critical $red"; do
+		set -- $u
+		printf '[urgency_%s]\n    background = "%s"\n    foreground = "%s"\n    frame_color = "%s"\n' "$1" "$bg" "$fg" "$2"
+	done
+} > "$HOME/.config/dunst/dunstrc.d/theme.conf"
 # GTK's: adw-gtk3's and libadwaita's named colours (adw-gtk3 the theme xsettingsd names, below), the ground
 # and text, the views and popovers a shade up, the accent its blue; ~/.config/gtk-{3,4}.0/gtk.css link here
 # (install), read by each app as it starts
