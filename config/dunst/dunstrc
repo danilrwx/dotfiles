@@ -4,7 +4,7 @@
 # bin/x-fnkeys sends volume/brightness with a value hint, drawn as the progress bar. Linked to ~/.config/dunst
 # by install --desktop.
 [global]
-    font = Iosevka 14
+    font = Iosevka 11
     format = "<b>%s</b>\n%b"
     width = 300
     origin = top-right
