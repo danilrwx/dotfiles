@@ -238,6 +238,11 @@ cbg=$bg$(awk -v o="$opacity" 'BEGIN { printf "%02x", o * 255 + 0.5 }')
 # on Wayland reads, the windows open now too. The portal's color-scheme for GTK4 and Chrome
 if [ "$mode" = dark ]; then gtk=adw-gtk3-dark scheme=prefer-dark; else gtk=adw-gtk3 scheme=prefer-light; fi
 gsettings set org.gnome.desktop.interface gtk-theme "$gtk" 2> /dev/null
+# and as settings.ini, what GTK3 reads where gsettings does not reach: under Xwayland (an X11 app, or one started
+# with a stale WAYLAND_DISPLAY, ssh's askpass among them), no XSETTINGS being served any more
+mkdir -p "$HOME/.config/gtk-3.0"
+printf '[Settings]\ngtk-theme-name=%s\ngtk-application-prefer-dark-theme=%d\ngtk-cursor-theme-name=Adwaita\ngtk-cursor-theme-size=24\n' \
+	"$gtk" "$([ "$mode" = dark ] && echo 1 || echo 0)" > "$HOME/.config/gtk-3.0/settings.ini"
 gsettings set org.gnome.desktop.interface color-scheme "$scheme" 2> /dev/null ||
 	gsettings set org.gnome.desktop.interface color-scheme default 2> /dev/null
 # Claude Code's: a theme of its own over dark-ansi or light-ansi by the mode (/theme, "dotfiles"), its diffs a tint of the ground toward
