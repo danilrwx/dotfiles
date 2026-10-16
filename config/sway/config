@@ -72,9 +72,6 @@ input type:touchpad {
 	scroll_factor 0.3
 }
 
-# mice without acceleration, the hand's movement one to one, for aiming; the touchpad keeps its own above
-input type:pointer accel_profile flat
-
 # floating: Steam, bin/x-ctl's TUIs, the portal's file dialog, centred; Telegram on 9, Discord on 10
 for_window [app_id="steam"] floating enable
 for_window [class="steam"] floating enable
