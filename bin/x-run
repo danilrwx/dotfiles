@@ -1,8 +1,8 @@
 #!/bin/bash
-# the dmenu launcher (super+d, config/sxhkd): over the bar, the apps by their names (the
+# the launcher (super+d, config/sway), in bin/x-menu: the apps by their names (the
 # .desktop entries, not PATH's binaries; those hidden by NoDisplay, config/applications's among them, left out).
 # What is typed instead: arithmetic is calculated, its result copied; "s words" searches DuckDuckGo, "g words"
-# Google, "?question" asks Claude, in the browser; anything else runs as a command, dmenu_run's way.
+# Google, "?question" asks Claude, in the browser; anything else runs as a command, as wmenu-run would.
 
 # the entries by id, the user's over the system's
 declare -A app seen
@@ -20,11 +20,7 @@ for d in "${XDG_DATA_HOME:-$HOME/.local/share}/applications" /usr/local/share/ap
   done
 done
 
-# the colour theme's ground and text (bin/theme)
-bg=#000000 fg=#ffffff
-. "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
-q=$(printf '%s\n' "${!app[@]}" | sort -f | dmenu -i -p run -fn 'Iosevka:size=11' \
-  -nb "$bg" -nf "$fg" -sb "$fg" -sf "$bg") || exit 0
+q=$(printf '%s\n' "${!app[@]}" | sort -f | "$HOME/dotfiles/bin/x-menu" run) || exit 0
 web() { xdg-open "$1$(jq -rn --arg q "$2" '$q | @uri')" & }
 case $q in
   "s "*) web 'https://duckduckgo.com/?q=' "${q#s }" ;;
@@ -35,7 +31,7 @@ case $q in
       exec gtk-launch "${app[$q]}"
     # digits and operators alone, so safe in awk's program
     elif [[ $q =~ ^[0-9.+*/%^()\ -]+$ ]] && r=$(awk "BEGIN {print $q}" 2>/dev/null) && [ -n "$r" ]; then
-      printf %s "$r" | xclip -selection clipboard
+      printf %s "$r" | "$HOME/dotfiles/bin/clip"
       notify-send -a run "$q = $r" "copied"
     else
       exec sh -c "$q"

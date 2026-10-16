@@ -1,23 +1,50 @@
 #!/bin/bash
-# polybar's status text, every second (config/polybar's x-status module): memory, volume, mic, battery,
-# brightness, layout, date. Plain words, no icon font.
+# x-status: the status as a dunst card (super+i): memory, volume, mic, battery, brightness, date, plain words.
+# x-status bar: the same every second as swaybar's status line (config/sway, the i3bar protocol), and a card at 10%
+# battery and a critical one at 5% while it discharges, each once a discharge (UPower powers off at 2%).
+# The battery is yellow from 20% and red from 10% while it discharges, in both.
 export LC_NUMERIC=C   # wpctl prints 0.45; awk under ru_RU reads that as 0
 
 # "Volume: 0.45 [MUTED]" -> 45% or off
 level() { wpctl get-volume "$1" 2>/dev/null | awk '{print /MUTED/ ? "off" : int($2 * 100 + 0.5) "%"}'; }
-
-while :; do
+# "CAPACITY STATUS" of the first battery, nothing without one
+battery() {
+  for b in /sys/class/power_supply/BAT*; do [ -d "$b" ] && { echo "$(<"$b/capacity") $(<"$b/status")"; return; }; done
+}
+# the line, pango markup for the battery's colour; c and st the battery's, for the cards
+status() {
+  yellow=#ffff55 red=#ff5555
+  . "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
   s="mem $(free -h | awk '/^Mem/ {print $3}')  vol $(level @DEFAULT_AUDIO_SINK@)  mic $(level @DEFAULT_AUDIO_SOURCE@)"
-  for b in /sys/class/power_supply/BAT*; do
-    [ -d "$b" ] || continue
-    s+="  bat $(<"$b/capacity")%"
-    [ "$(<"$b/status")" == Charging ] && s+="+"
-  done
+  read -r c st <<< "$(battery)"
+  if [ -n "$c" ]; then
+    t="bat $c%"
+    if [ "$st" = Charging ]; then t+="+"
+    elif (( c <= 10 )); then t="<span foreground='$red'>$t</span>"
+    elif (( c <= 20 )); then t="<span foreground='$yellow'>$t</span>"; fi
+    s+="  $t"
+  fi
   for l in /sys/class/backlight/*; do
     [ -d "$l" ] && s+="  bri $(( $(<"$l/brightness") * 100 / $(<"$l/max_brightness") ))%" && break
   done
-  # grp_led:scroll: Scroll Lock (bit 2 of the LED mask) lit while ru is on
-  (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && s+="  RU" || s+="  US"
-  echo "$s  $(date +'%d/%m %H:%M')"
-  sleep 1
-done
+}
+
+if [ "${1:-}" = bar ]; then
+  echo '{"version": 1}'
+  echo '['
+  warned=
+  while :; do
+    status
+    printf '[{"full_text": "%s  %s", "markup": "pango"}],\n' "$s" "$(date +'%d/%m %H:%M')"
+    if [ -z "$c" ] || [ "$st" = Charging ]; then warned=
+    elif (( c <= 5 )) && [ "$warned" != 5 ]; then
+      notify-send -a battery -r 9914 -u critical "Battery $c%" "Plug in: it powers off at 2%"; warned=5
+    elif (( c <= 10 )) && [ -z "$warned" ]; then
+      notify-send -a battery -r 9914 "Battery $c%" "Low"; warned=10
+    fi
+    sleep 1
+  done
+fi
+
+status
+exec notify-send -a fnkeys -r 9912 -t 3000 "$(date +'%H:%M  %a %d/%m')" "$s"

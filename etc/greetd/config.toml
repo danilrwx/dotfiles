@@ -1,8 +1,8 @@
-# dotfiles: tuigreet on vt 7, bspwm (bin/x-session through startx, as /usr/share/xsessions/x-bspwm.desktop
-# runs it); remembering the last user and session
+# dotfiles: tuigreet on vt 7, sway (its package's /usr/share/wayland-sessions/sway.desktop; the sessions' directory
+# named, Debian's tuigreet lists none unless told); remembering the last user and session
 [terminal]
 vt = 7
 
 [default_session]
-command = "tuigreet --time --remember --remember-session --asterisks --xsessions /usr/share/xsessions --cmd 'startx /home/danil/dotfiles/bin/x-session'"
+command = "tuigreet --time --remember --remember-session --asterisks --sessions /usr/share/wayland-sessions --cmd sway"
 user = "_greetd"

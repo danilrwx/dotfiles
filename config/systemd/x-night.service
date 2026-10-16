@@ -1,9 +1,0 @@
-# The night light, 21:00 to 07:00 (bin/x-night), run by x-night.timer every minute. Linked to
-# ~/.config/systemd/user by install.
-[Unit]
-Description=Night light
-PartOf=graphical-session.target
-
-[Service]
-Type=oneshot
-ExecStart=%h/dotfiles/bin/x-night

@@ -1,0 +1,7 @@
+#!/bin/sh
+# x-menu PROMPT: a line of stdin picked in wmenu, in the colour theme's ground and text (bin/theme). bin/x-run's,
+# bin/x-ctl's and bin/x-drives' menu.
+bg=#000000 fg=#ffffff
+. "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
+exec wmenu -i -p "$1" -f 'Iosevka 11' -N "${bg#\#}" -n "${fg#\#}" -S "${fg#\#}" -s "${bg#\#}" \
+	-M "${fg#\#}" -m "${bg#\#}"

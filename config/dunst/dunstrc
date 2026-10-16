@@ -1,4 +1,4 @@
-# dunst under bspwm (over D-Bus, at the first notification): cards as the bar and bspwm look, the theme's ground
+# dunst under sway (over D-Bus, at the first notification): cards as the borders look, the theme's ground
 # and text, a 1px frame green as a focused window's (grey for low urgency, red for critical), top right; those
 # colours from dunstrc.d/theme.conf (bin/theme), these the fallback.
 # bin/x-fnkeys sends volume/brightness with a value hint, drawn as the progress bar. Linked to ~/.config/dunst

@@ -1,19 +1,16 @@
 #!/bin/sh
 # $mod+x: pick Wi-Fi, Bluetooth, the removable drives (bin/x-drives), the sound output or input, the headset mode or
-# the power profile. Wi-Fi and Bluetooth are impala and bluetui in a floating st of class x-ctl (bin/x-term; a
-# rule in config/bspwm/bspwmrc); output, input and power are a second pick, the current one first: PipeWire's sinks or
+# the power profile. Wi-Fi and Bluetooth are impala and bluetui in a floating foot of app id x-ctl (bin/x-term; a
+# rule in config/sway); output, input and power are a second pick, the current one first: PipeWire's sinks or
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between headphones
 # (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vpn-vless: on through TUN or as the
 # system proxy, off, the rule or global mode, the profile. openvpn brings a profile of bin/vpn-openvpn up, or the
 # one up down. theme picks the colour theme (bin/theme), the current one first.
-# pick PROMPT: a line of stdin by dmenu, bin/x-run's look (as tall as the bar)
-# the colour theme's ground and text (bin/theme)
-bg=#000000 fg=#ffffff
-. "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
-pick() { dmenu -i -p "$1" -fn 'Iosevka:size=11' -nb "$bg" -nf "$fg" -sb "$fg" -sf "$bg"; }
-# term TITLE CMD: st (bin/x-term) with class x-ctl
+# pick PROMPT: a line of stdin by bin/x-menu
+pick() { "$HOME/dotfiles/bin/x-menu" "$1"; }
+# term TITLE CMD: foot (bin/x-term) with app id x-ctl
 term() { exec "$HOME/dotfiles/bin/x-term" -c x-ctl -t "$1" -e "$2"; }
-# devices Sink|Source: "ID<tab>NAME" per PipeWire audio sink or source, the default one first. Only the
+# devices Sink|Source: "ID<tab>NAME" per PipeWire audio sink or source, the default one first and marked "* ". Only the
 # nodes of class Audio/Sink or Audio/Source: wpctl status lists WirePlumber's internal Bluetooth nodes as the
 # sinks, while the headset's real one sits under its filters. Left out unless the default: those whose every
 # port the card reports unplugged ("available": "no", the HDMI outputs with no display on them; a port ALSA
@@ -30,7 +27,7 @@ devices() {
 			| (($routes[$p["device.id"] | tostring] // []) | map(select(.devices | index($p["card.profile.device"])))) as $r
 			| select($def or ($r | length) == 0 or any($r[]; .available != "no"))
 			| {def: $def, id, name: ($p["node.nick"] // $p["node.description"])}]
-		| sort_by(.def | not) | .[] | "\(.id)\t\(.name)"'
+		| sort_by(.def | not) | .[] | "\(.id)\t\(if .def then "* " else "  " end)\(.name)"'
 }
 # sound Sink|Source TITLE: pick a device by name, make it the default
 sound() {
@@ -38,22 +35,24 @@ sound() {
 	name=$(printf '%s\n' "$list" | cut -f2- | pick "$2") || exit 0
 	id=$(printf '%s\n' "$list" | awk -F '\t' -v n="$name" '$2 == n {print $1; exit}')
 	[ -n "$id" ] || exit 0
+	name=${name#[* ] }
 	if wpctl set-default "$id"; then notify-send -a fnkeys -r 9912 -t 1500 "Sound $2" "$name"
 	else notify-send -a fnkeys -r 9912 -t 3000 "Sound $2" "could not switch to $name"; fi
 }
-# headset: the first Bluetooth device as "ID<tab>NAME<tab>PROFILE<tab>A2DP<tab>HFP", the current profile's
-# name and the index of the best A2DP and handsfree profile each; nothing without one
+# headset: the first Bluetooth device as "ID|NAME|PROFILE|A2DP|HFP", the current profile's name and the index of
+# the best A2DP and handsfree profile each; nothing without one. A | as read's separator: a tab is whitespace to
+# it, and an empty field would collapse and shift the rest
 headset_info() {
 	pw-dump | jq -r '[.[] | select(.type == "PipeWire:Interface:Device" and .info.props["device.api"] == "bluez5")][0]
 		// empty | [.id, .info.props["device.description"], (.info.params.Profile[0].name // ""),
 		([.info.params.EnumProfile[] | select(.name | startswith("a2dp-sink"))] | max_by(.priority) | .index // ""),
 		([.info.params.EnumProfile[] | select(.name | startswith("headset-head-unit"))] | max_by(.priority) | .index // "")]
-		| map(tostring) | @tsv'
+		| map(tostring) | join("|")'
 }
 headset() {
 	info=$(headset_info)
 	[ -n "$info" ] || { notify-send -a fnkeys -r 9912 -t 1500 "Headset" "no Bluetooth headset"; exit 0; }
-	IFS='	' read -r id name cur a2dp hfp <<-EOF
+	IFS='|' read -r id name cur a2dp hfp <<-EOF
 	$info
 	EOF
 	case "$cur" in

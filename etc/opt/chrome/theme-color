@@ -1,0 +1,11 @@
+#!/bin/sh
+# chrome-theme-color [#rrggbb]: Chrome's theme colour as a managed policy (BrowserThemeColor), or none ('{}'):
+# the colour alone, so the one policy file bin/theme sets, root's, can hold nothing else. Installed root's into
+# /usr/local/sbin by install, which lets this user run it through sudo without a password, it alone
+# (/etc/sudoers.d/dotfiles-chrome-theme).
+case ${1:-} in
+'') json='{}' ;;
+'#'[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]) json="{ \"BrowserThemeColor\": \"$1\" }" ;;
+*) echo "chrome-theme-color: #rrggbb, or nothing" >&2; exit 1 ;;
+esac
+echo "$json" > /etc/opt/chrome/policies/managed/dotfiles-theme.json

@@ -1,0 +1,6 @@
+#!/bin/sh
+# The lock: swaylock on the colour theme's ground (bin/theme), forked once locked, so swayidle's before-sleep
+# waits for it. swayidle at idle and before sleep (an exec in config/sway), super+shift+x.
+bg=#000000
+. "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
+exec swaylock -f -c "${bg#\#}"

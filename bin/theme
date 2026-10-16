@@ -1,25 +1,24 @@
 #!/bin/sh
 # theme [NAME]: the colour theme, one of config/themes/: its ground, text and 16 ANSI colours, and two options
 # over it: the ground plain (black, white on a light theme) or the theme's own (bg), and the terminal's opacity
-# (opacity: st's -A, by bin/x-term, see-through by xcompmgr, started only while it is below 1). A theme is dark
-# or light by its ground's luminance, and what has the two modes takes it: Claude's base, GTK's theme, the
-# portal's color-scheme. The terminal, st, gets the palette as OSC escapes, the open windows at once and the
-# new ones by bin/x-term; nvim (plugin/colors.lua), tmux, fzf, bat and k9s take their colours from those ANSI
-# slots, so they follow; Claude has its own theme, "dotfiles", written here. What draws on X wants hex:
-# bspwm, polybar, dunst and dmenu (bin/x-run, bin/x-ctl) get their colours written next to the link, from the
-# ground, text, grey (bright black) and green and blue (bright), and are reloaded; Chrome's theme colour is
-# the ground when it is the theme's own.
+# (opacity: foot's alpha, by bin/x-term). A theme is dark or light by its ground's luminance, and what has the
+# two modes takes it: Claude's base, GTK's theme, the portal's color-scheme. The terminal, foot, gets the palette
+# as OSC escapes, the open windows at once and the new ones by bin/x-term; nvim (plugin/colors.lua), tmux, fzf,
+# bat and k9s take their colours from those ANSI slots, so they follow; Claude has its own theme, "dotfiles",
+# written here. What wants hex, sway's borders, dunst, wmenu (bin/x-menu), swaylock (bin/x-lock), gets its
+# colours written next to the link, from the ground, text, grey (bright black) and green and blue (bright), and
+# is reloaded; Chrome's theme colour is the ground when it is the theme's own.
 #   theme, theme list dark|light
 #                         the themes, or those of one mode, the current one marked
 #   theme NAME            set it
 #   theme set bg plain|theme|toggle, theme set opacity 0.1-1|cycle, theme set wallpaper FILE|none
-#                         an option, the current theme set again with it; the wallpaper, an image zoomed over
-#                         the root (xwallpaper) while the opacity is below 1, is what it shows through; the
+#                         an option, the current theme set again with it; the wallpaper, an image filling
+#                         sway's background while the opacity is below 1, is what it shows through; the
 #                         ground's colour without it
 #   theme pick            an fzf of them (tmux's prefix T, in a popup), the current one's mode first: the one
 #                         under the cursor tried on the terminal at once, ctrl-b the ground, ctrl-o the
 #                         opacity, ctrl-t the other mode's; Enter sets it, Esc puts the old one back
-#   theme quick NAME      the terminal's colours only, no X reloads (pick's tries)
+#   theme quick NAME      the terminal's colours only, no reloads (pick's tries)
 #   theme preview NAME    its 16 colours and a piece of C coloured as nvim colours it (plugin/colors.lua)
 dir=$HOME/dotfiles/config/themes
 state=${XDG_STATE_HOME:-$HOME/.local/state}/theme
@@ -158,11 +157,11 @@ mix() {
 		printf %02x $((a + (b - a) * $3 / 100))
 	done
 }
-# the terminal's (st, bin/x-term): its palette as OSC escapes, 4 for the 16 slots and for the 256 palette's
+# the terminal's (foot, bin/x-term): its palette as OSC escapes, 4 for the 16 slots and for the 256 palette's
 # darkest greys (235-238: nvim's selection, LSP references and columns, fzf's current line, tmux's pane
 # borders) a tint of the ground toward the text rather than neutral grey, 10, 11 and 12 the text, the ground
-# and the cursor. bin/x-term prints it to each new st before its shell; the open ones get it on their ttys,
-# the shell's under each st, which the tmux client in it shares
+# and the cursor. bin/x-term prints it to each new foot before its shell; the open ones get it on their ttys,
+# the shell's under each foot, which the tmux client in it shares
 i=0
 {
 	for r in normal bright; do
@@ -175,52 +174,52 @@ i=0
 		set -- $i
 		printf '\033]4;%s;%s\007' "$1" "$(mix "$bg" "$fg" "$2")"
 	done
-	printf '\033]10;%s\007\033]11;%s\007\033]12;%s\007' "$fg" "$bg" "$fg"
+	# the ground with the opacity as its alpha, in percent (foot takes URxvt's [N] before the colour), so the
+	# open terminals change their see-through at once, not only the new ones
+	printf '\033]10;%s\007\033]11;[%s]%s\007\033]12;%s\007' "$fg" \
+		"$(awk -v o="$opacity" 'BEGIN { printf "%d", o * 100 + 0.5 }')" "$bg" "$fg"
 } > "$state/osc"
-for p in $(pgrep -x st); do
+for p in $(pgrep -x foot); do
 	for t in $(ps -o tty= --ppid "$p"); do
 		[ -w "/dev/$t" ] && cat "$state/osc" > "/dev/$t"
 	done
 done
-# xcompmgr for the opacity, only while it is below 1
-if [ -n "$DISPLAY" ]; then
-	if [ "$opacity" = 1 ]; then
-		pkill -x xcompmgr
-	elif ! pgrep -x xcompmgr > /dev/null; then
-		setsid -f xcompmgr < /dev/null > /dev/null 2>&1
-	fi
-fi
 # quick: the terminal only, and what takes the terminal's colours (nvim, tmux, fzf, k9s)
 [ -n "$quick" ] && exit 0
 
-# dmenu's colours for bin/x-run and bin/x-ctl, sourced
-printf 'bg=%s fg=%s grey=%s green=%s blue=%s\n' "$bg" "$fg" "$grey" "$green" "$blue" > "$state/colors.sh"
-# bspwm's and polybar's, as X resources (theme.bg...): bspwmrc reads them by xrdb -get, polybar by
-# ${xrdb:...}; merged now and by bin/x-session at login. theme.barbg the bar's, as see-through as the
-# terminal: #aarrggbb, the alpha the opacity's
-barbg=$(awk -v o="$opacity" -v c="${bg#\#}" 'BEGIN { printf "#%02x%s", o * 255, c }')
-printf 'theme.bg: %s\ntheme.barbg: %s\ntheme.fg: %s\ntheme.grey: %s\ntheme.green: %s\n' \
-	"$bg" "$barbg" "$fg" "$grey" "$green" > "$state/Xresources"
-[ -n "$DISPLAY" ] && xrdb -merge "$state/Xresources"
-# the root: the wallpaper while the opacity shows it (below 1), else the ground's colour
-if [ -n "$DISPLAY" ]; then
-	if [ "$opacity" != 1 ] && [ -f "$wallpaper" ]; then xwallpaper --zoom "$wallpaper"; else xsetroot -solid "$bg"; fi
-fi
+# wmenu's (bin/x-menu), swaylock's (bin/x-lock) and the status' (bin/x-status), sourced
+printf 'bg=%s fg=%s grey=%s green=%s blue=%s yellow=%s red=%s\n' "$bg" "$fg" "$grey" "$green" "$blue" \
+	"$(val bright yellow)" "$(val bright red)" > "$state/colors.sh"
 sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
-# dunst's, as the bar and bspwm look: the ground and the text, the frame green as a focused window's (grey for a
-# low urgency, red for a critical one), the progress bar green, and as see-through as the terminal (its
-# transparency, under xcompmgr); a drop-in, kept out of git (.gitignore)
+# sway's: the background, the wallpaper while the opacity shows it (below 1), else the ground's colour, the
+# borders, the focused one green, the rest the ground, and the bar's, as my old i3 bar; a file its config includes at the start, and each line
+# sent to the running one
+{
+	if [ "$opacity" != 1 ] && [ -f "$wallpaper" ]; then printf 'output * bg "%s" fill\n' "$wallpaper"
+	else printf 'output * bg %s solid_color\n' "$bg"; fi
+	printf 'client.focused %s %s %s %s %s\n' "$green" "$bg" "$fg" "$green" "$green"
+	for k in focused_inactive unfocused; do printf 'client.%s %s %s %s %s %s\n' "$k" "$bg" "$bg" "$fg" "$bg" "$bg"; done
+	printf 'client.urgent %s %s %s %s %s\n' "$red" "$bg" "$fg" "$red" "$red"
+	printf 'bar main colors background %s\nbar main colors statusline %s\n' "$bg" "$grey"
+	printf 'bar main colors focused_workspace %s %s %s\n' "$bg" "$bg" "$fg"
+	for k in inactive active; do printf 'bar main colors %s_workspace %s %s %s\n' "$k" "$bg" "$bg" "$grey"; done
+	printf 'bar main colors urgent_workspace %s %s %s\n' "$bg" "$bg" "$green"
+} > "$state/sway.conf"
+[ -n "$SWAYSOCK" ] && while read -r l; do swaymsg -q "$l"; done < "$state/sway.conf"
+# dunst's, as the bar and the borders look: the ground and the text, the frame green as a focused window's (grey for a
+# low urgency, red for a critical one), the progress bar green, and as see-through as the terminal: the ground's
+# alpha the opacity's, dunst's own transparency being X's alone; a drop-in, kept out of git (.gitignore)
 mkdir -p "$HOME/.config/dunst/dunstrc.d"
+cbg=$bg$(awk -v o="$opacity" 'BEGIN { printf "%02x", o * 255 + 0.5 }')
 {
 	printf '[global]\n    background = "%s"\n    foreground = "%s"\n    frame_color = "%s"\n    highlight = "%s"\n' \
-		"$bg" "$fg" "$green" "$green"
-	awk -v o="$opacity" 'BEGIN { printf "    transparency = %d\n", (1 - o) * 100 + 0.5 }'
+		"$cbg" "$fg" "$green" "$green"
 	for u in "low $grey" "normal $green" "critical $red"; do
 		set -- $u
-		printf '[urgency_%s]\n    background = "%s"\n    foreground = "%s"\n    frame_color = "%s"\n' "$1" "$bg" "$fg" "$2"
+		printf '[urgency_%s]\n    background = "%s"\n    foreground = "%s"\n    frame_color = "%s"\n' "$1" "$cbg" "$fg" "$2"
 	done
 } > "$HOME/.config/dunst/dunstrc.d/theme.conf"
-# GTK's: adw-gtk3's and libadwaita's named colours (adw-gtk3 the theme xsettingsd names, below), the ground
+# GTK's: adw-gtk3's and libadwaita's named colours (adw-gtk3 the theme named below), the ground
 # and text, the views and popovers a shade up, the accent its blue; ~/.config/gtk-{3,4}.0/gtk.css link here
 # (install), read by each app as it starts
 {
@@ -235,12 +234,10 @@ mkdir -p "$HOME/.config/dunst/dunstrc.d"
 	printf '@define-color theme_unfocused_selected_bg_color %s;\n@define-color theme_unfocused_selected_fg_color %s;\n' "$sel" "$fg"
 } > "$state/gtk.css"
 # GTK3's theme: outside GNOME it reads no color-scheme, so adw-gtk3 (install puts it in ~/.local/share/themes,
-# libadwaita's look built on the named colours above) in the theme's mode as XSETTINGS' Net/ThemeName,
-# config/xsettingsd's settings and it written here for xsettingsd (bin/x-session) and a HUP to it: the GTK3
-# windows open now switch too. The portal's color-scheme for GTK4 and Chrome
+# libadwaita's look built on the named colours above) in the theme's mode as its gtk-theme setting, which GTK3
+# on Wayland reads, the windows open now too. The portal's color-scheme for GTK4 and Chrome
 if [ "$mode" = dark ]; then gtk=adw-gtk3-dark scheme=prefer-dark; else gtk=adw-gtk3 scheme=prefer-light; fi
-{ sed '/^#/d' "$HOME/dotfiles/config/xsettingsd/xsettingsd.conf"; printf 'Net/ThemeName "%s"\n' "$gtk"; } > "$state/xsettingsd.conf"
-pkill -HUP -x xsettingsd
+gsettings set org.gnome.desktop.interface gtk-theme "$gtk" 2> /dev/null
 gsettings set org.gnome.desktop.interface color-scheme "$scheme" 2> /dev/null ||
 	gsettings set org.gnome.desktop.interface color-scheme default 2> /dev/null
 # Claude Code's: a theme of its own over dark-ansi or light-ansi by the mode (/theme, "dotfiles"), its diffs a tint of the ground toward
@@ -287,21 +284,13 @@ sed -i "s/^color_scheme=.*/color_scheme=$([ "$mode" = light ] && echo 1 || echo 
 printf 'gui:\n  theme:\n    activeBorderColor: ["%s", bold]\n    inactiveBorderColor: ["%s"]\n    searchingActiveBorderColor: ["%s", bold]\n    optionsTextColor: ["%s"]\n    selectedLineBgColor: ["%s"]\n    inactiveViewSelectedLineBgColor: [bold]\n    unstagedChangesColor: ["%s"]\n' \
 	"$green" "$grey" "$blue" "$blue" "$sel" "$red" > "$state/lazygit.yml"
 
-# Chrome's: its theme colour the ground when the theme's own shows (bg theme), its own theme under plain; the
-# policy file install makes this user's, which Chrome watches
-policy=/etc/opt/chrome/policies/managed/dotfiles-theme.json
-if [ -w "$policy" ]; then
-	if [ "$bg_mode" = theme ]; then printf '{ "BrowserThemeColor": "%s" }\n' "$bg"; else echo '{}'; fi > "$policy"
+# Chrome's: its theme colour the ground when the theme's own shows (bg theme), its own theme under plain; a
+# managed policy, which Chrome watches, through install's root helper (sudo without a password, it alone)
+if [ -x /usr/local/sbin/chrome-theme-color ]; then
+	if [ "$bg_mode" = theme ]; then set -- "$bg"; else set --; fi
+	sudo -n /usr/local/sbin/chrome-theme-color "$@" 2> /dev/null
 fi
 
 # what runs now picks them up
-pgrep -x bspwm > /dev/null && bspc config focused_border_color "$green" && bspc config normal_border_color "$bg"
-# polybar anew rather than by its USR1 reload, which with the tray module can lose the bar while the old
-# process holds the tray; none of the terminal kept, or the tmux popup (pick) waits on it never closing
-if pgrep -x polybar > /dev/null; then
-	pkill -x polybar
-	while pgrep -x polybar > /dev/null; do sleep 0.1; done
-	setsid -f polybar main < /dev/null > /dev/null 2>&1
-fi
 pgrep -x dunst > /dev/null && dunstctl reload
 exit 0

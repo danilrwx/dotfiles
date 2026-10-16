@@ -1,5 +1,5 @@
 #!/bin/bash
-# The removable drives in dmenu (bin/x-ctl's drives, $mod+x): one not mounted is
+# The removable drives in bin/x-menu (bin/x-ctl's drives, $mod+x): one not mounted is
 # mounted by udisksctl (under /media/$USER, no root), one mounted unmounted and its drive powered off to pull out.
 # a partition (or a whole stick with no table) of a removable or hot-plugged drive, with a filesystem
 mapfile -t rows < <(lsblk -J -p -o NAME,PKNAME,TYPE,RM,HOTPLUG,SIZE,LABEL,FSTYPE,MOUNTPOINT | jq -r '
@@ -8,8 +8,7 @@ mapfile -t rows < <(lsblk -J -p -o NAME,PKNAME,TYPE,RM,HOTPLUG,SIZE,LABEL,FSTYPE
   | [(if .mountpoint then "unmount" else "mount" end), .name, .size, (.label // "-"), (.mountpoint // ""), (.pkname // .name)]
   | @tsv')
 [ ${#rows[@]} -gt 0 ] || { notify-send -a drives "No drives" "nothing removable is plugged in"; exit 0; }
-pick=$(printf '%s\n' "${rows[@]}" | cut -f1-5 | tr '\t' ' ' | dmenu -i -p drives -fn 'Iosevka:size=11' \
-  -nb '#000000' -nf '#ffffff' -sb '#ffffff' -sf '#000000') || exit 0
+pick=$(printf '%s\n' "${rows[@]}" | cut -f1-5 | tr '\t' ' ' | "$HOME/dotfiles/bin/x-menu" drives) || exit 0
 for r in "${rows[@]}"; do
   IFS=$'\t' read -r act dev _ label _ disk <<< "$r"
   [ "$pick" = "$(cut -f1-5 <<< "$r" | tr '\t' ' ')" ] || continue

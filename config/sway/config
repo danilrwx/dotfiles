@@ -1,0 +1,186 @@
+# sway, the session (its package's entry, tuigreet's default): its window keys my old i3 config's, with the
+# session's own (the launcher, the quick settings, the status, the Fn keys). Linked to ~/.config/sway by install.
+
+# the session's environment to systemd and D-Bus: the portals (picked by XDG_CURRENT_DESKTOP), ssh-agent's askpass
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway
+
+# the session's daemons, gone with sway: the lock at 10 min idle and before sleep, the screens off at 15 and on at
+# the first input (bin/x-lock); the night light, 4500 K from 21:00 to 07:00; the polkit agent's password prompts
+exec swayidle -w timeout 600 x-lock timeout 900 'swaymsg "output * power off"' \
+	resume 'swaymsg "output * power on"' before-sleep x-lock
+exec wlsunset -s 21:00 -S 07:00 -t 4500 -T 6500 -d 60
+exec lxpolkit
+
+# every screen at 2x, the panel at 120 Hz, the 240 Hz monitor right of it, its left edge at the panel's 1560
+# logical pixels; sway takes each up as it is plugged in
+output * scale 2
+output eDP-1 mode 3120x2080@120Hz position 0 0
+output DP-1 mode 2560x1600@240Hz position 1560 0
+output * bg #000000 solid_color
+# the cursor, passed to what sway starts as XCURSOR_THEME and XCURSOR_SIZE (Steam under Xwayland reads those)
+seat * xcursor_theme Adwaita 24
+
+# the bar, as my old i3's: the workspaces and the status line (bin/x-status bar: memory, sound, battery,
+# brightness, date, and the low battery cards), Iosevka 11 on top; super+b hides and shows it, super+i shows the
+# status as a card too. The colour theme's colours (bin/theme), these the fallback
+bar {
+	id main
+	position top
+	font pango:Iosevka 11
+	status_command x-status bar
+	# the tray's icons as tall as the bar less this all round, the default 2 leaving them too big
+	tray_padding 11
+	colors {
+		background #000000
+		statusline #767676
+		focused_workspace  #000000 #000000 #ffffff
+		inactive_workspace #000000 #000000 #767676
+		active_workspace   #000000 #000000 #767676
+		urgent_workspace   #000000 #000000 #23fd00
+	}
+}
+# a 1px green border on the focused window, none on a window alone (smart_borders)
+default_border pixel 1
+default_floating_border pixel 1
+smart_borders on
+gaps inner 0
+#                       border  background text    indicator child_border
+client.focused          #addf9c #000000    #ffffff #addf9c   #addf9c
+client.focused_inactive #000000 #000000    #ffffff #000000   #000000
+client.unfocused        #000000 #000000    #ffffff #000000   #000000
+client.urgent           #ff5555 #000000    #ffffff #ff5555   #ff5555
+# the colour theme's over these, the background, the borders and the bar's (bin/theme writes it)
+include ~/.local/state/theme/sway.conf
+focus_follows_mouse yes
+
+# keyboard: us and ru, Ctrl+Space between them (Caps as Ctrl is the hwdb's)
+input type:keyboard {
+	xkb_layout us,ru
+	xkb_options grp:ctrl_space_toggle
+	repeat_delay 660
+	repeat_rate 25
+}
+# the touchpad: no tap, a click by the fingers down, natural scrolling, off while typing, the slower pointer,
+# scrolling a third of libinput's
+input type:touchpad {
+	tap disabled
+	click_method clickfinger
+	natural_scroll enabled
+	dwt enabled
+	accel_profile adaptive
+	pointer_accel -0.4
+	scroll_factor 0.3
+}
+
+# floating: Steam, bin/x-ctl's TUIs, the portal's file dialog, centred; Telegram on 9, Discord on 10
+for_window [app_id="steam"] floating enable
+for_window [class="steam"] floating enable
+for_window [app_id="x-ctl"] floating enable, resize set 60 ppt 70 ppt
+for_window [app_id="xdg-desktop-portal-gtk"] floating enable
+for_window [floating] move position center
+assign [app_id="org.telegram.desktop"] workspace number 9
+assign [class="discord"] workspace number 10
+assign [app_id="discord"] workspace number 10
+
+# tearing in fullscreen games that ask for it, CS2 and gamescope even if they do not
+output * allow_tearing yes
+for_window [app_id="cs2"] allow_tearing yes
+for_window [class="cs2"] allow_tearing yes
+for_window [app_id="gamescope"] allow_tearing yes
+# VRR on the monitors that have it, used while a game is fullscreen
+output * adaptive_sync on
+
+# the keys: my old i3 config's window keys (h/j/k/l by direction, the splits, the layouts, the resize mode), the
+# rest the session's; --to-code so they work on the ru layout too
+set $mod Mod4
+floating_modifier $mod normal
+
+bindsym --to-code {
+	$mod+Return exec x-term
+	$mod+d exec x-run
+	$mod+x exec x-ctl
+	$mod+i exec x-status
+	$mod+Shift+x exec x-lock
+	Print exec grim -g "$(slurp)" - | wl-copy -t image/png
+	$mod+Shift+s exec grim -g "$(slurp)" - | wl-copy -t image/png
+	$mod+n exec dunstctl close
+	$mod+Shift+n exec dunstctl close-all
+
+	$mod+h focus left
+	$mod+j focus down
+	$mod+k focus up
+	$mod+l focus right
+	$mod+Shift+h move left
+	$mod+Shift+j move down
+	$mod+Shift+k move up
+	$mod+Shift+l move right
+	$mod+v split v
+	$mod+c split h
+	$mod+f fullscreen toggle
+	$mod+s layout stacking
+	$mod+w layout tabbed
+	$mod+e layout toggle split
+	$mod+Shift+space floating toggle
+	$mod+space focus mode_toggle
+	$mod+a focus parent
+	$mod+Tab workspace back_and_forth
+	$mod+period focus output right
+	$mod+Shift+period move container to output right
+	$mod+Shift+q kill
+	$mod+b bar mode toggle
+	$mod+Shift+c reload
+	$mod+Shift+e exec swaynag -t warning -m 'Exit sway? This ends the session.' -B 'Yes, exit sway' 'swaymsg exit'
+	$mod+r mode "resize"
+
+	$mod+1 workspace number 1
+	$mod+2 workspace number 2
+	$mod+3 workspace number 3
+	$mod+4 workspace number 4
+	$mod+5 workspace number 5
+	$mod+6 workspace number 6
+	$mod+7 workspace number 7
+	$mod+8 workspace number 8
+	$mod+9 workspace number 9
+	$mod+0 workspace number 10
+	$mod+Shift+1 move container to workspace number 1
+	$mod+Shift+2 move container to workspace number 2
+	$mod+Shift+3 move container to workspace number 3
+	$mod+Shift+4 move container to workspace number 4
+	$mod+Shift+5 move container to workspace number 5
+	$mod+Shift+6 move container to workspace number 6
+	$mod+Shift+7 move container to workspace number 7
+	$mod+Shift+8 move container to workspace number 8
+	$mod+Shift+9 move container to workspace number 9
+	$mod+Shift+0 move container to workspace number 10
+}
+
+# the window's size by h/j/k/l, out by Return, Escape or super+r again
+mode "resize" {
+	bindsym --to-code {
+		h resize shrink width 5 px or 5 ppt
+		j resize grow height 5 px or 5 ppt
+		k resize shrink height 5 px or 5 ppt
+		l resize grow width 5 px or 5 ppt
+		Return mode "default"
+		Escape mode "default"
+		$mod+r mode "default"
+	}
+}
+
+# the media and HONOR Fn keys as dunst cards (bin/x-fnkeys); held, they repeat
+bindsym --locked {
+	XF86AudioRaiseVolume exec x-fnkeys vol-up
+	XF86AudioLowerVolume exec x-fnkeys vol-down
+	XF86AudioMute exec x-fnkeys vol-mute
+	$mod+XF86AudioRaiseVolume exec x-fnkeys mic-up
+	$mod+XF86AudioLowerVolume exec x-fnkeys mic-down
+	XF86AudioMicMute exec x-fnkeys mic
+	XF86MonBrightnessUp exec x-fnkeys bright-up
+	XF86MonBrightnessDown exec x-fnkeys bright-down
+	XF86AudioPlay exec playerctl play-pause
+	XF86AudioNext exec playerctl next
+	XF86AudioPrev exec playerctl previous
+}
+bindsym --to-code $mod+Shift+m exec x-fnkeys mic
+bindsym XF86Launch1 exec x-fnkeys profile
+bindsym XF86CameraAccessToggle exec x-fnkeys camera
