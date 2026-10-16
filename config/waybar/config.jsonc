@@ -1,0 +1,14 @@
+// waybar, sway's bar (config/sway runs it as its swaybar_command, bar id main, so super+b hides it): the
+// workspaces and the mode left, the status (bin/x-status bar) and the tray right; swaybar's tray could not open
+// an item's menu (Steam's right click). Linked to ~/.config/waybar by install.
+{
+  "id": "main",
+  "ipc": true,
+  "layer": "top",
+  "position": "top",
+  "modules-left": ["sway/workspaces", "sway/mode"],
+  "modules-right": ["custom/status", "tray"],
+  "sway/workspaces": { "disable-scroll": true },
+  "custom/status": { "exec": "x-status bar", "tooltip": false },
+  "tray": { "icon-size": 16, "spacing": 8 }
+}

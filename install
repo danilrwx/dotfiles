@@ -46,10 +46,10 @@ DESKTOP_PKGS=(iwd bluez rfkill
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
   greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome thunar
   openvpn openvpn-systemd-resolved)
-# the session, without recommends: sway, Xwayland (Steam, games), the terminal, the launcher, the clipboard,
+# the session, without recommends: sway and its bar, waybar, Xwayland (Steam, games), the terminal, the launcher, the clipboard,
 # screenshots, the lock and the idle, the night light, notifications, the polkit agent, the media keys' tools,
 # bin/x-run's gtk-launch, screen sharing's portal
-WL_PKGS=(xwayland sway foot wmenu wl-clipboard grim slurp swaylock swayidle wlsunset
+WL_PKGS=(xwayland sway waybar foot wmenu wl-clipboard grim slurp swaylock swayidle wlsunset
   dunst libnotify-bin lxpolkit brightnessctl playerctl libgtk-3-bin xdg-desktop-portal-wlr)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
 
@@ -214,6 +214,7 @@ desktop_system() {
 # Desktop, user side: the session's configs, ssh-agent───────────────────────────────────────────────────────────────────
 desktop_session() {
   link config/sway "$HOME/.config/sway"
+  link config/waybar "$HOME/.config/waybar"
   link config/dunst "$HOME/.config/dunst"
   # Bluetooth headsets kept in A2DP when an app opens a mic, the mic being the built-in array
   link config/wireplumber "$HOME/.config/wireplumber"

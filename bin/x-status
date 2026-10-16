@@ -1,7 +1,7 @@
 #!/bin/bash
 # x-status: the status as a dunst card (super+i): memory, volume, mic, battery, brightness, date, plain words.
-# x-status bar: the same every second as swaybar's status line (config/sway, the i3bar protocol), and a card at 10%
-# battery and a critical one at 5% while it discharges, each once a discharge (UPower powers off at 2%).
+# x-status bar: the same every second as waybar's status (config/waybar: a line each, pango markup), and a card at
+# 10% battery and a critical one at 5% while it discharges, each once a discharge (UPower powers off at 2%).
 # The battery is yellow from 20% and red from 10% while it discharges, in both.
 export LC_NUMERIC=C   # wpctl prints 0.45; awk under ru_RU reads that as 0
 
@@ -30,12 +30,11 @@ status() {
 }
 
 if [ "${1:-}" = bar ]; then
-  echo '{"version": 1}'
-  echo '['
   warned=
   while :; do
     status
-    printf '[{"full_text": "%s  %s", "markup": "pango"}],\n' "$s" "$(date +'%d/%m %H:%M')"
+    # gone with the bar: the read end closed, the write fails
+    echo "$s  $(date +'%d/%m %H:%M')" 2> /dev/null || exit 0
     if [ -z "$c" ] || [ "$st" = Charging ]; then warned=
     elif (( c <= 5 )) && [ "$warned" != 5 ]; then
       notify-send -a battery -r 9914 -u critical "Battery $c%" "Plug in: it powers off at 2%"; warned=5
