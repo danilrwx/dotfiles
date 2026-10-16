@@ -8,11 +8,16 @@
 #   vpn-vless profile [NAME]  pick the profile (PROXY's server), or list them, the current one first
 #   vpn-vless status          "off", or "tun|proxy rule|global PROFILE"
 #   vpn-vless build           merge config/mihomo/base.yaml and private/config/mihomo/desktop.yaml into
-#                       ~/.config/mihomo/config.yaml (mihomo.service's ExecStartPre)
+#                       ~/.config/mihomo/config.yaml with the API's secret (mihomo.service's ExecStartPre)
 api=http://127.0.0.1:9090
 dir=$HOME/.config/mihomo
 
-call() { curl -fsS --max-time 2 -X "$1" "$api$2" ${3:+-H 'Content-Type: application/json' -d "$3"}; }
+# the API's secret (build makes it once, 0600): without one any web page could read and change mihomo over
+# 127.0.0.1, its CORS letting every origin in
+call() {
+	curl -fsS --max-time 2 -X "$1" -H "Authorization: Bearer $(cat "$dir/secret" 2>/dev/null)" "$api$2" \
+		${3:+-H 'Content-Type: application/json' -d "$3"}
+}
 
 # global_via_profile: the global mode goes through mihomo's built-in GLOBAL group, DIRECT unless told,
 # so it is pointed at PROXY, the group the profile is picked in
@@ -45,10 +50,13 @@ system_proxy() {
 case "${1:-}" in
 build)
 	mkdir -p "$dir"
+	# the config holds the servers' keys and the API's secret: this user's alone
+	umask 077
+	[ -s "$dir/secret" ] || head -c 24 /dev/urandom | base64 > "$dir/secret"
 	# yq is go install's (dev_tools), off the PATH systemd gives the service
-	"$HOME/go/bin/yq" eval-all '. as $part ireduce ({}; . * $part)' "$HOME/dotfiles/config/mihomo/base.yaml" \
-		"$HOME/dotfiles/private/config/mihomo/desktop.yaml" > "$dir/config.yaml.new" \
-		&& mv "$dir/config.yaml.new" "$dir/config.yaml" ;;
+	SECRET=$(cat "$dir/secret") "$HOME/go/bin/yq" eval-all '. as $part ireduce ({}; . * $part) | .secret = strenv(SECRET)' \
+		"$HOME/dotfiles/config/mihomo/base.yaml" "$HOME/dotfiles/private/config/mihomo/desktop.yaml" \
+		> "$dir/config.yaml.new" && mv "$dir/config.yaml.new" "$dir/config.yaml" ;;
 on)
 	case "${2:-}" in
 	tun)

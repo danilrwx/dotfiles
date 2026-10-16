@@ -2,7 +2,6 @@
 # config/mihomo/base.yaml and the private part before each start. Linked to ~/.config/systemd/user by install.
 [Unit]
 Description=mihomo, the VLESS client (bin/vpn-vless)
-After=network-online.target
 
 [Service]
 ExecStartPre=%h/dotfiles/bin/vpn-vless build
