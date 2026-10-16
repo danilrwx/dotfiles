@@ -301,7 +301,9 @@ local function select_hunk()
   end
   local s = (h.new_cnt == 0) and h.lnum or h.new_start
   local e = (h.new_cnt == 0) and h.lnum or (h.new_start + h.new_cnt - 1)
-  vim.cmd(("normal! %dGV%dG"):format(s, e))
+  -- out of a visual selection first: its V would toggle linewise off (Vih), its anchor stay put (vih)
+  local esc = vim.fn.mode():match("^[vV\22]") and "\27" or ""
+  vim.cmd(("normal! %s%dGV%dG"):format(esc, s, e))
 end
 
 -- open the index (ref="") or HEAD version in a diff split beside the file

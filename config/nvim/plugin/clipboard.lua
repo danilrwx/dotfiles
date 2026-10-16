@@ -1,7 +1,7 @@
 -- Every plain yank is mirrored to the desktop clipboard, so there is no
--- <leader>y: bin/clip (xclip). Without a display
+-- <leader>y: bin/clip (wl-copy). Without a display
 -- (a server over ssh) yanks stay in nvim's registers.
-if not ((vim.env.DISPLAY or vim.env.WAYLAND_DISPLAY) and vim.fn.executable("clip") == 1) then
+if not (vim.env.WAYLAND_DISPLAY and vim.fn.executable("clip") == 1) then
   return
 end
 
@@ -10,12 +10,12 @@ local function copy(lines, regtype)
   vim.system({ "clip" }, { stdin = text, detach = true })
 end
 
--- only real yanks (not deletes) to the unnamed or clipboard registers
+-- only real yanks (not deletes) to the unnamed register: "+ and "* go to the clipboard by nvim's own provider
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("clipboard_copy", { clear = true }),
   callback = function()
     local e = vim.v.event
-    if e.operator == "y" and (e.regname == "" or e.regname == "+" or e.regname == "*") then
+    if e.operator == "y" and e.regname == "" then
       copy(e.regcontents, e.regtype)
     end
   end,

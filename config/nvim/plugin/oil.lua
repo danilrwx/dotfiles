@@ -327,7 +327,9 @@ local function up()
   end
   local buf = vim.api.nvim_get_current_buf()
   vim.bo.modified = false
-  M.open(vim.fn.fnamemodify(vim.fn.trim(bufdir[buf], "/", 2), ":h") .. "/")
+  -- at / it stays there: the parent of "" would be "." (nvim's own directory)
+  local cur = vim.fn.trim(bufdir[buf], "/", 2)
+  M.open(cur == "" and "/" or vim.fn.fnamemodify(cur, ":h") .. "/")
 end
 
 local function focus(name)

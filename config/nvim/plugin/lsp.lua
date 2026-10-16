@@ -92,6 +92,16 @@ vim.api.nvim_create_autocmd("LspAttach", {
           vim.lsp.buf.format({ id = client.id })
         end,
       })
+      -- gone with the client: a stopped gopls would leave every :w with "no matching language servers"
+      vim.api.nvim_create_autocmd("LspDetach", {
+        group = grp,
+        buffer = ev.buf,
+        callback = function(d)
+          if d.data.client_id == client.id then
+            vim.api.nvim_clear_autocmds({ group = grp, buffer = ev.buf })
+          end
+        end,
+      })
     end
   end,
 })

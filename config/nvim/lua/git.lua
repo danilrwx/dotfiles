@@ -151,6 +151,10 @@ local function scratch(lines, name, where, dir)
       M.open_pr(h, dir)
     end
   end, { buffer = buf })
+  -- q / <Esc> close it, as the blame float does (README)
+  for _, k in ipairs({ "q", "<Esc>" }) do
+    vim.keymap.set("n", k, "<cmd>close<cr>", { buffer = buf, nowait = true })
+  end
 end
 
 -- open `git show <rev>` (optionally scoped to a path) in a diff-highlighted tab
@@ -609,10 +613,24 @@ function M.setup_current_line()
     end,
   })
 
-  vim.api.nvim_create_autocmd({ "CursorHold", "BufEnter" }, {
+  vim.api.nvim_create_autocmd("BufEnter", {
     group = grp,
     callback = function(a)
       refresh_cur(a.buf)
+    end,
+  })
+  -- CursorHold comes 100 ms (updatetime) after each edit; a full-file blame then is seconds of CPU on a long
+  -- history, so it waits for a real pause, the timer restarted by each hold
+  local hold = vim.uv.new_timer()
+  vim.api.nvim_create_autocmd("CursorHold", {
+    group = grp,
+    callback = function(a)
+      hold:stop()
+      hold:start(750, 0, vim.schedule_wrap(function()
+        if vim.api.nvim_buf_is_valid(a.buf) and a.buf == vim.api.nvim_get_current_buf() then
+          refresh_cur(a.buf)
+        end
+      end))
     end,
   })
 

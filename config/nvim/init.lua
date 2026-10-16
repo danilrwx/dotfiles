@@ -45,7 +45,7 @@ end
 
 vim.keymap.set("n", "<c-d>", "<c-d>zz")
 vim.keymap.set("n", "<c-u>", "<c-u>zz")
-vim.keymap.set("n", "<c-l>", "<cmd>nohlsearch<cr>")
+vim.keymap.set("n", "<c-l>", "<cmd>nohlsearch<bar>diffupdate<bar>normal! <c-l><cr>")
 
 vim.keymap.set("n", "-", "<cmd>Oil<cr>", { silent = true })
 

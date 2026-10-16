@@ -56,8 +56,10 @@ function M.open(cands, opts)
     if not v.prev_visible then
       return
     end
-    if ptimer then
+    -- a pending one closed, not just stopped: defer_fn's timer frees itself only when it fires
+    if ptimer and not ptimer:is_closing() then
       ptimer:stop()
+      ptimer:close()
     end
     ptimer = vim.defer_fn(do_preview, PREVIEW_MS)
   end
@@ -259,8 +261,10 @@ function M.open(cands, opts)
       if v:query() == last_q then
         return
       end
-      if ftimer then
+      -- a pending one closed, not just stopped: defer_fn's timer frees itself only when it fires
+      if ftimer and not ftimer:is_closing() then
         ftimer:stop()
+        ftimer:close()
       end
       ftimer = vim.defer_fn(refilter, DEBOUNCE_MS)
     end,
