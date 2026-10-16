@@ -40,12 +40,13 @@ sound() {
 	else notify-send -a fnkeys -r 9912 -t 3000 "Sound $2" "could not switch to $name"; fi
 }
 # headset: the first Bluetooth device as "ID|NAME|PROFILE|A2DP|HFP", the current profile's name and the index of
-# the best A2DP and handsfree profile each; nothing without one. A | as read's separator: a tab is whitespace to
-# it, and an empty field would collapse and shift the rest
+# the best A2DP (SBC-XQ where the headset has it, which PipeWire ranks below plain SBC) and handsfree profile
+# each; nothing without one. A | as read's separator: a tab is whitespace to it, and an empty field would
+# collapse and shift the rest
 headset_info() {
 	pw-dump | jq -r '[.[] | select(.type == "PipeWire:Interface:Device" and .info.props["device.api"] == "bluez5")][0]
 		// empty | [.id, .info.props["device.description"], (.info.params.Profile[0].name // ""),
-		([.info.params.EnumProfile[] | select(.name | startswith("a2dp-sink"))] | max_by(.priority) | .index // ""),
+		([.info.params.EnumProfile[] | select(.name | startswith("a2dp-sink"))] | (map(select(.name | endswith("sbc_xq")))[0] // max_by(.priority)) | .index // ""),
 		([.info.params.EnumProfile[] | select(.name | startswith("headset-head-unit"))] | max_by(.priority) | .index // "")]
 		| map(tostring) | join("|")'
 }
