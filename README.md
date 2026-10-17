@@ -16,7 +16,7 @@ cd ~/dotfiles && ./install --desktop
   lazygit, k9s, bat, Chrome's toolbar, the lock screen and Claude Code's diffs follow. 16 dark themes and 8
   light ones; whether a theme is dark or light is read off its colours, so GTK, Chrome and Claude switch
   mode with it.
-- **Light where it counts.** sway from Ubuntu's archive with my old i3 keys, foot as the terminal; waybar with
+- **Light where it counts.** sway from Ubuntu's archive with my old i3 keys, foot as the terminal; swaybar with
   a plain-words status line; the session's daemons are a few lines of `exec` in its config.
 - **HiDPI, crisp.** Every screen at 2x by sway's own output settings; GTK, Chrome and Telegram draw natively at it.
 - **Neovim, plugin-free.** Fuzzy picker, live grep, git signs and blame, a file manager, sessions,
@@ -71,7 +71,7 @@ after a config change.
 | `super+shift+c` / `super+shift+e` | reload the config / quit, after a yes |
 | media and HONOR Fn keys | volume, mic, brightness, camera, power profile, with an OSD |
 
-The rest of the session: greetd with tuigreet to log in; waybar on top with the status line (`bin/x-status`),
+The rest of the session: greetd with tuigreet to log in; swaybar on top with the status line (`bin/x-status`),
 `super+b` hiding it and `super+i` showing the status as a card, a card at 10% and 5% battery; Telegram opens on
 workspace 9 and Discord on 10; dunst for notifications; swayidle locking with swaylock on the theme's ground at
 10 min, the screens off at 15; a night light from 21:00 to 07:00 (wlsunset); the monitors by sway's output

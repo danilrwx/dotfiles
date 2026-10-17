@@ -5,7 +5,7 @@
 # two modes takes it: Claude's base, GTK's theme, the portal's color-scheme. The terminal, foot, gets the palette
 # as OSC escapes, the open windows at once and the new ones by bin/x-term; nvim (plugin/colors.lua), tmux, fzf,
 # bat and k9s take their colours from those ANSI slots, so they follow; Claude has its own theme, "dotfiles",
-# written here. What wants hex, sway's borders, waybar, dunst, wmenu (bin/x-menu), swaylock (bin/x-lock), gets its
+# written here. What wants hex, sway's borders, dunst, wmenu (bin/x-menu), swaylock (bin/x-lock), gets its
 # colours written next to the link, from the ground, text, grey (bright black) and green and blue (bright), and
 # is reloaded; Chrome's theme colour is the ground when it is the theme's own.
 #   theme, theme list dark|light
@@ -191,8 +191,8 @@ done
 printf 'bg=%s fg=%s grey=%s green=%s blue=%s yellow=%s red=%s\n' "$bg" "$fg" "$grey" "$green" "$blue" \
 	"$(val bright yellow)" "$(val bright red)" > "$state/colors.sh"
 sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
-# sway's: the background, the wallpaper while the opacity shows it (below 1), else the ground's colour, and the
-# borders, the focused one green, the rest the ground; a file its config includes at the start, and each line
+# sway's: the background, the wallpaper while the opacity shows it (below 1), else the ground's colour, the
+# borders, the focused one green, the rest the ground, and the bar's, as my old i3 bar; a file its config includes at the start, and each line
 # sent to the running one
 {
 	if [ "$opacity" != 1 ] && [ -f "$wallpaper" ]; then printf 'output * bg "%s" fill\n' "$wallpaper"
@@ -200,12 +200,12 @@ sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
 	printf 'client.focused %s %s %s %s %s\n' "$green" "$bg" "$fg" "$green" "$green"
 	for k in focused_inactive unfocused; do printf 'client.%s %s %s %s %s %s\n' "$k" "$bg" "$bg" "$fg" "$bg" "$bg"; done
 	printf 'client.urgent %s %s %s %s %s\n' "$red" "$bg" "$fg" "$red" "$red"
+	printf 'bar main colors background %s\nbar main colors statusline %s\n' "$bg" "$grey"
+	printf 'bar main colors focused_workspace %s %s %s\n' "$bg" "$bg" "$fg"
+	for k in inactive active; do printf 'bar main colors %s_workspace %s %s %s\n' "$k" "$bg" "$bg" "$grey"; done
+	printf 'bar main colors urgent_workspace %s %s %s\n' "$bg" "$bg" "$green"
 } > "$state/sway.conf"
 [ -n "$SWAYSOCK" ] && while read -r l; do swaymsg -q "$l"; done < "$state/sway.conf"
-# waybar's (config/waybar/style.css imports it), reloaded by its USR2
-printf '@define-color theme_bg %s;\n@define-color theme_fg %s;\n@define-color theme_grey %s;\n@define-color theme_green %s;\n' \
-	"$bg" "$fg" "$grey" "$green" > "$state/waybar.css"
-pkill -USR2 -x waybar
 # dunst's, as the bar and the borders look: the ground and the text, the frame green as a focused window's (grey for a
 # low urgency, red for a critical one), the progress bar green, and as see-through as the terminal: the ground's
 # alpha the opacity's, dunst's own transparency being X's alone; a drop-in, kept out of git (.gitignore)

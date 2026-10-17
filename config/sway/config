@@ -20,14 +20,25 @@ output * bg #000000 solid_color
 # the cursor, passed to what sway starts as XCURSOR_THEME and XCURSOR_SIZE (Steam under Xwayland reads those)
 seat * xcursor_theme Adwaita 24
 
-# the bar, waybar (config/waybar): the workspaces, the status line (bin/x-status bar: memory, sound, battery,
-# brightness, date, and the low battery cards) and the tray, whose menus swaybar could not open; super+b hides and
-# shows it, super+i shows the status as a card too
+# the bar, as my old i3's: the workspaces and the status line (bin/x-status bar: memory, sound, battery,
+# brightness, date, and the low battery cards), Iosevka 11 on top; super+b hides and shows it, super+i shows the
+# status as a card too. The colour theme's colours (bin/theme), these the fallback
 bar {
 	id main
-	swaybar_command waybar
+	position top
+	font pango:Iosevka 11
+	status_command x-status bar
+	# the tray's icons as tall as the bar less this all round, the default 2 leaving them too big
+	tray_padding 11
+	colors {
+		background #000000
+		statusline #767676
+		focused_workspace  #000000 #000000 #ffffff
+		inactive_workspace #000000 #000000 #767676
+		active_workspace   #000000 #000000 #767676
+		urgent_workspace   #000000 #000000 #23fd00
+	}
 }
-
 # a 1px green border on the focused window, none on a window alone (smart_borders)
 default_border pixel 1
 default_floating_border pixel 1
@@ -38,7 +49,7 @@ client.focused          #addf9c #000000    #ffffff #addf9c   #addf9c
 client.focused_inactive #000000 #000000    #ffffff #000000   #000000
 client.unfocused        #000000 #000000    #ffffff #000000   #000000
 client.urgent           #ff5555 #000000    #ffffff #ff5555   #ff5555
-# the colour theme's over these, the background and the borders (bin/theme writes it)
+# the colour theme's over these, the background, the borders and the bar's (bin/theme writes it)
 include ~/.local/state/theme/sway.conf
 focus_follows_mouse yes
 
