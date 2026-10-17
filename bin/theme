@@ -191,22 +191,20 @@ done
 printf 'bg=%s fg=%s grey=%s green=%s blue=%s yellow=%s red=%s\n' "$bg" "$fg" "$grey" "$green" "$blue" \
 	"$(val bright yellow)" "$(val bright red)" > "$state/colors.sh"
 sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
-# sway's: the background, the wallpaper while the opacity shows it (below 1), else the ground's colour, the
-# borders, the focused one green, the rest the ground, and the bar's, as my old i3 bar; a file its config includes at the start, and each line
-# sent to the running one
+# sway's: the background, the wallpaper while the opacity shows it (below 1), else the ground's colour, and the
+# borders, the focused one green, the rest the ground; a file its config includes at the start, and each line
+# sent to the running one. Careful: these lines are sway *commands*, and some of them create state — a
+# "bar NAME colors …" for a bar config/sway no longer defines makes sway start that bar, which is how a bar came
+# back after its block was deleted. So nothing about the bar belongs here while there is no bar.
 {
 	if [ "$opacity" != 1 ] && [ -f "$wallpaper" ]; then printf 'output * bg "%s" fill\n' "$wallpaper"
 	else printf 'output * bg %s solid_color\n' "$bg"; fi
 	printf 'client.focused %s %s %s %s %s\n' "$green" "$bg" "$fg" "$green" "$green"
 	for k in focused_inactive unfocused; do printf 'client.%s %s %s %s %s %s\n' "$k" "$bg" "$bg" "$fg" "$bg" "$bg"; done
 	printf 'client.urgent %s %s %s %s %s\n' "$red" "$bg" "$fg" "$red" "$red"
-	printf 'bar main colors background %s\nbar main colors statusline %s\n' "$bg" "$grey"
-	printf 'bar main colors focused_workspace %s %s %s\n' "$bg" "$bg" "$fg"
-	for k in inactive active; do printf 'bar main colors %s_workspace %s %s %s\n' "$k" "$bg" "$bg" "$grey"; done
-	printf 'bar main colors urgent_workspace %s %s %s\n' "$bg" "$bg" "$green"
 } > "$state/sway.conf"
 [ -n "$SWAYSOCK" ] && while read -r l; do swaymsg -q "$l"; done < "$state/sway.conf"
-# dunst's, as the bar and the borders look: the ground and the text, the frame green as a focused window's (grey for a
+# dunst's, as the borders look: the ground and the text, the frame green as a focused window's (grey for a
 # low urgency, red for a critical one), the progress bar green, and as see-through as the terminal: the ground's
 # alpha the opacity's, dunst's own transparency being X's alone; a drop-in, kept out of git (.gitignore)
 mkdir -p "$HOME/.config/dunst/dunstrc.d"

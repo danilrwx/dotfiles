@@ -16,8 +16,8 @@ cd ~/dotfiles && ./install --desktop
   lazygit, k9s, bat, Chrome's toolbar, the lock screen and Claude Code's diffs follow. 16 dark themes and 8
   light ones; whether a theme is dark or light is read off its colours, so GTK, Chrome and Claude switch
   mode with it.
-- **Light where it counts.** sway from Ubuntu's archive with my old i3 keys, foot as the terminal; swaybar with
-  a plain-words status line; the session's daemons are a few lines of `exec` in its config.
+- **Light where it counts.** sway from Ubuntu's archive with my old i3 keys, foot as the terminal; no bar at all,
+  the status is a card on `super+i`; the session's daemons are a few lines of `exec` in its config.
 - **HiDPI, crisp.** Every screen at 2x by sway's own output settings; GTK, Chrome and Telegram draw natively at it.
 - **Neovim, plugin-free.** Fuzzy picker, live grep, git signs and blame, a file manager, sessions,
   LSP completion — native Lua on built-in Neovim. Nothing to update, nothing to break.
@@ -64,15 +64,15 @@ after a config change.
 | `super+Tab` / `super+.`, `+shift` | the previous workspace / the next screen, send to it |
 | `super+f` / `super+shift+space` | fullscreen / float |
 | `super+shift+q` | close |
-| `super+b` | the bar, hidden or shown |
 | `Print`, `super+shift+s` | screenshot of a region to the clipboard |
 | `super+n`, `+shift` | dismiss a notification, all of them |
 | `super+shift+x` | lock |
 | `super+shift+c` / `super+shift+e` | reload the config / quit, after a yes |
 | media and HONOR Fn keys | volume, mic, brightness, camera, power profile, with an OSD |
 
-The rest of the session: greetd with tuigreet to log in; swaybar on top with the status line (`bin/x-status`),
-`super+b` hiding it and `super+i` showing the status as a card, a card at 10% and 5% battery; Telegram opens on
+The rest of the session: greetd with tuigreet to log in; no bar — `super+i` shows the status (memory, sound,
+battery, brightness, date) as a card, `bin/x-status` sends one at 10% and 5% battery, and the tray is gone with
+the bar; Telegram opens on
 workspace 9 and Discord on 10; dunst for notifications; swayidle locking with swaylock on the theme's ground at
 10 min, the screens off at 15; a night light from 21:00 to 07:00 (wlsunset); the monitors by sway's output
 settings; lxpolkit; screen sharing through xdg-desktop-portal-wlr; thunar for files.
@@ -135,7 +135,7 @@ profiles, the keyring). `-n` shows all of it first; it refuses to run before gre
 | `bin/x-run` | the launcher (`super+d`) |
 | `bin/x-menu` | the menu x-run, x-ctl and x-drives pick from (wmenu) |
 | `bin/x-ctl` | quick settings (`super+x`) |
-| `bin/x-status` | the bar's status line, the low battery cards; the status as a card (`super+i`) |
+| `bin/x-status` | the status as a card (`super+i`), the low battery cards |
 | `bin/x-fnkeys` | media and HONOR Fn keys with dunst OSD cards |
 | `bin/x-drives` | removable drives: mount, or unmount and power off |
 | `bin/vpn-vless` | the VLESS client (mihomo) |

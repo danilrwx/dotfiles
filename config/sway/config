@@ -10,6 +10,9 @@ exec swayidle -w timeout 600 x-lock timeout 900 'swaymsg "output * power off"' \
 	resume 'swaymsg "output * power on"' before-sleep x-lock
 exec wlsunset -s 21:00 -S 07:00 -t 4500 -T 6500 -d 60
 exec lxpolkit
+# the low battery cards (10% and 5% once a discharge), which the bar's status loop used to send; its own output
+# goes nowhere, the status is super+i's card
+exec x-status bar > /dev/null
 
 # every screen at 2x, the panel at 120 Hz, the 240 Hz monitor right of it, its left edge at the panel's 1560
 # logical pixels; sway takes each up as it is plugged in
@@ -20,25 +23,13 @@ output * bg #000000 solid_color
 # the cursor, passed to what sway starts as XCURSOR_THEME and XCURSOR_SIZE (Steam under Xwayland reads those)
 seat * xcursor_theme Adwaita 24
 
-# the bar, as my old i3's: the workspaces and the status line (bin/x-status bar: memory, sound, battery,
-# brightness, date, and the low battery cards), Iosevka 11 on top; super+b hides and shows it, super+i shows the
-# status as a card too. The colour theme's colours (bin/theme), these the fallback
-bar {
-	id main
-	position top
-	font pango:Iosevka 11
-	status_command x-status bar
-	# the tray's icons as tall as the bar less this all round, the default 2 leaving them too big
-	tray_padding 11
-	colors {
-		background #000000
-		statusline #767676
-		focused_workspace  #000000 #000000 #ffffff
-		inactive_workspace #000000 #000000 #767676
-		active_workspace   #000000 #000000 #767676
-		urgent_workspace   #000000 #000000 #23fd00
-	}
-}
+# no bar: sway makes a default one (bottom, small) when the config defines none, so this one exists only to stay
+# out of the way, permanently hidden and with no status of its own; the status is a dunst card (super+i,
+# bin/x-status) and the low battery cards come from the same script running on its own above
+# no bar: the status is a dunst card (super+i, bin/x-status) and the low battery cards come from the same script
+# running on its own above. sway makes no bar of its own when the config has none, but a "bar NAME colors ..."
+# line, as the theme's file this config includes used to have, makes one anyway — bin/theme stopped writing them
+
 # a 1px green border on the focused window, none on a window alone (smart_borders)
 default_border pixel 1
 default_floating_border pixel 1
@@ -127,7 +118,6 @@ bindsym --to-code {
 	$mod+period focus output right
 	$mod+Shift+period move container to output right
 	$mod+Shift+q kill
-	$mod+b bar mode toggle
 	$mod+Shift+c reload
 	$mod+Shift+e exec swaynag -t warning -m 'Exit sway? This ends the session.' -B 'Yes, exit sway' 'swaymsg exit'
 	$mod+r mode "resize"

@@ -1,7 +1,8 @@
 #!/bin/bash
 # x-status: the status as a dunst card (super+i): memory, volume, mic, battery, brightness, date, plain words.
-# x-status bar: the same every second as swaybar's status line (config/sway, the i3bar protocol), and a card at 10%
-# battery and a critical one at 5% while it discharges, each once a discharge (UPower powers off at 2%).
+# x-status bar: the same every second, which is where the card at 10% battery and the critical one at 5% come
+# from, once a discharge (UPower powers off at 2%); its own lines, the i3bar protocol, go nowhere, sway has no
+# bar any more (config/sway runs it with its output dropped).
 # The battery is yellow from 20% and red from 10% while it discharges, in both.
 export LC_NUMERIC=C   # wpctl prints 0.45; awk under ru_RU reads that as 0
 
