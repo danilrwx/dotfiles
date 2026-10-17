@@ -306,9 +306,12 @@ desktop_session() {
   # bin/theme writes; not in Ubuntu's archive, its release from GitHub
   local adw=v6.5
   if [ ! -d "$HOME/.local/share/themes/adw-gtk3-dark" ]; then
-    mkdir -p "$HOME/.local/share/themes"
-    curl -fsSL "https://github.com/lassekongo83/adw-gtk3/releases/download/$adw/adw-gtk3$adw.tar.xz" \
-      | tar -xJ -C "$HOME/.local/share/themes" || log "Failed to install adw-gtk3. Continue installation."
+    if [ "$CHECK" == 1 ]; then problem "the adw-gtk3 GTK theme is not installed (bin/theme names it)"
+    else
+      mkdir -p "$HOME/.local/share/themes"
+      curl -fsSL "https://github.com/lassekongo83/adw-gtk3/releases/download/$adw/adw-gtk3$adw.tar.xz" \
+        | tar -xJ -C "$HOME/.local/share/themes" || log "Failed to install adw-gtk3. Continue installation."
+    fi
   fi
   # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE), and .profile the session
   for e in config/environment.d/*.conf; do link "$e" "$HOME/.config/environment.d/${e##*/}"; done
@@ -349,7 +352,8 @@ desktop_apps() {
   local t name ver asset
   for t in impala:v0.9.0:impala-x86_64-unknown-linux-musl bluetui:v0.8.1:bluetui-x86_64-linux-musl; do
     IFS=: read -r name ver asset <<< "$t"
-    if [ "$("$HOME/.local/bin/$name" --version 2>/dev/null | awk '{print "v" $2}')" != "$ver" ]; then
+    if [ "$("$HOME/.local/bin/$name" --version 2>/dev/null | awk 'NR==1{print "v" $2}')" != "$ver" ]; then
+      [ "$CHECK" == 1 ] && { problem "$name is not $ver"; continue; }
       log "Installing $name $ver"
       curl -fsSL -o "$HOME/.local/bin/$name.new" "https://github.com/pythops/$name/releases/download/$ver/$asset" \
         && chmod +x "$HOME/.local/bin/$name.new" && mv "$HOME/.local/bin/$name.new" "$HOME/.local/bin/$name"
@@ -359,12 +363,24 @@ desktop_apps() {
   # mihomo, the VLESS client behind bin/vpn-vless: the static build, not in the archive, with the capability its
   # TUN mode needs to route the system's traffic, so it runs as a --user service (config/systemd/mihomo.service)
   local mihomo=$HOME/.local/bin/mihomo ver=v1.19.32
-  if [ "$("$mihomo" -v 2>/dev/null | awk '{print $3}')" != "$ver" ]; then
-    log "Installing mihomo $ver"
-    curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/$ver/mihomo-linux-amd64-$ver.gz" \
-      | gunzip > "$mihomo.new" && chmod +x "$mihomo.new" && mv "$mihomo.new" "$mihomo"
+  # -v prints a line of its own now ("Use tags: with_gvisor"), so only the first one holds the version
+  if [ "$("$mihomo" -v 2>/dev/null | awk 'NR==1{print $3}')" != "$ver" ]; then
+    if [ "$CHECK" == 1 ]; then
+      problem "mihomo is not $ver"
+    else
+      log "Installing mihomo $ver"
+      curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/$ver/mihomo-linux-amd64-$ver.gz" \
+        | gunzip > "$mihomo.new" && chmod +x "$mihomo.new" && mv "$mihomo.new" "$mihomo"
+    fi
   fi
-  getcap "$mihomo" | grep -q cap_net_admin || sudo setcap cap_net_admin,cap_net_bind_service+ep "$mihomo"
+  if [ "$CHECK" == 1 ]; then
+    getcap "$mihomo" 2>/dev/null | grep -q cap_net_admin || problem "mihomo lacks cap_net_admin: sudo setcap cap_net_admin,cap_net_bind_service+ep $mihomo"
+  else
+    getcap "$mihomo" | grep -q cap_net_admin || {
+      sudo setcap cap_net_admin,cap_net_bind_service+ep "$mihomo" \
+        || log "setcap mihomo failed: TUN mode will not route until the capability is set by hand"
+    }
+  fi
   # its TUN sets and reverts the Meta link's DNS in systemd-resolved, without a password prompt each time
   put /etc/polkit-1/rules.d/50-resolved-links.rules
 
