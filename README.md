@@ -41,6 +41,7 @@ cd ~/dotfiles && ./install --desktop
 ```sh
 cd ~/dotfiles && ./install            # the CLI tools only
 cd ~/dotfiles && ./install --desktop  # plus the sway desktop and the GUI apps
+./install --check                     # what the machine lacks, has stale or undeclared; changes nothing
 ./debloat -n && ./debloat             # once, after --desktop: GNOME and snapd gone
 ```
 

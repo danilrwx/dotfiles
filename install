@@ -6,22 +6,40 @@
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
 #   --skip-go    keep the Go tools in ~/go/bin as they are, no `go install`
 #   --skip-ts    keep the built treesitter parsers, no TSBuild
+#   --check      what this script declares and the machine does not have: the links, the files under /etc, the
+#                packages, the units it masks or enables. Changes nothing, and skips what has no declared state
+#                to compare against: the submodules, private's install, the tools from go, apt and the web
 #
 # Safe to rerun: every step checks before it changes anything. bin/dotfiles-update is this script on PATH.
 
 log() { echo -e "\033[0;31m$1\033[0m"; }
 
-DESKTOP=0; RU_MIRROR=0; SKIP_GO=0; SKIP_TS=0
+# --check: a line per difference and a count, so the exit code says whether the machine is what this declares.
+# `declared` collects the links the run makes, which is what the orphan scan at the end compares $HOME against.
+problems=0
+problem() { log "check: $*"; problems=$((problems + 1)); }
+declared=()
+
+DESKTOP=0; RU_MIRROR=0; SKIP_GO=0; SKIP_TS=0; CHECK=0
 for arg in "$@"; do
   case "$arg" in
     --desktop)   DESKTOP=1 ;;
     --ru-mirror) RU_MIRROR=1 ;;
     --skip-go)   SKIP_GO=1 ;;
     --skip-ts)   SKIP_TS=1 ;;
+    --check)     CHECK=1 ;;
     -h|--help)   sed -n '/^# \.\/install/,/^[^#]/{s/^# \{0,1\}//p;}' "$0"; exit 0 ;;
     *) log "Unknown option: $arg"; exit 1 ;;
   esac
 done
+
+# --check reports the whole declared state, so it walks the desktop sections whatever flags it was given, and
+# skips the tools it cannot compare (see the dispatch at the end)
+if [ "$CHECK" == 1 ]; then DESKTOP=1; SKIP_GO=1; SKIP_TS=1;
+  # only the differences on stdout: the section headers this script logs along the way would read as if it were
+  # installing ("Installing Steam") and bury the report
+  log() { case "$1" in check:*) echo -e "\033[0;31m$1\033[0m" ;; esac; }
+fi
 
 # the paths below (link, put, the submodules) are the repo's, whatever directory this is started from
 cd "$HOME/dotfiles" || { log "No $HOME/dotfiles"; exit 1; }
@@ -54,13 +72,47 @@ WL_PKGS=(xwayland sway foot wmenu wl-clipboard grim slurp swaylock swayidle wlsu
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
 
 # Helpers ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
-pkg() { sudo apt install -y "$@"; }
+# pkg [APT FLAG] NAME…: apt install; under --check, the names not installed yet. The apps installed from the web
+# (deb_from) are out of that report: a URL says nothing about which package it leaves behind
+pkg() {
+  local flags=()
+  while [[ ${1-} == --* ]]; do flags+=("$1"); shift; done
+  if [ "$CHECK" == 1 ]; then
+    local p
+    for p in "$@"; do installed "$p" || problem "package $p is not installed"; done
+    return
+  fi
+  sudo apt install "${flags[@]}" -y "$@"
+}
 installed() { dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null | grep -qx installed; }
+
+# ln under --check: the two links made outside link() (fd, GTK's theme) are compared, not written
+ln() {
+  if [ "$CHECK" != 1 ]; then command ln "$@"; return; fi
+  while [[ ${1-} == -* ]]; do shift; done
+  [ "$(readlink -f "${2-}" 2>/dev/null)" == "$(readlink -f "${1-}")" ] || problem "$2 -> $1 differs or is not there"
+}
+
+# xdg-mime under --check: it writes ~/.config/mimeapps.list, the only setting this script makes outside a link,
+# a file under /etc or a package
+xdg-mime() { [ "$CHECK" == 1 ] || command xdg-mime "$@"; }
+
+# sudo under --check: inert, so the direct calls outside the helpers (apt, sed on /etc, systemctl, the HONOR
+# patch script) change nothing. The state they produce is what put, pkg and user_systemctl compare
+sudo() { [ "$CHECK" == 1 ] || command sudo "$@"; }
 
 # link SRC DST: DST a symlink to the repo's SRC; a real file or dir in the way is moved to DST.bak, else ln
 # would put the link inside that dir
 link() {
   local src=$HOME/dotfiles/$1 dst=$2
+  declared+=("$dst")
+  if [ "$CHECK" == 1 ]; then
+    if [ ! -L "$dst" ]; then problem "$dst is not a link (want $src)"
+    elif [ "$(readlink -f "$dst")" != "$(readlink -f "$src")" ]; then problem "$dst points at $(readlink "$dst") (want $src)"
+    elif [ ! -e "$dst" ]; then problem "$dst points at $src, which the repo no longer has"
+    fi
+    return
+  fi
   mkdir -p "$(dirname "$dst")"
   if [ -e "$dst" ] && [ ! -L "$dst" ]; then
     log "Backing up $dst to $dst.bak"
@@ -72,6 +124,14 @@ link() {
 # put DST [MODE]: the repo's etc/… copy of DST installed as root; false when DST already matches
 put() {
   local src=etc/${1#/etc/} dst=$1
+  if [ "$CHECK" == 1 ]; then
+    # a file only root reads cannot be compared here; the line says what to run rather than guess at it
+    if cmp -s "$src" "$dst" 2>/dev/null; then :
+    elif [ -r "$dst" ]; then problem "$dst differs from $src"
+    else problem "$dst is not readable: sudo cmp -s $src $dst"
+    fi
+    return
+  fi
   sudo cmp -s "$src" "$dst" && return 1
   sudo install -D -m "${2:-644}" "$src" "$dst"
 }
@@ -83,8 +143,9 @@ join_group() {
   sudo usermod -aG "$1" "$USER"
 }
 
-# git_sync DIR URL: clone, or pull a clone already there
+# git_sync DIR URL: clone, or pull a clone already there; under --check, whether the clone is there at all
 git_sync() {
+  if [ "$CHECK" == 1 ]; then [ -d "$1/.git" ] || problem "$1 is not cloned"; return; fi
   if [ -d "$1/.git" ]; then
     git -C "$1" pull -q --ff-only || log "Failed to update $1. Continue installation."
   else
@@ -96,6 +157,7 @@ git_sync() {
 # deb_from URL [SHA512]: a .deb installed from the web, checked against the base64 SHA-512 if given
 deb_from() {
   local deb
+  [ "$CHECK" == 1 ] && return
   deb=$(mktemp --suffix .deb)
   curl -fsSL -o "$deb" "$1" &&
     { [ -z "${2:-}" ] || [ "$(openssl dgst -sha512 -binary "$deb" | base64 -w0)" == "$2" ] || { log "$1: checksum mismatch"; false; }; } &&
@@ -103,13 +165,36 @@ deb_from() {
   rm -f "$deb"
 }
 
-# systemctl --user, only with a user session to talk to (not over a bare ssh or sudo -i)
-user_systemctl() { [ -n "${XDG_RUNTIME_DIR:-}" ] && systemctl --user "$@"; }
+# systemctl --user, only with a user session to talk to (not over a bare ssh or sudo -i). Under --check it
+# compares the units this script masks or enables: an Ubuntu update unmasks them quietly (gcr-ssh-agent took
+# over ssh-agent's socket once this way)
+user_systemctl() {
+  [ -n "${XDG_RUNTIME_DIR:-}" ] || return
+  if [ "$CHECK" == 1 ]; then
+    local want u state
+    case "$1" in
+      mask)   want=masked ;;
+      enable) want=enabled ;;
+      *) return ;;
+    esac
+    shift
+    for u in "$@"; do
+      [ "${u#--}" != "$u" ] && continue
+      state=$(systemctl --user is-enabled "$u" 2>/dev/null)   # prints the state and exits non-zero for masked
+      [ -n "$state" ] || state=unknown
+      [ "$state" == "$want" ] || problem "$u is $state, want $want"
+    done
+    return
+  fi
+  systemctl --user "$@"
+}
 
 # Base: the repo, the CLI configs and packages ────────────────────────────────────────────────────────────────────────
 base() {
-  # the ssh remote and the private submodule, with a key to reach them
-  if compgen -G "$HOME/.ssh/id_*" | grep -qv '\.pub$'; then
+  # the ssh remote and the private submodule, with a key to reach them (skipped under --check: pulling and
+  # rewriting the remote is not a state to compare against)
+  if [ "$CHECK" == 1 ]; then :
+  elif compgen -G "$HOME/.ssh/id_*" | grep -qv '\.pub$'; then
     log "Switching origin to ssh and updating submodules"
     git remote set-url origin git@github.com:danilrwx/dotfiles.git
     # --merge, and private back on its master: a plain update checks the submodule out at the commit this
@@ -129,7 +214,7 @@ base() {
   # bat's own theme (config/bat/themes) into its cache
   batcat cache --build > /dev/null 2>&1 || true
   # the private CLI configs (claude, pi, CLAUDE.md), kept out of this public repo
-  if [ -f private/install ]; then
+  if [ "$CHECK" != 1 ] && [ -f private/install ]; then
     log "Running private install"
     private/install || log "Failed to run private install. Continue installation."
   fi
@@ -150,7 +235,7 @@ base() {
 desktop_system() {
   log "Installing the desktop base"
   pkg "${DESKTOP_PKGS[@]}"
-  sudo apt install -y --no-install-recommends "${WL_PKGS[@]}"
+  pkg --no-install-recommends "${WL_PKGS[@]}"
 
   # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
   # netplan, DNS by systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
@@ -513,6 +598,22 @@ if [ "$DESKTOP" == 1 ]; then
   desktop_system
   desktop_session
   desktop_apps
+fi
+if [ "$CHECK" == 1 ]; then
+  # links in $HOME into the repo that this run does not declare: a leftover of a config the repo dropped (a
+  # stale ~/.config/waybar, which sway would still read) or one made by hand. private's install links its own
+  # and bin/theme writes the state files, both out of this script's declarations
+  while read -r l; do
+    case "$(readlink "$l")" in
+      "$HOME/dotfiles/private/"*|"$HOME/dotfiles/config/themes/"*) continue ;;
+    esac
+    case " ${declared[*]} " in *" $l "*) continue ;; esac
+    if [ ! -e "$l" ]; then problem "orphan link $l -> $(readlink "$l"), the repo has no such path"
+    else problem "undeclared link $l -> $(readlink "$l"), nothing here makes it"
+    fi
+  done < <(find "$HOME" -maxdepth 4 -type l -lname "$HOME/dotfiles/*" 2>/dev/null | grep -v "^$HOME/dotfiles/")
+  log "check: $problems differ"
+  exit $(( problems > 0 ))
 fi
 dev_tools
 system
