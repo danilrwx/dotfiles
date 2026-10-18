@@ -1,0 +1,5 @@
+[bash]
+allow = [
+    "STATE=${XDG_STATE_HOME:-$HOME/.local/state}/theme",
+    "mkdir *",
+]

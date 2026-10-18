@@ -1,0 +1,12 @@
+{
+  "packages": {
+    "maki": {
+      "src": "/home/danil/w/maki",
+      "rev": "e1fba12f896df850d6093ab5d41e5921d9b48f5c"
+    },
+    "maki-flant-provider": {
+      "src": "/home/danil/w/maki-flant-provider",
+      "rev": "773000342d2d929786cefeb19f56d43ce05f7d15"
+    }
+  }
+}

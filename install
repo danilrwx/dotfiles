@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ./install [--desktop] [--ru-mirror] [--skip-go] [--skip-ts]
-#   --desktop    the sway session on Wayland (config/sway), foot, wmenu, dunst, swaylock, greetd, and
+#   --desktop    the sway session on Wayland (config/sway), alacritty, wmenu, dunst, swaylock, greetd, and
 #                the GUI apps: Chrome, virt-manager, Telegram, Discord, Steam.
 #                Then ./debloat strips GNOME and snapd
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
@@ -67,9 +67,65 @@ DESKTOP_PKGS=(iwd bluez rfkill
 # the session, without recommends: sway, Xwayland (Steam, games), the terminal, the launcher, the clipboard,
 # screenshots, the lock and the idle, the night light, notifications, the polkit agent, the media keys' tools,
 # bin/x-run's gtk-launch, screen sharing's portal
-WL_PKGS=(xwayland sway foot wmenu wl-clipboard grim slurp swaylock swayidle wlsunset
+WL_PKGS=(xwayland sway alacritty wmenu wl-clipboard grim slurp swaylock swayidle wlsunset
   dunst libnotify-bin lxpolkit brightnessctl playerctl libgtk-3-bin xdg-desktop-portal-wlr)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
+
+# Install the pinned RTK release into ~/.local/bin without configuring agent-specific hooks.
+install_rtk() {
+  local ver=v1.0.1 target asset tmp expected actual
+  case "$(uname -m)" in
+    x86_64|amd64) target=x86_64-unknown-linux-musl ;;
+    aarch64|arm64) target=aarch64-unknown-linux-gnu ;;
+    *) problem "RTK unsupported on architecture $(uname -m)"; return 1 ;;
+  esac
+  if "$HOME/.local/bin/rtk" --version 2>/dev/null \
+    | awk -v ver="${ver#v}" '$0 == "rtk " ver { found=1 } END { exit !found }' \
+    && "$HOME/.local/bin/rtk" gain >/dev/null 2>&1; then
+    return
+  fi
+  if [ "$CHECK" == 1 ]; then
+    problem "RTK is not $ver or rtk gain verification fails"
+    return 0
+  fi
+
+  asset="rtk-$target.tar.gz"
+  mkdir -p "$HOME/.local/bin"
+  tmp=$(mktemp -d)
+  log "Installing RTK $ver"
+  if curl -fsSL -o "$tmp/$asset" "https://github.com/rtk-ai/rtk/releases/download/$ver/$asset" \
+    && curl -fsSL -o "$tmp/checksums.txt" "https://github.com/rtk-ai/rtk/releases/download/$ver/checksums.txt"; then
+    expected=$(awk -v asset="$asset" '$2 == asset {print $1}' "$tmp/checksums.txt")
+    actual=$(sha256sum "$tmp/$asset" | awk '{print $1}')
+    if [ -n "$expected" ] && [ "$expected" == "$actual" ] \
+      && ! tar -tzf "$tmp/$asset" | grep -qE '^/|(^|/)\.\.(/|$)' \
+      && tar -xzf "$tmp/$asset" -C "$tmp" && [ -x "$tmp/rtk" ]; then
+      if install -m 755 "$tmp/rtk" "$HOME/.local/bin/rtk.new"; then
+        if ! "$HOME/.local/bin/rtk.new" --version 2>/dev/null \
+          | awk -v ver="${ver#v}" '$0 == "rtk " ver { found=1 } END { exit !found }' \
+          || ! "$HOME/.local/bin/rtk.new" gain >/dev/null 2>&1; then
+          rm -f "$HOME/.local/bin/rtk.new"
+          log "RTK verification failed; installation left unchanged"
+        elif mv "$HOME/.local/bin/rtk.new" "$HOME/.local/bin/rtk"; then
+          log "Installed RTK $ver"
+        else
+          rm -f "$HOME/.local/bin/rtk.new"
+          log "RTK installation failed; installation left unchanged"
+        fi
+      else
+        log "RTK staging failed; installation left unchanged"
+      fi
+    else
+      log "RTK download/checksum/archive verification failed; installation left unchanged"
+    fi
+  else
+    log "RTK download failed; continue installation"
+  fi
+  rm -rf "$tmp"
+  return 0
+}
+
+install_rtk
 
 # Helpers ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # pkg [APT FLAG] NAME…: apt install; under --check, the names not installed yet. The apps installed from the web
@@ -210,7 +266,7 @@ base() {
   log "Linking configs"
   mkdir -p "$HOME/.local/bin" "$HOME/.local/share"
   for f in .gitconfig .gitignore_global .profile .tmux.conf .zprofile .zshrc; do link "$f" "$HOME/$f"; done
-  for c in k9s htop lazygit nvim bat; do link "config/$c" "$HOME/.config/$c"; done
+  for c in k9s htop lazygit nvim bat maki; do link "config/$c" "$HOME/.config/$c"; done
   # bat's own theme (config/bat/themes) into its cache
   batcat cache --build > /dev/null 2>&1 || true
   # the private CLI configs (claude, pi, CLAUDE.md), kept out of this public repo
@@ -327,8 +383,9 @@ desktop_session() {
   # all, from Noto Color Emoji rather than a monochrome fallback (config/fontconfig)
   [ -e "${XDG_STATE_HOME:-$HOME/.local/state}/theme/theme.toml" ] || "$HOME/dotfiles/bin/theme" kitty
   link config/fontconfig/fonts.conf "$HOME/.config/fontconfig/fonts.conf"
-  # foot as x-terminal-emulator, for whatever opens "a terminal" (gtk-launch's htop, nvim)
-  sudo update-alternatives --set x-terminal-emulator /usr/bin/foot
+  mkdir -p "$HOME/.config/alacritty"
+  ln -snf "${XDG_STATE_HOME:-$HOME/.local/state}/theme/alacritty.toml" "$HOME/.config/alacritty/alacritty.toml"
+  sudo update-alternatives --set x-terminal-emulator /usr/bin/alacritty
   # thunar for folders: Chrome's "show in folder", the portal's and the rest's
   xdg-mime default thunar.desktop inode/directory
 

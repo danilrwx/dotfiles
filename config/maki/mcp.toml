@@ -1,0 +1,3 @@
+[mcp.playwright]
+command = ["npx", "-y", "@playwright/mcp@latest", "--extension"]
+enabled = true
