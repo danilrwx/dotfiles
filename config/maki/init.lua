@@ -9,6 +9,7 @@ require("golangci_lint")
 require("handoff")
 require("ast_grep")
 require("safe_ish_yolo")
+require("session_title")
 
 maki.api.register_prompt_hint({
   slot = "conventions",
