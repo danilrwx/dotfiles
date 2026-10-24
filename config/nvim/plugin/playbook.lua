@@ -1,10 +1,22 @@
 -- Minimal playbook runner: in a playbook.sh buffer, <CR> sends the current line
--- (or the visual selection) to the neighbouring tmux pane and runs it. Depends
--- on tmux only.
+-- (or the visual selection) to the pane below and runs it. In herdr the target
+-- pane is named by bin/herdr-playbook through PLAYBOOK_TARGET, which the split
+-- hands its shell; in tmux it is {last} (or g:playbook_target).
 
 local function send(lines)
+  local herdr = vim.env.HERDR_ENV == "1" and vim.env.HERDR_BIN_PATH or nil
+  local target = vim.env.PLAYBOOK_TARGET
+  if herdr and target then
+    for _, line in ipairs(lines) do
+      if line:match("%S") then
+        vim.system({ herdr, "pane", "send-text", target, line }):wait()
+        vim.system({ herdr, "pane", "send-keys", target, "enter" }):wait()
+      end
+    end
+    return
+  end
   if not vim.env.TMUX or vim.env.TMUX == "" then
-    vim.api.nvim_echo({ { "playbook: not inside tmux", "WarningMsg" } }, true, {})
+    vim.api.nvim_echo({ { "playbook: not inside tmux or a herdr playbook split", "WarningMsg" } }, true, {})
     return
   end
   -- read the target each call (per-project g:playbook_target takes effect) and

@@ -1,0 +1,144 @@
+# Herdr's own UI in the colour theme (bin/theme). The "terminal" theme takes the host terminal's ground, text
+# and 16 ANSI slots, which alacritty has from bin/theme, so its panels, text and states follow every theme;
+# bin/theme also sends the client a SIGWINCH, which makes it re-read that palette (its docs) and hand it to
+# the panes, for what they draw and answer their apps. The overrides are the bright half of the slots, the
+# ones the themes put the accents and the states on (k9s, lazygit, maki take them so). The rest of this file
+# is what Herdr's onboarding and settings write; it is a link into the repo (install).
+onboarding = false
+
+[ui.toast]
+delivery = "system"
+
+[theme]
+name = "terminal"
+
+[theme.custom]
+# the mode bar's PREFIX pill is the accent's ground with the panel's ink on it, and with panel_bg reset that
+# ink is surface_dim: the terminal theme's dark grey on a bright accent reads badly, so black, as tmux's
+# mode-style (colour0 on colour12). The sidebar's rule and the unfocused scrollbar track are surface_dim too,
+# and take the black with it — on a dark ground they are the ground, on a light one a plain border
+surface_dim = "black"
+accent = "lightblue"
+blue = "lightblue"
+green = "lightgreen"
+yellow = "lightyellow"
+teal = "lightcyan"
+mauve = "lightmagenta"
+peach = "lightyellow"
+
+# zsh, the login shell (install), not $SHELL: a wrapper given first to a terminal leaves its own there (foot
+# set it to /bin/sh), and every pane would run sh
+[terminal]
+default_shell = "/usr/bin/zsh"
+
+# Alt+1..9 picks a tab as it picked a tmux window. Ctrl+И, the B key on the Russian layout, is a second prefix,
+# and the letter bindings after it carry their Russian twins, so they work without switching layouts (was
+# bin/tmux-ru-keys)
+[keys]
+prefix = ["ctrl+b", "ctrl+и"]
+# the digits: alt+1..9 picks a tab, prefix+1..9 a workspace ("space"), shift stays for the agents
+switch_tab = ["alt+1..9"]
+switch_workspace = ["prefix+1..9"]
+settings = ["prefix+s", "prefix+ы"]
+detach = ["prefix+q", "prefix+й"]
+reload_config = ["prefix+shift+r", "prefix+shift+к"]
+open_notification_target = ["prefix+o", "prefix+щ"]
+workspace_picker = ["prefix+w", "prefix+ц"]
+goto = ["prefix+g", "prefix+п"]
+new_workspace = ["prefix+shift+n", "prefix+shift+т"]
+new_worktree = ["prefix+shift+g", "prefix+shift+п"]
+# open a worktree that already exists on disk (an agent made it, or an old one),
+# instead of creating a new branch: the picker over the repo's worktrees
+open_worktree = ["prefix+shift+o", "prefix+shift+щ"]
+rename_workspace = ["prefix+shift+w", "prefix+shift+ц"]
+close_workspace = ["prefix+shift+d", "prefix+shift+в"]
+new_tab = ["prefix+c", "prefix+с"]
+rename_tab = ["prefix+shift+t", "prefix+shift+е"]
+previous_tab = ["prefix+p", "prefix+з"]
+next_tab = ["prefix+n", "prefix+т"]
+close_tab = ["prefix+shift+x", "prefix+shift+ч"]
+rename_pane = ["prefix+shift+p", "prefix+shift+з"]
+edit_scrollback = ["prefix+e", "prefix+у"]
+copy_mode = ["prefix+[", "prefix+х"]
+focus_pane_left = ["prefix+h", "prefix+р"]
+focus_pane_down = ["prefix+j", "prefix+о"]
+focus_pane_up = ["prefix+k", "prefix+л"]
+focus_pane_right = ["prefix+l", "prefix+д"]
+split_vertical = ["prefix+v", "prefix+м"]
+close_pane = ["prefix+x", "prefix+ч"]
+zoom = ["prefix+z", "prefix+я"]
+resize_mode = ["prefix+r", "prefix+к"]
+toggle_sidebar = ["prefix+b", "prefix+и"]
+# the agent panel: cycle the agents herdr has found (screen detection or a self-report),
+# the way prefix+n/p cycle tabs; prefix+o jumps to the one asking for attention
+next_agent = ["prefix+a", "prefix+ф"]
+previous_agent = ["prefix+shift+a", "prefix+shift+ф"]
+# by number: shift+1..9 picks the agent shown at that position in the panel
+# (alt+1..9 is a tab, prefix+1..9 a workspace)
+focus_agent = "prefix+shift+1..9"
+# navigate mode (prefix+w, prefix+g): Ctrl-P/N walk the spaces beside the arrows, h/j/k/l stay on the
+# panes; each with its Russian twin
+navigate_workspace_up = ["up", "ctrl+p", "ctrl+з"]
+navigate_workspace_down = ["down", "ctrl+n", "ctrl+т"]
+navigate_pane_left = ["h", "р"]
+navigate_pane_down = ["j", "о"]
+navigate_pane_up = ["k", "л"]
+navigate_pane_right = ["l", "д"]
+
+# the colour theme: an fzf of them with a preview (bin/theme pick); prefix+T is rename_tab here
+[[keys.command]]
+key = ["prefix+t", "prefix+е"]
+type = "popup"
+command = "~/dotfiles/bin/theme pick"
+width = "80%"
+height = "60%"
+
+# the kube context and namespace pickers (prefix+v/V in tmux; prefix+v splits here)
+[[keys.command]]
+key = ["prefix+shift+k", "prefix+shift+л"]
+type = "popup"
+command = "zsh -ic kctx"
+
+[[keys.command]]
+key = ["prefix+shift+s", "prefix+shift+ы"]
+type = "popup"
+command = "zsh -ic kns"
+
+# prefix+b hides the sidebar whole, not down to its narrow status rail
+[ui]
+sidebar_collapsed_mode = "hidden"
+status_indicators = "symbols"
+# herdr asks for a tab name by default; off, prefix+c makes the tab at once and it
+# takes its number for a name, no extra Enter (rename_tab, prefix+shift+t, renames)
+prompt_new_tab_name = false
+
+[ui.sound]
+enabled = true
+
+# fuzzy-extract a token from any pane's output, as extrakto did in tmux: in the
+# popup, Tab types the pick into the pane below, Enter copies it to the clipboard
+# (bin/herdr-extract)
+[[keys.command]]
+key = "prefix+tab"
+type = "popup"
+command = "~/dotfiles/bin/herdr-extract"
+description = "extract a token"
+width = "80%"
+height = "60%"
+
+# kill the runaway foreground process of the pane, its shell staying (bin/herdr-kill;
+# was tmux-cowboy, `bind *` in .tmux.conf)
+[[keys.command]]
+key = "prefix+*"
+type = "shell"
+command = "~/dotfiles/bin/herdr-kill"
+description = "kill the foreground process"
+
+# the playbook in a small split above the pane (bin/herdr-playbook, config/nvim/plugin/playbook.lua):
+# nvim on top, about tmux's 12 lines, and <CR> sends the line/selection to the shell below.
+# prefix+alt+p rather than tmux's prefix+p, which is previous_tab here; the Russian twin, as the others
+[[keys.command]]
+key = ["prefix+alt+p", "prefix+alt+з"]
+type = "shell"
+command = "~/dotfiles/bin/herdr-playbook"
+description = "open the playbook"

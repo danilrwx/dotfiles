@@ -13,7 +13,7 @@ cd ~/dotfiles && ./install --desktop
 
 - **One theme, everywhere, live.** `prefix T` in tmux opens a picker; move the cursor and the terminal
   repaints as you go. Enter, and the notifications, the launcher, GTK windows (already open ones too),
-  lazygit, k9s, bat, Chrome's toolbar, the lock screen and Claude Code's diffs follow. 16 dark themes and 8
+  lazygit, k9s, bat, herdr, Chrome's toolbar, the lock screen and Claude Code's diffs follow. 16 dark themes and 8
   light ones; whether a theme is dark or light is read off its colours, so GTK, Chrome and Claude switch
   mode with it.
 - **Light where it counts.** sway from Ubuntu's archive with my old i3 keys, foot as the terminal; no bar at all,
@@ -89,7 +89,7 @@ theme set opacity 0.85|cycle   # see-through terminal, over a wallpaper
 theme set wallpaper FILE|none  # under the see-through terminal, as sway's background
 ```
 
-What takes the terminal's 16 colours — foot, nvim, tmux, fzf, bat, k9s — follows by the ANSI slots; what
+What takes the terminal's 16 colours — alacritty, nvim, tmux, fzf, bat, k9s, herdr — follows by the ANSI slots; what
 wants hex — Claude Code, GTK, dunst, wmenu, lazygit, k9s's skin, Chrome, swaylock — is
 written from the theme. The themes are plain TOML in [`config/themes`](config/themes).
 
@@ -142,7 +142,12 @@ profiles, the keyring). `-n` shows all of it first; it refuses to run before gre
 | `bin/vpn-vless` | the VLESS client (mihomo) |
 | `bin/vpn-openvpn` | an OpenVPN profile up or down |
 | `bin/x-askpass` | ssh's and sudo's password prompt, showing the command, each prompt logged |
-| `bin/clip` | stdin to the clipboard (tmux, nvim) |
+| `bin/clip` | stdin to the clipboard (tmux, nvim, herdr) |
+| `bin/k`, `bin/kaf`, `bin/kad`, `bin/ll` | `kubectl`, `apply -f`, `delete -f`, `ls -lah` as commands: maki's `!` runs bash and never reads `.zshrc`'s aliases |
 | `bin/tmux-extract` | `prefix Tab`: fuzzy-pick a word, path or URL from the pane |
 | `bin/tmux-ru-keys` | the tmux bindings on the Russian layout too |
 | `bin/tmux-agent-watch` | `prefix A`: watch another tmux session in a split |
+| `bin/herdr-extract` | `prefix Tab` in herdr: the same picker, Tab inserts, Enter copies |
+| `bin/herdr-kill` | `prefix *`: SIGKILL the pane's foreground process, its shell staying |
+| `bin/herdr-playbook` | `prefix alt p`: `playbook.sh` in a small split above, `<CR>` runs the line below |
+| `bin/herdr-worktree-open` | opens the repo's linked worktrees herdr does not have yet (run by the Maki plugin after `git worktree add`) |

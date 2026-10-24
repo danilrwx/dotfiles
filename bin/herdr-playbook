@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# the playbook in a small split above the pane, as `bind p` in .tmux.conf had it
+# (nvim on top, the shell below): <CR> there sends the line/selection down and
+# runs it (config/nvim/plugin/playbook.lua). herdr splits down only, so the pane
+# is split at the height wanted and then swapped up; the target is named to nvim
+# through PLAYBOOK_TARGET, which the split hands its shell, so no guessing at
+# neighbours and no tmux
+here=$(dirname "$(readlink -f "$0")")
+herdr=${HERDR_BIN_PATH:-$here/herdr}
+pane=${HERDR_ACTIVE_PANE_ID:-${HERDR_PANE_ID:?not run from herdr}}
+
+# tmux's 12 lines as herdr's ratio: --ratio is the room the top slot gets, and
+# after the swap the new pane sits in it, the shell taking the rest below; kept
+# between a fifth and two fifths on very short and very tall panes
+height=$("$herdr" pane layout --pane "$pane" \
+  | jq -r --arg p "$pane" '.result.layout.panes[] | select(.pane_id == $p) | .rect.height')
+ratio=$(awk -v h="${height:-49}" 'BEGIN { r = 12 / h; if (r < 0.2) r = 0.2; if (r > 0.4) r = 0.4; printf "%.2f", r }')
+
+new=$("$herdr" pane split --pane "$pane" --direction down --ratio "$ratio" --focus \
+  --env PLAYBOOK_TARGET="$pane" \
+  | jq -r '.result.pane.pane_id')
+[ -n "$new" ] && [ "$new" != null ] || exit 1
+
+# split down puts the new pane last; swap it into the top slot and it is the small
+# one, the shell keeping the rest below
+"$herdr" pane swap --pane "$new" --direction up > /dev/null
+# exec: nvim replaces the split's shell, so quitting it closes the split, as tmux's
+# split-window with a command did; a shell left behind would keep the split open
+"$herdr" pane run "$new" exec nvim "$HOME/playbook.sh"

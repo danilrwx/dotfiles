@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# fzf-based replacement for the extrakto tmux plugin: no python, no TPM, works
+# anywhere fzf+herdr exist. Opens on prefix+Tab; inside fzf, Tab types the picked
+# token (word/path/url) into the pane, Enter copies it to the clipboard through
+# bin/clip.
+#
+# The pane to type into is HERDR_ACTIVE_PANE_ID: a popup command does not get
+# HERDR_PANE_ID, only the tiled pane under it (herdr's docs)
+set -euo pipefail
+
+here=$(dirname "$(readlink -f "$0")")
+
+extract() {
+  grep -oE '(https?://|git@|ssh://|file://)?[[:alnum:]_@%./:~+-]{2,}' | awk '!seen[$0]++'
+}
+
+if [ "${1:-}" = "--selftest" ]; then
+  out=$(printf 'see https://example.com/x and /etc/hosts foo\n' | extract)
+  printf '%s\n' "$out" | grep -qx 'https://example.com/x' || { echo "FAIL url"; exit 1; }
+  printf '%s\n' "$out" | grep -qx '/etc/hosts'            || { echo "FAIL path"; exit 1; }
+  echo ok; exit 0
+fi
+
+: "${HERDR_ACTIVE_PANE_ID:?not run from a herdr popup}"
+herdr=${HERDR_BIN_PATH:-herdr}
+
+# every pane of the session, as extrakto took the whole tmux session: herdr's
+# pane list without a workspace covers all of them
+out=$(
+  "$herdr" pane list \
+    | jq -r '.result.panes[].pane_id' \
+    | while read -r p; do
+        "$herdr" pane read "$p" --source recent --lines 200 2> /dev/null || true
+      done | extract \
+    | fzf --no-sort --tac --height=100% --expect=tab,enter \
+          --input-label=' extract ' \
+          --header='Enter: Copy   Tab: Insert   Esc: Cancel'
+) || exit 0
+key=$(printf '%s\n' "$out" | sed -n 1p)
+sel=$(printf '%s\n' "$out" | sed -n 2p)
+[ -n "$sel" ] || exit 0
+
+case "$key" in
+  tab) "$herdr" pane send-text "$HERDR_ACTIVE_PANE_ID" "$sel" ;;  # insert into the pane
+  *)   printf '%s' "$sel" | "$here/clip" ;;                       # the desktop clipboard
+esac

@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# open every linked git worktree of DIR's repo that herdr does not have yet, so a
+# worktree an agent made with a plain `git worktree add` shows up as a workspace.
+# Run by the Maki plugin after a bash tool call that mentions worktrees
+# (config/maki/lua/worktree.lua), or by hand: herdr-worktree-open [dir].
+#
+# Idempotent: herdr answers already_open for the ones it has, and nothing is
+# created or focused. A line per newly opened worktree, "label<TAB>path", for the
+# caller to report
+here=$(dirname "$(readlink -f "$0")")
+herdr=${HERDR_BIN_PATH:-$here/herdr}
+dir=${1:-$PWD}
+
+root=$(git -C "$dir" rev-parse --show-toplevel 2> /dev/null) || exit 0
+[ -n "$root" ] || exit 0
+
+"$herdr" worktree list --cwd "$root" 2> /dev/null \
+  | jq -r '.result.worktrees[] | select(.is_linked_worktree and (.is_prunable | not)) | [.path, (.branch // "")] | @tsv' \
+  | while IFS="$(printf '\t')" read -r path branch; do
+      [ -n "$path" ] || continue
+      name=${branch:-$(basename "$path")}
+      out=$("$herdr" worktree open --cwd "$root" --path "$path" --label "$name" 2> /dev/null)
+      case $out in
+        *'"already_open":true'*) ;;
+        *'"already_open":false'*) printf '%s\t%s\n' "$name" "$path" ;;
+      esac
+    done

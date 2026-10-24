@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# kill the foreground process of the focused pane, SIGKILL, its shell and the pane
+# staying (was tmux-cowboy, `bind *` in .tmux.conf): a stray `yes`, a pager that
+# will not quit, a hung build. Run as a `type = "shell"` key command, so the pane
+# is HERDR_ACTIVE_PANE_ID, not HERDR_PANE_ID
+herdr=${HERDR_BIN_PATH:-herdr}
+pane=${HERDR_ACTIVE_PANE_ID:-${HERDR_PANE_ID:?not run from herdr}}
+
+# foreground_processes is what the shell runs (the shell itself is shell_pid), so
+# nothing here is the pane; kill each of them, the shell prints its prompt again
+"$herdr" pane process-info --pane "$pane" \
+  | jq -r '.result.process_info.foreground_processes[]?.pid' \
+  | while read -r pid; do
+      [ -n "$pid" ] && kill -9 "$pid" 2> /dev/null
+    done
