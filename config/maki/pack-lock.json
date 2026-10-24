@@ -1,12 +1,16 @@
 {
   "packages": {
+    "ai-common": {
+      "rev": "6b143e9bad8af6963b8a9a68fe0898af48cb4423",
+      "src": "/home/danil/w/ai/ai-common"
+    },
     "maki": {
-      "src": "/home/danil/w/maki",
-      "rev": "e1fba12f896df850d6093ab5d41e5921d9b48f5c"
+      "rev": "f65a2b3e5999e444a43bd7c2f676682a66e57c9a",
+      "src": "/home/danil/w/ai/maki"
     },
     "maki-flant-provider": {
-      "src": "/home/danil/w/maki-flant-provider",
-      "rev": "773000342d2d929786cefeb19f56d43ce05f7d15"
+      "rev": "773000342d2d929786cefeb19f56d43ce05f7d15",
+      "src": "/home/danil/w/ai/maki-flant-provider"
     }
   }
 }

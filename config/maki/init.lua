@@ -6,9 +6,12 @@
 
 require("maki_theme").apply()
 require("golangci_lint")
-require("handoff")
 require("ast_grep")
 require("safe_ish_yolo")
+require("stats")
+require("cache_guard")
+-- require("herdr")
+require("worktree")
 
 maki.api.register_prompt_hint({
   slot = "conventions",
@@ -33,6 +36,7 @@ Memory across sessions:
 -- Maki snapshots the current git revision when loading the package; commit locally
 -- before /reload for edits to appear. Switch src to the SSH URL for shared installs.
 maki.pack.add({
-  { src = "/home/danil/w/maki", version = "main" },
-  { src = "/home/danil/w/maki-flant-provider", version = "main" },
+  { src = "/home/danil/w/ai/ai-common", version = "main" },
+  { src = "/home/danil/w/ai/maki", version = "main" },
+  { src = "/home/danil/w/ai/maki-flant-provider", version = "main" },
 }, { confirm = false })
