@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# `kubectl apply -f`, the .zshrc alias as a command for the shells that never read
+# that file (maki's `!` runs bash); see bin/k
+exec kubectl apply -f "$@"

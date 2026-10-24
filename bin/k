@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# kubectl's short name as a real command, not .zshrc's alias: maki's `!` runs its
+# command through bash, which never reads the zsh config, so an alias there is not
+# found (bash: k: command not found). A script in a PATH directory is, and the
+# shell scripts and the agents that do not read .zshrc get it too
+exec kubectl "$@"
