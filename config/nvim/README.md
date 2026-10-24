@@ -15,8 +15,7 @@ to start, nothing to lock or break on update.
 | `ugrep` (or `grep`) | live grep picker and `:Grepq` (ugrep preferred, falls back to grep) |
 | `fd` (optional) | `<leader>F` file list (falls back to `git ls-files`; `fdfind` on Ubuntu, `install` links it as `fd`) |
 | `gh` / `glab` (optional) | open PR/MR for a commit (GitHub / GitLab) |
-| `tmux` (optional) | `<leader>gg` lazygit, playbook runner |
-| `lazygit` (optional) | `<leader>gg` |
+| `tmux` or `herdr` (optional) | playbook runner |
 | `go`, `golangci-lint` (optional) | `:Lint` (golangci-lint, else `go vet`) |
 | `cc`, `curl`, `tar` | `:TSBuild` (compile treesitter parsers) |
 | language servers | `gopls`, `clangd`, `helm-ls`, `golangci-lint-langserver` — auto-skipped if the binary is absent |
@@ -34,7 +33,7 @@ plugin/             feature modules, auto-sourced on start
   quickfix.lua        :Grepq / quickfix toggle
   oil.lua             file manager (edit the dir like a buffer)
   session.lua         auto save/restore per-cwd sessions
-  playbook.lua        run playbook.sh lines in a tmux pane
+  playbook.lua        run playbook.sh lines in the pane below (tmux, herdr)
   clipboard.lua       yank mirroring to bin/clip (wl-copy)
   colors.lua          Alabaster-style highlighting on the terminal's ANSI colours
   treesitter.lua      enable TS + :TSBuild parser compiler
@@ -51,7 +50,6 @@ lsp/                per-server configs (mostly vendored from nvim-lspconfig)
 | `<C-d>` / `<C-u>` | half-page down/up, centred (`zz`) |
 | `<C-l>` | clear search highlight |
 | `-` | open Oil in the current file's directory |
-| `<leader>gg` | lazygit in a new tmux window |
 
 ### Buffers & windows
 
@@ -171,8 +169,9 @@ apply (creates/deletes/renames/copies; asks to confirm).
 ### Playbook
 
 In a `playbook.sh` buffer, `<CR>` sends the current line (or the visual
-selection) to the neighbouring tmux pane and runs it. Target overridable via
-`vim.g.playbook_target` (default `{last}`).
+selection) to the pane below and runs it. In herdr the target is
+`PLAYBOOK_TARGET`, which `bin/herdr-playbook` names to the split's shell; in
+tmux it is `vim.g.playbook_target` (default `{last}`).
 
 ### Sessions
 

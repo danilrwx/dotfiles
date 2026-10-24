@@ -8,3 +8,7 @@ config/k9s/clusters
 config/dunst/dunstrc.d/
 # bin/theme's skin for k9s, from config/k9s/skin.yaml
 config/k9s/skins/
+# bin/theme's maki user theme, from config/themes
+config/maki/themes/
+# bin/theme's palette for the Paseo plugin, from config/themes
+config/paseo/theme/shared/palette.ts

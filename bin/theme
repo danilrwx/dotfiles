@@ -1,10 +1,11 @@
 #!/bin/sh
 # theme [NAME]: the colour theme, one of config/themes/: its ground, text and 16 ANSI colours, and two options
 # over it: the ground plain (black, white on a light theme) or the theme's own (bg), and the terminal's opacity
-# (opacity: foot's alpha, by bin/x-term). A theme is dark or light by its ground's luminance, and what has the
-# two modes takes it: Claude's base, GTK's theme, the portal's color-scheme. The terminal, foot, gets the palette
+# (opacity: Alacritty's window opacity, by bin/x-term). A theme is dark or light by its ground's luminance, and what has the
+# two modes takes it: Claude's base, GTK's theme, the portal's color-scheme. The terminal, Alacritty, gets the palette
 # as OSC escapes, the open windows at once and the new ones by bin/x-term; nvim (plugin/colors.lua), tmux, fzf,
-# bat and k9s take their colours from those ANSI slots, so they follow; Claude has its own theme, "dotfiles",
+# bat, k9s and herdr's UI (its "terminal" theme, config/herdr) take their colours from those ANSI slots, so they
+# follow; Claude and Paseo have their own theme, "dotfiles",
 # written here. What wants hex, sway's borders, dunst, wmenu (bin/x-menu), swaylock (bin/x-lock), gets its
 # colours written next to the link, from the ground, text, grey (bright black) and green and blue (bright), and
 # is reloaded; Chrome's theme colour is the ground when it is the theme's own.
@@ -157,11 +158,24 @@ mix() {
 		printf %02x $((a + (b - a) * $3 / 100))
 	done
 }
-# the terminal's (foot, bin/x-term): its palette as OSC escapes, 4 for the 16 slots and for the 256 palette's
-# darkest greys (235-238: nvim's selection, LSP references and columns, fzf's current line, tmux's pane
-# borders) a tint of the ground toward the text rather than neutral grey, 10, 11 and 12 the text, the ground
-# and the cursor. bin/x-term prints it to each new foot before its shell; the open ones get it on their ttys,
-# the shell's under each foot, which the tmux client in it shares
+{
+	printf '[general]\nlive_config_reload = true\n'
+	printf '[font]\nsize = 12\n[font.normal]\nfamily = "Iosevka"\n'
+	printf '[window]\nopacity = %s\ndynamic_padding = true\n[window.padding]\nx = 0\ny = 6\n' "$opacity"
+	printf '[colors.primary]\nbackground = "%s"\nforeground = "%s"\n' "$bg" "$fg"
+	printf '[colors.cursor]\ntext = "%s"\ncursor = "%s"\n' "$bg" "$fg"
+	for r in normal bright; do
+		printf '[colors.%s]\n' "$r"
+		for n in black red green yellow blue magenta cyan white; do
+			printf '%s = "%s"\n' "$n" "$(val "$r" "$n")"
+		done
+	done
+	for i in "235 6" "236 10" "237 14" "238 20"; do
+		set -- $i
+		printf '[[colors.indexed_colors]]\nindex = %s\ncolor = "%s"\n' "$1" "$(mix "$bg" "$fg" "$2")"
+	done
+} > "$state/alacritty.toml.tmp"
+mv "$state/alacritty.toml.tmp" "$state/alacritty.toml"
 i=0
 {
 	for r in normal bright; do
@@ -174,22 +188,129 @@ i=0
 		set -- $i
 		printf '\033]4;%s;%s\007' "$1" "$(mix "$bg" "$fg" "$2")"
 	done
-	# the ground with the opacity as its alpha, in percent (foot takes URxvt's [N] before the colour), so the
-	# open terminals change their see-through at once, not only the new ones
-	printf '\033]10;%s\007\033]11;[%s]%s\007\033]12;%s\007' "$fg" \
-		"$(awk -v o="$opacity" 'BEGIN { printf "%d", o * 100 + 0.5 }')" "$bg" "$fg"
+	printf '\033]10;%s\007\033]11;%s\007\033]12;%s\007' "$fg" "$bg" "$fg"
 } > "$state/osc"
-for p in $(pgrep -x foot); do
+for p in $(pgrep -x alacritty); do
 	for t in $(ps -o tty= --ppid "$p"); do
 		[ -w "/dev/$t" ] && cat "$state/osc" > "/dev/$t"
 	done
 done
-# quick: the terminal only, and what takes the terminal's colours (nvim, tmux, fzf, k9s)
+# herdr's client, not its server (same name, but it draws nothing): SIGWINCH is how it is told to re-read the
+# terminal's palette, which its own "terminal" theme (config/herdr) and the answers its panes give follow by
+for p in $(pgrep -x herdr); do
+	case $(ps -o args= -p "$p") in
+	*" server") ;;
+	*) kill -WINCH "$p" 2> /dev/null ;;
+	esac
+done
+# quick: the terminal only, and what takes the terminal's colours (nvim, tmux, fzf, k9s, herdr)
 [ -n "$quick" ] && exit 0
 
 # wmenu's (bin/x-menu), swaylock's (bin/x-lock) and the status' (bin/x-status), sourced
 printf 'bg=%s fg=%s grey=%s green=%s blue=%s yellow=%s red=%s\n' "$bg" "$fg" "$grey" "$green" "$blue" \
 	"$(val bright yellow)" "$(val bright red)" > "$state/colors.sh"
+# maki's (config/maki/lua/maki_theme.lua, the user's UI): a user theme of its own under
+# ~/.config/maki/themes — the dotfiles theme's 16 colours as the palette plus the scope
+# and UI roles, so maki's whole UI reads the same as the terminal. The plugin names it to
+# maki at startup; a new theme is picked up on the next maki start
+mkdir -p "$HOME/.config/maki/themes"
+{
+	# scope mapping, nvim's own: few roles coloured (config/nvim/plugin/colors.lua),
+	# the rest the plain foreground. comments and control flow grey, definitions
+	# (where a function or type is declared, after/queries) and flow magenta, calls
+	# blue, types cyan, strings green
+	cat <<'SCOPES'
+"comment"            = { fg = "comment" }
+"comment.block"      = { fg = "comment" }
+"comment.line"       = { fg = "comment" }
+"definition"         = { fg = "pink" }
+"keyword.directive"  = { fg = "pink" }
+"keyword.return"     = { fg = "pink" }
+"keyword.repeat"     = { fg = "pink" }
+"keyword.exception"  = { fg = "pink" }
+"function.call"      = { fg = "blue" }
+"function.builtin"   = { fg = "blue" }
+"type"               = { fg = "cyan" }
+"type.builtin"       = { fg = "cyan" }
+"string"             = { fg = "green" }
+"markup.heading"     = { fg = "foreground", modifiers = ["bold"] }
+"markup.raw"         = { fg = "green" }
+"markup.link.text"   = { fg = "foreground", modifiers = ["underlined"] }
+SCOPES
+	# the palette: the theme's 16 colours, the ground and text, the greys
+	printf '[palette]\n'
+	printf 'background      = "%s"\n' "$bg"
+	printf 'background_2    = "%s"\n' "$(mix "$bg" "$fg" 7)"
+	printf 'foreground      = "%s"\n' "$fg"
+	printf 'comment         = "%s"\n' "$grey"
+	printf 'comment_lighter = "%s"\n' "$(mix "$grey" "$fg" 20)"
+	printf 'cyan            = "%s"\n' "$(val bright cyan)"
+	printf 'green           = "%s"\n' "$(val bright green)"
+	printf 'orange          = "%s"\n' "$(val bright yellow)"
+	printf 'pink            = "%s"\n' "$(val bright magenta)"
+	printf 'purple          = "%s"\n' "$(val bright magenta)"
+	printf 'red             = "%s"\n' "$(val bright red)"
+	printf 'yellow          = "%s"\n' "$(val bright yellow)"
+	printf 'blue            = "%s"\n' "$(val bright blue)"
+	printf 'teal            = "%s"\n' "$(val bright cyan)"
+	printf 'current_line    = "%s"\n' "$(mix "$bg" "$fg" 8)"
+	printf 'selection       = "%s"\n' "$(mix "$bg" "$fg" 18)"
+	printf 'lavender        = "%s"\n' "$(mix "$blue" "$bg" 40)"
+	printf 'sapphire        = "%s"\n' "$(mix "$blue" "$bg" 20)"
+	printf 'sky             = "%s"\n' "$(val bright cyan)"
+	printf 'maroon          = "%s"\n' "$(val normal red)"
+	printf 'flamingo        = "%s"\n' "$(mix "$(val normal red)" "$fg" 30)"
+	printf 'rosewater       = "%s"\n' "$(mix "$fg" "$bg" 20)"
+	# the UI roles: the accents, the diff tints (the ground toward the theme's green/red),
+	# the selection, the panel borders
+	printf '[ui]\n'
+	printf 'user               = { fg = "blue" }\n'
+	printf 'assistant          = { fg = "foreground" }\n'
+	printf 'assistant_prefix   = { fg = "rosewater" }\n'
+	printf 'thinking           = { fg = "comment", modifiers = ["italic"] }\n'
+	printf 'tool               = { fg = "foreground" }\n'
+	printf 'tool_bg            = { bg = "background_2" }\n'
+	printf 'tool_prefix        = { fg = "foreground", modifiers = ["bold"] }\n'
+	printf 'tool_path          = { fg = "cyan" }\n'
+	printf 'tool_annotation    = { fg = "comment" }\n'
+	printf 'tool_success       = { fg = "green" }\n'
+	printf 'tool_error         = { fg = "red" }\n'
+	printf 'tool_dim           = { fg = "comment" }\n'
+	printf 'error              = { fg = "red" }\n'
+	printf 'status_dim         = { fg = "comment" }\n'
+	printf 'strikethrough      = { fg = "comment", modifiers = ["crossed_out"] }\n'
+	printf 'code_block         = { fg = "foreground" }\n'
+	printf 'horizontal_rule    = { fg = "comment" }\n'
+	printf 'diff_old           = { bg = "%s" }\n' "$(mix "$bg" "$(val bright red)" 14)"
+	printf 'diff_new           = { bg = "%s" }\n' "$(mix "$bg" "$(val bright green)" 14)"
+	printf 'diff_old_emphasis  = { bg = "%s" }\n' "$(mix "$bg" "$(val bright red)" 30)"
+	printf 'diff_new_emphasis  = { bg = "%s" }\n' "$(mix "$bg" "$(val bright green)" 30)"
+	printf 'diff_line_nr       = { fg = "comment" }\n'
+	printf 'todo_completed     = { fg = "green" }\n'
+	printf 'todo_in_progress   = { fg = "yellow" }\n'
+	printf 'todo_pending       = { fg = "comment" }\n'
+	printf 'todo_cancelled     = { fg = "red", modifiers = ["crossed_out"] }\n'
+	printf 'table_border       = { fg = "comment" }\n'
+	printf 'item_selected      = { fg = "background", bg = "blue" }\n'
+	printf 'item               = { fg = "blue" }\n'
+	printf 'item_desc          = { fg = "comment" }\n'
+	printf 'accent             = { fg = "orange" }\n'
+	printf 'panel_border       = { fg = "blue" }\n'
+	printf 'panel_title        = { fg = "blue", modifiers = ["bold"] }\n'
+	printf 'cursor             = { fg = "background", bg = "foreground" }\n'
+	printf 'keybind_key        = { fg = "cyan", modifiers = ["bold"] }\n'
+	printf 'keybind_section    = { fg = "blue", modifiers = ["bold"] }\n'
+	printf 'input_border       = { fg = "comment" }\n'
+	printf 'keybind_desc       = { fg = "foreground" }\n'
+	printf 'queue              = { fg = "purple" }\n'
+	printf 'status_notice      = { fg = "orange" }\n'
+	printf 'status_retry_error = { fg = "red" }\n'
+	printf 'status_retry_info  = { fg = "comment" }\n'
+	printf 'input_placeholder  = { fg = "comment" }\n'
+	printf 'timestamp          = { fg = "comment" }\n'
+	printf 'spinner            = { fg = "orange" }\n'
+	printf 'active             = { fg = "cyan" }\n'
+} > "$HOME/.config/maki/themes/dotfiles.toml"
 sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
 # sway's: the background, the wallpaper while the opacity shows it (below 1), else the ground's colour, and the
 # borders, the focused one green, the rest the ground; a file its config includes at the start, and each line
@@ -272,6 +393,15 @@ if [ -d "$claude" ]; then
 	}
 	EOF
 fi
+# Paseo's: a theme of its own, "dotfiles", from config/paseo/theme, its plugin, which takes eight colours and
+# derives the rest (its terminal's ANSI slots too, so not the theme's own); the palette written into the plugin,
+# which is reloaded. Paseo's CLI is in its AppImage, mounted under /tmp while it runs
+# ponytail: the first mount found, a second Paseo running at once may be the older one
+printf 'export const palette = { appearance: "%s", colors: { background: "%s", foreground: "%s", raised: "%s", control: "%s", border: "%s", accent: "%s", mutedForeground: "%s", ring: "%s" } } as const;\n' \
+	"$mode" "$bg" "$fg" "$(mix "$bg" "$fg" 8)" "$(mix "$bg" "$fg" 12)" "$(mix "$bg" "$fg" 18)" "$blue" "$grey" "$grey" \
+	> "$HOME/dotfiles/config/paseo/theme/shared/palette.ts"
+paseo=$(command -v paseo || ls /tmp/.mount_Paseo-*/resources/bin/paseo 2> /dev/null | head -n1)
+[ -n "$paseo" ] && "$paseo" plugin reload dotfiles-theme > /dev/null 2>&1
 # k9s's: config/k9s/skin.yaml's colour names the theme's hex, into the skin config.yaml names (skins/, out of
 # git); hex rather than the names as ANSI, which tcell sends as its own fixed RGB on a truecolor terminal
 sed -e '/^#/d' -e "s/\bgray\b/\"$grey\"/g; s/\bblue\b/\"$blue\"/g; s/\bfuchsia\b/\"$(val bright magenta)\"/g" \

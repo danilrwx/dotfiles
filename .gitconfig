@@ -1,6 +1,7 @@
 [core]
   editor = nvim
   excludesfile = ~/.gitignore_global
+	pager = delta
 
 [user]
   name = Daniil Antoshin
@@ -45,6 +46,7 @@
 
 [merge]
 	tool = nvimdiff
+	conflictStyle = zdiff3
 [mergetool]
     prompt = true
 [mergetool "nvimdiff"]
@@ -55,3 +57,7 @@
 
 # [url "ssh://git@fox.flant.com/"]
 # 	insteadOf = https://fox.flant.com/
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true

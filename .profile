@@ -34,3 +34,4 @@ unset f
 # The private submodule's own: the keys and tokens the CLI tools read, flint through trdl. Here, not in .zprofile,
 # so greetd's /bin/sh gets them too and the whole session, foot and nvim and pi included, inherits them.
 [ -f "$HOME/dotfiles/private/.profile" ] && . "$HOME/dotfiles/private/.profile"
+. "$HOME/.cargo/env"

@@ -1,23 +1,17 @@
 #!/bin/sh
-# x-term [-c APP_ID] [-t TITLE] [FOOT_OPTS...] [-e CMD [ARGS...]]: foot, the terminal, in the colour theme: its
-# opacity (bin/theme's option) as foot's alpha, and its palette, the OSC escapes bin/theme keeps, printed before
-# the shell or CMD runs. -c and -t, the names bin/x-ctl gives them, as foot's -a and -T. super+Return (config/sway),
-# bin/x-ctl's TUIs.
 state=${XDG_STATE_HOME:-$HOME/.local/state}/theme
-opacity=1
-. "$state/options" 2> /dev/null
-# foot's options, up to -e, quoted into a string; what follows -e, or the shell, is the command
+if [ ! -f "$state/alacritty.toml" ]; then
+	current=$(basename "$(readlink "$state/theme.toml")" .toml)
+	"$HOME/dotfiles/bin/theme" quick "${current:-kitty}" || exit 1
+fi
 q() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
 opts=
 while [ $# -gt 0 ] && [ "$1" != -e ]; do
 	o=$1
-	case $o in -c) o=-a ;; -t) o=-T ;; esac
+	case $o in -c) o=--class ;; -t) o=--title ;; esac
 	opts="$opts $(q "$o")"
 	shift
 done
 [ "$1" = -e ] && shift
 [ $# -gt 0 ] || set -- "${SHELL:-/bin/sh}"
-# 6 px above and below the text, and the part of a tiled window less than a cell split there too (pad center), not
-# a strip under the last line, tmux's status; through env, which foot does not take for a shell: given /bin/sh
-# first, it sets SHELL to it, and tmux and the rest started inside then run sh
-eval "exec foot -f 'Iosevka:size=12' -o colors.alpha=\"\$opacity\" -o 'pad=0x6 center' $opts env SHELL=\"\${SHELL:-/bin/sh}\" /bin/sh -c 'cat \"\$0\" 2> /dev/null; exec \"\$@\"' \"\$state/osc\" \"\$@\""
+eval "exec alacritty --config-file \"\$state/alacritty.toml\" $opts -e \"\$@\""

@@ -49,19 +49,6 @@ vim.keymap.set("n", "<c-l>", "<cmd>nohlsearch<bar>diffupdate<bar>normal! <c-l><c
 
 vim.keymap.set("n", "-", "<cmd>Oil<cr>", { silent = true })
 
-vim.keymap.set("n", "<leader>gg", function()
-  if not vim.env.TMUX or vim.env.TMUX == "" then
-    vim.notify("lazygit: not inside tmux", vim.log.levels.WARN)
-    return
-  end
-  if vim.fn.executable("lazygit") == 0 then
-    vim.notify("lazygit is not installed", vim.log.levels.WARN)
-    return
-  end
-  vim.cmd("silent !tmux neww lazygit")
-  vim.cmd("redraw!")
-end, { silent = true })
-
 vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>", { silent = true })
 vim.keymap.set("n", "<S-l>", "<cmd>bn<cr>", { silent = true })
 vim.keymap.set("n", "<S-h>", "<cmd>bp<cr>", { silent = true })
