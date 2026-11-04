@@ -1,0 +1,16 @@
+{
+  "PasswordManagerEnabled": false,
+  "PasswordLeakDetectionEnabled": false,
+  "AutofillAddressEnabled": false,
+  "AutofillCreditCardEnabled": false,
+  "SearchSuggestEnabled": false,
+  "SavingBrowserHistoryDisabled": true,
+  "WebRtcIPHandling": "disable_non_proxied_udp",
+  "PrivacySandboxAdTopicsEnabled": false,
+  "PrivacySandboxSiteEnabledAdsEnabled": false,
+  "PrivacySandboxAdMeasurementEnabled": false,
+  "NetworkPredictionOptions": 2,
+  "HttpsOnlyMode": "force_enabled",
+  "DefaultGeolocationSetting": 2,
+  "PaymentMethodQueryEnabled": false
+}
