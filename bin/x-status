@@ -1,8 +1,8 @@
 #!/bin/bash
 # x-status: the status as a dunst card (super+i): memory, volume, mic, battery, brightness, date, plain words.
-# x-status bar: the same every second, which is where the card at 10% battery and the critical one at 5% come
-# from, once a discharge (UPower powers off at 2%); its own lines, the i3bar protocol, go nowhere, sway has no
-# bar any more (config/sway runs it with its output dropped).
+# x-status bar: the same every second, one plain line for whatever wants to poll it, with RU
+# from Scroll Lock's LED, the one the keyboard layout lights. This is where the card at 10% battery and the
+# critical one at 5% come from, once a discharge (UPower powers off at 2%).
 # The battery is yellow from 20% and red from 10% while it discharges, in both.
 export LC_NUMERIC=C   # wpctl prints 0.45; awk under ru_RU reads that as 0
 
@@ -12,7 +12,7 @@ level() { wpctl get-volume "$1" 2>/dev/null | awk '{print /MUTED/ ? "off" : int(
 battery() {
   for b in /sys/class/power_supply/BAT*; do [ -d "$b" ] && { echo "$(<"$b/capacity") $(<"$b/status")"; return; }; done
 }
-# the line, pango markup for the battery's colour; c and st the battery's, for the cards
+# the line into s; markup (pango) colours the battery; c and st the battery's, for the cards and the bar
 status() {
   yellow=#ffff55 red=#ff5555
   . "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
@@ -21,28 +21,34 @@ status() {
   if [ -n "$c" ]; then
     t="bat $c%"
     if [ "$st" = Charging ]; then t+="+"
-    elif (( c <= 10 )); then t="<span foreground='$red'>$t</span>"
-    elif (( c <= 20 )); then t="<span foreground='$yellow'>$t</span>"; fi
+    elif (( c <= 20 )) && [ "${1:-}" = markup ]; then
+      if (( c <= 10 )); then t="<span foreground='$red'>$t</span>"
+      else t="<span foreground='$yellow'>$t</span>"; fi
+    fi
     s+="  $t"
   fi
   for l in /sys/class/backlight/*; do
     [ -d "$l" ] && s+="  bri $(( $(<"$l/brightness") * 100 / $(<"$l/max_brightness") ))%" && break
   done
 }
+# the low and critical cards, once each per discharge
+warned=
+warn() {
+  if [ -z "$c" ] || [ "$st" = Charging ]; then warned=
+  elif (( c <= 5 )) && [ "$warned" != 5 ]; then
+    notify-send -a battery -r 9914 -u critical "Battery $c%" "Plug in: it powers off at 2%"; warned=5
+  elif (( c <= 10 )) && [ -z "$warned" ]; then
+    notify-send -a battery -r 9914 "Battery $c%" "Low"; warned=10
+  fi
+}
 
 if [ "${1:-}" = bar ]; then
-  echo '{"version": 1}'
-  echo '['
-  warned=
   while :; do
     status
-    printf '[{"full_text": "%s  %s", "markup": "pango"}],\n' "$s" "$(date +'%d/%m %H:%M')"
-    if [ -z "$c" ] || [ "$st" = Charging ]; then warned=
-    elif (( c <= 5 )) && [ "$warned" != 5 ]; then
-      notify-send -a battery -r 9914 -u critical "Battery $c%" "Plug in: it powers off at 2%"; warned=5
-    elif (( c <= 10 )) && [ -z "$warned" ]; then
-      notify-send -a battery -r 9914 "Battery $c%" "Low"; warned=10
-    fi
+    # grp_led:scroll: Scroll Lock (bit 2 of the LED mask) lit while ru is on
+    (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && r=RU || r=US
+    echo "$s  $r  $(date +'%d/%m %H:%M')"
+    warn
     sleep 1
   done
 fi

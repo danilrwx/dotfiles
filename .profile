@@ -1,8 +1,14 @@
-# sh login profile: greetd sources it before the session (sway), and
+# sh login profile: greetd sources it before the session (Hyprland), and
 # .zprofile sources it for zsh login shells (tmux, ssh), so terminals spawned by the WM, which run zsh as no
 # login shell, still get PATH and the rest from the session.
-PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH"
+PATH="$HOME/dotfiles/private/bin:$HOME/dotfiles/bin:$HOME/.local/bin:$HOME/bin:$HOME/go/bin:/usr/local/go/bin:$HOME/.cargo/bin:$PATH"
 export PATH
+
+# install --android: sdkmanager and avdmanager, adb and fastboot, the emulator. ~/Android/Sdk is where Studio
+# looks for an SDK, so a project needs no local.properties. Dead entries where the flag was never run, as
+# /usr/local/go/bin is without Go
+export ANDROID_HOME="$HOME/Android/Sdk"
+PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export EDITOR='nvim'
@@ -35,3 +41,6 @@ unset f
 # so greetd's /bin/sh gets them too and the whole session, foot and nvim and pi included, inherits them.
 [ -f "$HOME/dotfiles/private/.profile" ] && . "$HOME/dotfiles/private/.profile"
 . "$HOME/.cargo/env"
+
+# Added by jcode installer
+export PATH="/home/danil/.local/bin:$PATH"

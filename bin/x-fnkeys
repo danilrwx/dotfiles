@@ -1,7 +1,6 @@
 #!/bin/sh
-# Media and HONOR Fn keys under sway (config/sway). Levels (volume, mic, brightness)
-# are a dunst progress card, states (mute, profile, camera) a
-# notification card. The performance and camera keys are acted on by
+# Media and HONOR Fn keys under Hyprland (config/hypr). Levels (volume, mic, brightness) are a dunst progress
+# card, states (mute, profile, camera) a notification card. The performance and camera keys are acted on by
 # honor-hotkey-actions.service; here we only show what it did.
 # wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0
 export LC_NUMERIC=C
@@ -39,6 +38,6 @@ camera)
 	[ -e /dev/video0 ] && osd "Camera" "on" || osd "Camera" "off" ;;
 *)
 	echo "usage: x-fnkeys vol-up|vol-down|vol-mute|mic-up|mic-down|mic|bright-up|bright-down|" >&2
-	echo "       profile|camera" >&2
+	echo "       touchpad-on|touchpad-off|touchpad-toggle|profile|camera" >&2
 	exit 1 ;;
 esac

@@ -6,15 +6,15 @@
 # as OSC escapes, the open windows at once and the new ones by bin/x-term; nvim (plugin/colors.lua), tmux, fzf,
 # bat, k9s and herdr's UI (its "terminal" theme, config/herdr) take their colours from those ANSI slots, so they
 # follow; Claude and Paseo have their own theme, "dotfiles",
-# written here. What wants hex, sway's borders, dunst, wmenu (bin/x-menu), swaylock (bin/x-lock), gets its
-# colours written next to the link, from the ground, text, grey (bright black) and green and blue (bright), and
-# is reloaded; Chrome's theme colour is the ground when it is the theme's own.
+# written here. What wants hex, Hyprland's borders (hyprland.conf), dunst, the menu (wmenu: bin/x-menu) and the
+# lock (swaylock: bin/x-lock), gets its colours written next to the link, from the ground, text, grey (bright
+# black) and green and blue (bright), and is reloaded.
 #   theme, theme list dark|light
 #                         the themes, or those of one mode, the current one marked
 #   theme NAME            set it
 #   theme set bg plain|theme|toggle, theme set opacity 0.1-1|cycle, theme set wallpaper FILE|none
 #                         an option, the current theme set again with it; the wallpaper, an image filling
-#                         sway's background while the opacity is below 1, is what it shows through; the
+#                         the session's background while the opacity is below 1, is what it shows through; the
 #                         ground's colour without it
 #   theme pick            an fzf of them (tmux's prefix T, in a popup), the current one's mode first: the one
 #                         under the cursor tried on the terminal at once, ctrl-b the ground, ctrl-o the
@@ -160,7 +160,7 @@ mix() {
 }
 {
 	printf '[general]\nlive_config_reload = true\n'
-	printf '[font]\nsize = 12\n[font.normal]\nfamily = "Iosevka"\n'
+	printf '[font]\nsize = 12\n[font.normal]\nfamily = "IosevkaTerm Nerd Font Mono"\n'
 	printf '[window]\nopacity = %s\ndynamic_padding = true\n[window.padding]\nx = 0\ny = 6\n' "$opacity"
 	printf '[colors.primary]\nbackground = "%s"\nforeground = "%s"\n' "$bg" "$fg"
 	printf '[colors.cursor]\ntext = "%s"\ncursor = "%s"\n' "$bg" "$fg"
@@ -206,7 +206,7 @@ done
 # quick: the terminal only, and what takes the terminal's colours (nvim, tmux, fzf, k9s, herdr)
 [ -n "$quick" ] && exit 0
 
-# wmenu's (bin/x-menu), swaylock's (bin/x-lock) and the status' (bin/x-status), sourced
+# the menus' (bin/x-menu), the locks' (bin/x-lock) and the status' (bin/x-status), sourced
 printf 'bg=%s fg=%s grey=%s green=%s blue=%s yellow=%s red=%s\n' "$bg" "$fg" "$grey" "$green" "$blue" \
 	"$(val bright yellow)" "$(val bright red)" > "$state/colors.sh"
 # maki's (config/maki/lua/maki_theme.lua, the user's UI): a user theme of its own under
@@ -312,19 +312,22 @@ SCOPES
 	printf 'active             = { fg = "cyan" }\n'
 } > "$HOME/.config/maki/themes/dotfiles.toml"
 sel=$(mix "$bg" "$fg" 20) red=$(val bright red)
-# sway's: the background, the wallpaper while the opacity shows it (below 1), else the ground's colour, and the
-# borders, the focused one green, the rest the ground; a file its config includes at the start, and each line
-# sent to the running one. Careful: these lines are sway *commands*, and some of them create state — a
-# "bar NAME colors …" for a bar config/sway no longer defines makes sway start that bar, which is how a bar came
-# back after its block was deleted. So nothing about the bar belongs here while there is no bar.
+# Hyprland's: the borders, as ~/.local/state/theme/hyprland.conf, which config/hypr sources at startup, and the
+# running compositor's live (hyprctl keyword: no reload, nothing on screen blinks). The background (bin/x-bg: the
+# theme's ground, or the wallpaper while the terminal's opacity shows it) is restarted with it
 {
-	if [ "$opacity" != 1 ] && [ -f "$wallpaper" ]; then printf 'output * bg "%s" fill\n' "$wallpaper"
-	else printf 'output * bg %s solid_color\n' "$bg"; fi
-	printf 'client.focused %s %s %s %s %s\n' "$green" "$bg" "$fg" "$green" "$green"
-	for k in focused_inactive unfocused; do printf 'client.%s %s %s %s %s %s\n' "$k" "$bg" "$bg" "$fg" "$bg" "$bg"; done
-	printf 'client.urgent %s %s %s %s %s\n' "$red" "$bg" "$fg" "$red" "$red"
-} > "$state/sway.conf"
-[ -n "$SWAYSOCK" ] && while read -r l; do swaymsg -q "$l"; done < "$state/sway.conf"
+	printf 'general {\n\tcol.active_border = rgb(%s)\n\tcol.inactive_border = rgb(%s)\n}\n' "${green#\#}" "${bg#\#}"
+	printf 'group {\n\tcol.border_active = rgb(%s)\n\tcol.border_inactive = rgb(%s)\n}\n' "${green#\#}" "${bg#\#}"
+} > "$state/hyprland.conf"
+if pgrep -x Hyprland > /dev/null; then
+	hyprctl keyword general:col.active_border "rgb(${green#\#})" > /dev/null 2>&1
+	hyprctl keyword general:col.inactive_border "rgb(${bg#\#})" > /dev/null 2>&1
+	hyprctl keyword group:col.border_active "rgb(${green#\#})" > /dev/null 2>&1
+	hyprctl keyword group:col.border_inactive "rgb(${bg#\#})" > /dev/null 2>&1
+fi
+if pgrep -x swaybg > /dev/null; then
+	"$HOME/dotfiles/bin/x-bg" > /dev/null 2>&1 &
+fi
 # dunst's, as the borders look: the ground and the text, the frame green as a focused window's (grey for a
 # low urgency, red for a critical one), the progress bar green, and as see-through as the terminal: the ground's
 # alpha the opacity's, dunst's own transparency being X's alone; a drop-in, kept out of git (.gitignore)
@@ -354,11 +357,11 @@ cbg=$bg$(awk -v o="$opacity" 'BEGIN { printf "%02x", o * 255 + 0.5 }')
 } > "$state/gtk.css"
 # GTK3's theme: outside GNOME it reads no color-scheme, so adw-gtk3 (install puts it in ~/.local/share/themes,
 # libadwaita's look built on the named colours above) in the theme's mode as its gtk-theme setting, which GTK3
-# on Wayland reads, the windows open now too. The portal's color-scheme for GTK4 and Chrome
+# on Wayland reads, the windows open now too. The portal's color-scheme for GTK4 and Helium
 if [ "$mode" = dark ]; then gtk=adw-gtk3-dark scheme=prefer-dark; else gtk=adw-gtk3 scheme=prefer-light; fi
 gsettings set org.gnome.desktop.interface gtk-theme "$gtk" 2> /dev/null
 # and as settings.ini, what GTK3 reads where gsettings does not reach: under Xwayland (an X11 app, or one started
-# with a stale WAYLAND_DISPLAY, ssh's askpass among them), no XSETTINGS being served any more
+# with a stale WAYLAND_DISPLAY, ssh's askpass among them), no XSETTINGS daemon serving it
 mkdir -p "$HOME/.config/gtk-3.0"
 printf '[Settings]\ngtk-theme-name=%s\ngtk-application-prefer-dark-theme=%d\ngtk-cursor-theme-name=Adwaita\ngtk-cursor-theme-size=24\n' \
 	"$gtk" "$([ "$mode" = dark ] && echo 1 || echo 0)" > "$HOME/.config/gtk-3.0/settings.ini"
@@ -416,13 +419,6 @@ sed -i "s/^color_scheme=.*/color_scheme=$([ "$mode" = light ] && echo 1 || echo 
 # file over config/lazygit (LG_CONFIG_FILE, .profile)
 printf 'gui:\n  theme:\n    activeBorderColor: ["%s", bold]\n    inactiveBorderColor: ["%s"]\n    searchingActiveBorderColor: ["%s", bold]\n    optionsTextColor: ["%s"]\n    selectedLineBgColor: ["%s"]\n    inactiveViewSelectedLineBgColor: [bold]\n    unstagedChangesColor: ["%s"]\n' \
 	"$green" "$grey" "$blue" "$blue" "$sel" "$red" > "$state/lazygit.yml"
-
-# Chrome's: its theme colour the ground when the theme's own shows (bg theme), its own theme under plain; a
-# managed policy, which Chrome watches, through install's root helper (sudo without a password, it alone)
-if [ -x /usr/local/sbin/chrome-theme-color ]; then
-	if [ "$bg_mode" = theme ]; then set -- "$bg"; else set --; fi
-	sudo -n /usr/local/sbin/chrome-theme-color "$@" 2> /dev/null
-fi
 
 # what runs now picks them up
 pgrep -x dunst > /dev/null && dunstctl reload
