@@ -1,7 +1,7 @@
 {
   "packages": {
     "ai-common": {
-      "rev": "6b143e9bad8af6963b8a9a68fe0898af48cb4423",
+      "rev": "e89585a91f0e3d45c3d1bc0f274a557983e407f6",
       "src": "/home/danil/w/ai/ai-common"
     },
     "maki": {

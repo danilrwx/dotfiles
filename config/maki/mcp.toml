@@ -1,3 +1,7 @@
 [mcp.playwright]
-command = ["npx", "-y", "@playwright/mcp@latest", "--extension"]
+command = ["npx", "-y", "@playwright/mcp@latest", "--extension", "--executable-path", "/usr/bin/helium"]
+enabled = true
+
+[mcp.open-pencil]
+command = ["openpencil-mcp"]
 enabled = true

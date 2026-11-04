@@ -6,8 +6,8 @@
 -- fixed at start. A new dotfiles theme is picked up on the next maki start (or
 -- /reload), the way every other dotfiles consumer follows bin/theme.
 --
--- The terminal itself (foot, tmux, nvim) takes its 16 slots from the theme the
--- usual way: bin/theme sends foot's OSC escapes to the open terminals. maki's user
+-- The terminal itself (alacritty, tmux, nvim) takes its 16 slots from the theme
+-- the usual way: bin/theme sends alacritty's OSC escapes to the open terminals. maki's user
 -- theme uses the same palette, so its highlight reads the same way as the terminal's.
 
 local function apply()
