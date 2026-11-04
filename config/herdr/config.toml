@@ -108,6 +108,22 @@ command = "zsh -ic kns"
 [ui]
 sidebar_collapsed_mode = "hidden"
 status_indicators = "symbols"
+# the tmux status-right, moved to the right edge of the tab row: the kube context and the
+# namespace every 5s, as status-interval did, and the local time beside it — datetime
+# formats server-local wall-clock, which is what a clock here wants, and gives the entry a
+# strftime format instead of a process every tick. The command still runs on the Herdr
+# server through sh -lc, keeps the last line of its output and clears the entry on failure,
+# empty output or timeout; a narrow tab row yields the whole right area to the tabs.
+# The two braille blanks are the right margin: the display's rounded corners eat the last
+# cells of the top line, and herdr trims trailing spaces, so the padding must be a glyph
+# that occupies a cell and draws nothing (U+2800). tmux's status-left (whoami@host) has no
+# counterpart here: the nearest is { type = "hostname" } in this list, or [ui] window_title
+# for the outer title.
+tab_bar_right = [
+  { type = "command", command = "ctx=$(kubectl config current-context 2>/dev/null); ns=$(kubectl config view --minify -o 'jsonpath={..namespace}' 2>/dev/null); echo \"${ctx:-none}:${ns:-default}\"", interval_seconds = 5, timeout_seconds = 2 },
+  { type = "datetime", format = "%H:%M\u2800\u2800" },
+]
+tab_bar_right_separator = " · "
 # herdr asks for a tab name by default; off, prefix+c makes the tab at once and it
 # takes its number for a name, no extra Enter (rename_tab, prefix+shift+t, renames)
 prompt_new_tab_name = false
