@@ -1,0 +1,12 @@
+! dotfiles: the X resources of the X clients under Xwayland (xrdb -merge, an exec in config/hypr). X apps render at
+! the screen's real resolution (xwayland force_zero_scaling) and scale themselves: Steam's UI by
+! STEAM_FORCE_DESKTOPUI_SCALING, everything else by this Xft.dpi (96 x 2). The cursor stays 24 there: Steam, the
+! one X app, doubles it by its own scaling (48 came out at 96).
+Xft.dpi: 192
+Xft.antialias: 1
+Xft.hinting: 1
+Xft.hintstyle: hintslight
+Xft.rgba: rgb
+Xft.lcdfilter: lcddefault
+Xcursor.theme: Adwaita
+Xcursor.size: 24
