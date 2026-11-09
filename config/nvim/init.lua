@@ -52,3 +52,6 @@ vim.keymap.set("n", "-", "<cmd>Oil<cr>", { silent = true })
 vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>", { silent = true })
 vim.keymap.set("n", "<S-l>", "<cmd>bn<cr>", { silent = true })
 vim.keymap.set("n", "<S-h>", "<cmd>bp<cr>", { silent = true })
+
+-- publish the lock file for pi-core Neovim integration
+pcall(dofile, "/home/danil/w/pi-core/nvim/pi-ide.lua")
