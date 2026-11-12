@@ -1,0 +1,8 @@
+#!/bin/sh
+# helium: the browser on the theme's side: --force-dark-mode, the theme being a dark one. Its own UI takes the
+# GTK theme install names (Adwaita-dark, through gsettings and the portal); the web's prefers-color-scheme,
+# which Chromium does not take from GTK, follows only that flag, so the flag is what carries the mode. What
+# the profile's own Appearance > Mode says can silently beat both (a Light pref wins over --force-dark-mode),
+# so install sets it to Device. The VA-API encode (iHD) is a feature Chromium leaves off on Linux and
+# chrome://flags has no switch for; the launcher entry (install) points its Exec here too.
+exec /usr/bin/helium --force-dark-mode --enable-features=AcceleratedVideoEncoder "$@"

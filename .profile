@@ -15,13 +15,14 @@ export EDITOR='nvim'
 export VISUAL='nvim'
 
 export FZF_DEFAULT_OPTS="--height 40% --input-border=sharp --list-border=sharp --preview-border=sharp --prompt='> ' --pointer='>' --marker='>' --gutter=' ' --info=inline-right --bind ctrl-f:page-down,ctrl-b:page-up --color=fg:-1,fg+:-1,bg:-1,bg+:236,hl:10,hl+:10,info:8,marker:13,prompt:-1,spinner:8,pointer:13,header:8,border:8,gutter:-1"
-# fzf's colours are ANSI slots and the terminal's own text (-1), so they follow the theme (bin/theme): the
-# matches bright green as in nvim's menus, the pointer and marks magenta, the rest grey. Ctrl-T previews the
-# file by bat in its nvim theme (config/bat: the same slots in nvim's roles), Alt-C the directory
+# fzf's colours are ANSI slots and the terminal's own text (-1), so they follow the terminal's palette
+# (config/kitty/theme.conf): the matches bright green as in nvim's menus, the pointer and marks magenta, the rest
+# grey. Ctrl-T previews the file by bat in its nvim theme (config/bat: the same slots in nvim's roles), Alt-C the
+# directory
 export FZF_CTRL_T_OPTS="--preview 'batcat --color=always --style=numbers --line-range=:300 {} 2>/dev/null || ls -1 {}'"
 export FZF_ALT_C_OPTS="--preview 'ls -1 --color=always {}'"
-# lazygit: its config, then the colour theme's borders and selection over it (bin/theme)
-export LG_CONFIG_FILE="$HOME/.config/lazygit/config.yml,${XDG_STATE_HOME:-$HOME/.local/state}/theme/lazygit.yml"
+# lazygit: its config, then the theme's borders and selection over it (config/lazygit/theme.yml)
+export LG_CONFIG_FILE="$HOME/.config/lazygit/config.yml,$HOME/.config/lazygit/theme.yml"
 
 export PI_OFFLINE=1
 
@@ -41,6 +42,3 @@ unset f
 # so greetd's /bin/sh gets them too and the whole session, foot and nvim and pi included, inherits them.
 [ -f "$HOME/dotfiles/private/.profile" ] && . "$HOME/dotfiles/private/.profile"
 . "$HOME/.cargo/env"
-
-# Added by jcode installer
-export PATH="/home/danil/.local/bin:$PATH"

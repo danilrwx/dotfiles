@@ -1,7 +1,13 @@
 #!/bin/sh
-# x-menu PROMPT: a line of stdin picked in wmenu, in the colour theme's ground and text (bin/theme).
-# bin/x-run's, bin/x-ctl's and bin/x-drives'.
-bg=#000000 fg=#ffffff
-. "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
-exec wmenu -i -p "$1" -f 'Iosevka 11' -N "${bg#\#}" -n "${fg#\#}" -S "${fg#\#}" -s "${bg#\#}" \
+# x-menu PROMPT [LINES]: a line of stdin picked in wmenu, on the theme's ground in its text (pastel: black and
+# white). LINES makes it a vertical list of that many rows; the callers with a single prompt (bin/x-run, bin/x-ctl,
+# bin/x-drives) leave it out.
+bg=#000000
+fg=#ffffff
+# started from a Hyprland bind, stdin is the compositor's tty: wmenu would read it and never open its surface
+[ -t 0 ] && exec 0< /dev/null
+if [ -n "${2:-}" ]; then set -- "$1" -l "$2"; else set -- "$1"; fi
+prompt=$1
+shift
+exec wmenu -i -p "$prompt" "$@" -f 'Iosevka 11' -N "${bg#\#}" -n "${fg#\#}" -S "${fg#\#}" -s "${bg#\#}" \
 	-M "${fg#\#}" -m "${bg#\#}"

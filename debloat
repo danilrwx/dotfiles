@@ -18,6 +18,7 @@ case "${1:-}" in
   *) log "Unknown option: $1"; exit 1 ;;
 esac
 
+# shellcheck source=/dev/null
 [ -f /etc/os-release ] && . /etc/os-release
 [ "${ID:-}" == ubuntu ] || { log "Ubuntu only"; exit 1; }
 
@@ -36,16 +37,22 @@ REMOVE=(
   nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
   snapd
-  # Firefox, Helium being the browser; pavucontrol, bin/x-ctl picking the devices
-  firefox pavucontrol
+  # pavucontrol, bin/x-ctl picking the devices. Firefox is not here: it comes from Mozilla's repo (install), and
+  # Ubuntu's `firefox` is a snap installer that would be the same package name
+  pavucontrol
   # Ubuntu's wallpapers under a black root
   ubuntu-wallpapers ubuntu-wallpapers-resolute
-  # the heavy terminals, alacritty is the one; not xterm, steam-libs depends on it
-  kitty wezterm terminator tilix konsole xfce4-terminal lxterminal gnome-console qterminal
+  # the heavy terminals, kitty is the one; not xterm, steam-libs depends on it
+  wezterm terminator tilix konsole xfce4-terminal lxterminal gnome-console qterminal
   # the X server and the X session's tools, gone with bspwm; x11-xserver-utils stays (Hyprland merges
   # .Xresources with xrdb), and so does Xwayland, a package of its own, for Steam and the games
   xserver-xorg xserver-xorg-core xserver-xorg-input-libinput xserver-xorg-input-wacom xinit bspwm sxhkd polybar
   suckless-tools xss-lock i3lock maim xclip xcompmgr xwallpaper autorandr xsettingsd redshift
+  # replaced by the Hyprland stack and bin/wifi + bin/bt, or unused; yad stays (steam-installer needs it),
+  # and so does vim (vim-gtk3 comes with install)
+  delta swaylock swayidle lxpolkit virt-manager discord foot surf xserver-xorg-legacy
+  wlopm wlr-randr xinput libgtk4-layer-shell0 libgtk4-layer-shell-dev
+  libchewing3-data libopencc-data libpinyin-data
   # NetworkManager stays off for iwd and systemd-networkd (install), so it goes with its plugins and the
   # wpa_supplicant iwd replaces
   network-manager network-manager-gnome network-manager-openvpn network-manager-pptp wpasupplicant
@@ -63,8 +70,9 @@ DISABLE=(ModemManager.service cups-browsed.service motd-news.timer ua-timer.time
 STALE=(org.gnome.Ptyxis nautilus evolution goa-1.0 gnome-initial-setup gnome-initial-setup-done
   tiling-assistant ubuntu-insights yelp ibus update-notifier gnome-xdg-terminals.list
   ubuntu-xdg-terminals.list xdg-terminals.list monitors.xml monitors.xml~
-  BraveSoftware chromium microsoft-edge opera vivaldi)
-installed() { dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null | grep -qx installed; }
+  chromium microsoft-edge opera vivaldi
+  discord foot i3 sway waybar geoclue-2.0 xterm)
+installed() { dpkg-query -W -f='${db:Status-Status}\n' "$1" 2>/dev/null | grep -qx installed; }
 remove=(); for p in "${REMOVE[@]}"; do installed "$p" && remove+=("$p"); done
 
 if [ "$DRY" == 1 ]; then
@@ -76,7 +84,7 @@ if [ "$DRY" == 1 ]; then
   LC_ALL=C apt-get -s purge --autoremove "${remove[@]}" | awk '/^Purg|^Remv/ {print "  " $2}'
   log "Services that would be disabled:"
   for u in "${DISABLE[@]}"; do systemctl -q is-enabled "$u" 2>/dev/null && echo "  $u"; done
-  log "~/.config entries that would go:"
+  log "$HOME/.config entries that would go:"
   for c in "${STALE[@]}"; do [ -e "$HOME/.config/$c" ] && echo "  $c"; done
   exit 0
 fi
@@ -115,7 +123,7 @@ for u in "${DISABLE[@]}"; do sudo systemctl disable --now "$u" 2>/dev/null || tr
 log "Removing configs of the removed apps"
 for c in "${STALE[@]}"; do rm -rf "${HOME:?}/.config/$c"; done
 # the dpkg leftovers of what went (the "rc" packages: their configs)
-rc=$(dpkg -l | awk '/^rc/ {print $2}')
-[ -n "$rc" ] && sudo apt purge -y $rc
+mapfile -t rc < <(dpkg -l | awk '/^rc/ {print $2}')
+[ "${#rc[@]}" -gt 0 ] && sudo apt purge -y "${rc[@]}"
 
 log "Done. Reboot: greetd takes over the login."

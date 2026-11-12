@@ -1,0 +1,32 @@
+#!/bin/sh
+# helium-bookmarks [tab|window]: Helium's own bookmarks (Ctrl+D, folders and all) in bin/x-menu, opened at once:
+# a new tab (SUPER+B), a new window (SUPER+SHIFT+B, `window`). The live Bookmarks file is read, so the list is
+# current; private/helium/bookmarks.tsv is the export (bin/helium-bookmarks-export). A line that matches no
+# bookmark is not lost: bin/web-url takes it as an address, a bang ("!yt", "!5") or a search. Renaming and
+# deleting stay in Helium's bookmark manager, copying the URL is Ctrl+L/Ctrl+C there.
+src=$HOME/.config/net.imput.helium/Default/Bookmarks
+mode=${1:-tab}
+
+[ -s "$src" ] || { notify-send -a helium "Bookmarks" "no Helium bookmarks file"; exit 0; }
+# url<TAB>title<TAB>folder, the same shape as the export; the menu shows "folder / title" over the URL
+list=$(jq -r '
+	def urls($path):
+		if .type == "url" then [.url, (.name // ""), ($path | join(" / "))]
+		else .name as $n | (.children // [])[] | urls($path + [$n]) end;
+	.roots | to_entries[] | .value | (.children // [])[] | urls([]) | @tsv
+' "$src" 2>/dev/null |
+	awk -F '\t' '!seen[$1]++ { t = ($2 == "" ? $1 : $2); print ($3 == "" ? t : $3 " / " t) "\t" $1 }' | sort -f)
+[ -n "$list" ] || { notify-send -a helium "Bookmarks" "no bookmarks yet"; exit 0; }
+
+line=$(printf '%s\n' "$list" | "$HOME/dotfiles/bin/x-menu" 'Bookmark:' 15) || exit 0
+url=$(printf '%s\n' "$list" | LINE="$line" awk -F '\t' 'BEGIN { l = ENVIRON["LINE"] } $0 == l { print $2; exit }')
+# no bookmark matches what was typed: the browser gets it as an address, a bang or a search
+if [ -z "$url" ]; then
+	url=$("$HOME/dotfiles/bin/web-url" "$line") || exit 0
+fi
+
+case $mode in
+window) ("$HOME/dotfiles/bin/helium" --new-window "$url" > /dev/null 2>&1 &) ;;
+copy) printf '%s' "$url" | "$HOME/dotfiles/bin/clip" ;;
+*) ("$HOME/dotfiles/bin/helium" "$url" > /dev/null 2>&1 &) ;;
+esac

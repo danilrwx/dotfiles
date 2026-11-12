@@ -1,6 +1,6 @@
 -- Colours after Alabaster: only a few things coloured, all the rest the plain
 -- fg, so colour means something. termguicolors is off, so they come from the
--- terminal's 16 ANSI slots (config/themes, Claude's dark-ansi the same),
+-- terminal's 16 ANSI slots (config/kitty/theme.conf, Claude's dark-ansi the same),
 -- the bright ones only: comments → grey, definitions (where a function or type
 -- is declared: after/queries) and control flow (branches, loops, return, goto,
 -- the preprocessor's #if/#ifdef/#endif) → magenta, calls → blue, types → cyan,
@@ -113,7 +113,7 @@ local function apply()
   end
 
   -- 2) ANSI palette on base + syntax groups, overriding the links it recognises.
-  -- the terminal's own text colour, the theme's foreground (bin/theme): slot 15 is not it everywhere
+  -- the terminal's own text colour, the palette's foreground (config/kitty/theme.conf): slot 15 is not it everywhere
   hl("Normal", { ctermfg = "NONE", ctermbg = "NONE" })
   -- not in captures until a query uses them, so set by name
   hl("@definition", PALETTE.definition)
@@ -234,9 +234,8 @@ local function apply()
   end
 end
 
--- also on 'background': nvim sets it when the terminal reports a new ground
--- (bin/theme switching dark and light), and resets its own groups (Search's
--- yellow) with it
+-- also on 'background': nvim sets it when the terminal reports a ground, and
+-- resets its own groups (Search's yellow) with it
 vim.api.nvim_create_autocmd("ColorScheme", {
   group = vim.api.nvim_create_augroup("claudelook", { clear = true }),
   callback = apply,

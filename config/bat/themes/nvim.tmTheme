@@ -2,7 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!-- nvim: bat on the terminal's ANSI slots in the roles of config/nvim/plugin/colors.lua: comments grey (8),
      definitions and control flow magenta (13), calls blue (12), types cyan (14), strings green (10), the rest
-     the text; so it follows the colour theme (bin/theme). #RR000000 is the slot RR, #00000001 the text.
+     the text; so it follows the terminal's palette (config/kitty/theme.conf). #RR000000 is the slot RR,
+     #00000001 the text.
      Linked to ~/.config/bat by install, built by `batcat cache --build`. -->
 <plist version="1.0"><dict>
 <key>name</key><string>nvim</string>

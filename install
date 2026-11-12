@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
-# ./install [--desktop] [--android] [--open-pencil] [--ru-mirror] [--skip-go] [--skip-ts]
-#   --desktop    the session (config/hypr, on Wayland), alacritty, wmenu, dunst, swaylock, greetd, and the GUI
-#                apps: Helium, virt-manager, Telegram,
-#                Discord, Steam. Then ./debloat strips GNOME and snapd
+# ./install [--desktop] [--android] [--ru-mirror] [--skip-go] [--skip-ts]
+#   --desktop    the session (config/hypr, on Wayland), kitty, wmenu, dunst, hyprlock, greetd, and the GUI
+#                apps: Helium, Steam. Then ./debloat strips GNOME and snapd
 #   --android    the Android SDK in ~/Android/Sdk (the command-line tools, platform-tools, the emulator, the
 #                newest platform and build-tools), the JDK it builds with, the udev rules for the phones by USB,
 #                Android Studio in /opt; --check compares these where they are installed, or with this flag
-#   --open-pencil  OpenPencil desktop and its local MCP bridge for Maki
 #   --ru-mirror  pin the Ubuntu archive to mirror.yandex.ru
 #   --skip-go    keep the Go tools in ~/go/bin as they are, no `go install` (the Go compiler in /usr/local/go
 #                is still updated)
@@ -25,12 +23,11 @@ problems=0
 problem() { log "check: $*"; problems=$((problems + 1)); }
 declared=()
 
-DESKTOP=0; ANDROID=0; OPEN_PENCIL=0; RU_MIRROR=0; SKIP_GO=0; SKIP_TS=0; CHECK=0
+DESKTOP=0; ANDROID=0; RU_MIRROR=0; SKIP_GO=0; SKIP_TS=0; CHECK=0
 for arg in "$@"; do
   case "$arg" in
     --desktop)     DESKTOP=1 ;;
     --android)     ANDROID=1 ;;
-    --open-pencil) OPEN_PENCIL=1 ;;
     --ru-mirror)   RU_MIRROR=1 ;;
     --skip-go)     SKIP_GO=1 ;;
     --skip-ts)     SKIP_TS=1 ;;
@@ -46,7 +43,6 @@ if [ "$CHECK" == 1 ]; then DESKTOP=1; SKIP_GO=1; SKIP_TS=1;
   # Android is opt-in, so it is compared where it was installed (or where --android was given with --check):
   # a machine that never asked for it is not told it lacks an SDK
   if [ -d "$HOME/Android/Sdk" ] || [ -d /opt/android-studio ]; then ANDROID=1; fi
-  if command -v OpenPencil > /dev/null; then OPEN_PENCIL=1; fi
   # only the differences on stdout: the section headers this script logs along the way would read as if it were
   # installing ("Installing Steam") and bury the report
   log() { case "$1" in check:*) echo -e "\033[0;31m$1\033[0m" ;; esac; }
@@ -54,14 +50,73 @@ fi
 
 # the paths below (link, put, the submodules) are the repo's, whatever directory this is started from
 cd "$HOME/dotfiles" || { log "No $HOME/dotfiles"; exit 1; }
+# shellcheck source=/dev/null
 [ -f /etc/os-release ] && . /etc/os-release
 [ "${ID:-}" == ubuntu ] || { log "Unsupported system: ${ID:-$(uname -s)}, Ubuntu only"; exit 1; }
 log "This is an Ubuntu $VERSION_ID system."
 
+# Fetching ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# What comes from the web: the hash its project publishes is what decides, unpack refuses an archive that would
+# write outside the directory it is given, and swap_tree renames the new tree in. Nothing lands until the last step.
+# fetch URL FILE HASH: the URL into FILE, its HASH checked — the sha256's hex, or sha1:<hex> where a release
+# publishes only that; a `.sha256` file's contents work as they are. No hash, no download: a caller that cannot
+# name the file it expects does not get to install it
+fetch() {
+  local url=$1 file=$2 want=$3 sum alg=sha256sum
+  case "$want" in sha1:*) alg=sha1sum; want=${want#sha1:} ;; esac
+  want=$(printf '%s' "$want" | tr -d '[:space:]')
+  [ -n "$want" ] || { log "$url: no checksum to verify it against, not downloaded"; return 1; }
+  curl -fsSL -o "$file" "$url" || { rm -f "$file"; return 1; }
+  sum=$("$alg" "$file" | awk '{print $1}')
+  [ "$sum" == "$want" ] && return 0
+  log "$url: ${alg%sum} is $sum, want $want"
+  rm -f "$file"
+  return 1
+}
+
+# unpack ARCHIVE DIR: the archive's tree into DIR (mktemp -d gives an empty one). A member with an absolute path
+# or a .. in it stops it before anything is written: tar.gz, tar.xz and zip, by the name
+unpack() {
+  local a=$1 dir=$2 bad
+  case "$a" in
+  *.tar.gz|*.tgz) bad=$(tar -tzf "$a" | grep -E '^/|(^|/)\.\.(/|$)') && { log "$a: $bad"; return 1; }
+                  mkdir -p "$dir" && tar -xzf "$a" -C "$dir" ;;
+  *.tar.xz)       bad=$(tar -tJf "$a" | grep -E '^/|(^|/)\.\.(/|$)') && { log "$a: $bad"; return 1; }
+                  mkdir -p "$dir" && tar -xJf "$a" -C "$dir" ;;
+  *.zip)          bad=$(unzip -Z1 "$a" | grep -E '^/|(^|/)\.\.(/|$)') && { log "$a: $bad"; return 1; }
+                  unzip -q "$a" -d "$dir" ;;
+  *)              log "$a: not a tar.gz, tar.xz or zip"; return 1 ;;
+  esac
+}
+
+# asroot DIR CMD...: CMD where DIR's parent is the user's (the SDK in ~/Android), with sudo where it is root's
+# (/usr/local, /opt)
+asroot() {
+  local dir=$1; shift
+  if [ -w "$(dirname "$dir")" ]; then "$@"; else sudo "$@"; fi
+}
+
+# swap_tree NEW DIR: the tree at NEW takes DIR's place in two renames, the old one aside as DIR.old and removed
+# only once the new one is in; a failed second rename puts the old one back
+swap_tree() {
+  local new=$1 dir=$2
+  asroot "$dir" rm -rf "$dir.new" || return 1
+  asroot "$dir" mv "$new" "$dir.new" || { asroot "$dir" rm -rf "$dir.new"; return 1; }
+  if [ -e "$dir" ]; then asroot "$dir" mv "$dir" "$dir.old" || { asroot "$dir" rm -rf "$dir.new"; return 1; }; fi
+  if asroot "$dir" mv "$dir.new" "$dir"; then asroot "$dir" rm -rf "$dir.old"; return 0; fi
+  if [ -e "$dir.old" ] && asroot "$dir" mv "$dir.old" "$dir"; then log "$dir: the previous tree is back"; fi
+  return 1
+}
+
 # Packages ────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # the CLI set; Go itself and everything Go-based comes from dev_tools (go.dev, then `go install`)
-BASE_PKGS=(build-essential git wget zip unzip curl file procps zsh tmux gnupg2 htop ugrep ripgrep fzf bat jq clangd
-  neovim nodejs npm fd-find fastfetch)
+BASE_PKGS=(build-essential git libcap2-bin openssl wget zip unzip curl file procps zsh tmux gnupg2
+  htop ugrep ripgrep fzf bat jq clangd neovim nodejs npm fd-find fastfetch
+  openssh-server pass vim-gtk3 age)
+# the dev tools (not the libraries of a build): compilers and build systems, the linters, the debugger and the
+# image/data helpers nvim's clangd/gopls and the repo's shell scripts reach for
+DEV_PKGS=(clang clang-format bison flex meson ninja-build valac valgrind bear tokei shellcheck scdoc pkg-config
+  gobject-introspection python3-pil systemd-dev glslang-tools git-filter-repo evtest rust-clippy)
 # the desktop base, explicit so it holds on Ubuntu Server as on a debloated desktop (installed by hand, so
 # debloat's autoremove keeps it): the Intel GPU's video decode and encode (VA-API, iHD), Wi-Fi by iwd,
 # Bluetooth, sound, fingerprint, power profiles, firmware updates, the file dialogs' portal, the keyring
@@ -73,13 +128,14 @@ DESKTOP_PKGS=(iwd bluez rfkill
   udisks2 fwupd systemd-oomd accountsservice polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
   intel-media-va-driver-non-free
   gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk cups
-  greetd tuigreet virt-manager tigervnc-viewer ssh-askpass-gnome thunar
+  gstreamer1.0-libav gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
+  greetd tuigreet libvirt-daemon-system libvirt-clients qemu-system-x86 tigervnc-viewer ssh-askpass-gnome thunar
   openvpn openvpn-systemd-resolved)
 # the Wayland session, without recommends: Xwayland (Steam, games), the terminal, the launcher, the clipboard,
 # screenshots, the lock and the idle, the night light, notifications, the polkit agent, the media keys' tools,
 # bin/x-run's gtk-launch, screen sharing's portal
-WL_PKGS=(xwayland hyprland xdg-desktop-portal-hyprland x11-xserver-utils alacritty wmenu wl-clipboard grim
-  slurp swaylock swayidle wlsunset dunst libnotify-bin lxpolkit brightnessctl playerctl libgtk-3-bin)
+WL_PKGS=(xwayland hyprland xdg-desktop-portal-hyprland x11-xserver-utils kitty wmenu wl-clipboard grim
+  slurp hyprlock hypridle wlsunset dunst libnotify-bin hyprpolkitagent brightnessctl playerctl libgtk-3-bin)
 DOCKER_PKGS=(docker.io docker-compose-v2 docker-buildx)
 # --android, without recommends: the JDK Gradle builds with (Studio runs on the JBR in its own tarball), the
 # udev rules that make a phone on USB readable without root (android-sdk-platform-tools-common brings
@@ -90,17 +146,18 @@ ANDROID_PKGS=(openjdk-21-jdk-headless android-sdk-platform-tools-common libxrend
 
 # Install the pinned RTK release into ~/.local/bin without configuring agent-specific hooks.
 install_rtk() {
-  local ver=v1.0.1 target asset tmp expected actual
+  local ver=v1.0.1 target asset tmp
   case "$(uname -m)" in
     x86_64|amd64) target=x86_64-unknown-linux-musl ;;
     aarch64|arm64) target=aarch64-unknown-linux-gnu ;;
     *) problem "RTK unsupported on architecture $(uname -m)"; return 1 ;;
   esac
-  if "$HOME/.local/bin/rtk" --version 2>/dev/null \
-    | awk -v ver="${ver#v}" '$0 == "rtk " ver { found=1 } END { exit !found }' \
-    && "$HOME/.local/bin/rtk" gain >/dev/null 2>&1; then
-    return
-  fi
+  # the binary is the one this script pinned, and it runs (gain): a truncated download that kept its name
+  rtk_ok() {
+    "$1" --version 2>/dev/null | awk -v ver="${ver#v}" '$0 == "rtk " ver { found=1 } END { exit !found }' \
+      && "$1" gain >/dev/null 2>&1
+  }
+  rtk_ok "$HOME/.local/bin/rtk" && return
   if [ "$CHECK" == 1 ]; then
     problem "RTK is not $ver or rtk gain verification fails"
     return 0
@@ -110,33 +167,16 @@ install_rtk() {
   mkdir -p "$HOME/.local/bin"
   tmp=$(mktemp -d)
   log "Installing RTK $ver"
-  if curl -fsSL -o "$tmp/$asset" "https://github.com/rtk-ai/rtk/releases/download/$ver/$asset" \
-    && curl -fsSL -o "$tmp/checksums.txt" "https://github.com/rtk-ai/rtk/releases/download/$ver/checksums.txt"; then
-    expected=$(awk -v asset="$asset" '$2 == asset {print $1}' "$tmp/checksums.txt")
-    actual=$(sha256sum "$tmp/$asset" | awk '{print $1}')
-    if [ -n "$expected" ] && [ "$expected" == "$actual" ] \
-      && ! tar -tzf "$tmp/$asset" | grep -qE '^/|(^|/)\.\.(/|$)' \
-      && tar -xzf "$tmp/$asset" -C "$tmp" && [ -x "$tmp/rtk" ]; then
-      if install -m 755 "$tmp/rtk" "$HOME/.local/bin/rtk.new"; then
-        if ! "$HOME/.local/bin/rtk.new" --version 2>/dev/null \
-          | awk -v ver="${ver#v}" '$0 == "rtk " ver { found=1 } END { exit !found }' \
-          || ! "$HOME/.local/bin/rtk.new" gain >/dev/null 2>&1; then
-          rm -f "$HOME/.local/bin/rtk.new"
-          log "RTK verification failed; installation left unchanged"
-        elif mv "$HOME/.local/bin/rtk.new" "$HOME/.local/bin/rtk"; then
-          log "Installed RTK $ver"
-        else
-          rm -f "$HOME/.local/bin/rtk.new"
-          log "RTK installation failed; installation left unchanged"
-        fi
-      else
-        log "RTK staging failed; installation left unchanged"
-      fi
-    else
-      log "RTK download/checksum/archive verification failed; installation left unchanged"
-    fi
+  if fetch "https://github.com/rtk-ai/rtk/releases/download/$ver/checksums.txt" "$tmp/checksums.txt" \
+    && fetch "https://github.com/rtk-ai/rtk/releases/download/$ver/$asset" "$tmp/$asset" \
+      "$(awk -v asset="$asset" '$2 == asset {print $1}' "$tmp/checksums.txt")" \
+    && unpack "$tmp/$asset" "$tmp/x" && [ -x "$tmp/x/rtk" ] \
+    && install -m 755 "$tmp/x/rtk" "$HOME/.local/bin/rtk.new" && rtk_ok "$HOME/.local/bin/rtk.new" \
+    && mv -f "$HOME/.local/bin/rtk.new" "$HOME/.local/bin/rtk"; then
+    log "Installed RTK $ver"
   else
-    log "RTK download failed; continue installation"
+    rm -f "$HOME/.local/bin/rtk.new"
+    log "RTK download, checksum or verification failed; installation left unchanged"
   fi
   rm -rf "$tmp"
   return 0
@@ -157,7 +197,7 @@ pkg() {
   fi
   sudo apt install "${flags[@]}" -y "$@"
 }
-installed() { dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null | grep -qx installed; }
+installed() { dpkg-query -W -f='${db:Status-Status}\n' "$1" 2>/dev/null | grep -qx installed; }
 
 # ln under --check: the two links made outside link() (fd, GTK's theme) are compared, not written
 ln() {
@@ -169,6 +209,13 @@ ln() {
 # xdg-mime under --check: it writes ~/.config/mimeapps.list, the only setting this script makes outside a link,
 # a file under /etc or a package
 xdg-mime() { [ "$CHECK" == 1 ] || command xdg-mime "$@"; }
+
+# xdg-settings too: it writes ~/.config/mimeapps.list as well (the default browser)
+xdg-settings() { [ "$CHECK" == 1 ] || command xdg-settings "$@"; }
+
+# gsettings under --check: inert too; the GTK theme and the portal's color-scheme it sets are compared against
+# nothing, nothing here reads them back
+gsettings() { [ "$CHECK" == 1 ] || command gsettings "$@"; }
 
 # sudo under --check: inert, so the direct calls outside the helpers (apt, sed on /etc, systemctl, the HONOR
 # patch script) change nothing. The state they produce is what put, pkg and user_systemctl compare
@@ -208,6 +255,23 @@ put() {
   fi
   sudo cmp -s "$src" "$dst" && return 1
   sudo install -D -m "${2:-644}" "$src" "$dst"
+}
+
+# expect_line FILE REGEX: under --check, whether a file another package owns holds the line this script's sed puts
+# there. No repo copy to compare, the way put has one for the files under etc/; the sed itself is inert under
+# --check, sudo being
+expect_line() {
+  [ "$CHECK" == 1 ] || return 0
+  grep -qE "$2" "$1" 2>/dev/null || problem "$1: no line matching $2"
+}
+
+# unit_enabled NAME: under --check, whether the system unit is enabled — the state the sudo systemctl enable
+# calls make (user_systemctl has the --user ones)
+unit_enabled() {
+  [ "$CHECK" == 1 ] || return 0
+  local state
+  state=$(systemctl is-enabled "$1" 2>/dev/null) || state=${state:-unknown}
+  [ "$state" == enabled ] || problem "$1 is ${state:-unknown}, want enabled"
 }
 
 join_group() {
@@ -285,8 +349,6 @@ base() {
   mkdir -p "$HOME/.local/bin" "$HOME/.local/share"
   for f in .gitconfig .gitignore_global .profile .tmux.conf .zprofile .zshrc; do link "$f" "$HOME/$f"; done
   for c in k9s htop lazygit nvim bat maki MangoHud; do link "config/$c" "$HOME/.config/$c"; done
-  # herdr's is one file beside its own runtime state (logs, sockets), so the file alone, not the directory
-  link config/herdr/config.toml "$HOME/.config/herdr/config.toml"
   # bat's own theme (config/bat/themes) into its cache
   batcat cache --build > /dev/null 2>&1 || true
   # the private CLI configs (claude, pi, CLAUDE.md), kept out of this public repo
@@ -303,6 +365,7 @@ base() {
   fi
   sudo apt update -y
   pkg "${BASE_PKGS[@]}"
+  pkg "${DEV_PKGS[@]}"
   # Ubuntu ships fd as fdfind; nvim's :find and file picker look for fd
   ln -sf /usr/bin/fdfind "$HOME/.local/bin/fd"
 }
@@ -313,7 +376,7 @@ desktop_system() {
   pkg "${DESKTOP_PKGS[@]}"
   pkg --no-install-recommends "${WL_PKGS[@]}"
 
-  # Network: iwd for Wi-Fi with its own DHCP (impala is its TUI), systemd-networkd for the wire through
+  # Network: iwd for Wi-Fi with its own DHCP (bin/wifi drives its iwctl), systemd-networkd for the wire through
   # netplan, DNS by systemd-resolved. No NetworkManager: the one VPN wanted is VLESS, which NM cannot do
   put /etc/iwd/main.conf
   put /etc/netplan/01-wired.yaml 600
@@ -329,7 +392,7 @@ desktop_system() {
       case "$keymgmt" in
         wpa-psk|sae) printf '[Security]\nPassphrase=%s\n' "$psk" | sudo install -D -m 600 /dev/stdin "/var/lib/iwd/$file.psk" ;;
         "")          sudo install -D -m 600 /dev/null "/var/lib/iwd/$file.open" ;;
-        *)           log "  $ssid: $keymgmt is not moved, add it in impala" ;;
+        *)           log "  $ssid: $keymgmt is not moved, add it with bin/wifi or iwctl" ;;
       esac
     done
     # the switch itself at the next boot: done now, it would cut the network under this very script
@@ -338,6 +401,8 @@ desktop_system() {
     log "Wi-Fi moves to iwd at the next boot"
   fi
   sudo systemctl enable iwd systemd-networkd
+  unit_enabled iwd
+  unit_enabled systemd-networkd
 
   # No fingerprint login: pam_fprintd first in common-auth waits up to 10 s for a finger on every sudo,
   # login and unlock. Its PAM profile off, which pam-auth-update keeps off across package updates; fprintd
@@ -346,11 +411,13 @@ desktop_system() {
 
   # us and ru, Ctrl+Space between them, for the console (tuigreet) and X, as localectl set-x11-keymap writes
   # them; the layout on Scroll Lock's LED (bin/x-status reads it as RU), Caps as Ctrl the hwdb's
+  expect_line /etc/default/keyboard '^XKBLAYOUT="us,ru"$'
   sudo sed -i -e 's/^XKBLAYOUT=.*/XKBLAYOUT="us,ru"/' -e 's/^XKBVARIANT=.*/XKBVARIANT=","/' \
     -e 's/^XKBOPTIONS=.*/XKBOPTIONS="grp:ctrl_space_toggle,grp_led:scroll"/' /etc/default/keyboard
 
   # Bluetooth LE Audio (LC3, music and the mic at once, on headsets that have it): the kernel's ISO sockets, still
   # behind an experimental UUID, and BlueZ's experimental profiles, BAP (PACS, ASCS) among them
+  expect_line /etc/bluetooth/main.conf '^KernelExperimental = 6fbaf188'
   sudo sed -i -e 's/^#\?KernelExperimental = .*/KernelExperimental = 6fbaf188-05e0-496a-9885-d6ddfdb4e03e/' \
     -e 's/^#\?Experimental = .*/Experimental = true/' /etc/bluetooth/main.conf
 
@@ -358,6 +425,7 @@ desktop_system() {
   # lists are /usr/share/wayland-sessions (Hyprland's); GDM goes with GNOME in ./debloat. It takes over the
   # display-manager alias at the next boot, the running session is left alone
   put /etc/greetd/config.toml
+  unit_enabled greetd
   # the X sessions of the desktops before this one out of tuigreet's list
   sudo rm -f /usr/share/xsessions/i3.desktop /usr/share/xsessions/i3-with-shmlog.desktop \
     /usr/share/xsessions/x-i3.desktop /usr/share/xsessions/bspwm.desktop /usr/share/xsessions/x-bspwm.desktop
@@ -370,6 +438,7 @@ desktop_system() {
   fi
   # tuigreet draws on the console, so its scale is the console font: Terminus 16x32, twice the 8x16
   # default, on vt 7 as well, which the default ACTIVE_CONSOLES leaves out
+  expect_line /etc/default/console-setup '^FONTSIZE="16x32"$'
   sudo sed -i -e 's|^ACTIVE_CONSOLES=.*|ACTIVE_CONSOLES="/dev/tty[1-7]"|' -e 's|^FONTFACE=.*|FONTFACE="Terminus"|' \
     -e 's|^FONTSIZE=.*|FONTSIZE="16x32"|' /etc/default/console-setup
 }
@@ -382,49 +451,41 @@ desktop_session() {
   link config/dunst "$HOME/.config/dunst"
   # Bluetooth headsets kept in A2DP when an app opens a mic, the mic being the built-in array
   link config/wireplumber "$HOME/.config/wireplumber"
-  # GTK3's theme, adw-gtk3 (named by bin/theme as the gtk-theme setting): libadwaita's look, built on the named colours
-  # bin/theme writes; not in Ubuntu's archive, its release from GitHub
-  local adw=v6.5
-  if [ ! -d "$HOME/.local/share/themes/adw-gtk3-dark" ]; then
-    if [ "$CHECK" == 1 ]; then problem "the adw-gtk3 GTK theme is not installed (bin/theme names it)"
-    else
-      mkdir -p "$HOME/.local/share/themes"
-      curl -fsSL "https://github.com/lassekongo83/adw-gtk3/releases/download/$adw/adw-gtk3$adw.tar.xz" \
-        | tar -xJ -C "$HOME/.local/share/themes" || log "Failed to install adw-gtk3. Continue installation."
-    fi
-  fi
+  # GTK3's theme is the system's own (Adwaita-dark, a dark theme), so nothing is downloaded here
   # what systemd --user starts gets these (SSH_ASKPASS, NO_AT_BRIDGE), and .profile the session
   for e in config/environment.d/*.conf; do link "$e" "$HOME/.config/environment.d/${e##*/}"; done
-  # their named colours, the colour theme's, for libadwaita (GTK4) too: bin/theme writes them
-  for g in gtk-3.0 gtk-4.0; do
-    mkdir -p "$HOME/.config/$g"
-    ln -snf "${XDG_STATE_HOME:-$HOME/.local/state}/theme/gtk.css" "$HOME/.config/$g/gtk.css"
-  done
+  # the theme's named colours, one file for GTK3 and libadwaita (GTK4); and GTK3's settings.ini, what it reads
+  # where gsettings does not reach (under Xwayland, with no XSETTINGS daemon serving it)
+  for g in gtk-3.0 gtk-4.0; do link config/gtk/gtk.css "$HOME/.config/$g/gtk.css"; done
+  link config/gtk/settings.ini "$HOME/.config/gtk-3.0/settings.ini"
+  # the GTK theme and the portal's color-scheme: what libadwaita's apps, Helium and the file dialogs take
+  gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
+  gsettings set org.gnome.desktop.interface color-scheme prefer-dark
   # the system's app entries that are tools, hidden from bin/x-run's list
   for a in config/applications/*.desktop; do link "$a" "$HOME/.local/share/applications/${a##*/}"; done
 
-  # the colour theme (bin/theme), kitty's colours until another is picked; what Iosevka lacks, the emoji above
-  # all, from Noto Color Emoji rather than a monochrome fallback (config/fontconfig)
-  local theme=${XDG_STATE_HOME:-$HOME/.local/state}/theme
-  [ -e "$theme/theme.toml" ] || "$HOME/dotfiles/bin/theme" kitty
-  # the terminal's font: Iosevka Term, Nerd Font patched (bin/theme names it), whose private-use area holds
-  # the icons k9s, lazygit, fastfetch and tmux's status draw, which Ubuntu's fonts-iosevka has not. The
-  # release carries 72 files and 87 MB; four are installed, the Mono build, so an icon is one cell wide
+  # what Iosevka lacks, the emoji above all, from Noto Color Emoji rather than a monochrome fallback
+  # (config/fontconfig)
+  # the terminal's font: Iosevka Term, Nerd Font patched (config/kitty/theme.conf names it), whose private-use
+  # area holds the icons k9s, lazygit, fastfetch and tmux's status draw, which Ubuntu's fonts-iosevka has not.
+  # The release carries 72 files and 87 MB; four are installed, the Mono build, so an icon is one cell wide
   local nfver=v3.5.1 nfsum=054a4a369cdcc5d57e9bc91ea56dfefd66c71c253dcb0c0d7b72c0810373da26
   local nfdir=$HOME/.local/share/fonts/IosevkaTermNerdFontMono
   if [ ! -f "$nfdir/IosevkaTermNerdFontMono-Regular.ttf" ]; then
     if [ "$CHECK" == 1 ]; then
-      problem "the Iosevka Term Nerd Font is not installed (bin/theme names it)"
+      problem "the Iosevka Term Nerd Font is not installed (config/kitty/theme.conf names it)"
     else
       log "Installing the Iosevka Term Nerd Font $nfver"
       local nf
       nf=$(mktemp)
-      if curl -fsSL -o "$nf" "https://github.com/ryanoasis/nerd-fonts/releases/download/$nfver/IosevkaTerm.tar.xz" \
-        && echo "$nfsum  $nf" | sha256sum -c --quiet -; then
+      if fetch "https://github.com/ryanoasis/nerd-fonts/releases/download/$nfver/IosevkaTerm.tar.xz" "$nf" "$nfsum"; then
         mkdir -p "$nfdir"
-        tar -xJf "$nf" -C "$nfdir" \
-          IosevkaTermNerdFontMono-{Regular,Bold,Italic,BoldItalic}.ttf \
-          && fc-cache -f "$HOME/.local/share/fonts" > /dev/null
+        if tar -xJf "$nf" -C "$nfdir" IosevkaTermNerdFontMono-{Regular,Bold,Italic,BoldItalic}.ttf; then
+          fc-cache -f "$HOME/.local/share/fonts" > /dev/null \
+            || log "fc-cache failed; the font is installed but the cache is stale"
+        else
+          log "Failed to install the Iosevka Term Nerd Font. Continue installation."
+        fi
       else
         log "Failed to install the Iosevka Term Nerd Font. Continue installation."
       fi
@@ -432,9 +493,11 @@ desktop_session() {
     fi
   fi
   link config/fontconfig/fonts.conf "$HOME/.config/fontconfig/fonts.conf"
-  mkdir -p "$HOME/.config/alacritty"
-  ln -snf "${XDG_STATE_HOME:-$HOME/.local/state}/theme/alacritty.toml" "$HOME/.config/alacritty/alacritty.toml"
-  sudo update-alternatives --set x-terminal-emulator /usr/bin/alacritty
+  # kitty: the config that no theme changes, and theme.conf, the pastel palette its include names (a new window
+  # reads both; a running one rereads them on SIGUSR1)
+  link config/kitty/kitty.conf "$HOME/.config/kitty/kitty.conf"
+  link config/kitty/theme.conf "$HOME/.config/kitty/theme.conf"
+  sudo update-alternatives --set x-terminal-emulator /usr/bin/kitty
   # thunar for folders: Helium's "show in folder", the portal's and the rest's
   xdg-mime default thunar.desktop inode/directory
 
@@ -453,30 +516,94 @@ desktop_session() {
 }
 
 # Desktop apps ────────────────────────────────────────────────────────────────────────────────────────────────────────
+# The vendors the session runs, each leaving the machine as it was when it fails: the VLESS client and the OpenVPN
+# profiles behind bin/vpn-*, the browser, the games.
 desktop_apps() {
-  # Wi-Fi and Bluetooth TUIs (impala, bluetui), one author, static builds; not in the archive
-  local t name ver asset
-  for t in impala:v0.9.0:impala-x86_64-unknown-linux-musl bluetui:v0.8.1:bluetui-x86_64-linux-musl; do
-    IFS=: read -r name ver asset <<< "$t"
-    if [ "$("$HOME/.local/bin/$name" --version 2>/dev/null | awk 'NR==1{print "v" $2}')" != "$ver" ]; then
-      [ "$CHECK" == 1 ] && { problem "$name is not $ver"; continue; }
-      log "Installing $name $ver"
-      curl -fsSL -o "$HOME/.local/bin/$name.new" "https://github.com/pythops/$name/releases/download/$ver/$asset" \
-        && chmod +x "$HOME/.local/bin/$name.new" && mv "$HOME/.local/bin/$name.new" "$HOME/.local/bin/$name"
-    fi
-  done
+  vless_client
+  openvpn_profiles
+  join_group libvirt   # virsh and the VMs (DESKTOP_PKGS has libvirt/qemu, not the virt-manager GUI)
+  firefox
+  helium
+  helium_profile
+  brave
+  steam
+}
 
-  # mihomo, the VLESS client behind bin/vpn-vless: the static build, not in the archive, with the capability its
-  # TUN mode needs to route the system's traffic, so it runs as a --user service (config/systemd/mihomo.service)
-  local mihomo=$HOME/.local/bin/mihomo ver=v1.19.32
+# Firefox from Mozilla's own repo, not the archive's: Ubuntu's `firefox` is a snap installer, and ./debloat pins
+# snapd out (etc/apt/preferences.d/no-snapd.pref), so the archive would leave a stub that debloat then purges. The
+# signing key is taken only with the fingerprint pinned here, and the pin file puts Mozilla's 1000 over Ubuntu's
+# 500, so apt upgrade follows Mozilla. Its policies (etc/firefox/policies) carry what the Chromium ones do, and
+# the autoExportHTML that bin/firefox-bookmarks reads
+firefox() {
+  if ! installed firefox; then
+    if [ "$CHECK" == 1 ]; then
+      problem "firefox is not installed"
+    else
+      log "Installing Firefox"
+      local key
+      key=$(curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg)
+      if gpg --show-keys --with-colons <<< "$key" 2>/dev/null \
+        | grep -qx 'fpr:::::::::35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3:'; then
+        printf '%s\n' "$key" | sudo install -D -m 644 /dev/stdin /etc/apt/keyrings/packages.mozilla.org.asc
+        put /etc/apt/sources.list.d/mozilla.sources
+        put /etc/apt/preferences.d/mozilla-firefox
+        sudo apt update && pkg firefox
+      else
+        log "Mozilla's signing key does not match its pinned fingerprint, Firefox not installed"
+      fi
+    fi
+  fi
+  # everything about the browser is in this one file: the prefs, the three extensions, Google. A file that does not
+  # parse is ignored whole and without a word (about:policies is where it shows), so a broken one is not installed
+  if jq -e . etc/firefox/policies/policies.json > /dev/null; then
+    put /etc/firefox/policies/policies.json
+  else
+    problem "etc/firefox/policies/policies.json is not valid JSON, not installed"
+  fi
+  command -v firefox &> /dev/null && xdg-settings set default-web-browser firefox.desktop
+
+  # Firefox's own profile list: without it the browser starts a fresh profile and the one already here — cookies,
+  # history, bookmarks — is left behind. Written once, Firefox maintains it from then on
+  if [ "$CHECK" == 1 ]; then
+    [ -f "$HOME/.mozilla/firefox/profiles.ini" ] \
+      || problem "no $HOME/.mozilla/firefox/profiles.ini: Firefox would start a fresh profile"
+  elif [ ! -f "$HOME/.mozilla/firefox/profiles.ini" ]; then
+    mkdir -p "$HOME/.mozilla/firefox"
+    printf '%s\n' '[Profile0]' 'Name=dotfiles' 'IsRelative=1' 'Path=dotfiles' 'Default=1' \
+      '' '[General]' 'StartWithLastProfile=1' 'Version=2' > "$HOME/.mozilla/firefox/profiles.ini"
+  fi
+  # the chrome: config/firefox/chrome, the stylesheet the profile reads when
+  # toolkit.legacyUserProfileCustomizations.stylesheets (the policy) says it may
+  link config/firefox/chrome "$HOME/.mozilla/firefox/dotfiles/chrome"
+}
+
+# mihomo, the VLESS client behind bin/vpn-vless: the static build, not in the archive, with the capability its
+# TUN mode needs to route the system's traffic, so it runs as a --user service (config/systemd/mihomo.service)
+vless_client() {
+  local mihomo=$HOME/.local/bin/mihomo ver=v1.19.32 arch
+  local sum=8451100836c9eda194331c2babfad490b2faf30cebc1a04b0e76fd8ac2d35d10   # v1.19.32, amd64
+  arch=$(dpkg --print-architecture)
+  # the release pinned here is the amd64 build: another architecture gets nothing rather than a binary that
+  # cannot run (its -v check would fail, and every run would install it again).
   # -v prints a line of its own now ("Use tags: with_gvisor"), so only the first one holds the version
-  if [ "$("$mihomo" -v 2>/dev/null | awk 'NR==1{print $3}')" != "$ver" ]; then
+  if [ "$arch" != amd64 ]; then
+    log "mihomo: the pinned $ver release is amd64 only, skipped on $arch"
+    [ "$CHECK" == 1 ] && problem "mihomo: no $arch build pinned"
+  elif [ "$("$mihomo" -v 2>/dev/null | awk 'NR==1{print $3}')" != "$ver" ]; then
     if [ "$CHECK" == 1 ]; then
       problem "mihomo is not $ver"
     else
       log "Installing mihomo $ver"
-      curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/$ver/mihomo-linux-amd64-$ver.gz" \
-        | gunzip > "$mihomo.new" && chmod +x "$mihomo.new" && mv "$mihomo.new" "$mihomo"
+      local gz
+      gz=$(mktemp)
+      if fetch "https://github.com/MetaCubeX/mihomo/releases/download/$ver/mihomo-linux-amd64-$ver.gz" "$gz" "$sum" \
+        && gunzip -c "$gz" > "$mihomo.new" && chmod +x "$mihomo.new"; then
+        mv -f "$mihomo.new" "$mihomo"
+      else
+        rm -f "$mihomo.new"
+        log "mihomo download or checksum failed; the old binary stays. Continue installation."
+      fi
+      rm -f "$gz"
     fi
   fi
   if [ "$CHECK" == 1 ]; then
@@ -489,13 +616,17 @@ desktop_apps() {
   fi
   # its TUN sets and reverts the Meta link's DNS in systemd-resolved, without a password prompt each time
   put /etc/polkit-1/rules.d/50-resolved-links.rules
+  link config/systemd/mihomo.service "$HOME/.config/systemd/user/mihomo.service"
+  user_systemctl daemon-reload
+}
 
-  # OpenVPN (bin/vpn-openvpn): each private/config/openvpn/NAME.ovpn as /etc/openvpn/client/NAME.conf for
-  # openvpn-client@NAME.service, root's alone (the keys are in it). NAME.auth, the login and the password
-  # line by line, goes next to it as what auth-user-pass reads, NAME.pass as the key's passphrase for
-  # askpass; the server's DNS goes to systemd-resolved
-  # through openvpn-systemd-resolved, for the names behind it. The polkit rule starts and stops the units
-  # without sudo
+# OpenVPN (bin/vpn-openvpn): each private/config/openvpn/NAME.ovpn as /etc/openvpn/client/NAME.conf for
+# openvpn-client@NAME.service, root's alone (the keys are in it). NAME.auth, the login and the password
+# line by line, goes next to it as what auth-user-pass reads, NAME.pass as the key's passphrase for
+# askpass; the server's DNS goes to systemd-resolved
+# through openvpn-systemd-resolved, for the names behind it. The polkit rule starts and stops the units
+# without sudo
+openvpn_profiles() {
   put /etc/polkit-1/rules.d/50-openvpn-client.rules
   local ovpn name conf
   for ovpn in private/config/openvpn/*.ovpn; do
@@ -525,13 +656,12 @@ EOT
       || { log "Installing the OpenVPN profile $name"; sudo install -D -m 600 "$conf" "/etc/openvpn/client/$name.conf"; }
     rm -f "$conf"
   done
-  link config/systemd/mihomo.service "$HOME/.config/systemd/user/mihomo.service"
-  user_systemctl daemon-reload
+}
 
-  join_group libvirt   # virt-manager (DESKTOP_PKGS)
-
-  # Helium, ungoogled Chromium with uBlock Origin, from its apt repo, so updates come with apt upgrade: its
-  # signing key from GitHub, taken only with the fingerprint pinned here; amd64 only
+# Helium, ungoogled Chromium with uBlock Origin, from its apt repo, so updates come with apt upgrade: its
+# signing key from GitHub, taken only with the fingerprint pinned here; amd64 only. Lolka, an Electron app with
+# no apt repo, is the same shape: a .deb from the web, against the hash its manifest names
+helium() {
   if [ "$(dpkg --print-architecture)" == amd64 ] && ! installed helium-bin; then
     if [ "$CHECK" == 1 ]; then
       problem "helium-bin is not installed"
@@ -550,7 +680,6 @@ EOT
       fi
     fi
   fi
-  command -v helium &> /dev/null && xdg-settings set default-web-browser helium.desktop
   # Helium's policies, Chromium's directory, which it reads (JSON can hold no comment, so these): Memory Saver
   # on, balanced, the tabs out of sight letting go of their memory; and privacy: no saved passwords, autofill,
   # search suggestions or history, WebRTC kept behind the proxy, no prefetching, HTTPS only, no geolocation,
@@ -558,14 +687,34 @@ EOT
   put /etc/chromium/policies/managed/dotfiles.json || true
   put /etc/chromium/policies/managed/privacy.json || true
 
-  # Lolka, an Electron app with no apt repo: the .deb its electron-builder manifest names, checked
-  # against the manifest's hash
   if [ "$(dpkg --print-architecture)" == amd64 ] && ! installed lolka; then
     log "Installing Lolka"
     local lolka=https://storage.yandexcloud.net/lolka-electron/releases manifest
     manifest=$(curl -fsSL "$lolka/latest-linux.yml") &&
       deb_from "$lolka/$(awk '/^path:/ { print $2 }' <<< "$manifest")" "$(awk '/^sha512:/ { print $2 }' <<< "$manifest")"
   fi
+
+  # the browser's launcher entry, made from the system's on every run, its Exec bin/helium: --force-dark-mode
+  # (the theme is dark) and the VA-API encode (iHD) for calls and screen sharing, which Chromium leaves off on
+  # Linux and chrome://flags has no switch for. It hides the system entry in ~/.local/share/applications
+  local desk=/usr/share/applications/helium.desktop
+  [ -f "$desk" ] && sed "s|^Exec=helium|Exec=\"$HOME/dotfiles/bin/helium\"|" "$desk" \
+    > "$HOME/.local/share/applications/helium.desktop"
+
+  # Helium's own bookmarks (Ctrl+D) mirrored into private: the path unit exports them when Chromium rewrites the
+  # file, so bin/helium-bookmarks and git have the current list; Helium stays the source of truth
+  link config/systemd/helium-bookmarks.service "$HOME/.config/systemd/user/helium-bookmarks.service"
+  link config/systemd/helium-bookmarks.path "$HOME/.config/systemd/user/helium-bookmarks.path"
+  user_systemctl daemon-reload
+  user_systemctl enable helium-bookmarks.path
+  # the watched file appears at Helium's first run: a missing one would fail the start, so start it then
+  [ -f "$HOME/.config/net.imput.helium/Default/Bookmarks" ] && user_systemctl start helium-bookmarks.path
+  user_systemctl start helium-bookmarks.service
+}
+
+# The files Helium keeps its own state in, edited only while it is not running (it rewrites them on exit): the GPU
+# flag, the UI mode its own Appearance beats, and the search engine it keeps twice
+helium_profile() {
   # GPU compositing: Chromium's blocklist takes this GPU (Arc B370) for software compositing, and
   # scrolling at 3120x2080 120Hz drops frames on it; the chrome://flags switch that overrides the list,
   # put in Helium's Local State while it is not running (it rewrites the file on exit)
@@ -577,40 +726,82 @@ EOT
       "$state" > "$state.new" && mv "$state.new" "$state"
   fi
 
-  # hardware video encode (VA-API, iHD) for calls and screen sharing, a feature Chromium leaves off on
-  # Linux and chrome://flags has no switch for, and its UI dark always (its "Device" mode turns light here,
-  # the portal's prefer-dark notwithstanding): Helium's launcher entry with the flags, made from the system
-  # one on every run, hiding it in ~/.local/share/applications
-  local desk=/usr/share/applications/helium.desktop
-  [ -f "$desk" ] && sed 's|^Exec=helium|& --enable-features=AcceleratedVideoEncoder --force-dark-mode|' "$desk" \
-    > "$HOME/.local/share/applications/helium.desktop"
-
-  # Telegram: the official tarball in ~/.local/opt, which updates itself and writes its own .desktop file
-  if [ ! -x "$HOME/.local/opt/Telegram/Telegram" ]; then
-    log "Installing Telegram"
-    mkdir -p "$HOME/.local/opt"
-    curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJ -C "$HOME/.local/opt" \
-      && ln -sf "$HOME/.local/opt/Telegram/Telegram" "$HOME/.local/bin/telegram"
+  # Its own UI takes the GTK theme install names (Adwaita-dark) and follows it; the profile's Appearance > Mode
+  # has to be "Device" for that, and for bin/helium's flag to count at all (a stored Light beats both)
+  local prefs=$HOME/.config/net.imput.helium/Default/Preferences
+  if [ -s "$prefs" ] && ! pgrep -x helium > /dev/null \
+    && [ "$(jq -r '.browser.theme.color_scheme2 // 0' "$prefs")" != 0 ]; then
+    jq '.browser.theme.color_scheme2 = 0' "$prefs" > "$prefs.new" && mv "$prefs.new" "$prefs"
   fi
 
-  # Discord: the official .deb, which does not update itself; a rerun installs the current one
-  local discord_url
-  discord_url=$(curl -fsS -o /dev/null -w '%{redirect_url}' "https://discord.com/api/download?platform=linux&format=deb")
-  if [ -n "$discord_url" ] && [ "$(dpkg-query -W -f='${Version}' discord 2>/dev/null)" != "$(basename "$discord_url" .deb | sed 's/^discord-//')" ]; then
-    log "Installing Discord"
-    deb_from "$discord_url"
+  # the search engine is Google, its builtin entry, which the profile keeps twice: a GUID in
+  # default_search_provider (the choice) and a copy of the engine itself in default_search_provider_data
+  # (what answers a search before the engine list is read). Helium's bangs, the !keywords of Kagi's list
+  # (Fiverr, Amazon among them), come back from its services with GUIDs of their own, and a choice left
+  # pointing at one of them put that bang back as the engine on every start, over anything picked in the
+  # settings; the copy stayed on it too, so a search went to Amazon with Google chosen. Both go to Google,
+  # and to the same value, since the two disagreeing reads as a tampered choice and is reset. While it is
+  # not running (it rewrites Preferences on exit)
+  local google=485bf7d3-0215-45af-87dc-538868000001 guid copy engine='{"short_name":"Google","keyword":"google.com",
+    "url":"https://www.google.com/search?q={searchTerms}",
+    "suggestions_url":"https://www.google.com/complete/search?client=chrome&q={searchTerms}",
+    "favicon_url":"https://www.gstatic.com/images/branding/searchlogo/ico/favicon.ico",
+    "synced_guid":"485bf7d3-0215-45af-87dc-538868000001","prepopulate_id":1,
+    "safe_for_autoreplace":true,"input_encodings":["UTF-8"],"is_active":1}'
+  if [ -s "$prefs" ] && ! pgrep -x helium > /dev/null; then
+    read -r guid copy <<< "$(jq -r '[.default_search_provider.guid,
+      (.default_search_provider_data.template_url_data.synced_guid // "")] | join(" ")' "$prefs")"
+    if [ "$guid" != "$google" ] || [ "$copy" != "$google" ]; then
+      jq --arg guid "$google" --argjson engine "$engine" \
+        '.default_search_provider_data = {template_url_data: $engine, mirrored_template_url_data: $engine}
+         | .default_search_provider.guid = $guid' "$prefs" > "$prefs.new" && mv "$prefs.new" "$prefs"
+    fi
   fi
+}
 
-  # Steam: multiverse's steam-installer, which fetches and updates Valve's client; needs i386
-  log "Installing Steam"
-  if ! dpkg --print-foreign-architectures | grep -qx i386; then
-    sudo dpkg --add-architecture i386
-    sudo apt update -y
+# Brave, Chromium with its own Shields: the official apt repo, its signing key taken only with the fingerprints
+# pinned here (the archive is signed by two keys, the newer one too), and the policies in etc/brave/policies/managed
+# that turn every Brave service off — Rewards, Wallet, VPN, Talk, News, Leo, Playlist, Speedreader, P3A — and set the
+# Shields defaults. Not the default browser: Firefox is; this is the plain Chromium to compare against
+brave() {
+  if ! installed brave-browser; then
+    if [ "$CHECK" == 1 ]; then
+      problem "brave-browser is not installed"
+    else
+      log "Installing Brave"
+      local key
+      key=$(mktemp)
+      if curl -fsSL -o "$key" https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
+        && gpg --show-keys --with-colons "$key" 2>/dev/null | grep -qE \
+          'fpr:::::::::(DBF1A116C220B8C7164F98230686B78420038257|47D32A74E9A9E013A4B4926C68D513D36A73CD96):'; then
+        sudo install -D -m 644 "$key" /usr/share/keyrings/brave-browser-archive-keyring.gpg
+        put /etc/apt/sources.list.d/brave-browser.sources
+        sudo apt update && pkg brave-browser
+      else
+        log "Brave's signing key does not match its pinned fingerprints, not installed"
+      fi
+      rm -f "$key"
+    fi
   fi
-  pkg steam-installer
+  put /etc/brave/policies/managed/dotfiles.json
+}
+
+# Steam: multiverse's steam-installer, which fetches and updates Valve's client; needs i386. Skipped when the
+# client is already there (the package, or the /usr/games/steam it leaves), since it updates itself
+steam() {
+  if installed steam-installer || installed steam-launcher || [ -x /usr/games/steam ] || [ -d "$HOME/.steam" ]; then
+    [ "$CHECK" == 1 ] || log "Steam is already installed; skipping"
+  else
+    log "Installing Steam"
+    if ! dpkg --print-foreign-architectures | grep -qx i386; then
+      sudo dpkg --add-architecture i386
+      sudo apt update -y
+    fi
+    pkg steam-installer
+  fi
   # games under gamescope (their own Xwayland at full resolution, where the session's is 2x blurry), MangoHud's overlay in
-  # them: `gamescope -W 3120 -H 2080 -w 3120 -h 2080 -f --immediate-flips -- mangohud %command%`
-  pkg gamescope mangohud
+  # them, gamemode for the scheduler: `gamescope -W 3120 -H 2080 -w 3120 -h 2080 -f --immediate-flips -- mangohud %command%`
+  pkg gamescope mangohud gamemode
 }
 
 # Android ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -652,13 +843,9 @@ android_sdk() {
       sha=$(printf '%s\n' "$block" | sed -n 's|.*<checksum type="sha1">\([0-9a-f]*\)<.*|\1|p' | head -1)
       url=$(printf '%s\n' "$block" | sed -n 's|.*<url>\(commandlinetools-linux-[^<]*\)<.*|\1|p' | head -1)
       if [ -n "$url" ] && [ -n "$sha" ] \
-        && curl -fsSL -o "$tmp/$url" "https://dl.google.com/android/repository/$url" \
-        && [ "$(sha1sum "$tmp/$url" | awk '{print $1}')" == "$sha" ] \
-        && ! unzip -Z1 "$tmp/$url" | grep -qE '^/|(^|/)\.\.(/|$)' \
-        && unzip -q "$tmp/$url" -d "$tmp/x" && [ -x "$tmp/x/cmdline-tools/bin/sdkmanager" ]; then
-        mkdir -p "$sdk/cmdline-tools"
-        rm -rf "$sdk/cmdline-tools/latest"
-        mv "$tmp/x/cmdline-tools" "$sdk/cmdline-tools/latest"
+        && fetch "https://dl.google.com/android/repository/$url" "$tmp/$url" "sha1:$sha" \
+        && unpack "$tmp/$url" "$tmp/x" && [ -x "$tmp/x/cmdline-tools/bin/sdkmanager" ] \
+        && mkdir -p "$sdk/cmdline-tools" && swap_tree "$tmp/x/cmdline-tools" "$sdk/cmdline-tools/latest"; then
         log "Installed the command-line tools from $url"
       else
         log "The command-line tools download/checksum failed; no Android SDK this run. Continue installation."
@@ -731,24 +918,14 @@ android_studio() {
     return 0
   fi
 
-  # 1.6 GB: unpacked beside the old tree and verified there, then two renames swap them, as install_go does
+  # 1.6 GB: downloaded, unpacked beside the old tree and verified there, then swap_tree renames it in
   log "Installing Android Studio $ver"
-  if curl -fsSL -o "$tmp/studio.tar.gz" "$url" \
-    && [ "$(sha256sum "$tmp/studio.tar.gz" | awk '{print $1}')" == "$sha" ] \
-    && ! tar -tzf "$tmp/studio.tar.gz" | grep -qE '^/|(^|/)\.\.(/|$)' \
-    && tar -xzf "$tmp/studio.tar.gz" -C "$tmp" && [ -x "$tmp/android-studio/bin/studio.sh" ] \
-    && sudo rm -rf "$dir.new" "$dir.old" && sudo mkdir -p "$(dirname "$dir")" \
-    && sudo mv "$tmp/android-studio" "$dir.new" \
-    && { [ ! -e "$dir" ] || sudo mv "$dir" "$dir.old"; } && sudo mv "$dir.new" "$dir"; then
-    sudo rm -rf "$dir.old"
+  if fetch "$url" "$tmp/studio.tar.gz" "$sha" && unpack "$tmp/studio.tar.gz" "$tmp/x" \
+    && [ -x "$tmp/x/android-studio/bin/studio.sh" ] && swap_tree "$tmp/x/android-studio" "$dir"; then
     printf '%s\n' "$ver" | sudo tee "$dir/.install-version" > /dev/null
     log "Installed Android Studio $ver"
   else
-    if [ -e "$dir.old" ] && [ ! -e "$dir" ] && sudo mv "$dir.old" "$dir"; then
-      log "Android Studio installation failed; the previous $dir is back. Continue installation."
-    else
-      log "Android Studio installation failed; see $dir and $dir.old. Continue installation."
-    fi
+    log "Android Studio $ver not installed; $dir left as it was. Continue installation."
   fi
   rm -rf "$tmp"
 }
@@ -789,36 +966,15 @@ install_go() {
   fi
 
   log "Installing Go $ver"
-  if ! curl -fsSL -o "$tmp/$file" "https://go.dev/dl/$file"; then
-    log "Go $ver download failed; /usr/local/go left as it is. Continue installation."
+  if ! fetch "https://go.dev/dl/$file" "$tmp/$file" "$sha" \
+    || ! unpack "$tmp/$file" "$tmp/x" \
+    || [ "$("$tmp/x/go/bin/go" version 2>/dev/null | awk '{print $3}')" != "$ver" ] \
+    || ! swap_tree "$tmp/x/go" /usr/local/go; then
+    log "Go $ver download, checksum or verification failed; /usr/local/go left as it was. Continue installation."
     rm -rf "$tmp"
     return 1
   fi
-  if [ "$(sha256sum "$tmp/$file" | awk '{print $1}')" != "$sha" ] \
-    || tar -tzf "$tmp/$file" | grep -qE '^/|(^|/)\.\.(/|$)' \
-    || ! tar -xzf "$tmp/$file" -C "$tmp" \
-    || [ "$("$tmp/go/bin/go" version 2>/dev/null | awk '{print $3}')" != "$ver" ]; then
-    log "Go $ver checksum/archive verification failed; /usr/local/go left as it is. Continue installation."
-    rm -rf "$tmp"
-    return 1
-  fi
-
-  # staged beside the old tree: the swap is two renames, and the old one comes back if the second fails
-  if sudo rm -rf /usr/local/go.new /usr/local/go.old \
-    && sudo mv "$tmp/go" /usr/local/go.new \
-    && { [ ! -e /usr/local/go ] || sudo mv /usr/local/go /usr/local/go.old; } \
-    && sudo mv /usr/local/go.new /usr/local/go; then
-    sudo rm -rf /usr/local/go.old
-    log "Installed Go $ver"
-  else
-    if [ -e /usr/local/go.old ] && [ ! -e /usr/local/go ] && sudo mv /usr/local/go.old /usr/local/go; then
-      log "Go installation failed; the previous /usr/local/go is back. Continue installation."
-    else
-      log "Go installation failed; see /usr/local/go and /usr/local/go.old. Continue installation."
-    fi
-    rm -rf "$tmp"
-    return 1
-  fi
+  log "Installed Go $ver"
   rm -rf "$tmp"
 }
 
@@ -828,14 +984,15 @@ dev_tools() {
   # leave an empty /usr/local/bin/kubectl that `command -v` takes as installed on every later run
   if ! command -v kubectl &> /dev/null; then
     log "Installing kubectl"
-    local arch url tmp
+    local arch url tmp sha
     arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
     url="https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/${arch}/kubectl"
     tmp=$(mktemp)
-    if curl -fsSL -o "$tmp" "$url" && echo "$(curl -fsSL "$url.sha256")  $tmp" | sha256sum -c --quiet; then
-      sudo install -m 755 "$tmp" /usr/local/bin/kubectl
+    if ! sha=$(curl -fsSL "$url.sha256"); then
+      log "kubectl's .sha256 is unreachable; nothing installed. Continue installation."
+    elif fetch "$url" "$tmp" "$sha" && sudo install -m 755 "$tmp" /usr/local/bin/kubectl; then :
     else
-      log "kubectl download failed. Continue installation."
+      log "kubectl download or checksum failed; nothing installed. Continue installation."
     fi
     rm -f "$tmp"
   fi
@@ -878,7 +1035,8 @@ dev_tools() {
       github.com/matryer/moq@latest \
       github.com/onsi/ginkgo/v2/ginkgo@v2.14.0 \
       github.com/mrjosh/helm-ls@latest \
-      github.com/nametake/golangci-lint-langserver@latest
+      github.com/nametake/golangci-lint-langserver@latest \
+      github.com/getsops/sops/v3/cmd/sops@latest
     do
       go install "$mod" || log "go install $mod failed. Continue installation."
     done
@@ -900,43 +1058,12 @@ dev_tools() {
   command -v vpnctl &> /dev/null &&
     vpnctl completion zsh > "$HOME/.local/share/completions/vpnctl.zsh" 2>/dev/null || true
 
-  # d8 (deckhouse-cli) and claude-code by their own installers; d8's default INSTALL_DIR, /opt, is off PATH
+  # d8 (deckhouse-cli) by its own installer; d8's default INSTALL_DIR, /opt, is off PATH
   if ! command -v d8 &> /dev/null; then
     log "Installing d8"
     INSTALL_DIR=/usr/local/bin UNATTENDED=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/deckhouse/deckhouse-cli/main/tools/install.sh)"
   fi
-  if ! command -v claude &> /dev/null; then
-    log "Installing claude-code"
-    curl -fsSL https://claude.ai/install.sh | bash
-  fi
 }
-open_pencil() {
-  local version=0.16.0 arch deb status=0
-  arch=$(dpkg --print-architecture)
-  if [ "$arch" != amd64 ]; then
-    log "OpenPencil: no configured desktop package for $arch"
-    return 1
-  fi
-  if [ "$CHECK" == 1 ]; then
-    [ "$(dpkg-query -W -f='${Version}' open-pencil 2>/dev/null)" == "$version" ] \
-      || problem "OpenPencil $version is not installed"
-    [ "$("$HOME/.local/bin/openpencil-mcp" --version 2>/dev/null)" == "$version" ] \
-      || problem "OpenPencil MCP $version is not installed"
-    return 0
-  fi
-  if [ "$(dpkg-query -W -f='${Version}' open-pencil 2>/dev/null)" != "$version" ]; then
-    deb=$(mktemp --suffix .deb) || return 1
-    curl -fsSL -o "$deb" "https://github.com/open-pencil/open-pencil/releases/download/v$version/OpenPencil_${version}_amd64.deb" \
-      && printf '%s  %s\n' '451e90efd4607f528ff5e705dfc6f6193eaeef222c33aa69ebfbd863d170bd73' "$deb" | sha256sum -c - \
-      && sudo apt install -y "$deb" || status=$?
-    rm -f "$deb"
-    [ "$status" == 0 ] || return "$status"
-  fi
-  if [ "$("$HOME/.local/bin/openpencil-mcp" --version 2>/dev/null)" != "$version" ]; then
-    npm install --global --prefix "$HOME/.local" "@open-pencil/mcp@$version" || return
-  fi
-}
-
 # System: login shell, Docker, Caps as Ctrl, the HONOR fixes ──────────────────────────────────────────────────────────
 system() {
   # zsh as the login shell; passwd, not $SHELL, which stays stale until the next login
@@ -985,14 +1112,13 @@ if [ "$DESKTOP" == 1 ]; then
 fi
 # Android is a flag of its own: the SDK and Studio have nothing to do with the desktop
 [ "$ANDROID" == 1 ] && android
-if [ "$OPEN_PENCIL" == 1 ]; then open_pencil || exit 1; fi
 if [ "$CHECK" == 1 ]; then
   # links in $HOME into the repo that this run does not declare: a leftover of a config the repo dropped (a
-  # stale ~/.config/sway, which the repo dropped) or one made by hand. private's install links its own
-  # and bin/theme writes the state files, both out of this script's declarations
+  # stale ~/.config/sway, which the repo dropped) or one made by hand. private's install links its own,
+  # out of this script's declarations
   while read -r l; do
     case "$(readlink "$l")" in
-      "$HOME/dotfiles/private/"*|"$HOME/dotfiles/config/themes/"*) continue ;;
+      "$HOME/dotfiles/private/"*) continue ;;
     esac
     case " ${declared[*]} " in *" $l "*) continue ;; esac
     if [ ! -e "$l" ]; then problem "orphan link $l -> $(readlink "$l"), the repo has no such path"

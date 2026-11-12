@@ -1,0 +1,86 @@
+"comment"            = { fg = "comment" }
+"comment.block"      = { fg = "comment" }
+"comment.line"       = { fg = "comment" }
+"definition"         = { fg = "pink" }
+"keyword.directive"  = { fg = "pink" }
+"keyword.return"     = { fg = "pink" }
+"keyword.repeat"     = { fg = "pink" }
+"keyword.exception"  = { fg = "pink" }
+"function.call"      = { fg = "blue" }
+"function.builtin"   = { fg = "blue" }
+"type"               = { fg = "cyan" }
+"type.builtin"       = { fg = "cyan" }
+"string"             = { fg = "green" }
+"markup.heading"     = { fg = "foreground", modifiers = ["bold"] }
+"markup.raw"         = { fg = "green" }
+"markup.link.text"   = { fg = "foreground", modifiers = ["underlined"] }
+[palette]
+background      = "#000000"
+background_2    = "#111111"
+foreground      = "#ffffff"
+comment         = "#6b6b6b"
+comment_lighter = "#888888"
+cyan            = "#93d4d4"
+green           = "#addf9c"
+orange          = "#efe6a8"
+pink            = "#dbb0e4"
+purple          = "#dbb0e4"
+red             = "#f09a9b"
+yellow          = "#efe6a8"
+blue            = "#9cc4f0"
+teal            = "#93d4d4"
+current_line    = "#141414"
+selection       = "#2d2d2d"
+lavender        = "#5e7690"
+sapphire        = "#7d9dc0"
+sky             = "#93d4d4"
+maroon          = "#e0787a"
+flamingo        = "#e9a0a1"
+rosewater       = "#cccccc"
+[ui]
+user               = { fg = "blue" }
+assistant          = { fg = "foreground" }
+assistant_prefix   = { fg = "rosewater" }
+thinking           = { fg = "comment", modifiers = ["italic"] }
+tool               = { fg = "foreground" }
+tool_bg            = { bg = "background_2" }
+tool_prefix        = { fg = "foreground", modifiers = ["bold"] }
+tool_path          = { fg = "cyan" }
+tool_annotation    = { fg = "comment" }
+tool_success       = { fg = "green" }
+tool_error         = { fg = "red" }
+tool_dim           = { fg = "comment" }
+error              = { fg = "red" }
+status_dim         = { fg = "comment" }
+strikethrough      = { fg = "comment", modifiers = ["crossed_out"] }
+code_block         = { fg = "foreground" }
+horizontal_rule    = { fg = "comment" }
+diff_old           = { bg = "#211515" }
+diff_new           = { bg = "#181f15" }
+diff_old_emphasis  = { bg = "#482e2e" }
+diff_new_emphasis  = { bg = "#33422e" }
+diff_line_nr       = { fg = "comment" }
+todo_completed     = { fg = "green" }
+todo_in_progress   = { fg = "yellow" }
+todo_pending       = { fg = "comment" }
+todo_cancelled     = { fg = "red", modifiers = ["crossed_out"] }
+table_border       = { fg = "comment" }
+item_selected      = { fg = "background", bg = "blue" }
+item               = { fg = "blue" }
+item_desc          = { fg = "comment" }
+accent             = { fg = "orange" }
+panel_border       = { fg = "blue" }
+panel_title        = { fg = "blue", modifiers = ["bold"] }
+cursor             = { fg = "background", bg = "foreground" }
+keybind_key        = { fg = "cyan", modifiers = ["bold"] }
+keybind_section    = { fg = "blue", modifiers = ["bold"] }
+input_border       = { fg = "comment" }
+keybind_desc       = { fg = "foreground" }
+queue              = { fg = "purple" }
+status_notice      = { fg = "orange" }
+status_retry_error = { fg = "red" }
+status_retry_info  = { fg = "comment" }
+input_placeholder  = { fg = "comment" }
+timestamp          = { fg = "comment" }
+spinner            = { fg = "orange" }
+active             = { fg = "cyan" }

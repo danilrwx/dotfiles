@@ -1,15 +1,13 @@
 #!/bin/sh
 # $mod+x: pick Wi-Fi, Bluetooth, the removable drives (bin/x-drives), the sound output or input, the headset mode or
-# the power profile. Wi-Fi and Bluetooth are impala and bluetui in a floating alacritty of app id x-ctl (bin/x-term);
+# the power profile. Wi-Fi and Bluetooth are bin/wifi and bin/bt, over the daemons' own iwctl and bluetoothctl;
 # output, input and power are a second pick, the current one first: PipeWire's sinks or
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between headphones
 # (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vpn-vless: on through TUN or as the
 # system proxy, off, the rule or global mode, the profile. openvpn brings a profile of bin/vpn-openvpn up, or the
-# one up down. theme picks the colour theme (bin/theme), the current one first.
+# one up down.
 # pick PROMPT: a line of stdin by bin/x-menu
 pick() { "$HOME/dotfiles/bin/x-menu" "$1"; }
-# term TITLE CMD: alacritty (bin/x-term) with app id x-ctl
-term() { exec "$HOME/dotfiles/bin/x-term" -c x-ctl -t "$1" -e "$2"; }
 # devices Sink|Source: "ID<tab>NAME" per PipeWire audio sink or source, the default one first and marked "* ". Only the
 # nodes of class Audio/Sink or Audio/Source: wpctl status lists WirePlumber's internal Bluetooth nodes as the
 # sinks, while the headset's real one sits under its filters. Left out unless the default: those whose every
@@ -104,22 +102,18 @@ openvpn() {
 		notify-send -a fnkeys -r 9912 -u critical "OpenVPN" "$err"
 	fi
 }
-choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\nopenvpn\ndrives\npower\ntheme\n' | pick ctl) || exit 0
+choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\nopenvpn\ndrives\npower\n' | pick ctl) || exit 0
 case "$choice" in
 power)
 	cur=$(powerprofilesctl get)
 	profile=$({ echo "$cur"; powerprofilesctl list | sed -n 's/^[* ] *\([a-z-]*\):$/\1/p' | grep -vx "$cur"; } | pick power) || exit 0
 	powerprofilesctl set "$profile" && notify-send -a fnkeys -r 9912 -t 1500 "Power profile" "$profile" ;;
-wifi)      term Wi-Fi "$HOME/.local/bin/impala" ;;
+wifi)      exec "$HOME/dotfiles/bin/wifi" ;;
 drives)    exec "$HOME/dotfiles/bin/x-drives" ;;
-bluetooth) term Bluetooth "$HOME/.local/bin/bluetui" ;;
+bluetooth) exec "$HOME/dotfiles/bin/bt" ;;
 output)    sound Sink output ;;
 input)     sound Source input ;;
 headset)   headset ;;
 vless)     vless ;;
 openvpn)   openvpn ;;
-theme)
-	t="$HOME/dotfiles/bin/theme"
-	name=$("$t" | sort -k2 -r | cut -d' ' -f1 | pick theme) || exit 0
-	exec "$t" "$name" ;;
 esac

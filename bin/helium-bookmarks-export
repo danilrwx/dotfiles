@@ -1,0 +1,19 @@
+#!/bin/sh
+# helium-bookmarks-export: Helium's bookmarks (its own Ctrl+D store) into ~/dotfiles/private/helium/bookmarks.tsv —
+# url, title, folder path. The systemd path unit runs it when Chromium rewrites the file; Helium is the source of
+# truth, this is the copy git and our menu keep.
+src=$HOME/.config/net.imput.helium/Default/Bookmarks
+dst=$HOME/dotfiles/private/helium/bookmarks.tsv
+
+[ -s "$src" ] || exit 0
+mkdir -p "${dst%/*}"
+tmp=$(mktemp) || exit 1
+trap 'rm -f "$tmp" "$dst.new"' EXIT
+jq -r '
+	def urls($path):
+		if .type == "url" then [.url, (.name // ""), ($path | join(" / "))]
+		else .name as $n | (.children // [])[] | urls($path + [$n]) end;
+	.roots | to_entries[] | .value | (.children // [])[] | urls([]) | @tsv
+' "$src" > "$tmp" || exit 1
+awk -F '\t' '!seen[$1]++' "$tmp" | sort -f -t "$(printf '\t')" -k2,2 > "$dst.new" || exit 1
+mv "$dst.new" "$dst"

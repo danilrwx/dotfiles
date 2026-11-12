@@ -1,0 +1,421 @@
+{
+  "policies": {
+    "DisableFeedbackCommands": true,
+    "DisableFirefoxAccounts": true,
+    "DisableFirefoxStudies": true,
+    "DisableFormHistory": true,
+    "DisablePocket": true,
+    "DisableProfileImport": true,
+    "DisableTelemetry": true,
+    "DontCheckDefaultBrowser": true,
+    "EnableTrackingProtection": {
+      "Value": true,
+      "Locked": true,
+      "Cryptomining": true,
+      "Fingerprinting": true
+    },
+    "ExtensionSettings": {
+      "patchtree@danilrwx.github.io": {
+        "installation_mode": "force_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/patchtree/latest.xpi"
+      },
+      "sponsorBlocker@ajay.app": {
+        "installation_mode": "normal_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi"
+      },
+      "uBlock0@raymondhill.net": {
+        "installation_mode": "normal_installed",
+        "install_url": "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
+      }
+    },
+    "FirefoxHome": {
+      "Search": true,
+      "TopSites": false,
+      "SponsoredTopSites": false,
+      "Highlights": false,
+      "Pocket": false,
+      "SponsoredPocket": false,
+      "Snippets": false,
+      "Locked": true
+    },
+    "FirefoxSuggest": {
+      "WebSuggestions": false,
+      "SponsoredSuggestions": false,
+      "ImproveSuggest": false,
+      "Locked": true
+    },
+    "NetworkPrediction": false,
+    "OfferToSaveLogins": false,
+    "OverrideFirstRunPage": "",
+    "OverridePostUpdatePage": "",
+    "PasswordManagerEnabled": false,
+    "PictureInPicture": {
+      "Enabled": false,
+      "Locked": true
+    },
+    "Preferences": {
+      "beacon.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "breakpad.reportURL": {
+        "Value": "",
+        "Status": "locked"
+      },
+      "browser.ai.control.default": {
+        "Value": "blocked",
+        "Status": "locked"
+      },
+      "browser.bookmarks.autoExportHTML": {
+        "Value": true,
+        "Status": "locked"
+      },
+      "browser.bookmarks.openInTabClosesMenu": {
+        "Value": false,
+        "Status": "default"
+      },
+      "browser.contentblocking.category": {
+        "Value": "strict",
+        "Status": "default"
+      },
+      "browser.crashReports.unsubmittedCheck.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.discovery.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.download.open_pdf_attachments_inline": {
+        "Value": true,
+        "Status": "default"
+      },
+      "browser.ml.chat.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.ml.enable": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.ml.linkPreview.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.ml.pageAssist.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.newtab.preload": {
+        "Value": false,
+        "Status": "default"
+      },
+      "browser.newtabpage.activity-stream.default.sites": {
+        "Value": "",
+        "Status": "locked"
+      },
+      "browser.newtabpage.activity-stream.showSponsored": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.newtabpage.activity-stream.showSponsoredTopSites": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.newtabpage.activity-stream.showWeather": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.ping-centre.telemetry": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.places.speculativeConnect.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.privatebrowsing.forceMediaMemoryCache": {
+        "Value": true,
+        "Status": "default"
+      },
+      "browser.search.update": {
+        "Value": false,
+        "Status": "default"
+      },
+      "browser.send_pings": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.sessionstore.interval": {
+        "Value": 60000,
+        "Status": "default"
+      },
+      "browser.sessionstore.privacy_level": {
+        "Value": 2,
+        "Status": "default"
+      },
+      "browser.sessionstore.resume_from_crash": {
+        "Value": true,
+        "Status": "default"
+      },
+      "browser.shopping.experience2023.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.startup.page": {
+        "Value": 3,
+        "Status": "default"
+      },
+      "browser.tabs.crashReporting.sendReport": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.tabs.firefox-view": {
+        "Value": false,
+        "Status": "default"
+      },
+      "browser.tabs.groups.smart.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.uidensity": {
+        "Value": 1,
+        "Status": "default"
+      },
+      "browser.uitour.enabled": {
+        "Value": false,
+        "Status": "default"
+      },
+      "browser.urlbar.speculativeConnect.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.urlbar.suggest.engines": {
+        "Value": false,
+        "Status": "default"
+      },
+      "browser.urlbar.suggest.history": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "browser.urlbar.suggest.openpage": {
+        "Value": true,
+        "Status": "default"
+      },
+      "browser.urlbar.suggest.searchengine": {
+        "Value": false,
+        "Status": "default"
+      },
+      "browser.urlbar.trending.featureGate": {
+        "Value": false,
+        "Status": "default"
+      },
+      "browser.vpn_promo.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "dom.ipc.processCount.webIsolated": {
+        "Value": 8,
+        "Status": "default"
+      },
+      "dom.ipc.processPrelaunch.enabled": {
+        "Value": false,
+        "Status": "default"
+      },
+      "dom.security.https_only_mode": {
+        "Value": true,
+        "Status": "default"
+      },
+      "extensions.getAddons.cache.enabled": {
+        "Value": false,
+        "Status": "default"
+      },
+      "extensions.htmlaboutaddons.recommendations.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "extensions.ml.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "findbar.highlightAll": {
+        "Value": true,
+        "Status": "default"
+      },
+      "full-screen-api.transition-duration.enter": {
+        "Value": "0 0",
+        "Status": "default"
+      },
+      "full-screen-api.transition-duration.leave": {
+        "Value": "0 0",
+        "Status": "default"
+      },
+      "general.smoothScroll.msdPhysics.enabled": {
+        "Value": true,
+        "Status": "default"
+      },
+      "geo.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "gfx.canvas.accelerated": {
+        "Value": true,
+        "Status": "default"
+      },
+      "gfx.canvas.accelerated.cache-size": {
+        "Value": 512,
+        "Status": "default"
+      },
+      "gfx.webrender.all": {
+        "Value": true,
+        "Status": "default"
+      },
+      "javascript.options.mem.high_water_mark": {
+        "Value": 256,
+        "Status": "default"
+      },
+      "media.autoplay.default": {
+        "Value": 5,
+        "Status": "default"
+      },
+      "media.ffmpeg.vaapi.enabled": {
+        "Value": true,
+        "Status": "default"
+      },
+      "media.ffvpx.enabled": {
+        "Value": false,
+        "Status": "default"
+      },
+      "media.videocontrols.picture-in-picture.video-toggle.enabled": {
+        "Value": false,
+        "Status": "default"
+      },
+      "network.IDN_show_punycode": {
+        "Value": true,
+        "Status": "locked"
+      },
+      "network.auth.subresource-http-auth-allow": {
+        "Value": 1,
+        "Status": "default"
+      },
+      "network.dns.disablePrefetchFromHTTPS": {
+        "Value": true,
+        "Status": "default"
+      },
+      "network.dnsCacheExpiration": {
+        "Value": 3600,
+        "Status": "default"
+      },
+      "network.http.max-persistent-connections-per-server": {
+        "Value": 10,
+        "Status": "default"
+      },
+      "network.http.referer.XOriginPolicy": {
+        "Value": 2,
+        "Status": "default"
+      },
+      "network.http.referer.XOriginTrimmingPolicy": {
+        "Value": 2,
+        "Status": "default"
+      },
+      "network.http.speculative-parallel-limit": {
+        "Value": 0,
+        "Status": "locked"
+      },
+      "network.trr.mode": {
+        "Value": 5,
+        "Status": "default"
+      },
+      "pdfjs.enableScripting": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "permissions.default.geo": {
+        "Value": 2,
+        "Status": "locked"
+      },
+      "permissions.manager.defaultsUrl": {
+        "Value": "",
+        "Status": "default"
+      },
+      "places.history.enabled": {
+        "Value": false,
+        "Status": "locked"
+      },
+      "privacy.antitracking.isolateContentScriptResources": {
+        "Value": true,
+        "Status": "default"
+      },
+      "privacy.globalprivacycontrol.enabled": {
+        "Value": true,
+        "Status": "locked"
+      },
+      "privacy.userContext.enabled": {
+        "Value": true,
+        "Status": "default"
+      },
+      "security.csp.reporting.enabled": {
+        "Value": false,
+        "Status": "default"
+      },
+      "security.ssl.treat_unsafe_negotiation_as_broken": {
+        "Value": true,
+        "Status": "default"
+      },
+      "security.tls.enable_0rtt_data": {
+        "Value": false,
+        "Status": "default"
+      },
+      "sidebar.position_start": {
+        "Value": true,
+        "Status": "user"
+      },
+      "sidebar.revamp": {
+        "Value": true,
+        "Status": "user"
+      },
+      "sidebar.verticalTabs": {
+        "Value": true,
+        "Status": "user"
+      },
+      "sidebar.visibility": {
+        "Value": "hide-sidebar",
+        "Status": "user"
+      },
+      "signon.formlessCapture.enabled": {
+        "Value": false,
+        "Status": "default"
+      },
+      "signon.privateBrowsingCapture.enabled": {
+        "Value": false,
+        "Status": "default"
+      },
+      "toolkit.legacyUserProfileCustomizations.stylesheets": {
+        "Value": true,
+        "Status": "default"
+      },
+      "widget.use-xdg-desktop-portal.file-picker": {
+        "Value": 1,
+        "Status": "default"
+      },
+      "widget.wayland.fractional-scale.enabled": {
+        "Value": true,
+        "Status": "default"
+      }
+    },
+    "SearchEngines": {
+      "Default": "Google"
+    },
+    "SearchSuggestEnabled": false,
+    "UserMessaging": {
+      "WhatsNew": false,
+      "ExtensionRecommendations": false,
+      "FeatureRecommendations": false,
+      "UrlbarInterventions": false,
+      "SkipOnboarding": true,
+      "MoreFromMozilla": false,
+      "FirefoxLabs": false,
+      "Locked": true
+    }
+  }
+}

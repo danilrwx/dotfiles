@@ -1,9 +1,12 @@
 #!/bin/sh
-state=${XDG_STATE_HOME:-$HOME/.local/state}/theme
-if [ ! -f "$state/alacritty.toml" ]; then
-	current=$(basename "$(readlink "$state/theme.toml")" .toml)
-	"$HOME/dotfiles/bin/theme" quick "${current:-kitty}" || exit 1
-fi
+# x-term: kitty in the theme, the window class and title the callers ask for, the rest to its own arguments.
+# config/kitty/kitty.conf includes theme.conf, the palette; a machine that has not run install yet gets both
+# here, so the font and the no-confirmation close are never kitty's defaults
+conf=${XDG_CONFIG_HOME:-$HOME/.config}/kitty
+mkdir -p "$conf"
+for f in kitty.conf theme.conf; do
+	[ -e "$conf/$f" ] || ln -snf "$HOME/dotfiles/config/kitty/$f" "$conf/$f" || exit 1
+done
 q() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
 opts=
 while [ $# -gt 0 ] && [ "$1" != -e ]; do
@@ -14,4 +17,4 @@ while [ $# -gt 0 ] && [ "$1" != -e ]; do
 done
 [ "$1" = -e ] && shift
 [ $# -gt 0 ] || set -- "${SHELL:-/bin/sh}"
-eval "exec alacritty --config-file \"\$state/alacritty.toml\" $opts -e \"\$@\""
+eval "exec kitty --config $(q "$conf/kitty.conf") $opts -e \"\$@\""

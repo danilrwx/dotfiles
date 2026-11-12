@@ -1,0 +1,38 @@
+#!/bin/sh
+# web-url WORDS: the address a browser should load for WORDS — itself when it is one (a scheme, a path, a host with
+# a dot or a port), Helium's own search engine for "!5 tours" / "@gemini ..." (its Web Data's keywords), otherwise
+# a DuckDuckGo search. A bang Helium does not know ("!yt", "!reddit", "!g") is DuckDuckGo's own, which resolves it
+# in the search. bin/helium-search, bin/helium-bookmarks and bin/x-run come here.
+
+# helium_engine WORDS: the URL of Helium's search engine whose keyword is the first word ("!5", "@gemini"), its
+# {searchTerms} filled; nothing when Helium has no such engine. immutable: the file is Chromium's and may be locked.
+helium_engine() {
+	case ${1%% *} in '!'*|'@'*) ;; *) return 1 ;; esac
+	keyword=${1%% *}
+	query=${1#"$keyword"}
+	KEYWORD=$keyword QUERY=${query# } python3 - <<'PY'
+import os, sqlite3, urllib.parse
+p = os.path.expanduser('~/.config/net.imput.helium/Default/Web Data')
+try:
+    db = sqlite3.connect(f'file:{p}?immutable=1', uri=True, timeout=1)
+    row = db.execute('select url from keywords where keyword = ?', (os.environ['KEYWORD'],)).fetchone()
+except Exception:
+    row = None
+if row and row[0]:
+    term = urllib.parse.quote(os.environ['QUERY'].strip(), safe='')
+    print(row[0].replace('{searchTerms}', term))
+PY
+}
+
+text=$*
+[ -n "$text" ] || exit 1
+url=$(helium_engine "$text")
+[ -n "$url" ] && { printf '%s\n' "$url"; exit 0; }
+case $text in
+	# what Chromium's command line takes as it is: a scheme, or a path
+	*://*|about:*|file:*|data:*|chrome:*|/*|./*|../*|~*) printf '%s\n' "$text" ;;
+	# a host with a dot or a port, no spaces
+	*[[:space:]]*) printf 'https://duckduckgo.com/?q=%s\n' "$(jq -rn --arg q "$text" '$q | @uri')" ;;
+	*.*|*:*[0-9]*) printf '%s\n' "$text" ;;
+	*) printf 'https://duckduckgo.com/?q=%s\n' "$(jq -rn --arg q "$text" '$q | @uri')" ;;
+esac

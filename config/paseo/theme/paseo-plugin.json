@@ -1,5 +1,0 @@
-{
-  "id": "dotfiles-theme",
-  "name": "dotfiles theme",
-  "requirements": { "paseo": ">=0.13.0" }
-}

@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch Helium's bookmarks file
+
+[Path]
+PathChanged=%h/.config/net.imput.helium/Default/Bookmarks
+Unit=helium-bookmarks.service
+
+[Install]
+WantedBy=default.target

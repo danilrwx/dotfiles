@@ -1,0 +1,26 @@
+k9s:
+  body: {fgColor: default, bgColor: default, logoColor: "#9cc4f0"}
+  prompt: {fgColor: default, bgColor: default, suggestColor: "#6b6b6b"}
+  info: {fgColor: "#6b6b6b", sectionColor: default}
+  dialog: {fgColor: default, bgColor: default, buttonFgColor: default, buttonBgColor: default, buttonFocusFgColor: default, buttonFocusBgColor: "#333333", labelFgColor: "#9cc4f0", fieldFgColor: default}
+  frame:
+    border: {fgColor: "#6b6b6b", focusColor: default}
+    menu: {fgColor: default, keyColor: "#9cc4f0", numKeyColor: "#dbb0e4"}
+    crumbs: {fgColor: default, bgColor: "#333333", activeColor: "#9cc4f0"}
+    status: {newColor: "#ffffff", modifyColor: "#efe6a8", addColor: "#addf9c", pendingColor: "#efe6a8", errorColor: "#f09a9b", highlightColor: "#93d4d4", killColor: "#6b6b6b", completedColor: "#6b6b6b"}
+    title: {fgColor: default, bgColor: default, highlightColor: "#9cc4f0", counterColor: "#dbb0e4", filterColor: "#efe6a8"}
+  views:
+    charts: {bgColor: default, defaultDialColors: ["#9cc4f0", "#f09a9b"], defaultChartColors: ["#9cc4f0", "#f09a9b"]}
+    table:
+      fgColor: default
+      bgColor: default
+      cursorFgColor: "#000000"
+      cursorBgColor: "#333333"
+      markColor: "#efe6a8"
+      header: {fgColor: "#6b6b6b", bgColor: default, sorterColor: "#9cc4f0"}
+    xray: {fgColor: default, bgColor: default, cursorColor: "#9cc4f0", graphicColor: "#6b6b6b", showIcons: false}
+    yaml: {keyColor: "#9cc4f0", colonColor: "#6b6b6b", valueColor: default}
+    logs:
+      fgColor: default
+      bgColor: default
+      indicator: {fgColor: default, bgColor: default, toggleOnColor: "#addf9c", toggleOffColor: "#6b6b6b"}

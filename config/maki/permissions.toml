@@ -1,5 +1,4 @@
+# maki's bash allowlist: nothing beyond its defaults. It held the colour theme's state directory
+# (STATE=…/theme, mkdir *) while bin/theme wrote it; the theme is static now.
 [bash]
-allow = [
-    "STATE=${XDG_STATE_HOME:-$HOME/.local/state}/theme",
-    "mkdir *",
-]
+allow = []

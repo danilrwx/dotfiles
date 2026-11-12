@@ -1,0 +1,55 @@
+#!/bin/sh
+# firefox-bookmarks [tab|window]: Firefox's own bookmarks (Ctrl+D, folders and all) in bin/x-menu, opened at once: a
+# new tab (SUPER+B), a new window (SUPER+SHIFT+B, `window`). The source is bookmarks.html, which
+# browser.bookmarks.autoExportHTML (the policy, etc/firefox/policies/policies.json) rewrites on every change, so the
+# list is current. A line matching no bookmark goes to the browser as an address, a bang ("!yt") or a search
+# (bin/web-url). Renaming and deleting stay in Firefox's bookmark manager.
+mode=${1:-tab}
+moz=${MOZILLA_HOME:-$HOME/.mozilla}/firefox
+# the profile: Firefox names its directory itself, so the one that has an exported bookmarks.html is it
+src=
+for f in "$moz"/*/bookmarks.html; do [ -f "$f" ] && src=$f && break; done
+[ -n "$src" ] || { notify-send -a firefox "Bookmarks" "no bookmarks yet"; exit 0; }
+
+# bookmarks.html is Netscape's: <DT><H3>folder</H3> then the <DL><p> it names, a </DL><p> closing a level, and a
+# <DT><A HREF="url">title</A> per bookmark inside one. The folder is the stack of open levels, the root one nameless
+list=$(python3 - "$src" <<'PY'
+import html, re, sys
+levels, pending, rows = [], None, []
+for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
+    s = line.strip()
+    if s.startswith('<DT><H3'):
+        m = re.search(r'>(.*)</H3>', s)
+        pending = html.unescape(m.group(1)) if m else None
+    elif s.startswith('<DL'):
+        levels.append(pending)
+        pending = None
+    elif s.startswith('</DL'):
+        if levels:
+            levels.pop()
+    elif s.startswith('<DT><A HREF="'):
+        m = re.match(r'<DT><A HREF="([^"]*)"[^>]*>(.*)</A>', s)
+        if m:
+            title = html.unescape(m.group(2)).replace('\t', ' ')
+            folder = ' / '.join(n for n in levels if n)
+            rows.append('\t'.join([html.unescape(m.group(1)), title, folder]))
+sys.stdout.write('\n'.join(rows) + ('\n' if rows else ''))
+PY
+)
+[ -n "$list" ] || { notify-send -a firefox "Bookmarks" "no bookmarks yet"; exit 0; }
+# title, or "folder / title", over the URL
+menu=$(printf '%s\n' "$list" |
+	awk -F '\t' '!seen[$1]++ { t = ($2 == "" ? $1 : $2); print ($3 == "" ? t : $3 " / " t) "\t" $1 }' | sort -f)
+
+line=$(printf '%s\n' "$menu" | "$HOME/dotfiles/bin/x-menu" 'Bookmark:' 15) || exit 0
+url=$(printf '%s\n' "$menu" | LINE="$line" awk -F '\t' 'BEGIN { l = ENVIRON["LINE"] } $0 == l { print $2; exit }')
+# no bookmark matches what was typed: the browser gets it as an address, a bang or a search
+if [ -z "$url" ]; then
+	url=$("$HOME/dotfiles/bin/web-url" "$line") || exit 0
+fi
+
+case $mode in
+window) (firefox --new-window "$url" > /dev/null 2>&1 &) ;;
+copy)   printf '%s' "$url" | "$HOME/dotfiles/bin/clip" ;;
+*)      (firefox "$url" > /dev/null 2>&1 &) ;;
+esac

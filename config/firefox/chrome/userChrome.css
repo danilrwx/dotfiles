@@ -1,0 +1,105 @@
+/* Firefox as the rest of the desktop: vertical tabs in the sidebar (sidebar.revamp + sidebar.verticalTabs, set by
+   the policy), the top bar out of the way until the pointer reaches the top edge, and the pastel palette's own
+   surfaces (config/kitty/theme.conf). Only the theme's variables and the elements that are always there:
+   userChrome.css is unsupported and its DOM does move, so the less it reaches for, the longer it survives. Read
+   from the profile's chrome/, which install links to config/firefox/chrome. */
+
+:root {
+  --dotfiles-bg: #1c1c1c;        /* color0: toolbar, sidebar, menus */
+  --dotfiles-ground: #000000;    /* background: the page, the selected tab */
+  --dotfiles-fg: #ffffff;        /* foreground */
+  --dotfiles-grey: #6b6b6b;      /* color8: inactive labels, placeholders */
+  --dotfiles-line: #333333;      /* selection_background: separators */
+  --dotfiles-accent: #9cc4f0;    /* color12: focus, selection */
+}
+
+:root {
+  --lwt-accent-color: var(--dotfiles-ground) !important;
+  --lwt-text-color: var(--dotfiles-fg) !important;
+  --toolbar-bgcolor: var(--dotfiles-bg) !important;
+  --toolbar-color: var(--dotfiles-fg) !important;
+  --toolbar-field-background-color: var(--dotfiles-ground) !important;
+  --toolbar-field-color: var(--dotfiles-fg) !important;
+  --toolbar-field-focus-background-color: var(--dotfiles-ground) !important;
+  --toolbar-field-focus-color: var(--dotfiles-fg) !important;
+  --toolbar-field-border-color: var(--dotfiles-line) !important;
+  --tab-selected-bgcolor: var(--dotfiles-ground) !important;
+  --tab-selected-textcolor: var(--dotfiles-fg) !important;
+  --tab-border-radius: 6px !important;
+  --toolbarbutton-icon-fill: var(--dotfiles-fg) !important;
+  --toolbarbutton-hover-background: #2a2a2a !important;
+  --toolbarbutton-active-background: var(--dotfiles-line) !important;
+  --arrowpanel-background: var(--dotfiles-bg) !important;
+  --arrowpanel-color: var(--dotfiles-fg) !important;
+  --arrowpanel-border-color: var(--dotfiles-line) !important;
+  --focus-outline-color: var(--dotfiles-accent) !important;
+  /* the sidebar shares the toolbar's surface, its launcher included */
+  --sidebar-background-color: var(--dotfiles-bg) !important;
+  --sidebar-text-color: var(--dotfiles-fg) !important;
+  --sidebar-border-color: var(--dotfiles-line) !important;
+}
+
+/* ── the tabs are in the sidebar now; the horizontal strip would only take the height it has ─────────────────── */
+#TabsToolbar {
+  display: none !important;
+}
+
+/* ── the top bar stays where it is ─────────────────────────────────────────────────────────────────────────────
+   The autohide version moved the toolbar out of the window and caught the pointer with a strip of its own. It looked
+   right and broke a thing it could not see: Firefox positions its panels (the hamburger, downloads, permissions, the
+   address bar's own results) from the box of the button they hang on, and that box had left the screen. Popups then
+   opened at the window edge, over the page. A bar that is always there is one line of chrome and no such trade. */
+#navigator-toolbox {
+  border-bottom: 1px solid var(--dotfiles-line) !important;
+}
+#nav-bar,
+#PersonalToolbar {
+  background: var(--dotfiles-bg) !important;
+  box-shadow: none !important;
+}
+
+/* ── the sidebar: the same 1px line against the page, no header chrome ───────────────────────────────────────── */
+#sidebar-box {
+  border-inline-end: 1px solid var(--dotfiles-line) !important;
+  background: var(--dotfiles-bg) !important;
+}
+#sidebar-header {
+  border-bottom: 1px solid var(--dotfiles-line) !important;
+  padding-inline: 4px !important;
+}
+/* the launcher's icons and the tab rows read as the terminal's slots: the selected one on the ground, the rest
+   plain, the inactive labels grey */
+#sidebar-main toolbarbutton[checked] {
+  background: var(--dotfiles-line) !important;
+}
+#vertical-tabs .tabbrowser-tab {
+  border-radius: var(--tab-border-radius) !important;
+  margin-inline: 4px !important;
+}
+#vertical-tabs .tabbrowser-tab[selected="true"] .tab-background {
+  background: var(--dotfiles-ground) !important;
+  box-shadow: none !important;
+}
+#vertical-tabs .tabbrowser-tab:not([selected="true"]) .tab-label {
+  color: var(--dotfiles-grey) !important;
+}
+
+/* ── the address bar as a pill, the way Chromium draws the omnibox ────────────────────────────────────────────── */
+#urlbar-background,
+#searchbar {
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+#urlbar:is([focused], [open]) > #urlbar-background {
+  outline: 1px solid var(--dotfiles-accent) !important;
+}
+
+/* ── the buttons this setup has no use for ───────────────────────────────────────────────────────────────────── */
+#firefox-view-button,
+#fxa-toolbar-menu-button,
+#save-to-pocket-button,
+#unified-extensions-button,
+#contextual-feature-recommendation-notification {
+  display: none !important;
+}

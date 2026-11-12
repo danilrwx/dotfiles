@@ -1,0 +1,9 @@
+#!/bin/sh
+# firefox-search [WORDS]: a page in Firefox on a search (or an address) — WORDS, or what our menu (bin/x-menu) takes
+# when there are none. bin/web-url decides search or address; Firefox gets the URL, so a running instance opens a tab.
+if [ $# -gt 0 ]; then text=$*; else
+	text=$("$HOME/dotfiles/bin/x-menu" 'Search:' < /dev/null) || exit 0
+fi
+[ -n "$text" ] || exit 0
+url=$("$HOME/dotfiles/bin/web-url" "$text") || exit 0
+(firefox "$url" > /dev/null 2>&1 &)

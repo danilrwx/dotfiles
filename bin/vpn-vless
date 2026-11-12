@@ -2,7 +2,7 @@
 # The VLESS client: mihomo as a systemd --user service (config/systemd/mihomo.service), driven through its
 # API on 127.0.0.1:9090. bin/x-ctl's vless calls it.
 #   vpn-vless on tun|proxy    start, all traffic through TUN, or the proxy on 127.0.0.1:7890 set as GNOME's
-#                       system proxy (GTK apps; Helium outside GNOME reads only the env, Telegram its own)
+#                       system proxy (GTK apps; Helium outside GNOME reads only the env, some apps their own)
 #   vpn-vless off             stop, the system proxy cleared
 #   vpn-vless mode rule|global  Russia and the local networks direct (rule), or everything through the profile
 #   vpn-vless profile [NAME]  pick the profile (PROXY's server), or list them, the current one first
@@ -53,8 +53,9 @@ build)
 	# the config holds the servers' keys and the API's secret: this user's alone
 	umask 077
 	[ -s "$dir/secret" ] || head -c 24 /dev/urandom | base64 > "$dir/secret"
-	# yq is go install's (dev_tools), off the PATH systemd gives the service
-	SECRET=$(cat "$dir/secret") "$HOME/go/bin/yq" eval-all '. as $part ireduce ({}; . * $part) | .secret = strenv(SECRET)' \
+	# yq is go install's (dev_tools), off the PATH systemd gives the service; the two files merge, then the
+	# secret goes in
+	SECRET=$(cat "$dir/secret") "$HOME/go/bin/yq" eval-all 'select(fileIndex == 0) * select(fileIndex == 1) | .secret = strenv(SECRET)' \
 		"$HOME/dotfiles/config/mihomo/base.yaml" "$HOME/dotfiles/private/config/mihomo/desktop.yaml" \
 		> "$dir/config.yaml.new" && mv "$dir/config.yaml.new" "$dir/config.yaml" ;;
 on)

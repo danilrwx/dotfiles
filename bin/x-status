@@ -14,8 +14,8 @@ battery() {
 }
 # the line into s; markup (pango) colours the battery; c and st the battery's, for the cards and the bar
 status() {
-  yellow=#ffff55 red=#ff5555
-  . "${XDG_STATE_HOME:-$HOME/.local/state}/theme/colors.sh" 2>/dev/null
+  yellow=#efe6a8
+  red=#f09a9b
   s="mem $(free -h | awk '/^Mem/ {print $3}')  vol $(level @DEFAULT_AUDIO_SINK@)  mic $(level @DEFAULT_AUDIO_SOURCE@)"
   read -r c st <<< "$(battery)"
   if [ -n "$c" ]; then

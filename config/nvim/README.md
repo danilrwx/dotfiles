@@ -15,7 +15,7 @@ to start, nothing to lock or break on update.
 | `ugrep` (or `grep`) | live grep picker and `:Grepq` (ugrep preferred, falls back to grep) |
 | `fd` (optional) | `<leader>F` file list (falls back to `git ls-files`; `fdfind` on Ubuntu, `install` links it as `fd`) |
 | `gh` / `glab` (optional) | open PR/MR for a commit (GitHub / GitLab) |
-| `tmux` or `herdr` (optional) | playbook runner |
+| `tmux` (optional) | playbook runner |
 | `go`, `golangci-lint` (optional) | `:Lint` (golangci-lint, else `go vet`) |
 | `cc`, `curl`, `tar` | `:TSBuild` (compile treesitter parsers) |
 | language servers | `gopls`, `clangd`, `helm-ls`, `golangci-lint-langserver` — auto-skipped if the binary is absent |
@@ -33,7 +33,7 @@ plugin/             feature modules, auto-sourced on start
   quickfix.lua        :Grepq / quickfix toggle
   oil.lua             file manager (edit the dir like a buffer)
   session.lua         auto save/restore per-cwd sessions
-  playbook.lua        run playbook.sh lines in the pane below (tmux, herdr)
+  playbook.lua        run playbook.sh lines in the pane below (tmux)
   clipboard.lua       yank mirroring to bin/clip (wl-copy)
   colors.lua          Alabaster-style highlighting on the terminal's ANSI colours
   treesitter.lua      enable TS + :TSBuild parser compiler
@@ -169,9 +169,8 @@ apply (creates/deletes/renames/copies; asks to confirm).
 ### Playbook
 
 In a `playbook.sh` buffer, `<CR>` sends the current line (or the visual
-selection) to the pane below and runs it. In herdr the target is
-`PLAYBOOK_TARGET`, which `bin/herdr-playbook` names to the split's shell; in
-tmux it is `vim.g.playbook_target` (default `{last}`).
+selection) to the pane below and runs it. The target is `vim.g.playbook_target`
+(default `{last}`).
 
 ### Sessions
 
@@ -220,8 +219,8 @@ vendored under `queries/`.
 
 ## Notes
 
-- Colours come from the terminal's 16 ANSI slots (`termguicolors` off, the
-  colour theme's, `config/themes`), the bright ones, highlighted after Alabaster: comments grey,
+- Colours come from the terminal's 16 ANSI slots (`termguicolors` off, the pastel
+  theme's, `config/kitty/theme.conf`), the bright ones, highlighted after Alabaster: comments grey,
   definitions (`after/queries/`) and control flow (with `#if`/`#ifdef`) magenta,
   calls blue, types cyan, strings green; the rest plain. `.h` opens as C. See
   `plugin/colors.lua`.

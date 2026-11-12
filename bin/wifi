@@ -1,0 +1,86 @@
+#!/bin/sh
+# Wi-Fi through iwd's own iwctl (the daemon install runs), the pickers in bin/x-menu: the connected network
+# first, then the known ones, then the ones in range; connect, disconnect, rescan or read the address. A new
+# secured network's passphrase comes from OpenSSH's GTK askpass (masked, nothing in the menu's argv); without a
+# display it falls back to iwctl in a terminal, which asks itself. X_MENU, IWCTL, X_TERM and NOTIFY override the
+# commands (tests).
+menu() { "${X_MENU:-$HOME/dotfiles/bin/x-menu}" "$@"; }
+iw() { "${IWCTL:-iwctl}" "$@"; }
+note() { "${NOTIFY:-notify-send}" -a x-ctl -r 9912 -t "${1:-1500}" "Wi-Fi" "$2"; }
+strip() { sed 's/\x1b\[[0-9;]*m//g'; }
+
+stations() { iw station list 2>/dev/null | strip | sed 's/^ *//' | awk -F' {2,}' '$1 != "Name" && $1 !~ /^-+$/ && NF {print $1}'; }
+known() { iw known-networks list 2>/dev/null | strip | sed 's/^ *//' | awk -F' {2,}' '$1 != "Name" && $1 !~ /^-+$/ && NF {print $1}'; }
+# mark<TAB>SSID<TAB>security, the current one marked with "*"
+ranged() {
+	iw station "$1" get-networks 2>/dev/null | strip | sed 's/^ *//' | awk -F' {2,}' '
+		$1 == "Network name" || $1 ~ /^-+$/ || NF < 2 {next}
+		{ if ($1 == ">") printf "*\t%s\t%s\n", $2, $3; else printf "\t%s\t%s\n", $1, $2 }'
+}
+state() { iw station "$1" show 2>/dev/null | strip | sed -n 's/^ *State *//p' | head -1; }
+current() { iw station "$1" show 2>/dev/null | strip | sed -n 's/^ *Connected network *//p' | head -1; }
+security() { printf '%s\n' "$nets" | awk -F'\t' -v s="$1" '$2 == s {print $3; exit}'; }
+is_known() { printf '%s\n' "$knowns" | grep -Fxq -- "$1"; }
+
+dev=$(stations | head -1)
+if [ -z "$dev" ]; then note 3000 "no Wi-Fi device"; exit 0; fi
+if [ "$(stations | wc -l)" -gt 1 ]; then
+	dev=$(stations | menu "wifi device" 10) || exit 0
+	[ -n "$dev" ] || exit 0
+fi
+
+cur=$(current "$dev")
+st=$(state "$dev")
+nets=$(ranged "$dev")
+knowns=$(known)
+
+lines=$(
+	{ [ -n "$cur" ] && printf '* %s\n' "$cur"
+	  printf '%s\n' "$knowns"
+	  printf '%s\n' "$nets" | cut -f2
+	  printf 'action: disconnect\naction: scan\naction: status\n'
+	} | awk 'NF { k = $0; sub(/^\* /, "", k); if (!seen[k]++) print $0 }'
+)
+pick=$(printf '%s\n' "$lines" | menu "wifi: ${cur:-${st:-off}}" 15) || exit 0
+[ -n "$pick" ] || exit 0
+
+case "$pick" in
+	"action: disconnect")
+		if iw station "$dev" disconnect >/dev/null 2>&1; then note 1500 "disconnected"
+		else note 3000 "disconnect failed"; fi
+		exit 0 ;;
+	"action: scan")
+		iw station "$dev" scan >/dev/null 2>&1
+		sleep 3
+		exec "$0" ;;
+	"action: status")
+		note 3000 "$(iw station "$dev" show 2>/dev/null | strip \
+			| sed -n 's/^ *\(State\|Connected network\|IPv4 address\) */\1: /p' | tr '\n' ' ')"
+		exit 0 ;;
+esac
+
+ssid=${pick#\* }
+if is_known "$ssid"; then
+	if iw --dont-ask station "$dev" connect "$ssid" >/dev/null 2>&1; then note 1500 "connected to $ssid"
+	else note 3000 "could not connect to $ssid"; fi
+	exit 0
+fi
+sec=$(security "$ssid")
+if [ -z "$sec" ] || [ "$sec" = open ]; then
+	if iw --dont-ask station "$dev" connect "$ssid" >/dev/null 2>&1; then note 1500 "connected to $ssid"
+	else note 3000 "could not connect to $ssid"; fi
+	exit 0
+fi
+if [ -x /usr/lib/openssh/gnome-ssh-askpass ] && [ -n "${DISPLAY:-}" ]; then
+	pass=$(/usr/lib/openssh/gnome-ssh-askpass "Wi-Fi password for $ssid" 2>/dev/null) || exit 0
+	[ -n "$pass" ] || exit 0
+	if iw --passphrase "$pass" station "$dev" connect "$ssid" >/dev/null 2>&1; then
+		unset pass
+		note 1500 "connected to $ssid"
+	else
+		unset pass
+		note 3000 "could not connect to $ssid"
+	fi
+	exit 0
+fi
+exec "${X_TERM:-$HOME/dotfiles/bin/x-term}" -c x-ctl -t "Wi-Fi: $ssid" -e "${IWCTL:-iwctl}" station "$dev" connect "$ssid"

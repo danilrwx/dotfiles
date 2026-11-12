@@ -1,0 +1,57 @@
+#!/bin/sh
+# Bluetooth through bluez's bluetoothctl (install runs bluez), the pickers in bin/x-menu: the paired devices with
+# the connected one marked, connect/disconnect, the adapter's power, and a scan. A new device is paired, trusted
+# and connected; JustWorks devices need no prompt (NoInputNoOutput), anything else opens bluetoothctl in a
+# terminal. X_MENU, BLUETOOTHCTL, X_TERM and NOTIFY override the commands (tests).
+menu() { "${X_MENU:-$HOME/dotfiles/bin/x-menu}" "$@"; }
+bt() { "${BLUETOOTHCTL:-bluetoothctl}" "$@"; }
+note() { "${NOTIFY:-notify-send}" -a x-ctl -r 9912 -t "${1:-1500}" "Bluetooth" "$2"; }
+
+powered() { bt show 2>/dev/null | sed -n 's/^[[:space:]]*Powered: *//p' | head -1; }
+devices() { bt devices 2>/dev/null | sed -n 's/^Device \([0-9A-F:][0-9A-F:]*\) \(.*\)$/\1\t\2/p'; }
+connected() { bt devices Connected 2>/dev/null | sed -n 's/^Device \([0-9A-F:][0-9A-F:]*\).*/\1/p'; }
+field() { bt info "$1" 2>/dev/null | sed -n "s/^[[:space:]]*$2: *//p" | head -1; }
+
+pw=$(powered)
+conn=$(connected)
+lines=$(
+	devices | while IFS=$(printf '\t') read -r mac name; do
+		[ -n "$mac" ] || continue
+		if printf '%s\n' "$conn" | grep -qx "$mac"; then printf '* %s %s\n' "$mac" "$name"
+		else printf '%s %s\n' "$mac" "$name"; fi
+	done
+	if [ "$pw" = yes ]; then printf 'action: power off\n'; else printf 'action: power on\n'; fi
+	printf 'action: scan\n'
+)
+pick=$(printf '%s\n' "$lines" | menu "bluetooth: ${pw:-off}" 15) || exit 0
+[ -n "$pick" ] || exit 0
+
+case "$pick" in
+	"action: power off") if bt power off >/dev/null 2>&1; then note 1500 "power off"; else note 3000 "power off failed"; fi; exit 0 ;;
+	"action: power on")  if bt power on  >/dev/null 2>&1; then note 1500 "power on";  else note 3000 "power on failed";  fi; exit 0 ;;
+	"action: scan")
+		bt --timeout 12 scan on >/dev/null 2>&1
+		exec "$0" ;;
+esac
+
+mac=$(printf '%s' "${pick#\* }" | cut -d' ' -f1)
+name=$(printf '%s' "${pick#\* }" | cut -d' ' -f2-)
+if [ "$(field "$mac" Connected)" = yes ]; then
+	if bt disconnect "$mac" >/dev/null 2>&1; then note 1500 "disconnected ${name:-$mac}"
+	else note 3000 "disconnect failed"; fi
+	exit 0
+fi
+if [ "$(field "$mac" Paired)" = yes ]; then
+	if bt connect "$mac" >/dev/null 2>&1; then note 1500 "connected ${name:-$mac}"
+	else note 3000 "connect failed"; fi
+	exit 0
+fi
+if bt --agent NoInputNoOutput --timeout 20 pair "$mac" >/dev/null 2>&1; then
+	bt trust "$mac" >/dev/null 2>&1
+	if bt connect "$mac" >/dev/null 2>&1; then note 1500 "paired and connected ${name:-$mac}"
+	else note 3000 "paired, connect failed"; fi
+else
+	note 3000 "pairing failed; opening bluetoothctl"
+	exec "${X_TERM:-$HOME/dotfiles/bin/x-term}" -c x-ctl -t "Bluetooth: ${name:-$mac}" \
+		-e "${BLUETOOTHCTL:-bluetoothctl}"
+fi

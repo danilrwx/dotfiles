@@ -1,0 +1,6 @@
+[Unit]
+Description=Helium's bookmarks into ~/dotfiles/private
+
+[Service]
+Type=oneshot
+ExecStart=%h/dotfiles/bin/helium-bookmarks-export

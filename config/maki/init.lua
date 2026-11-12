@@ -1,17 +1,14 @@
--- the user's colour theme: maki's own UI in config/themes's colours.
--- bin/theme writes a user theme (dotfiles.toml) under ~/.config/maki/themes; the
--- plugin names it to maki once here (maki.setup is a one-shot per init.lua). A new
--- theme is picked up on the next maki start or /reload.
--- ~/.config/maki is a link to ~/dotfiles/config/maki (install).
+-- the user's colour theme: maki's own UI in the pastel theme's colours.
+-- The theme is config/maki/themes/dotfiles.toml, in the repo (and so under ~/.config/maki,
+-- a link to ~/dotfiles/config/maki, install); the plugin names it to maki once here
+-- (maki.setup is a one-shot per init.lua). An edit is picked up on the next maki start
+-- or /reload.
 
 require("maki_theme").apply()
 require("golangci_lint")
-require("ast_grep")
 require("safe_ish_yolo")
 require("stats")
 require("cache_guard")
--- require("herdr")
-require("worktree")
 
 maki.api.register_prompt_hint({
   slot = "conventions",

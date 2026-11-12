@@ -13,11 +13,18 @@ for r in "${rows[@]}"; do
   IFS=$'\t' read -r act dev _ label _ disk <<< "$r"
   [ "$pick" = "$(cut -f1-5 <<< "$r" | tr '\t' ' ')" ] || continue
   if [ "$act" = mount ]; then
-    out=$(udisksctl mount --no-user-interaction -b "$dev" 2>&1) && notify-send -a drives "$label" "${out##* at }" \
-      || notify-send -u critical -a drives "$label" "$out"
+    if out=$(udisksctl mount --no-user-interaction -b "$dev" 2>&1); then
+      notify-send -a drives "$label" "${out##* at }"
+    else
+      notify-send -u critical -a drives "$label" "$out"
+    fi
   else
-    out=$(udisksctl unmount --no-user-interaction -b "$dev" 2>&1 && udisksctl power-off --no-user-interaction -b "$disk" 2>&1) \
-      && notify-send -a drives "$label" "unmounted, can be pulled out" || notify-send -u critical -a drives "$label" "$out"
+    if out=$(udisksctl unmount --no-user-interaction -b "$dev" 2>&1 \
+      && udisksctl power-off --no-user-interaction -b "$disk" 2>&1); then
+      notify-send -a drives "$label" "unmounted, can be pulled out"
+    else
+      notify-send -u critical -a drives "$label" "$out"
+    fi
   fi
   break
 done

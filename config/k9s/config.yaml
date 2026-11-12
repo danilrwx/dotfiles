@@ -7,6 +7,6 @@ k9s:
     enableMouse: true
     logoless: true
     headless: true
-    # the colour theme's ANSI slots (skins/theme.yaml, bin/theme)
+    # the theme's hex colours (skins/theme.yaml)
     skin: theme
     reactive: true

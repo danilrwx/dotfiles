@@ -1,17 +1,16 @@
 -- the user's colour theme for maki's own UI.
 --
--- bin/theme writes a user theme, ~/.config/maki/themes/dotfiles.toml, the dotfiles
--- theme's 16 colours as the palette plus the scope and UI roles. This plugin names
--- it to maki once, at init: maki.setup is a one-shot per init.lua, so the theme is
--- fixed at start. A new dotfiles theme is picked up on the next maki start (or
--- /reload), the way every other dotfiles consumer follows bin/theme.
+-- config/maki/themes/dotfiles.toml, the dotfiles' one (pastel) theme's 16 colours as
+-- the palette plus the scope and UI roles. This plugin names it to maki once, at init:
+-- maki.setup is a one-shot per init.lua, so the theme is fixed at start. An edit is
+-- picked up on the next maki start (or /reload).
 --
--- The terminal itself (alacritty, tmux, nvim) takes its 16 slots from the theme
--- the usual way: bin/theme sends alacritty's OSC escapes to the open terminals. maki's user
--- theme uses the same palette, so its highlight reads the same way as the terminal's.
+-- The terminal itself (kitty, tmux, nvim) takes its 16 slots from config/kitty/theme.conf;
+-- maki's user theme uses the same palette, so its highlight reads the same way as the
+-- terminal's.
 
 local function apply()
-	-- the user theme's name is fixed by bin/theme; just point maki at it
+	-- the user theme's name is fixed by the file's; just point maki at it
 	maki.setup({
 		always_yolo = true,
 		ui = { theme = "dotfiles" },
