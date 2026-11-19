@@ -1,0 +1,123 @@
+#!/bin/sh
+# ./install_game
+# Add the gaming stack to an Ubuntu amd64 system after ./install --desktop.
+# Run ./debloat BEFORE this script; it intentionally removes gaming packages.
+
+set -eu
+
+cd -- "$(dirname -- "$(readlink -f -- "$0")")"
+
+case "${1:-}" in
+  -h|--help) sed -n '2,4s/^# //p' "$0"; exit 0 ;;
+  '') ;;
+  *) echo "Unknown option: $1" >&2; exit 1 ;;
+esac
+
+. ./lib/install.sh
+
+[ "$#" -le 1 ] || { echo 'Expected at most one option' >&2; exit 1; }
+. /etc/os-release
+[ "$ID" = ubuntu ] && [ "$(dpkg --print-architecture)" = amd64 ] || {
+  echo 'This gaming profile requires Ubuntu amd64' >&2; exit 1;
+}
+
+lolka() {
+  if ! installed lolka-x; then
+    log "Installing Lolka"
+    lolka_url=https://storage.yandexcloud.net/lolka-electron/releases
+    lolka_manifest=$(curl -fsSL "$lolka_url/latest-linux.yml") &&
+      deb_from "$lolka_url/$(printf '%s\n' "$lolka_manifest" | awk '/^path:/ { print $2 }')" "$(printf '%s\n' "$lolka_manifest" | awk '/^sha512:/ { print $2 }')"
+  fi
+}
+
+SCX_TAG=v1.1.4
+SCX_COMMIT=e7b3a219617472cf78880ac424714e52c932db61
+PKGS="steam-installer gamescope mangohud gamemode xwayland
+  libvulkan1 libvulkan1:i386 mesa-vulkan-drivers mesa-vulkan-drivers:i386
+  libgl1-mesa-dri libgl1-mesa-dri:i386
+  linux-tools-common linux-tools-generic"
+scx_ok() {
+  /usr/local/bin/scx_lavd --version 2>/dev/null |
+    awk -v version="${SCX_TAG#v}" 'NR == 1 && $2 == version {ok=1} END {exit !ok}'
+}
+
+[ -f "$HOME/.config/labwc/rc.xml" ] || {
+  echo 'Run ./install --desktop first' >&2; exit 1;
+}
+[ -d /sys/kernel/sched_ext ] || {
+  echo 'Boot a kernel with sched_ext support before installing this profile' >&2; exit 1;
+}
+sudo -v
+sudo dpkg --add-architecture i386
+sudo apt-get update
+
+if ! apt-cache show steam-installer >/dev/null 2>&1; then
+  sudo apt-get install -y software-properties-common
+  sudo add-apt-repository -y --no-update multiverse
+  sudo apt-get update
+fi
+
+sudo apt-get install -y $PKGS
+lolka
+
+if ! scx_ok; then
+  sudo apt-get install -y build-essential git clang libclang-dev libbpf-dev libelf-dev zlib1g-dev pkg-config rust-clippy
+  src=$HOME/.cache/build/scx
+  mkdir -p "${src%/*}"
+
+  if [ "$(git -C "$src" rev-parse HEAD 2>/dev/null || true)" != "$SCX_COMMIT" ]; then
+    # Keep any older checkout, including local changes.
+    if [ -e "$src" ]; then mv "$src" "$src.backup-$(date +%s%N)"; fi
+    git clone --depth 1 --branch "$SCX_TAG" https://github.com/sched-ext/scx "$src"
+  fi
+
+  [ "$(git -C "$src" rev-parse HEAD)" = "$SCX_COMMIT" ] || {
+    echo 'scx release commit differs from the pinned revision' >&2; exit 1;
+  }
+  rust=$(find /usr/lib -maxdepth 2 -path '/usr/lib/rust-*/bin' -type d | sort -V | tail -1)
+  [ -x "$rust/cargo" ] || { echo 'Distribution Cargo was not found' >&2; exit 1; }
+  (cd "$src" && PATH="$rust:$PATH" "$rust/cargo" build --release --locked -p scx_lavd)
+  sudo install -m 755 "$src/target/release/scx_lavd" /usr/local/bin/scx_lavd
+  scx_ok
+fi
+
+# Back up user settings before installing the game profile.
+
+backup=$HOME/.local/state/dotfiles/backups/$(date +%Y%m%d-%H%M%S-%N)-gaming
+
+for rel in .config/MangoHud/MangoHud.conf .config/labwc-gaming/environment; do
+  if [ -e "$HOME/$rel" ] || [ -L "$HOME/$rel" ]; then
+    mkdir -p "$backup/${rel%/*}"
+    cp -a "$HOME/$rel" "$backup/$rel"
+    rm "$HOME/$rel"
+  fi
+done
+
+gaming_config=$HOME/.config/labwc-gaming
+mkdir -p "$HOME/.config/MangoHud" "$gaming_config"
+ln -s "$PWD/game/config/MangoHud/MangoHud.conf" "$HOME/.config/MangoHud/MangoHud.conf"
+for file in rc.xml autostart shutdown; do
+  link "$HOME/.config/labwc/$file" "$gaming_config/$file"
+done
+sed '/^WLR_XWAYLAND=/d' "$HOME/.config/labwc/environment" > "$gaming_config/environment"
+
+for rel in etc/systemd/system/scx_lavd.service etc/systemd/system/cpu-idle.service etc/polkit-1/rules.d/50-cpu-idle.rules; do
+  sudo install -D -m 644 "game/$rel" "/$rel"
+done
+
+session=$(mktemp)
+trap 'rm -f "$session"' EXIT
+cat > "$session" <<EOF
+[Desktop Entry]
+Name=Labwc (gaming)
+Comment=Gaming profile with Xwayland
+Exec=/usr/bin/labwc --config-dir "$gaming_config"
+Type=Application
+DesktopNames=labwc;wlroots
+EOF
+sudo install -D -m 644 "$session" /usr/share/wayland-sessions/labwc-game.desktop
+
+sudo systemctl daemon-reload
+
+sudo systemctl enable --now scx_lavd.service
+echo 'Installed. Select Labwc (gaming) at login.'

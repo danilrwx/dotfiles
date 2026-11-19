@@ -4,15 +4,12 @@
     "DisableFirefoxAccounts": true,
     "DisableFirefoxStudies": true,
     "DisableFormHistory": true,
-    "DisablePocket": true,
     "DisableProfileImport": true,
     "DisableTelemetry": true,
     "DontCheckDefaultBrowser": true,
     "EnableTrackingProtection": {
-      "Value": true,
-      "Locked": true,
-      "Cryptomining": true,
-      "Fingerprinting": true
+      "Category": "strict",
+      "Locked": true
     },
     "ExtensionSettings": {
       "patchtree@danilrwx.github.io": {
@@ -54,14 +51,6 @@
       "Locked": true
     },
     "Preferences": {
-      "beacon.enabled": {
-        "Value": false,
-        "Status": "locked"
-      },
-      "breakpad.reportURL": {
-        "Value": "",
-        "Status": "locked"
-      },
       "browser.ai.control.default": {
         "Value": "blocked",
         "Status": "locked"
@@ -72,10 +61,6 @@
       },
       "browser.bookmarks.openInTabClosesMenu": {
         "Value": false,
-        "Status": "default"
-      },
-      "browser.contentblocking.category": {
-        "Value": "strict",
         "Status": "default"
       },
       "browser.crashReports.unsubmittedCheck.enabled": {
@@ -238,20 +223,8 @@
         "Value": false,
         "Status": "locked"
       },
-      "findbar.highlightAll": {
-        "Value": true,
-        "Status": "default"
-      },
-      "full-screen-api.transition-duration.enter": {
-        "Value": "0 0",
-        "Status": "default"
-      },
-      "full-screen-api.transition-duration.leave": {
-        "Value": "0 0",
-        "Status": "default"
-      },
       "general.smoothScroll.msdPhysics.enabled": {
-        "Value": true,
+        "Value": false,
         "Status": "default"
       },
       "geo.enabled": {
@@ -268,10 +241,6 @@
       },
       "gfx.webrender.all": {
         "Value": true,
-        "Status": "default"
-      },
-      "javascript.options.mem.high_water_mark": {
-        "Value": 256,
         "Status": "default"
       },
       "media.autoplay.default": {
@@ -330,21 +299,9 @@
         "Value": false,
         "Status": "locked"
       },
-      "permissions.default.geo": {
-        "Value": 2,
-        "Status": "locked"
-      },
-      "permissions.manager.defaultsUrl": {
-        "Value": "",
-        "Status": "default"
-      },
       "places.history.enabled": {
         "Value": false,
         "Status": "locked"
-      },
-      "privacy.antitracking.isolateContentScriptResources": {
-        "Value": true,
-        "Status": "default"
       },
       "privacy.globalprivacycontrol.enabled": {
         "Value": true,
@@ -356,10 +313,6 @@
       },
       "security.csp.reporting.enabled": {
         "Value": false,
-        "Status": "default"
-      },
-      "security.ssl.treat_unsafe_negotiation_as_broken": {
-        "Value": true,
         "Status": "default"
       },
       "security.tls.enable_0rtt_data": {
@@ -390,10 +343,6 @@
         "Value": false,
         "Status": "default"
       },
-      "toolkit.legacyUserProfileCustomizations.stylesheets": {
-        "Value": true,
-        "Status": "default"
-      },
       "widget.use-xdg-desktop-portal.file-picker": {
         "Value": 1,
         "Status": "default"
@@ -416,6 +365,10 @@
       "MoreFromMozilla": false,
       "FirefoxLabs": false,
       "Locked": true
+    },
+    "EncryptedMediaExtensions": {
+      "Enabled": true,
+      "Locked": false
     }
   }
 }

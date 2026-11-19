@@ -1,4 +1,3 @@
 #!/bin/sh
-# stdin to the desktop clipboard, through wl-copy; extra args go to it, e.g. `clip -t image/png`. tmux's
-# copy-command, nvim's yank mirror and bin/x-run use it.
+# stdin to the Wayland clipboard, with an optional MIME type (-t).
 exec wl-copy "$@"

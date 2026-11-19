@@ -1,16 +1,18 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # ./debloat [-n]
-#   Strip a stock Ubuntu desktop down to what the Hyprland session from `./install --desktop` runs on: every
-#   snap and snapd itself (blocked from coming back), GNOME, GDM, the Ubuntu desktop extras, Xorg and the X
-#   session's packages (Xwayland is a package of its own and stays, for Steam), NetworkManager (iwd has Wi-Fi),
+#   Strip a stock Ubuntu desktop down to what the Labwc session from `./install --desktop` runs on: every
+#   snap and snapd itself (blocked from coming back), GNOME, GDM, the Ubuntu desktop extras,
+#   the former bspwm session, NetworkManager (iwd has Wi-Fi),
 #   the services nothing here uses and the configs the removed apps left in ~/.config.
 #   Run `./install --desktop` first, so greetd is there to log in with once GDM is gone.
 #   -n  dry run: show what apt would remove, change nothing
-set -euo pipefail
 
-log() { echo -e "\033[0;31m$1\033[0m"; }
+set -eu
+
+log() { printf '\033[0;31m%s\033[0m\n' "$*"; }
 
 DRY=0
+
 case "${1:-}" in
   -n|--dry-run) DRY=1 ;;
   -h|--help) sed -n '/^# \.\/debloat/,/^[^#]/{s/^# \{0,1\}//p;}' "$0"; exit 0 ;;
@@ -20,110 +22,149 @@ esac
 
 # shellcheck source=/dev/null
 [ -f /etc/os-release ] && . /etc/os-release
-[ "${ID:-}" == ubuntu ] || { log "Ubuntu only"; exit 1; }
+[ "${ID:-}" = ubuntu ] || { log "Ubuntu only"; exit 1; }
 
 # install --desktop has to come first: greetd to log in with once GDM is gone, and the desktop base
 # (iwd, sound, Bluetooth...) installed by hand, so the autoremove below keeps it
-if [ "$DRY" == 0 ] && { [ "$(readlink -f /etc/systemd/system/display-manager.service)" != /usr/lib/systemd/system/greetd.service ] \
+
+if [ "$DRY" = 0 ] && { [ "$(readlink -f /etc/systemd/system/display-manager.service)" != /usr/lib/systemd/system/greetd.service ] \
   || ! apt-mark showmanual | grep -qx iwd; }; then
   log "Run ./install --desktop first"; exit 1
 fi
 
 # What goes. The metapackages and session first; `--autoremove` then takes the ~350 packages only they
 # pulled in (GNOME apps, tracker, evolution-data-server, ibus, cloud-init, sssd, apport, printer drivers...)
-REMOVE=(
+
+REMOVE="
   ubuntu-desktop ubuntu-desktop-minimal ubuntu-session ubuntu-settings gdm3
   gnome-shell gnome-shell-common gnome-session gnome-settings-daemon gnome-control-center
   nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
   snapd
-  # pavucontrol, bin/x-ctl picking the devices. Firefox is not here: it comes from Mozilla's repo (install), and
-  # Ubuntu's `firefox` is a snap installer that would be the same package name
+  apport apport-core-dump-handler apport-symptoms python3-apport python3-problem-report
+  cups cups-browsed cups-bsd cups-client cups-common cups-core-drivers cups-daemon
+  cups-filters cups-filters-core-drivers cups-ipp-utils cups-ppdc cups-server-common
+  steam-installer steam-launcher steam-devices steam-libs steam-libs:i386 steam-libs-i386:i386
+  gamescope mangohud gamemode gamemode-daemon libgamemode0 libgamemodeauto0
   pavucontrol
-  # Ubuntu's wallpapers under a black root
   ubuntu-wallpapers ubuntu-wallpapers-resolute
-  # the heavy terminals, kitty is the one; not xterm, steam-libs depends on it
-  wezterm terminator tilix konsole xfce4-terminal lxterminal gnome-console qterminal
-  # the X server and the X session's tools, gone with bspwm; x11-xserver-utils stays (Hyprland merges
-  # .Xresources with xrdb), and so does Xwayland, a package of its own, for Steam and the games
-  xserver-xorg xserver-xorg-core xserver-xorg-input-libinput xserver-xorg-input-wacom xinit bspwm sxhkd polybar
-  suckless-tools xss-lock i3lock maim xclip xcompmgr xwallpaper autorandr xsettingsd redshift
-  # replaced by the Hyprland stack and bin/wifi + bin/bt, or unused; yad stays (steam-installer needs it),
-  # and so does vim (vim-gtk3 comes with install)
-  delta swaylock swayidle lxpolkit virt-manager discord foot surf xserver-xorg-legacy
-  wlopm wlr-randr xinput libgtk4-layer-shell0 libgtk4-layer-shell-dev
+  helium-bin brave-browser brave-keyring claude-desktop lolka-x bat thunar thunar-data zathura zathura-pdf-poppler
+  switcheroo-control iio-sensor-proxy accountsservice
+  networkd-dispatcher avahi-daemon avahi-utils libnss-mdns ipp-usb rsyslog fprintd libpam-fprintd playerctl
+  kitty kitty-doc kitty-shell-integration kitty-terminfo fuzzel
+  alacritty wezterm terminator tilix konsole xfce4-terminal lxterminal gnome-console qterminal
+  wlsunset
+  bspwm sxhkd polybar cwm spectrwm
+  htop zsh nvi xdotool ripgrep
+  rxvt-unicode xterm suckless-tools xss-lock scrot xclip redshift xinit
+  xauth xinput x11-xserver-utils
+  xserver-xorg xserver-xorg-core xserver-xorg-input-all xserver-xorg-input-libinput
+  xserver-xorg-input-wacom xserver-xorg-video-all xserver-xorg-video-amdgpu
+  xserver-xorg-video-ati xserver-xorg-video-fbdev xserver-xorg-video-intel
+  xserver-xorg-video-nouveau xserver-xorg-video-qxl xserver-xorg-video-radeon xserver-xorg-video-vesa
+  i3lock maim xcompmgr xwallpaper autorandr xsettingsd
+  delta lxpolkit virt-manager discord surf xserver-xorg-legacy
+  libgtk4-layer-shell0 libgtk4-layer-shell-dev
   libchewing3-data libopencc-data libpinyin-data
-  # NetworkManager stays off for iwd and systemd-networkd (install), so it goes with its plugins and the
-  # wpa_supplicant iwd replaces
   network-manager network-manager-gnome network-manager-openvpn network-manager-pptp wpasupplicant
-  # input methods and dictionaries the Ubuntu installer marks as manual
   ibus ibus-table-cangjie3 ibus-table-cangjie5 ibus-table-cangjie-big m17n-db
   hunspell-en-au hunspell-en-ca hunspell-en-gb hunspell-en-za wbritish zenity
-  # gvfs's backends, phones and cameras by USB (afc, mtp, gphoto2), GNOME's online accounts and the network's
-  # browsing (network, dnssd, wsdd and its python daemon) in file dialogs; gvfs-daemons stays (the trash, drives)
-  gvfs-backends
-)
+  gvfs gvfs-common gvfs-daemons gvfs-libs gvfs-backends
+  rhythmbox rhythmbox-data rhythmbox-plugins rhythmbox-plugin-alternative-toolbar
+  exo-utils xfconf xscreensaver xscreensaver-data xscreensaver-gl"
 # Services of what stays that nothing here needs: no modem, no printer discovery on the network, no Ubuntu
 # Pro or MOTD news
-DISABLE=(ModemManager.service cups-browsed.service motd-news.timer ua-timer.timer ubuntu-advantage.service)
+
+DISABLE="ModemManager.service motd-news.timer ua-timer.timer ubuntu-advantage.service"
 # ~/.config leftovers of the removed apps and of the browsers' first-run probes
-STALE=(org.gnome.Ptyxis nautilus evolution goa-1.0 gnome-initial-setup gnome-initial-setup-done
+
+STALE="org.gnome.Ptyxis nautilus evolution goa-1.0 gnome-initial-setup gnome-initial-setup-done
   tiling-assistant ubuntu-insights yelp ibus update-notifier gnome-xdg-terminals.list
   ubuntu-xdg-terminals.list xdg-terminals.list monitors.xml monitors.xml~
   chromium microsoft-edge opera vivaldi
-  discord foot i3 sway waybar geoclue-2.0 xterm)
+  discord i3 sway waybar geoclue-2.0 xterm"
 installed() { dpkg-query -W -f='${db:Status-Status}\n' "$1" 2>/dev/null | grep -qx installed; }
-remove=(); for p in "${REMOVE[@]}"; do installed "$p" && remove+=("$p"); done
+set --
 
-if [ "$DRY" == 1 ]; then
+for p in $REMOVE; do installed "$p" && set -- "$@" "$p"; done
+
+if [ "$DRY" = 1 ]; then
   log "Snaps that would go:"
   command -v snap > /dev/null && snap list 2>/dev/null | awk 'NR > 1 {print "  " $1}'
   apt-mark showmanual | grep -qx iwd \
     || log "(install --desktop has not run yet: the list still has the desktop base it would keep)"
+
   log "apt would remove:"
-  LC_ALL=C apt-get -s purge --autoremove "${remove[@]}" | awk '/^Purg|^Remv/ {print "  " $2}'
+  simulation=
+
+  if [ "$#" -gt 0 ]; then simulation=$(LC_ALL=C apt-get -s purge --autoremove "$@"); fi
+  printf '%s\n' "$simulation" | awk '/^Purg|^Remv/ {print "  " $2}'
+
   log "Services that would be disabled:"
-  for u in "${DISABLE[@]}"; do systemctl -q is-enabled "$u" 2>/dev/null && echo "  $u"; done
+
+  for u in $DISABLE; do systemctl -q is-enabled "$u" 2>/dev/null && echo "  $u"; done
+
   log "$HOME/.config entries that would go:"
-  for c in "${STALE[@]}"; do [ -e "$HOME/.config/$c" ] && echo "  $c"; done
+
+  for c in $STALE; do [ -e "$HOME/.config/$c" ] && echo "  $c"; done
   exit 0
 fi
 
 # Snaps ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # apps before the bases and snapd they run on; snapd's own purge then drops /snap and its state
+
 if command -v snap > /dev/null; then
   log "Removing snaps"
   # `snap list` notes: base for the bases, snapd for snapd; content snaps (gnome-46-2404, mesa-2404) only
+
   # go once nothing uses them, hence the rounds
-  snaps() { snap list 2>/dev/null | awk -v base="$1" 'NR > 1 && $NF != "snapd" && ($NF == "base") == base {print $1}'; }
+
+  snaps() { snap list 2>/dev/null | awk -v base="$1" 'NR > 1 && $NF != "snapd" && ($NF = "base") = base {print $1}'; }
+
   for _ in 1 2 3; do
     for s in $(snaps 0); do sudo snap remove --purge "$s" || true; done
   done
+
   for s in $(snaps 1); do sudo snap remove --purge "$s" || true; done
 fi
+
 # Ubuntu's firefox and chromium debs are snap installers that pull snapd back in; pin it out
+
 log "Blocking snapd"
 sudo tee /etc/apt/preferences.d/no-snapd.pref > /dev/null <<'EOF'
 # debloat: no snapd, nor the transitional debs that install a snap
+
 Package: snapd
 Pin: release a=*
 Pin-Priority: -10
 EOF
 
 # GNOME ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
 log "Removing GNOME, GDM and snapd"
-sudo apt purge -y --autoremove "${remove[@]}"
+[ "$#" -eq 0 ] || sudo apt purge -y --autoremove "$@"
+
+case $(cat /proc/sys/kernel/core_pattern) in
+  '|/usr/share/apport/apport '*) sudo sysctl -w kernel.core_pattern=core ;;
+esac
+
 rm -rf "$HOME/snap"
 sudo rm -rf /snap /var/snap /var/lib/snapd /var/cache/snapd
 
 
 # Services and configs ──────────────────────────────────────────────────────────────────────────────────────────────
+
 log "Disabling unused services"
-for u in "${DISABLE[@]}"; do sudo systemctl disable --now "$u" 2>/dev/null || true; done
+
+for u in $DISABLE; do sudo systemctl disable --now "$u" 2>/dev/null || true; done
+
 log "Removing configs of the removed apps"
-for c in "${STALE[@]}"; do rm -rf "${HOME:?}/.config/$c"; done
+
+for c in $STALE; do rm -rf "${HOME:?}/.config/$c"; done
 # the dpkg leftovers of what went (the "rc" packages: their configs)
-mapfile -t rc < <(dpkg -l | awk '/^rc/ {print $2}')
-[ "${#rc[@]}" -gt 0 ] && sudo apt purge -y "${rc[@]}"
+# Package names contain no whitespace or glob characters.
+# shellcheck disable=SC2046
+set -- $(dpkg -l | awk '/^rc/ {print $2}')
+[ "$#" -eq 0 ] || sudo apt purge -y "$@"
 
 log "Done. Reboot: greetd takes over the login."

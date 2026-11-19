@@ -1,10 +1,10 @@
 vim.g.mapleader = " "
 
--- disable netrw: directories are opened by our Oil instead (see plugin/oil.lua)
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
+-- Vim's default theme, using the terminal palette.
+vim.o.termguicolors = false
+vim.cmd.colorscheme("vim")
 
--- .h is C, not C++ (nvim's default): there is a C parser, none for C++
+-- Treat .h files as C rather than C++.
 vim.g.c_syntax_for_h = true
 
 vim.o.autoindent = true
@@ -15,13 +15,10 @@ vim.o.softtabstop = 2
 vim.o.smartindent = true
 
 vim.o.number = true
-vim.o.updatetime = 100
-vim.o.signcolumn = "yes:1"
--- number then the git sign glyph tight against it (%s), no separate sign column
-vim.o.statuscolumn = "%=%l%s"
 vim.o.laststatus = 0
 
 vim.o.completeopt = "menuone,noselect,noinsert,fuzzy,popup"
+vim.o.pumheight = 12
 vim.o.winborder = "rounded"
 
 vim.o.undofile = true
@@ -32,26 +29,20 @@ if vim.fn.executable("ugrep") == 1 then
   vim.o.grepprg = "ugrep -RInk --tabs=1 --ignore-files --exclude='zz_generated*' --exclude-dir='generated'"
   vim.o.grepformat = "%f:%l:%c:%m,%f+%l+%c+%m,%-G%f|%l|%c|%m"
 else
-  vim.o.grepprg = "grep -RIn --exclude='*zz_generated*' --exclude-dir='generated'"
+  vim.o.grepprg = "grep -RInH --exclude-dir=.git --exclude='*zz_generated*' --exclude-dir='generated'"
+  vim.o.grepformat = "%f:%l:%m"
 end
 
 vim.filetype.add({ extension = { yaml = "helm", tpl = "helm" } })
-
--- source plugins from the private submodule (not tracked in this repo)
-local private = vim.fn.expand("~/dotfiles/private/config/nvim")
-if vim.fn.isdirectory(private) == 1 then
-  vim.opt.runtimepath:append(private)
-end
 
 vim.keymap.set("n", "<c-d>", "<c-d>zz")
 vim.keymap.set("n", "<c-u>", "<c-u>zz")
 vim.keymap.set("n", "<c-l>", "<cmd>nohlsearch<bar>diffupdate<bar>normal! <c-l><cr>")
 
-vim.keymap.set("n", "-", "<cmd>Oil<cr>", { silent = true })
+vim.g.netrw_banner = 0
+
+vim.keymap.set("n", "-", "<cmd>Explore %:p:h<cr>", { silent = true })
 
 vim.keymap.set("n", "<A-q>", "<cmd>bd<cr>", { silent = true })
 vim.keymap.set("n", "<S-l>", "<cmd>bn<cr>", { silent = true })
 vim.keymap.set("n", "<S-h>", "<cmd>bp<cr>", { silent = true })
-
--- publish the lock file for pi-core Neovim integration
-pcall(dofile, "/home/danil/w/pi-core/nvim/pi-ide.lua")

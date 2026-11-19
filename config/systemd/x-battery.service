@@ -1,0 +1,9 @@
+[Unit]
+Description=Check battery warning thresholds once
+
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=oneshot
+ExecStart=%h/dotfiles/bin/x-status battery
+StandardOutput=null

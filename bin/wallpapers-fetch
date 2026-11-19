@@ -1,0 +1,19 @@
+#!/bin/sh
+# Restore the painting collection without storing large images in dotfiles.
+set -eu
+
+gallery=${XDG_DATA_HOME:-$HOME/.local/share}/wallpapers/paintings
+catalog=$HOME/dotfiles/config/themes/wallpapers.tsv
+mkdir -p "$gallery/light" "$gallery/dark"
+
+tab=$(printf '\t')
+while IFS="$tab" read -r mode filename url artist title _source; do
+  case $mode in '#'*|'') continue ;; esac
+  image=$gallery/$mode/$filename
+  [ ! -s "$image" ] || continue
+
+  printf '%s — %s\n' "$artist" "$title"
+  curl --fail --location --retry 2 --silent --show-error \
+    --output "$image.part" "$url"
+  mv "$image.part" "$image"
+done < "$catalog"

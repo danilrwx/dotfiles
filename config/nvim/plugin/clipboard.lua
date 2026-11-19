@@ -1,5 +1,5 @@
 -- Every plain yank is mirrored to the desktop clipboard, so there is no
--- <leader>y: bin/clip (wl-copy). Without a display
+-- <leader>y: bin/clip (wl-copy or xclip). Without a display
 -- (a server over ssh) yanks stay in nvim's registers.
 if not (vim.env.WAYLAND_DISPLAY and vim.fn.executable("clip") == 1) then
   return

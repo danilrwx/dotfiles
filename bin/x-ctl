@@ -1,10 +1,10 @@
 #!/bin/sh
 # $mod+x: pick Wi-Fi, Bluetooth, the removable drives (bin/x-drives), the sound output or input, the headset mode or
-# the power profile. Wi-Fi and Bluetooth are bin/wifi and bin/bt, over the daemons' own iwctl and bluetoothctl;
+# the power profile. Wi-Fi uses bin/wifi over iwctl; Bluetooth uses the picker in bin/bt;
 # output, input and power are a second pick, the current one first: PipeWire's sinks or
 # sources by wpctl, or power-profiles-daemon's profiles. headset flips the Bluetooth headset between headphones
 # (A2DP, the good sound, no mic) and handsfree (HFP, with the mic). vless drives bin/vpn-vless: on through TUN or as the
-# system proxy, off, the rule or global mode, the profile. openvpn brings a profile of bin/vpn-openvpn up, or the
+# system proxy, off, the rule or global mode, the profile. openvpn brings a profile of dev/bin/vpn-openvpn up, or the
 # one up down.
 # pick PROMPT: a line of stdin by bin/x-menu
 pick() { "$HOME/dotfiles/bin/x-menu" "$1"; }
@@ -92,7 +92,7 @@ vless() {
 }
 # openvpn: the profiles, the one up first, and off while one is
 openvpn() {
-	ovpn=$HOME/dotfiles/bin/vpn-openvpn
+	ovpn=$HOME/.local/bin/vpn-openvpn
 	cur=$("$ovpn" status)
 	pick=$({ "$ovpn" list; [ "$cur" != off ] && echo off; } | pick "openvpn $cur") || exit 0
 	if [ "$pick" = off ]; then set -- off; else set -- on "$pick"; fi
@@ -102,8 +102,21 @@ openvpn() {
 		notify-send -a fnkeys -r 9912 -u critical "OpenVPN" "$err"
 	fi
 }
-choice=$(printf 'wifi\nbluetooth\noutput\ninput\nheadset\nvless\nopenvpn\ndrives\npower\n' | pick ctl) || exit 0
+choice=$({ printf 'wifi\nbluetooth\noutput\ninput\nheadset\nmusic\nvless\n'
+	[ ! -x "$HOME/.local/bin/vpn-openvpn" ] || printf 'openvpn\n'
+	printf 'drives\npower\ntheme\n'; } | pick ctl) || exit 0
 case "$choice" in
+music)
+	action=$(printf 'radio\nlocal\nstop\npause\nnext\n' | pick music) || exit 0
+	case "$action" in
+	radio|local|stop|pause|next)
+		err=$("$HOME/dotfiles/bin/classical" "$action" 2>&1) ||
+			notify-send -a fnkeys -r 9912 -u critical "Music" "$err"
+		;;
+	esac ;;
+theme)
+	mode=$(printf 'dark\nlight\n' | pick theme) || exit 0
+	[ -z "$mode" ] || "$HOME/dotfiles/bin/x-theme" "$mode" ;;
 power)
 	cur=$(powerprofilesctl get)
 	profile=$({ echo "$cur"; powerprofilesctl list | sed -n 's/^[* ] *\([a-z-]*\):$/\1/p' | grep -vx "$cur"; } | pick power) || exit 0

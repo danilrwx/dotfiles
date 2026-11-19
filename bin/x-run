@@ -1,9 +1,7 @@
 #!/bin/bash
-# the launcher (super+d, config/hypr), in bin/x-menu: the apps by their names (the
+# the launcher (Super+D in Labwc), in bin/x-menu: the apps by their names (the
 # .desktop entries, not PATH's binaries; those hidden by NoDisplay, config/applications's among them, left out).
-# What is typed instead: arithmetic is calculated, its result copied. Anything else whose first word is a command
-# runs as one, as wmenu-run would; the rest goes to the browser through bin/web-url: a URL, "!yt", Helium's own
-# "!5"/"@gemini", or a search.
+# Typed commands run through the shell; other input is ignored.
 
 # the entries by id, the user's over the system's
 declare -A app seen
@@ -22,18 +20,10 @@ for d in "${XDG_DATA_HOME:-$HOME/.local/share}/applications" /usr/local/share/ap
 done
 
 q=$(printf '%s\n' "${!app[@]}" | sort -f | "$HOME/dotfiles/bin/x-menu" run) || exit 0
-# browser WORDS: bin/web-url's page (a URL, a bang, a search) in the default browser — xdg-open, so which one it is
-# stays a setting (install points it at Firefox) and not a name written here
-browser() { local url; url=$("$HOME/dotfiles/bin/web-url" "$1") && (xdg-open "$url" > /dev/null 2>&1 &) }
+[ -n "$q" ] || exit 0
+
 if [ -n "${app[$q]}" ]; then
   exec gtk-launch "${app[$q]}"
-# digits and operators alone, so safe in awk's program
-elif [[ $q =~ ^[0-9.+*/%^()\ -]+$ ]] && r=$(awk "BEGIN {print $q}" 2>/dev/null) && [ -n "$r" ]; then
-  printf '%s' "$r" | "$HOME/dotfiles/bin/clip"
-  notify-send -a run "$q = $r" "copied"
 elif command -v "${q%% *}" > /dev/null 2>&1; then
   exec sh -c "$q"
-else
-  browser "$q"
 fi
-

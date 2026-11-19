@@ -1,5 +1,5 @@
 #!/bin/sh
-# Media and HONOR Fn keys under Hyprland (config/hypr). Levels (volume, mic, brightness) are a dunst progress
+# Media and HONOR Fn keys under Wayland. Levels (volume, mic, brightness) are a dunst progress
 # card, states (mute, profile, camera) a notification card. The performance and camera keys are acted on by
 # honor-hotkey-actions.service; here we only show what it did.
 # wpctl prints 0.45; mawk under LC_NUMERIC=ru_RU reads that as 0

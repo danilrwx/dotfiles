@@ -1,16 +1,14 @@
-# dunst under Hyprland (over D-Bus, at the first notification): cards as the borders look, the theme's ground
-# and text, a 1px frame green as a focused window's (grey for low urgency, red for critical), top right.
-# bin/x-fnkeys sends volume/brightness with a value hint, drawn as the progress bar. Linked to ~/.config/dunst
-# by install --desktop.
+# Notification frame matches the 4px window borders in both themes.
 [global]
     font = Iosevka 11
     format = "<b>%s</b>\n%b"
-    width = 300
+    width = (300, 420)
+    height = (0, 650)
     origin = top-right
     offset = (6, 30)
     padding = 8
     horizontal_padding = 8
-    frame_width = 1
+    frame_width = 4
     frame_color = "#addf9c"
     separator_height = 2
     separator_color = frame
@@ -24,6 +22,21 @@
     progress_bar_frame_width = 1
     highlight = "#addf9c"
     mouse_left_click = close_current
+
+[status]
+    appname = x-status
+    alignment = left
+    format = "%b"
+
+[clock]
+    appname = x-clock
+    alignment = center
+    format = "<span size='x-large' weight='bold'>%s</span>\n%b"
+
+[calendar]
+    appname = x-calendar
+    alignment = center
+    format = "%b"
 
 [urgency_low]
     timeout = 5

@@ -1,0 +1,3 @@
+#!/bin/sh
+pkill -x -u "$(id -u)" swayidle
+systemctl --user stop x-background.service xdg-desktop-portal-wlr.service dotfiles-polkit-agent.service

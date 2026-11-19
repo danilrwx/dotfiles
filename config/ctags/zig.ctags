@@ -1,0 +1,5 @@
+# Basic declaration tags; Zig scopes and imports are not resolved.
+--langdef=Zig
+--map-Zig=+.zig
+--regex-Zig=/^[[:blank:]]*((pub|export|extern|inline|noinline)[[:blank:]]+("[^"]*"[[:blank:]]+)?)*fn[[:blank:]]+([A-Za-z_][A-Za-z_0-9]*)[[:blank:]]*\(/\4/f,function/
+--regex-Zig=/^[[:blank:]]*(pub[[:blank:]]+)?(const|var)[[:blank:]]+([A-Za-z_][A-Za-z_0-9]*)/\3/v,variable/

@@ -56,10 +56,7 @@ alias kad="kubectl delete -f"
 kctx() { local c; c=$(kubectl config get-contexts -o name | fzf) && [ -n "$c" ] && kubectl config use-context "$c" }
 kns()  { local n; n=$(kubectl get ns -o name | cut -d/ -f2 | fzf) && [ -n "$n" ] && kubectl config set-context --current --namespace "$n" }
 
-alias vi=nvim
-alias vim=nvim
 
-alias lg='lazygit'
 
 setopt PROMPT_SUBST
 PROMPT='[%F{11}%*%f] %F{10}%~%f %F{12}❯%f '

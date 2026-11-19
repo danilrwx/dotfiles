@@ -52,6 +52,6 @@ if bt --agent NoInputNoOutput --timeout 20 pair "$mac" >/dev/null 2>&1; then
 	else note 3000 "paired, connect failed"; fi
 else
 	note 3000 "pairing failed; opening bluetoothctl"
-	exec "${X_TERM:-$HOME/dotfiles/bin/x-term}" -c x-ctl -t "Bluetooth: ${name:-$mac}" \
-		-e "${BLUETOOTHCTL:-bluetoothctl}"
+	exec "${X_TERM:-$HOME/dotfiles/bin/x-term}" --app-id x-ctl --title "Bluetooth: ${name:-$mac}" \
+		"${BLUETOOTHCTL:-bluetoothctl}"
 fi

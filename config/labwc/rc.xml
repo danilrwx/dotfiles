@@ -1,0 +1,232 @@
+<?xml version="1.0"?>
+<labwc_config>
+  <core>
+    <gap>0</gap>
+  </core>
+  <theme>
+    <name>Dotfiles</name>
+    <cornerRadius>0</cornerRadius>
+    <maximizedDecoration>none</maximizedDecoration>
+    <dropShadows>no</dropShadows>
+  </theme>
+  <margin top="10" bottom="10" left="10" right="10" />
+  <desktops number="9" popupTime="0" />
+  <keyboard>
+    <default />
+    <keybind key="W-c">
+      <action name="AutoPlace" policy="center" />
+    </keybind>
+    <keybind key="W-Tab">
+      <action name="NextWindow" />
+    </keybind>
+    <keybind key="W-S-t">
+      <action name="Execute" command="x-theme toggle" />
+    </keybind>
+    <keybind key="W-Return">
+      <action name="Execute" command="x-term" />
+    </keybind>
+    <keybind key="W-d">
+      <action name="Execute" command="x-run" />
+    </keybind>
+    <keybind key="W-b">
+      <action name="Execute" command="firefox-bookmarks" />
+    </keybind>
+    <keybind key="W-S-b">
+      <action name="Execute" command="firefox-bookmarks window" />
+    </keybind>
+    <keybind key="W-s">
+      <action name="Execute" command="firefox-search" />
+    </keybind>
+    <keybind key="W-x">
+      <action name="Execute" command="x-ctl" />
+    </keybind>
+    <keybind key="W-i">
+      <action name="Execute" command="x-status" />
+    </keybind>
+    <keybind key="W-S-i">
+      <action name="Execute" command="dunstctl close-all" />
+    </keybind>
+    <keybind key="W-S-x">
+      <action name="Execute" command="x-lock" />
+    </keybind>
+    <keybind key="W-n">
+      <action name="Execute" command="dunstctl close" />
+    </keybind>
+    <keybind key="W-S-n">
+      <action name="Execute" command="dunstctl close-all" />
+    </keybind>
+    <keybind key="XF86AudioRaiseVolume">
+      <action name="Execute" command="x-fnkeys vol-up" />
+    </keybind>
+    <keybind key="XF86AudioLowerVolume">
+      <action name="Execute" command="x-fnkeys vol-down" />
+    </keybind>
+    <keybind key="XF86AudioMute">
+      <action name="Execute" command="x-fnkeys vol-mute" />
+    </keybind>
+    <keybind key="XF86AudioMicMute">
+      <action name="Execute" command="x-fnkeys mic" />
+    </keybind>
+    <keybind key="XF86MonBrightnessUp">
+      <action name="Execute" command="x-fnkeys bright-up" />
+    </keybind>
+    <keybind key="XF86MonBrightnessDown">
+      <action name="Execute" command="x-fnkeys bright-down" />
+    </keybind>
+    <keybind key="W-Up">
+      <action name="Execute" command="x-fnkeys vol-up" />
+    </keybind>
+    <keybind key="W-Down">
+      <action name="Execute" command="x-fnkeys vol-down" />
+    </keybind>
+    <keybind key="W-Right">
+      <action name="Execute" command="classical next" />
+    </keybind>
+    <keybind key="W-S-Up">
+      <action name="Execute" command="x-fnkeys mic-up" />
+    </keybind>
+    <keybind key="W-S-Down">
+      <action name="Execute" command="x-fnkeys mic-down" />
+    </keybind>
+    <keybind key="Print">
+      <action name="Execute" command="sh -c 'geometry=$(slurp) || exit; grim -g &quot;$geometry&quot; - | wl-copy -t image/png'" />
+    </keybind>
+    <keybind key="W-S-s">
+      <action name="Execute" command="sh -c 'geometry=$(slurp) || exit; grim -g &quot;$geometry&quot; - | wl-copy -t image/png'" />
+    </keybind>
+    <keybind key="W-S-q">
+      <action name="Close" />
+    </keybind>
+    <keybind key="W-f">
+      <action name="ToggleFullscreen" />
+    </keybind>
+    <keybind key="W-m">
+      <action name="ToggleMaximize" />
+    </keybind>
+    <keybind key="W-S-e">
+      <action name="Exit" />
+    </keybind>
+    <keybind key="W-h">
+      <action name="SnapToEdge" direction="left" />
+    </keybind>
+    <keybind key="W-j">
+      <action name="SnapToEdge" direction="down" />
+    </keybind>
+    <keybind key="W-k">
+      <action name="SnapToEdge" direction="up" />
+    </keybind>
+    <keybind key="W-l">
+      <action name="SnapToEdge" direction="right" />
+    </keybind>
+    <keybind key="W-S-h">
+      <action name="SnapToEdge" direction="up-left" />
+    </keybind>
+    <keybind key="W-S-j">
+      <action name="SnapToEdge" direction="down-left" />
+    </keybind>
+    <keybind key="W-S-k">
+      <action name="SnapToEdge" direction="up-right" />
+    </keybind>
+    <keybind key="W-S-l">
+      <action name="SnapToEdge" direction="down-right" />
+    </keybind>
+    <keybind key="W-1">
+      <action name="GoToDesktop" to="1" />
+    </keybind>
+    <keybind key="W-S-1">
+      <action name="SendToDesktop" to="1" follow="no" />
+    </keybind>
+    <keybind key="W-2">
+      <action name="GoToDesktop" to="2" />
+    </keybind>
+    <keybind key="W-S-2">
+      <action name="SendToDesktop" to="2" follow="no" />
+    </keybind>
+    <keybind key="W-3">
+      <action name="GoToDesktop" to="3" />
+    </keybind>
+    <keybind key="W-S-3">
+      <action name="SendToDesktop" to="3" follow="no" />
+    </keybind>
+    <keybind key="W-4">
+      <action name="GoToDesktop" to="4" />
+    </keybind>
+    <keybind key="W-S-4">
+      <action name="SendToDesktop" to="4" follow="no" />
+    </keybind>
+    <keybind key="W-5">
+      <action name="GoToDesktop" to="5" />
+    </keybind>
+    <keybind key="W-S-5">
+      <action name="SendToDesktop" to="5" follow="no" />
+    </keybind>
+    <keybind key="W-6">
+      <action name="GoToDesktop" to="6" />
+    </keybind>
+    <keybind key="W-S-6">
+      <action name="SendToDesktop" to="6" follow="no" />
+    </keybind>
+    <keybind key="W-7">
+      <action name="GoToDesktop" to="7" />
+    </keybind>
+    <keybind key="W-S-7">
+      <action name="SendToDesktop" to="7" follow="no" />
+    </keybind>
+    <keybind key="W-8">
+      <action name="GoToDesktop" to="8" />
+    </keybind>
+    <keybind key="W-S-8">
+      <action name="SendToDesktop" to="8" follow="no" />
+    </keybind>
+    <keybind key="W-9">
+      <action name="GoToDesktop" to="9" />
+    </keybind>
+    <keybind key="W-S-9">
+      <action name="SendToDesktop" to="9" follow="no" />
+    </keybind>
+    <keybind key="W-XF86AudioRaiseVolume">
+      <action name="Execute" command="x-fnkeys mic-up" />
+    </keybind>
+    <keybind key="W-XF86AudioLowerVolume">
+      <action name="Execute" command="x-fnkeys mic-down" />
+    </keybind>
+    <keybind key="W-S-m">
+      <action name="Execute" command="x-fnkeys mic" />
+    </keybind>
+    <keybind key="XF86CameraAccessToggle">
+      <action name="Execute" command="x-fnkeys camera" />
+    </keybind>
+    <keybind key="XF86Launch1">
+      <action name="Execute" command="x-fnkeys profile" />
+    </keybind>
+  </keyboard>
+  <mouse>
+    <default />
+    <context name="Client">
+      <mousebind button="W-Left" action="Drag">
+        <action name="Move" />
+      </mousebind>
+      <mousebind button="W-Right" action="Drag">
+        <action name="Resize" />
+      </mousebind>
+    </context>
+  </mouse>
+  <libinput>
+    <device category="touchpad">
+      <naturalScroll>yes</naturalScroll>
+      <tap>no</tap>
+      <clickMethod>clickfinger</clickMethod>
+      <disableWhileTyping>yes</disableWhileTyping>
+      <pointerSpeed>-0.25</pointerSpeed>
+      <scrollFactor>0.3</scrollFactor>
+    </device>
+  </libinput>
+  <windowRules>
+    <windowRule identifier="*">
+      <action name="SetDecorations" decorations="border" />
+    </windowRule>
+    <windowRule identifier="firefox*">
+      <action name="SetDecorations" decorations="border" forceSSD="yes" />
+    </windowRule>
+  </windowRules>
+</labwc_config>

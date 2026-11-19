@@ -1,105 +1,51 @@
-/* Firefox as the rest of the desktop: vertical tabs in the sidebar (sidebar.revamp + sidebar.verticalTabs, set by
-   the policy), the top bar out of the way until the pointer reaches the top edge, and the pastel palette's own
-   surfaces (config/kitty/theme.conf). Only the theme's variables and the elements that are always there:
-   userChrome.css is unsupported and its DOM does move, so the less it reaches for, the longer it survives. Read
-   from the profile's chrome/, which install links to config/firefox/chrome. */
-
-:root {
-  --dotfiles-bg: #1c1c1c;        /* color0: toolbar, sidebar, menus */
-  --dotfiles-ground: #000000;    /* background: the page, the selected tab */
-  --dotfiles-fg: #ffffff;        /* foreground */
-  --dotfiles-grey: #6b6b6b;      /* color8: inactive labels, placeholders */
-  --dotfiles-line: #333333;      /* selection_background: separators */
-  --dotfiles-accent: #9cc4f0;    /* color12: focus, selection */
-}
-
-:root {
-  --lwt-accent-color: var(--dotfiles-ground) !important;
-  --lwt-text-color: var(--dotfiles-fg) !important;
-  --toolbar-bgcolor: var(--dotfiles-bg) !important;
-  --toolbar-color: var(--dotfiles-fg) !important;
-  --toolbar-field-background-color: var(--dotfiles-ground) !important;
-  --toolbar-field-color: var(--dotfiles-fg) !important;
-  --toolbar-field-focus-background-color: var(--dotfiles-ground) !important;
-  --toolbar-field-focus-color: var(--dotfiles-fg) !important;
-  --toolbar-field-border-color: var(--dotfiles-line) !important;
-  --tab-selected-bgcolor: var(--dotfiles-ground) !important;
-  --tab-selected-textcolor: var(--dotfiles-fg) !important;
-  --tab-border-radius: 6px !important;
-  --toolbarbutton-icon-fill: var(--dotfiles-fg) !important;
-  --toolbarbutton-hover-background: #2a2a2a !important;
-  --toolbarbutton-active-background: var(--dotfiles-line) !important;
-  --arrowpanel-background: var(--dotfiles-bg) !important;
-  --arrowpanel-color: var(--dotfiles-fg) !important;
-  --arrowpanel-border-color: var(--dotfiles-line) !important;
-  --focus-outline-color: var(--dotfiles-accent) !important;
-  /* the sidebar shares the toolbar's surface, its launcher included */
-  --sidebar-background-color: var(--dotfiles-bg) !important;
-  --sidebar-text-color: var(--dotfiles-fg) !important;
-  --sidebar-border-color: var(--dotfiles-line) !important;
-}
-
-/* ── the tabs are in the sidebar now; the horizontal strip would only take the height it has ─────────────────── */
-#TabsToolbar {
-  display: none !important;
-}
-
-/* ── the top bar stays where it is ─────────────────────────────────────────────────────────────────────────────
-   The autohide version moved the toolbar out of the window and caught the pointer with a strip of its own. It looked
-   right and broke a thing it could not see: Firefox positions its panels (the hamburger, downloads, permissions, the
-   address bar's own results) from the box of the button they hang on, and that box had left the screen. Popups then
-   opened at the window edge, over the page. A bar that is always there is one line of chrome and no such trade. */
-#navigator-toolbox {
-  border-bottom: 1px solid var(--dotfiles-line) !important;
-}
-#nav-bar,
-#PersonalToolbar {
-  background: var(--dotfiles-bg) !important;
+/* The compositor draws the outer frame; suppress Firefox's GTK decorations. */
+:root[windowtype="navigator:browser"] {
+  appearance: none !important;
   box-shadow: none !important;
 }
-
-/* ── the sidebar: the same 1px line against the page, no header chrome ───────────────────────────────────────── */
-#sidebar-box {
-  border-inline-end: 1px solid var(--dotfiles-line) !important;
-  background: var(--dotfiles-bg) !important;
-}
-#sidebar-header {
-  border-bottom: 1px solid var(--dotfiles-line) !important;
-  padding-inline: 4px !important;
-}
-/* the launcher's icons and the tab rows read as the terminal's slots: the selected one on the ground, the rest
-   plain, the inactive labels grey */
-#sidebar-main toolbarbutton[checked] {
-  background: var(--dotfiles-line) !important;
-}
-#vertical-tabs .tabbrowser-tab {
-  border-radius: var(--tab-border-radius) !important;
-  margin-inline: 4px !important;
-}
-#vertical-tabs .tabbrowser-tab[selected="true"] .tab-background {
-  background: var(--dotfiles-ground) !important;
-  box-shadow: none !important;
-}
-#vertical-tabs .tabbrowser-tab:not([selected="true"]) .tab-label {
-  color: var(--dotfiles-grey) !important;
+:root[windowtype="navigator:browser"] > body {
+  border-radius: 0 !important;
 }
 
-/* ── the address bar as a pill, the way Chromium draws the omnibox ────────────────────────────────────────────── */
-#urlbar-background,
-#searchbar {
-  border: none !important;
-  border-radius: 8px !important;
-  box-shadow: none !important;
-}
-#urlbar:is([focused], [open]) > #urlbar-background {
-  outline: 1px solid var(--dotfiles-accent) !important;
+/* Match the laptop's curved screen corners when maximized. */
+:root[windowtype="navigator:browser"][sizemode="maximized"] > body {
+  border-radius: 12px !important;
+  overflow: clip !important;
 }
 
-/* ── the buttons this setup has no use for ───────────────────────────────────────────────────────────────────── */
-#firefox-view-button,
-#fxa-toolbar-menu-button,
-#save-to-pocket-button,
-#unified-extensions-button,
-#contextual-feature-recommendation-notification {
-  display: none !important;
+/* Paper palette; dark-mode colors remain Firefox defaults. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --lwt-accent-color: #f2e8d2 !important;
+    --lwt-text-color: #33322e !important;
+    --toolbar-bgcolor: #f2e8d2 !important;
+    --toolbar-color: #33322e !important;
+    --toolbar-field-background-color: #e3d9c3 !important;
+    --toolbar-field-focus-background-color: #f2e8d2 !important;
+    --toolbar-field-color: #33322e !important;
+    --toolbar-field-focus-color: #33322e !important;
+    --tab-selected-bgcolor: #e3d9c3 !important;
+    --tab-selected-textcolor: #33322e !important;
+    --toolbox-background-color: #f2e8d2 !important;
+    --toolbox-background-color-inactive: #f2e8d2 !important;
+    --toolbox-text-color: #33322e !important;
+    --toolbox-text-color-inactive: #827c70 !important;
+    --tab-background-color-selected: #e3d9c3 !important;
+    --tab-text-color-selected: #33322e !important;
+    --tab-background-color-hover: #eae0ca !important;
+    --sidebar-background-color: #f2e8d2 !important;
+    --sidebar-text-color: #33322e !important;
+    --arrowpanel-background: #f2e8d2 !important;
+    --arrowpanel-color: #33322e !important;
+    --arrowpanel-border-color: #d1c6af !important;
+    --chrome-content-separator-color: #d1c6af !important;
+    --focus-outline-color: #827c70 !important;
+  }
+  #navigator-toolbox, #browser, #sidebar-main, sidebar-main, #sidebar-box {
+    background-color: #f2e8d2 !important;
+    color: #33322e !important;
+  }
+  #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab[selected] .tab-background {
+    background: #e3d9c3 !important;
+  }
 }

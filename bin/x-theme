@@ -1,0 +1,49 @@
+#!/bin/sh
+# Shared desktop theme; foot switches palettes without restarting.
+set -eu
+current=$HOME/.config/dotfiles/theme
+mode=${1:-toggle}
+case $mode in
+  toggle) if [ "$(cat "$current/name" 2>/dev/null || true)" = light ]; then mode=dark; else mode=light; fi ;;
+  dark|light) ;;
+  *) echo 'Usage: x-theme [dark|light|toggle]' >&2; exit 1 ;;
+esac
+mkdir -p "${current%/*}"
+ln -sfnT "$HOME/dotfiles/config/themes/$mode" "$current"
+
+if [ "$mode" = light ]; then
+  signal=USR2
+  gtk=Adwaita
+  scheme=prefer-light
+else
+  signal=USR1
+  gtk=Adwaita-dark
+  scheme=prefer-dark
+fi
+pkill -"$signal" -x -u "$(id -u)" foot || true
+pkill -USR1 -x -u "$(id -u)" nvim || true
+gsettings set org.gnome.desktop.interface gtk-theme "$gtk"
+gsettings set org.gnome.desktop.interface color-scheme "$scheme"
+dunstctl reload || true
+case ${XDG_CURRENT_DESKTOP:-} in
+  *labwc*)
+    desktop=#000000
+    # shellcheck source=/dev/null
+    . "$current/menu.sh"
+    gallery=${XDG_DATA_HOME:-$HOME/.local/share}/wallpapers/paintings/$mode
+    state=${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/wallpaper-$mode
+    previous=$(cat "$state" 2>/dev/null || true)
+    image=$(find "$gallery" -maxdepth 1 -type f -name '*.jpg' 2>/dev/null |
+      grep -Fxv -- "$previous" | shuf -n 1)
+    if [ -z "$image" ] && [ -f "$previous" ]; then image=$previous; fi
+    if [ ! -f "$image" ]; then image=$current/wallpaper.jpg; fi
+    mkdir -p "${state%/*}"
+    printf '%s\n' "$image" > "$state"
+
+    systemctl --user stop x-background.service 2>/dev/null || true
+    systemd-run --user --quiet --collect --unit=x-background \
+      --setenv="WAYLAND_DISPLAY=$WAYLAND_DISPLAY" \
+    swaybg --color "$desktop" --image "$image" --mode fill
+    labwc --reconfigure ;;
+esac
+printf '%s\n' "$mode"

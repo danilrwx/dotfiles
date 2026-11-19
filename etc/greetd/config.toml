@@ -1,9 +1,7 @@
-# dotfiles: tuigreet on vt 7, Hyprland (its package's /usr/share/wayland-sessions/hyprland.desktop, which runs
-# start-hyprland; Debian's tuigreet lists no session unless told, hence the directory named); remembering the
-# last user and session
+# Start the package-owned Labwc session by default.
 [terminal]
 vt = 7
 
 [default_session]
-command = "tuigreet --time --remember --remember-session --asterisks --sessions /usr/share/wayland-sessions --cmd start-hyprland"
+command = "tuigreet --time --remember --asterisks --sessions /usr/share/wayland-sessions --cmd /usr/bin/labwc"
 user = "_greetd"

@@ -1,5 +1,6 @@
 #!/bin/sh
-# The lock: hyprlock, on the theme's ground (the black and white config/hypr/hyprlock.conf sets). hypridle
-# locks at idle and before sleep (config/hypr/hypridle.conf), and super+shift+x.
-pgrep -x hyprlock > /dev/null && exit 0
-exec hyprlock
+# Avoid starting a second screen locker.
+pgrep -x -u "$(id -u)" swaylock >/dev/null && exit 0
+bg=000000
+[ "$(cat "$HOME/.config/dotfiles/theme/name" 2>/dev/null)" != light ] || bg=f2e8d2
+exec swaylock -f -c "$bg"

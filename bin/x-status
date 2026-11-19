@@ -1,57 +1,144 @@
 #!/bin/bash
-# x-status: the status as a dunst card (super+i): memory, volume, mic, battery, brightness, date, plain words.
-# x-status bar: the same every second, one plain line for whatever wants to poll it, with RU
-# from Scroll Lock's LED, the one the keyboard layout lights. This is where the card at 10% battery and the
-# critical one at 5% come from, once a discharge (UPower powers off at 2%).
-# The battery is yellow from 20% and red from 10% while it discharges, in both.
+# x-status: an on-demand desktop status card (Super+i).
+# x-status battery: one battery-only check, invoked by the user timer once a minute.
+# Warning state lives in the runtime directory and resets while not discharging.
 export LC_NUMERIC=C   # wpctl prints 0.45; awk under ru_RU reads that as 0
 
 # "Volume: 0.45 [MUTED]" -> 45% or off
-level() { wpctl get-volume "$1" 2>/dev/null | awk '{print /MUTED/ ? "off" : int($2 * 100 + 0.5) "%"}'; }
+level() { wpctl get-volume "$1" 2>/dev/null | awk '{print /MUTED/ ? "off" : int($2 * 100 + 0.5) "%"} END {if (!NR) print "unavailable"}'; }
 # "CAPACITY STATUS" of the first battery, nothing without one
 battery() {
   for b in /sys/class/power_supply/BAT*; do [ -d "$b" ] && { echo "$(<"$b/capacity") $(<"$b/status")"; return; }; done
 }
-# the line into s; markup (pango) colours the battery; c and st the battery's, for the cards and the bar
+row() {
+  printf '<b>%s</b>\n%s\n' "$1" "$(printf '%s' "$2" | sed 's/\&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')"
+}
+
+audio() {
+  local name
+  name=$(wpctl inspect "$2" 2>/dev/null | awk '
+    /node.description = / {description=$0}
+    /node.nick = / {nick=$0}
+    END {name=nick!="" ? nick : description; sub(/^.* = "/, "", name); sub(/"$/, "", name); print name}')
+  if [ -n "$name" ]; then row "$1" "$name · $(level "$2")"
+  else row "$1" 'unavailable'; fi
+}
+
+headphones() {
+  local mac name info charge found=0
+  while read -r _ mac _; do
+    [ -n "$mac" ] || continue
+    info=$(timeout 2 bluetoothctl info "$mac" 2>/dev/null) || continue
+    grep -Eq 'Icon: audio-(headphones|headset)' <<< "$info" || continue
+    name=$(sed -n 's/^[[:space:]]*Alias: //p' <<< "$info")
+    charge=$(awk -F '[()]' '/Battery Percentage:/ {print $2; exit}' <<< "$info")
+    row 'Headphones' "${name:-$mac} · ${charge:-unknown}${charge:+%}"
+    found=1
+  done < <(timeout 2 bluetoothctl devices Connected 2>/dev/null)
+  [ "$found" = 1 ] || row 'Headphones' 'disconnected'
+}
+
+network() {
+  local device info address
+  device=$(ip -4 route show default | awk '{for (i=1; i<NF; i++) if ($i=="dev") {print $(i+1); exit}}')
+  if [ -z "$device" ]; then row 'Connection' 'offline'; return; fi
+  info=$(timeout 2 iwctl station "$device" show 2>/dev/null | awk '
+    /^[[:space:]]*Connected network[[:space:]]/ {sub(/^[[:space:]]*Connected network[[:space:]]+/, ""); sub(/[[:space:]]+$/, ""); name=$0}
+    /^[[:space:]]*RSSI[[:space:]]/ {signal=$2 " " $3}
+    END {if (name!="") {printf "%s", name; if (signal!="") printf " · %s", signal}}')
+  if [ -n "$info" ]; then row 'Wi-Fi' "$info"
+  else row 'Interface' "$device"; fi
+  address=$(ip -4 -o addr show dev "$device" scope global | awk 'NR==1 {sub(/\/.*/, "", $4); print $4}')
+  [ -z "$address" ] || row 'IPv4' "$address"
+}
+
+calendar() {
+  local year month day bg='#000000' fg='#ffffff'
+  # shellcheck source=/dev/null
+  [ ! -r "$HOME/.config/dotfiles/theme/menu.sh" ] || . "$HOME/.config/dotfiles/theme/menu.sh"
+  read -r year month day < <(date +'%Y %m %d')
+  python3 - "$year" "$month" "$day" "$bg" "$fg" <<'PY'
+import calendar
+import sys
+
+year, month, day = map(int, sys.argv[1:4])
+bg, fg = sys.argv[4:6]
+
+def cell(text, today=False, muted=False):
+    # Equal-width cells preserve columns when Dunst centers partial weeks.
+    text = f' {text:>2} '.replace(' ', '\u00a0')
+    if today:
+        return f'<span foreground="{bg}" background="{fg}" weight="bold">{text}</span>'
+    return f'<span alpha="65%">{text}</span>' if muted else text
+
+lines = [''.join(cell(d, muted=True) for d in ('Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'))]
+for week in calendar.monthcalendar(year, month):
+    lines.append(''.join(cell(str(d) if d else '', today=d == day, muted=i >= 5)
+                         for i, d in enumerate(week)))
+print(f'<b>{calendar.month_name[month]} {year}</b>\n\n'
+      '<span font_family="Iosevka" line_height="1.35">' + '\n'.join(lines) + '</span>')
+PY
+}
+
 status() {
-  yellow=#efe6a8
-  red=#f09a9b
-  s="mem $(free -h | awk '/^Mem/ {print $3}')  vol $(level @DEFAULT_AUDIO_SINK@)  mic $(level @DEFAULT_AUDIO_SOURCE@)"
+  local remaining l now
   read -r c st <<< "$(battery)"
   if [ -n "$c" ]; then
-    t="bat $c%"
-    if [ "$st" = Charging ]; then t+="+"
-    elif (( c <= 20 )) && [ "${1:-}" = markup ]; then
-      if (( c <= 10 )); then t="<span foreground='$red'>$t</span>"
-      else t="<span foreground='$yellow'>$t</span>"; fi
-    fi
-    s+="  $t"
+    remaining=$(LC_ALL=C upower -i /org/freedesktop/UPower/devices/DisplayDevice 2>/dev/null | awk '
+      /time to (empty|full):/ {sub(/^.*:[[:space:]]*/, ""); gsub(/hours?/, "h");
+        gsub(/minutes?/, "min"); gsub(/seconds?/, "s"); gsub(/[[:space:]]/, ""); print}')
+    row 'Battery' "$c% · ${st,,}${remaining:+ · $remaining}"
   fi
   for l in /sys/class/backlight/*; do
-    [ -d "$l" ] && s+="  bri $(( $(<"$l/brightness") * 100 / $(<"$l/max_brightness") ))%" && break
+    [ -d "$l" ] || continue
+    row 'Brightness' "$(( $(<"$l/brightness") * 100 / $(<"$l/max_brightness") ))%"
+    break
   done
-}
-# the low and critical cards, once each per discharge
-warned=
-warn() {
-  if [ -z "$c" ] || [ "$st" = Charging ]; then warned=
-  elif (( c <= 5 )) && [ "$warned" != 5 ]; then
-    notify-send -a battery -r 9914 -u critical "Battery $c%" "Plug in: it powers off at 2%"; warned=5
-  elif (( c <= 10 )) && [ -z "$warned" ]; then
-    notify-send -a battery -r 9914 "Battery $c%" "Low"; warned=10
+
+  printf '\n'
+  audio 'Audio' @DEFAULT_AUDIO_SINK@
+  audio 'Microphone' @DEFAULT_AUDIO_SOURCE@
+  headphones
+  if now=$(classical now 2>/dev/null) && [ -n "$now" ]; then
+    row 'Now playing' "$now"
   fi
+
+  printf '\n'
+  network
+
+  printf '\n'
+  row 'Memory' "$(free -m | awk '/^Mem:/ {printf "%.1f / %.1f GiB", $3/1024, $2/1024}')"
+  row 'Disk' "$(df -h --output=avail "$HOME" | awk 'NR==2 {print $1 " free"}')"
+  row 'Uptime' "$(LC_ALL=C uptime -p | sed -E 's/^up //; s/ days?/d/g; s/ hours?/h/g; s/ minutes?/m/g; s/,//g')"
+}
+# One warning at 10%, then one critical warning at 5%, per discharge.
+warn() {
+  local state=${XDG_RUNTIME_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}}/dotfiles-battery-warning
+  local warned='' urgency=normal message=Low threshold
+  if [ -z "$c" ] || [ "$st" != Discharging ]; then
+    rm -f "$state"
+    return 0
+  fi
+  [ ! -r "$state" ] || read -r warned < "$state"
+  if (( c <= 5 )) && [ "$warned" != 5 ]; then
+    threshold=5; urgency=critical; message='Plug in: it powers off at 2%'
+  elif (( c <= 10 )) && [ -z "$warned" ]; then
+    threshold=10
+  else
+    return 0
+  fi
+  notify-send -a battery -r 9914 -u "$urgency" "Battery $c%" "$message" || return
+  [ -d "${state%/*}" ] || mkdir -p "${state%/*}"
+  printf '%s\n' "$threshold" > "$state"
 }
 
-if [ "${1:-}" = bar ]; then
-  while :; do
-    status
-    # grp_led:scroll: Scroll Lock (bit 2 of the LED mask) lit while ru is on
-    (( 0x$(xset q 2>/dev/null | awk '/LED mask/ {print $NF}') & 4 )) && r=RU || r=US
-    echo "$s  $r  $(date +'%d/%m %H:%M')"
-    warn
-    sleep 1
-  done
-fi
+case ${1:-} in
+  battery) read -r c st <<< "$(battery)"; warn; exit $? ;;
+  '') ;;
+  *) echo 'usage: x-status [battery]' >&2; exit 2 ;;
+esac
 
-status
-exec notify-send -a fnkeys -r 9912 -t 3000 "$(date +'%H:%M  %a %d/%m')" "$s"
+body=$(status)
+notify-send -a x-calendar -r 9916 -t 10000 'Calendar' "$(calendar)"
+notify-send -a x-status -r 9915 -t 10000 'Status' "$body"
+exec notify-send -a x-clock -r 9917 -t 10000 "$(date +'%H:%M')" "$(date +'%A, %-d %B %Y')"

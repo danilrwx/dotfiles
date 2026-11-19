@@ -1,0 +1,11 @@
+# Optional: start manually for a game and stop afterward to restore CPU idle states.
+# The installed polkit rule lets the active local user start and stop this unit.
+[Unit]
+Description=Disable CPU idle states until stopped
+ConditionPathExists=/sys/devices/system/cpu/cpuidle
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/cpupower idle-set -D 0
+ExecStop=/usr/bin/cpupower idle-set -E

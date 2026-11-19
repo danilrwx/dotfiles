@@ -1,0 +1,9 @@
+hst 5906386421930127f450c3450a4600536e4cd5c6
+neuwld 712fa71be579f3796b3cd500de87c736a8617dd7
+Active desktop terminal through bin/x-term.
+Font: IosevkaTerm Nerd Font Mono, pixelsize=16. Shared pastel palette.
+Plumb command: xdg-open. Terminfo cursor capabilities repaired.
+neuwld: shared library, Wayland SHM renderer, DRM disabled.
+Sources: ~/.local/src/hst and ~/.local/src/neuwld.
+wl.c: remove duplicate Fontconfig substitution before wlloadfont; prevents selection of Noto Color Emoji as the main font.
+wl.c: integer HiDPI from wl_surface preferred_buffer_scale; scale font, buffers, damage and pointer coordinates together.

@@ -1,5 +1,4 @@
 #!/bin/sh
 
-# `ls -lah`, the .zshrc alias as a command for the shells that never read that
-# file (maki's `!` runs bash); see bin/k
+# ls -lah, also available in noninteractive shells.
 exec ls -lah "$@"

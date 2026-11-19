@@ -1,3 +1,0 @@
-[mcp.playwright]
-command = ["npx", "-y", "@playwright/mcp@latest", "--extension", "--executable-path", "/usr/bin/helium"]
-enabled = true

@@ -1,5 +1,4 @@
 #!/bin/sh
 
-# `kubectl delete -f`, the .zshrc alias as a command for the shells that never read
-# that file (maki's `!` runs bash); see bin/k
+# kubectl delete -f, also available in noninteractive shells.
 exec kubectl delete -f "$@"

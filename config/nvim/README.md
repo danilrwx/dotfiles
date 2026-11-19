@@ -1,232 +1,93 @@
-# Neovim — plugin-free config
+# Neovim — native config
 
-A hand-rolled Neovim setup with **no plugin manager and no third-party plugins**.
-Everything below (fuzzy picker, git signs, git helper, file manager, sessions,
-completion) is native Lua on top of built-in Neovim + a few external CLIs. Fast
-to start, nothing to lock or break on update.
-
-`<leader>` is <kbd>Space</kbd>.
+No plugin manager or third-party plugins. Files use fuzzy `:find`, buffers use
+`:buffer`, and searches and LSP diagnostics use quickfix. Directory browsing uses
+bundled netrw. `<leader>` is Space.
 
 ## Requirements
 
-| Tool | Used for |
-|------|----------|
-| `git`, `bash` | git signs, git helper, blame |
-| `ugrep` (or `grep`) | live grep picker and `:Grepq` (ugrep preferred, falls back to grep) |
-| `fd` (optional) | `<leader>F` file list (falls back to `git ls-files`; `fdfind` on Ubuntu, `install` links it as `fd`) |
-| `gh` / `glab` (optional) | open PR/MR for a commit (GitHub / GitLab) |
-| `tmux` (optional) | playbook runner |
-| `go`, `golangci-lint` (optional) | `:Lint` (golangci-lint, else `go vet`) |
-| `cc`, `curl`, `tar` | `:TSBuild` (compile treesitter parsers) |
-| language servers | `gopls`, `clangd`, `helm-ls`, `golangci-lint-langserver` — auto-skipped if the binary is absent |
+- `fd` / `fdfind` for file enumeration, with a `find` fallback.
+- `ugrep` for text search, with a `grep` fallback.
+- `gopls`, `clangd`, `helm-ls`: each server is enabled only if its binary exists.
+- tmux for the playbook runner; `bin/clip` (`wl-copy`) for desktop copying.
+
+## Files, search and buffers
+
+| Key / command | Action |
+|---|---|
+| `<leader>f` / `<leader>F` | Start `:find `; type a fuzzy filename, Tab to complete, Enter to open |
+| `<leader>b` | List buffers, then start `:buffer `; enter a number or complete a name |
+| `<leader>/` | Start `:Grepq `; enter a pattern and press Enter |
+| `<leader>/` in visual mode | Search the first line of the selection |
+| `<leader>?` | Search the word under the cursor |
+| `<leader>D` / `:Diagnostics` | All LSP diagnostics in quickfix |
+| `:Diagnostics!` | Diagnostics for the current buffer |
+| `<leader>q` | Toggle quickfix |
+| `:cnext` / `:cprevious` | Next / previous quickfix result |
+| `:colder` / `:cnewer` | Older / newer quickfix result list |
+| `-` | Open netrw in the current file's directory |
+| `<S-l>` / `<S-h>` | Next / previous buffer |
+| `<A-q>` | Delete the current buffer |
+
+File search starts in the current working directory. fd respects ignore files.
+Text search runs after submission, without live updates or a preview window.
+`:Grepq` takes a search pattern; spaces, quotes and shell characters are passed
+to the search program rather than executed by the shell. Regex rules are those
+of the configured search program. Enter opens a result in the quickfix window.
+
+The former `:Picker` command, floating picker UI, preview, multi-selection and
+picker history have been removed. Command-line history and quickfix history
+are available through Neovim's standard commands.
+
+## Editing and appearance
+
+- Built-in `vim` theme and terminal colours; grey line numbers.
+- Neutral completion menus, black LSP floating windows, rounded borders.
+- Traditional Vim syntax, including code blocks inside LSP Markdown previews.
+  Tree-sitter highlighting and LSP semantic highlighting are disabled.
+- No statusline or bufferline. Manual folding.
+- Two-space indentation, persistent undo, restoration of the saved cursor position.
+- Brief highlight on yank; plain yanks also go to the Wayland clipboard.
+  `<leader>dd` copies `path:line`.
+- `<C-d>` / `<C-u>` scroll half a page and centre the cursor.
+  `<C-l>` clears search highlighting and refreshes the display/diff.
+- `.h` files use C. `.yaml` and `.tpl` intentionally use Helm.
+
+Markdown uses bundled syntax, conceal outside the cursor line, word wrapping and
+syntax highlighting in fenced code blocks. There is no separate renderer.
+
+## LSP
+
+Native completion opens automatically while typing. The menu shows names and
+kinds without long signature columns. Go is formatted on save.
+
+| Key | Action |
+|---|---|
+| `K` | Hover documentation |
+| `grn` | Rename |
+| `gra` | Code action |
+| `grr` | References |
+| `gri` | Implementation |
+| `grt` | Type definition |
+| `gO` | Document symbols |
+| `<C-s>` in insert mode | Signature help |
+| `grf` | Format buffer |
+| `grc` | Run code lens, when supported |
+| `[d` / `]d` | Previous / next diagnostic |
+
+## Playbook
+
+In `playbook.sh`, Enter sends the current line or visual selection to tmux and
+runs it. `vim.g.playbook_target` selects the target (default `{last}`).
 
 ## Layout
 
-```
-init.lua            options, leader, global maps, grepprg, undo, private rtp
-plugin/             feature modules, auto-sourced on start
-  picker.lua          fuzzy picker keymaps/commands (Files/Grep/Buffers/…)
-  git.lua             git helper keymaps/commands (log/blame/status/PR)
-  gitsigns.lua        native git signs + hunk actions
-  lsp.lua             enable servers, completion, code lens, format-on-save
-  diagnostics.lua     workspace diagnostics picker, :Lint -> quickfix
-  quickfix.lua        :Grepq / quickfix toggle
-  oil.lua             file manager (edit the dir like a buffer)
-  session.lua         auto save/restore per-cwd sessions
-  playbook.lua        run playbook.sh lines in the pane below (tmux)
-  clipboard.lua       yank mirroring to bin/clip (wl-copy)
-  colors.lua          Alabaster-style highlighting on the terminal's ANSI colours
-  treesitter.lua      enable TS + :TSBuild parser compiler
-lua/                engine code (picker/*, git.lua, session.lua)
-lsp/                per-server configs (mostly vendored from nvim-lspconfig)
-```
-
-## Keymaps
-
-### General / editing
-
-| Key | Action |
-|-----|--------|
-| `<C-d>` / `<C-u>` | half-page down/up, centred (`zz`) |
-| `<C-l>` | clear search highlight |
-| `-` | open Oil in the current file's directory |
-
-### Buffers & windows
-
-| Key | Action |
-|-----|--------|
-| `<S-l>` / `<S-h>` | next / previous buffer |
-| `<A-q>` | delete current buffer |
-| `<leader>b` | buffer picker (`<C-d>` deletes in-list) |
-
-### Files & search (picker)
-
-| Key | Action |
-|-----|--------|
-| `<leader>f` | git-tracked files (`git ls-files`) |
-| `<leader>F` | all files (`fd`, else git) |
-| `<leader>/` | live grep (normal); in visual mode greps the selection |
-| `<leader>?` | live grep the word under the cursor |
-| `<leader>'` | resume last picker (query + list position restored) |
-| `<leader>"` | resume the picker before that |
-
-### In-picker keys
-
-| Key | Action |
-|-----|--------|
-| `<C-n>`/`<Down>`, `<C-p>`/`<Up>` | move selection |
-| `<C-g>` | jump to top |
-| `<CR>` | open |
-| `<C-s>` / `<C-v>` / `<C-t>` | open in split / vsplit / tab |
-| `<C-x>` | mark row (multi-select) |
-| `<Tab>` | send results (or marks) to quickfix |
-| `<C-f>` / `<C-b>` | page down / up |
-| `<A-f>` / `<A-b>` | scroll the preview |
-| `<C-/>` | toggle preview pane |
-| `<C-o>` | previous picker (history) |
-| `<Esc>` / `<C-c>` | close |
-| `<C-d>` | delete (buffers / sessions pickers) |
-| `<A-g>` | live grep: toggle grep-pattern / file-filter mode |
-| `<A-r>` | live grep: toggle regex (ERE) / fixed-string |
-
-### Git — signs & hunks (`gitsigns.lua`)
-
-| Key | Action |
-|-----|--------|
-| `]c` / `[c` | next / previous hunk (native `]c`/`[c` in diff mode) |
-| `ghp` | preview hunk (inline float) |
-| `ghs` / `ghS` | stage hunk / stage whole buffer |
-| `ghu` / `ghU` | undo hunk (revert in buffer) / reset buffer to index |
-| `ghd` / `ghD` | diff split vs index / vs HEAD (`q` closes) |
-| `ih` | hunk text object (`dih`, `yih`, `Vih`) |
-
-### Git — history & blame (`git.lua`)
-
-| Key | Action |
-|-----|--------|
-| `<leader>gc` | repo log picker (preview commit diff) |
-| `<leader>gs` | status picker (`<C-s>` stage / `<C-u>` unstage) |
-| `<leader>gf` | current file's commit history (picker) |
-| `<leader>gl` | current file's full log with patches (fugitive-style, in a tab) |
-| `<leader>gh` | changed hunks across the repo (picker) |
-| `ghb` | detailed blame float for the current line |
-| `ghB` | toggle full-file blame annotations |
-| `gho` | open the PR/MR for the line's commit (browser) |
-
-In blame floats / git log buffers: `<CR>` opens the commit under the cursor,
-`o` opens its PR/MR, `q`/`<Esc>` closes.
-
-Current-line blame is always on (subtle right-aligned virtual text); toggle with
-`:GitLineBlameToggle`.
-
-### LSP
-
-Uses Neovim's **built-in** LSP defaults, plus two added maps (`grf` format,
-`grc` run the code lens under the cursor):
-
-| Key | Action |
-|-----|--------|
-| `K` | hover |
-| `grn` | rename |
-| `gra` | code action (normal & visual) |
-| `grr` | references |
-| `gri` | implementation |
-| `grt` | type definition |
-| `gO` | document symbols |
-| `<C-s>` (insert) | signature help |
-| `grf` | format buffer (added; also runs on save for Go) |
-| `grc` | run the code lens under the cursor (e.g. gopls "go generate") |
-| `[d` / `]d` | previous / next diagnostic |
-
-Completion is native (`vim.lsp.completion`, autotrigger) with
-`completeopt=menuone,noselect,noinsert,fuzzy,popup`.
-
-### Diagnostics & quickfix
-
-| Key | Action |
-|-----|--------|
-| `<leader>D` | workspace LSP diagnostics picker (all buffers) |
-| `<leader>q` | toggle the quickfix window |
-
-`<leader>D` (= `:Picker diagnostics`) is the workspace LSP diagnostics list
-`:Picker! diagnostics` scopes it to the
-current buffer. Separately, `:Lint` runs the project linter
-(`golangci-lint run ./...`, else `go vet ./...`) into the quickfix — that covers
-files you haven't opened, which the LSP doesn't report.
-
-### Oil (file manager)
-
-Open with `-`. Edit the directory listing like a normal buffer, then `:w` to
-apply (creates/deletes/renames/copies; asks to confirm).
-
-| Key | Action |
-|-----|--------|
-| `<CR>` | open file / enter directory |
-| `-` | go up a directory |
-| `cc` / `S` | rename the entry on the current line |
-| `:w` | apply the pending changes |
-
-### Playbook
-
-In a `playbook.sh` buffer, `<CR>` sends the current line (or the visual
-selection) to the pane below and runs it. The target is `vim.g.playbook_target`
-(default `{last}`).
-
-### Sessions
-
-Auto-saved per cwd on exit, auto-restored on a bare `nvim` (no file args).
-
-| Key | Action |
-|-----|--------|
-| `<leader>s` | session picker (`<C-d>` deletes) |
-
-Commands: `:SessionSave`, `:SessionRestore`, `:SessionDelete`.
-
-### Clipboard
-
-Every yank is mirrored to the desktop clipboard through `bin/clip` (`wl-copy`). `<leader>dd` copies `path:line` of the current position.
-
-## Commands
-
-Every picker is opened by one command — `:Picker {name}` (Tab-completes), so a
-forgotten picker is one `<Tab>` away:
-
-```
-:Picker <Tab>   files  gfiles  buffers  livegrep  git_hunks  git_commits
-                git_status  git_file_history  diagnostics  sessions
-:Picker livegrep foo   " opens live grep seeded with "foo"
-```
-
-Other commands:
-
-| Command | Action |
-|---------|--------|
-| `:Picker {name}` | open a picker by name (see above) |
-| `:Lint` | run the project linter (golangci-lint / go vet) into the quickfix |
-| `:GitFileLog` | current file's full log with patches (in a tab) |
-| `:GitBlame` / `:GitBlameLine` / `:GitLineBlameToggle` / `:GitOpenPR` | blame / PR |
-| `:Grepq {pattern}` | grep into quickfix (uses `grepprg`) |
-| `:Session{Save,Restore,Delete}` | sessions |
-| `:Oil [dir]` | file manager |
-| `:TSBuild` | download + compile treesitter parsers into `site/parser` |
-
-## Treesitter
-
-Highlighting/folding turn on automatically for any filetype whose parser is
-present. Parsers are **not** auto-installed — run `:TSBuild` to fetch and compile
-the pinned grammars (list in `plugin/treesitter.lua`) with `cc`. Queries are
-vendored under `queries/`.
-
-## Notes
-
-- Colours come from the terminal's 16 ANSI slots (`termguicolors` off, the pastel
-  theme's, `config/kitty/theme.conf`), the bright ones, highlighted after Alabaster: comments grey,
-  definitions (`after/queries/`) and control flow (with `#if`/`#ifdef`) magenta,
-  calls blue, types cyan, strings green; the rest plain. `.h` opens as C. See
-  `plugin/colors.lua`.
-- No statusline (`laststatus=0`) and no bufferline — deliberately minimal. The
-  line number column doubles as the git-sign column (`statuscolumn`).
-- Git signs diff the **live buffer** against the index, so they update before you
-  save. Symlinks are skipped (git blames the target, not the followed content).
-- `private/config/nvim` (a submodule, if present) is appended to `runtimepath`
-  for machine-specific tooling not tracked here.
+- `init.lua`: options, common keymaps, grep settings and filetypes.
+- `plugin/find.lua`: native fuzzy file search and buffer selection mappings.
+- `plugin/quickfix.lua`: search, diagnostics commands and quickfix toggle.
+- `plugin/diagnostics.lua`: diagnostic display and keymap.
+- `plugin/lsp.lua`, `lsp/`: native LSP and server configuration.
+- `plugin/hover.lua`, `plugin/ui.lua`: hover syntax and UI colours.
+- `plugin/editing.lua`, `plugin/clipboard.lua`: cursor, yank and clipboard.
+- `plugin/markdown.lua`, `plugin/syntax.lua`: traditional syntax.
+- `plugin/playbook.lua`: tmux playbook runner.

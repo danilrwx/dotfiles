@@ -5,10 +5,12 @@
 # list is current. A line matching no bookmark goes to the browser as an address, a bang ("!yt") or a search
 # (bin/web-url). Renaming and deleting stay in Firefox's bookmark manager.
 mode=${1:-tab}
-moz=${MOZILLA_HOME:-$HOME/.mozilla}/firefox
 # the profile: Firefox names its directory itself, so the one that has an exported bookmarks.html is it
 src=
-for f in "$moz"/*/bookmarks.html; do [ -f "$f" ] && src=$f && break; done
+for moz in "${XDG_CONFIG_HOME:-$HOME/.config}/mozilla/firefox" "${MOZILLA_HOME:-$HOME/.mozilla}/firefox"; do
+  for f in "$moz"/*/bookmarks.html; do [ -f "$f" ] && src=$f && break; done
+  [ -z "$src" ] || break
+done
 [ -n "$src" ] || { notify-send -a firefox "Bookmarks" "no bookmarks yet"; exit 0; }
 
 # bookmarks.html is Netscape's: <DT><H3>folder</H3> then the <DL><p> it names, a </DL><p> closing a level, and a
@@ -19,7 +21,7 @@ levels, pending, rows = [], None, []
 for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
     s = line.strip()
     if s.startswith('<DT><H3'):
-        m = re.search(r'>(.*)</H3>', s)
+        m = re.match(r'<DT><H3\b[^>]*>(.*)</H3>', s)
         pending = html.unescape(m.group(1)) if m else None
     elif s.startswith('<DL'):
         levels.append(pending)

@@ -83,4 +83,4 @@ if [ -x /usr/lib/openssh/gnome-ssh-askpass ] && [ -n "${DISPLAY:-}" ]; then
 	fi
 	exit 0
 fi
-exec "${X_TERM:-$HOME/dotfiles/bin/x-term}" -c x-ctl -t "Wi-Fi: $ssid" -e "${IWCTL:-iwctl}" station "$dev" connect "$ssid"
+exec "${X_TERM:-$HOME/dotfiles/bin/x-term}" --app-id x-ctl --title "Wi-Fi: $ssid" "${IWCTL:-iwctl}" station "$dev" connect "$ssid"

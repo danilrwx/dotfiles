@@ -1,0 +1,16 @@
+/* Firefox pages only: websites keep control of their own colors. */
+@-moz-document url-prefix("about:") {
+  @media (prefers-color-scheme: light) {
+    :root, body {
+      --in-content-page-background: #f2e8d2 !important;
+      --in-content-page-color: #33322e !important;
+      --background-color-canvas: #f2e8d2 !important;
+      --background-color-box: #e3d9c3 !important;
+      --text-color: #33322e !important;
+      --newtab-background-color: #f2e8d2 !important;
+      --newtab-text-primary-color: #33322e !important;
+      background-color: #f2e8d2 !important;
+      color: #33322e !important;
+    }
+  }
+}

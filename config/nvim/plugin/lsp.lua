@@ -2,7 +2,6 @@
 -- config's ignoreMissingServer) so opening a file never spams start errors.
 for _, name in ipairs({
   "gopls",
-  "golangci_lint_ls",
   "helm_ls",
   "clangd",
 }) do
@@ -20,14 +19,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
     if not client then
       return
     end
-    -- colours come from treesitter: LSP semantic tokens (clangd sends them,
-    -- gopls does not) would paint over it with the @lsp.* groups, which
-    -- colors.lua links to Normal. Dropping the capability here, before nvim
-    -- starts the token requests, keeps the highlighting treesitter-only.
+    -- Keep highlighting consistent with the traditional syntax files.
     client.server_capabilities.semanticTokensProvider = nil
-    -- the menu's items cut or padded to one width, so the menu keeps it and
-    -- the documentation popup (completeopt popup) has the room on its right
-    -- rather than a sliver left of a menu as wide as the longest signature
+    -- Keep the menu to names and kinds. Neovim otherwise puts item.detail
+    -- (often a long function signature) in an unbounded extra column, leaving
+    -- almost no room for the documentation popup.
     local w = 40
     vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, {
       autotrigger = true,
@@ -36,7 +32,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
         if vim.fn.strdisplaywidth(s) > w then
           s = vim.fn.strcharpart(s, 0, w - 1) .. "…"
         end
-        return { abbr = s .. string.rep(" ", w - vim.fn.strdisplaywidth(s)) }
+        return { abbr = s, menu = "" }
       end,
     })
     -- autotrigger fires on the server's trigger characters alone ("." "->"),

@@ -1,0 +1,151 @@
+#!/bin/sh
+set -eu
+
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+name=dotfiles-classical
+unit=$name.service
+socket=$XDG_RUNTIME_DIR/$name/mpv.sock
+library=$HOME/Music/Classical
+radio=https://stream.srg-ssr.ch/srgssr/rsc_de/aac/192
+shuffle=no
+loop=no
+
+control() {
+  python3 - "$socket" "$1" "$radio" <<'PY'
+import json
+from pathlib import Path
+import socket
+import sys
+from time import monotonic, sleep
+
+path, action, radio = sys.argv[1:]
+
+def request(channel, *command, optional=False, events=None):
+    channel.write(json.dumps({"command": command, "request_id": 1}).encode() + b"\n")
+    channel.flush()
+    for line in channel:
+        reply = json.loads(line)
+        if reply.get("request_id") == 1:
+            if reply["error"] != "success":
+                if optional and reply["error"] == "property unavailable":
+                    return None
+                sys.exit(f"Music player: {reply['error']}")
+            return reply.get("data")
+        if events is not None and "event" in reply:
+            events.add(reply["event"])
+    sys.exit("Music player disconnected")
+
+def now_playing(channel):
+    source = request(channel, "get_property", "path", optional=True)
+    if not source:
+        return
+    tags = request(channel, "get_property", "metadata", optional=True) or {}
+    tags = {key.lower(): " ".join(value.split()) for key, value in tags.items()}
+    stream_title = tags.get("icy-title")
+    if stream_title and stream_title != "Radio Swiss Classic - www.radioswissclassic.ch":
+        print(stream_title)
+        return
+    fallback = "Radio Swiss Classic" if source == radio else " ".join(Path(source).stem.split())
+    title = tags.get("title") or fallback
+    artist = tags.get("artist")
+    print(f"{title} · {artist}" if artist and artist.casefold() not in title.casefold() else title)
+
+def wait_for_audio(channel, deadline):
+    while not request(channel, "get_property", "audio-params", optional=True):
+        if monotonic() >= deadline:
+            sys.exit("Timed out waiting for the track")
+        sleep(0.05)
+
+try:
+    with socket.socket(socket.AF_UNIX) as player:
+        player.settimeout(0.3 if action == "now" else 2)
+        deadline = monotonic() + 3
+        while True:
+            try:
+                player.connect(path)
+                break
+            except (FileNotFoundError, ConnectionRefusedError):
+                if action != "first" or monotonic() >= deadline:
+                    raise
+                sleep(0.05)
+        with player.makefile("rwb") as channel:
+            if action == "now":
+                if not request(channel, "get_property", "pause"):
+                    now_playing(channel)
+            elif action == "pause":
+                request(channel, "cycle", "pause")
+            elif action == "first":
+                wait_for_audio(channel, deadline)
+                now_playing(channel)
+            else:
+                if not request(channel, "get_property", "options/shuffle"):
+                    sys.exit(3)
+                events = set()
+                request(channel, "playlist-next", events=events)
+                if "file-loaded" not in events:
+                    for line in channel:
+                        if json.loads(line).get("event") == "file-loaded":
+                            break
+                    else:
+                        sys.exit("Music player disconnected")
+                now_playing(channel)
+except (FileNotFoundError, ConnectionRefusedError):
+    if action == "now":
+        sys.exit(0)
+    if action == "next":
+        sys.exit(3)
+    sys.exit("Music player did not start" if action == "first" else "Start Radio or Local to pause playback")
+except OSError:
+    sys.exit("Could not connect to the music player")
+PY
+}
+
+notify_track() {
+  [ -n "$1" ] || return 0
+  title=$(printf '%s' "$1" | sed 's/\&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+  notify-send -a music -r 9918 -t 2500 'Music' "$title" || :
+}
+
+case ${1:-offline} in
+  local|offline) source=$library; shuffle=yes; loop=inf ;;
+  beethoven) source=$library/Beethoven ;;
+  mozart) source=$library/Mozart ;;
+  vivaldi) source=$library/Vivaldi ;;
+  radio) source=$radio ;;
+  stop)
+    if systemctl --user is-active --quiet "$unit"; then
+      systemctl --user stop "$unit"
+    fi
+    exit ;;
+  status) exec systemctl --user is-active "$unit" ;;
+  now|pause) control "$1"; exit ;;
+  next)
+    if track=$(control next); then notify_track "$track"; exit 0; else [ "$?" -eq 3 ] || exit 1; fi
+    source=$library; shuffle=yes; loop=inf ;;
+  https://*) source=$1 ;;
+  *)
+    printf 'Usage: classical [local|radio|stop|pause|next|now|status|composer|https://audio-url]\n' >&2
+    exit 2 ;;
+esac
+
+case $source in
+  /*)
+    if [ ! -d "$source" ]; then
+      printf 'Music directory not found: %s\n' "$source" >&2
+      exit 1
+    fi ;;
+esac
+
+player=$(command -v mpv)
+if systemctl --user is-active --quiet "$unit"; then
+  systemctl --user stop "$unit"
+fi
+systemd-run --user --quiet --collect --expand-environment=no --unit="$unit" \
+  --property=Type=exec --property="RuntimeDirectory=$name" --property=RuntimeDirectoryMode=0700 \
+  "$player" --no-video --no-terminal --directory-mode=recursive --input-ipc-server="$socket" \
+  --shuffle="$shuffle" --loop-playlist="$loop" -- "$source"
+
+if [ "${1:-}" = next ]; then
+  track=$(control first)
+  notify_track "$track"
+fi

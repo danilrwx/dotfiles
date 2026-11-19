@@ -1,0 +1,13 @@
+#!/bin/sh
+# Set the laptop's logical scale before starting applications.
+wlr-randr --output eDP-1 --mode 3120x2080@120Hz --scale 2
+
+dbus-update-activation-environment --systemd "DISPLAY=${DISPLAY:-}" "XAUTHORITY=${XAUTHORITY:-}" WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE GDK_BACKEND QT_QPA_PLATFORM MOZ_ENABLE_WAYLAND ELECTRON_OZONE_PLATFORM_HINT XCURSOR_THEME XCURSOR_SIZE
+systemctl --user restart dunst.service xdg-desktop-portal.service
+systemctl --user start x-battery.timer x-battery.service
+systemd-run --user --quiet --collect --unit=dotfiles-polkit-agent \
+  /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1
+
+x-theme "$(cat "$HOME/.config/dotfiles/theme/name")"
+
+swayidle -w timeout 600 'x-lock' timeout 900 'wlopm --off \*' resume 'wlopm --on \*' before-sleep 'x-lock' &
