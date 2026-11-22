@@ -1,0 +1,6 @@
+[terminal]
+vt = 7
+
+[default_session]
+command = "agreety --cmd '~/dotfiles/bin/start-labwc'"
+user = "greetd"

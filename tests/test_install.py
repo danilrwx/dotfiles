@@ -69,6 +69,27 @@ class InstallerTest(unittest.TestCase):
         self.assertEqual(before, snapshot(self.home))
         self.assertFalse((self.home / ".local/state/dotfiles/backups").exists())
 
+    def test_foot_updates_color_syntax_when_supported(self):
+        foot = self.stubs / "foot"
+        foot.write_text("#!/bin/sh\nexit 1\n")
+        foot.chmod(0o755)
+        self.run_install("--configs")
+        config_dir = self.home / ".config/foot"
+        self.assertTrue(config_dir.is_symlink())
+
+        foot.write_text('#!/bin/sh\n[ "$*" = "--check-config --config /dev/null --override=initial-color-theme=dark" ]\n')
+        self.run_install("--configs")
+        self.assertFalse(config_dir.is_symlink())
+        rendered = (config_dir / "foot.ini").read_text()
+        self.assertIn("[colors-dark]\n", rendered)
+        self.assertIn("[colors-light]\n", rendered)
+        self.assertIn("/theme/foot-modern.ini\n", rendered)
+        self.assertNotIn("[colors2]", rendered)
+        self.assertNotIn("[colors]", rendered)
+        before = snapshot(self.home)
+        self.run_install("--configs")
+        self.assertEqual(before, snapshot(self.home))
+
     def test_conflicts_and_old_bak_are_preserved(self):
         (self.home / ".bashrc").write_text("old bash config\n")
         (self.home / ".bashrc.bak").write_text("older bash config\n")

@@ -88,7 +88,7 @@ desktop_configs() {
   fi
 
   labwc_configs || return
-  link config/foot "$HOME/.config/foot" || return
+  foot_configs || return
 
   for profile in "$HOME"/.config/mozilla/firefox/* "$HOME"/.mozilla/firefox/*; do
     [ -f "$profile/prefs.js" ] || continue
@@ -379,6 +379,7 @@ else
   portable_packages || exit 1
   base_configs || exit 1
   desktop_configs || exit 1
+  if [ "$platform" = alpine ]; then alpine_login || exit 1; fi
 fi
 
 [ -z "$BACKUP_DIR" ] || log "Backups: $BACKUP_DIR"

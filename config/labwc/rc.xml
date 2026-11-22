@@ -15,6 +15,9 @@
   <desktops number="5" popupTime="0" />
   <keyboard>
     <default />
+    <keybind key="W-S-v">
+      <action name="ToggleKeybinds" />
+    </keybind>
     <keybind key="W-S-F11">
       <action name="ToggleTearing" />
     </keybind>

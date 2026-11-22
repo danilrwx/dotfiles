@@ -1,6 +1,31 @@
 # User configuration shared by Labwc sessions. Platform login and packages are below.
 # shellcheck shell=sh
 
+foot_configs() {
+  foot_dir=$HOME/.config/foot
+  if ! foot --check-config --config /dev/null --override=initial-color-theme=dark >/dev/null 2>&1; then
+    link config/foot "$foot_dir"
+    return
+  fi
+
+  # Foot 1.27 renamed the color sections and their startup selectors.
+  foot_settings=$(
+    sed -e '/\/pastel\.ini$/d' -e 's@/theme/foot\.ini$@/theme/foot-modern.ini@' \
+      -e 's/^\[colors2\]$/[colors-light]/' config/foot/foot.ini &&
+    sed 's/^\[colors\]$/[colors-dark]/' config/foot/pastel.ini
+  ) || return
+  if [ -L "$foot_dir" ]; then backup "$foot_dir" || return; fi
+  link config/foot/terminus.ini "$foot_dir/terminus.ini" || return
+  foot_config=$foot_dir/foot.ini
+  if [ ! -L "$foot_config" ] && printf '%s\n' "$foot_settings" | cmp -s - "$foot_config"; then return 0; fi
+  foot_tmp=$(mktemp "$foot_dir/.foot.XXXXXXXX") || return
+  printf '%s\n' "$foot_settings" > "$foot_tmp" || { rm -f "$foot_tmp"; return 1; }
+  if [ -e "$foot_config" ] || [ -L "$foot_config" ]; then
+    backup "$foot_config" || { rm -f "$foot_tmp"; return 1; }
+  fi
+  mv "$foot_tmp" "$foot_config"
+}
+
 labwc_configs() {
   labwc_dir=$HOME/.config/labwc
   if [ -L "$labwc_dir" ]; then backup "$labwc_dir" || return; fi
@@ -53,7 +78,8 @@ portable_packages() {
     alpine)
       admin setup-wayland-base bash git tmux vim curl jq fzf fd ugrep python3 \
         labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
-        grim slurp wlr-randr kanshi wlopm seatd xwayland font-terminus mpv || return
+        grim slurp wlr-randr kanshi wlopm seatd xwayland font-terminus mpv \
+        greetd-agreety greetd-openrc || return
       id -Gn "$portable_user" | grep -qw seat || admin addgroup "$portable_user" seat || return
       admin rc-update add seatd default || return
       admin rc-service seatd start
@@ -67,4 +93,14 @@ portable_packages() {
       admin rcctl check seatd || admin rcctl start seatd
       ;;
   esac
+}
+
+alpine_login() {
+  if ! admin cmp -s etc/greetd/alpine.toml /etc/greetd/config.toml; then
+    if admin test -f /etc/greetd/config.toml; then
+      admin cp -an /etc/greetd/config.toml /etc/greetd/config.toml.before-dotfiles || return
+    fi
+    admin install -m 644 etc/greetd/alpine.toml /etc/greetd/config.toml || return
+  fi
+  admin rc-update add greetd default
 }

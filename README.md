@@ -125,8 +125,9 @@ named colours and `settings.ini` in [`config/gtk`](config/gtk), the borders in `
 wmenu's (`bin/x-menu`), k9s's `skins/theme.yaml`, and Claude Code's,
 in `private` beside its own config as `themes/dotfiles.json`.
 
-Edit `config/foot/pastel.ini` to change the palette. Open a new Foot window or
-log in again on a Linux virtual console to load the updated colours.
+Edit `config/foot/pastel.ini` to change the palette. Run `./install --configs`
+and open a new Foot window to load the updated colours. A fresh Linux virtual
+console login also loads the updated palette.
 
 ## Text console
 
@@ -208,11 +209,11 @@ the installed snaps. `-n` previews the cleanup. Applying it requires greetd to b
 
 ## Running Labwc
 
-Ubuntu uses the package's Labwc session in greetd. On Alpine 3.24 and
-OpenBSD 8.0, run `./install` as your desktop user, then log in again so
-the seatd group membership takes effect. From a local console, launch
-the session with `~/dotfiles/bin/start-labwc`. The installer sets up the
-desktop packages and leaves login-manager setup to the operating system.
+Ubuntu uses the package's Labwc session in greetd. On Alpine 3.24,
+`./install` enables greetd for the next boot. Log in on the VM or machine
+console to start Labwc. On OpenBSD 8.0, run `./install` as your desktop
+user, log in again for seatd, then run `~/dotfiles/bin/start-labwc` from a
+local console. The same command also works from a text console on Alpine.
 
 Ubuntu installs Steam from Flathub into the same Labwc desktop. See
 [`game/README.md`](game/README.md) for the gaming tools.
