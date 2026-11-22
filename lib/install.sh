@@ -113,7 +113,7 @@ link() {
   mkdir -p "$(dirname "$link_dst")" || return
 
   if [ -e "$link_dst" ] || [ -L "$link_dst" ]; then backup "$link_dst" || return; fi
-  ln -sT -- "$link_src" "$link_dst"
+  ln "${LINK_FLAGS:--sT}" -- "$link_src" "$link_dst"
 }
 
 retire_link() {

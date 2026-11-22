@@ -1,29 +1,9 @@
-#!/bin/sh
-# ./install_dev [--android] [--skip-go]
-#   --android    also install Android SDK and Studio
-#   --skip-go    retain installed Go tools; still update the Go compiler
+# Shared Ubuntu development setup.
+# shellcheck shell=sh
 
-ANDROID=0
-SKIP_GO=0
-
-for arg do
-  case $arg in
-    --android) ANDROID=1 ;;
-    --skip-go) SKIP_GO=1 ;;
-    -h|--help) sed -n '2,4s/^# //p' "$0"; exit 0 ;;
-    *) printf 'Unknown option: %s\n' "$arg" >&2; exit 1 ;;
-  esac
-done
-
-cd "$HOME/dotfiles" || exit 1
-
-. ./lib/install.sh
-# shellcheck source=/dev/null
-. /etc/os-release
-[ "$ID" = ubuntu ] || { log 'Ubuntu only'; exit 1; }
 RTK_VERSION=v1.0.1
 
-DEV_PKGS="openvpn openvpn-systemd-resolved libvirt-daemon-system libvirt-clients qemu-system-x86 tigervnc-viewer
+DEV_PKGS="openvpn openvpn-systemd-resolved libvirt-daemon-system libvirt-clients qemu-system-x86 gvncviewer xdg-utils
   build-essential clangd nodejs npm clang clang-format bison flex meson ninja-build valac valgrind bear tokei shellcheck scdoc pkg-config universal-ctags
   gobject-introspection python3-pil systemd-dev glslang-tools git-filter-repo evtest"
 
@@ -312,9 +292,9 @@ docker_setup() {
     log "Docker Inc's docker-ce is installed: ./debloat moves it to the archive's docker.io"
   elif ! installed docker.io; then
     log "Installing docker"
-    pkg $DOCKER_PKGS
+    sudo apt-get install -y $DOCKER_PKGS || return
 
-    sudo systemctl enable --now docker.socket
+    sudo systemctl enable --now docker.socket || return
   fi
 
   join_group docker
@@ -354,21 +334,24 @@ EOT
   done
 }
 
-sudo apt update
-sudo apt install -y $DEV_PKGS
-link dev/config/k9s "$HOME/.config/k9s" || exit 1
-link dev/bin/vpn-openvpn "$HOME/.local/bin/vpn-openvpn" || exit 1
-join_group libvirt
 
-if getent group kvm >/dev/null; then join_group kvm; fi
-openvpn_profiles
+install_development() {
+  sudo apt-get install -y $DEV_PKGS || return
+  link dev/config/k9s "$HOME/.config/k9s" || return
+  link dev/bin/vpn-openvpn "$HOME/.local/bin/vpn-openvpn" || return
+  link config/applications/gvncviewer.desktop "$HOME/.local/share/applications/gvncviewer.desktop" || return
+  xdg-mime default gvncviewer.desktop x-scheme-handler/vnc || return
+  join_group libvirt || return
 
-if [ -f private/install ]; then
-  private/install || log 'Private development installer failed'
-fi
+  if getent group kvm >/dev/null; then join_group kvm || return; fi
+  openvpn_profiles
 
-install_rtk
-dev_tools
-docker_setup
-[ "$ANDROID" != 1 ] || android
-[ -z "$BACKUP_DIR" ] || log "Backups: $BACKUP_DIR"
+  if [ -f private/install ]; then
+    private/install || log 'Private development installer failed'
+  fi
+
+  install_rtk
+  dev_tools
+  docker_setup || return
+  [ "$ANDROID" != 1 ] || android
+}

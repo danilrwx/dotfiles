@@ -8,7 +8,7 @@ HISTCONTROL=ignoredups:erasedups
 shopt -s histappend checkwinsize
 # Share history between terminals without replacing another shell's new entries.
 PROMPT_COMMAND='history -a; history -n'
-PS1='[\[\e[93m\]\t\[\e[0m\]] \[\e[92m\]\w\[\e[0m\] \[\e[94m\]❯\[\e[0m\] '
+PS1='[\[\e[1;33m\]\t\[\e[0m\]] \[\e[1;32m\]\w\[\e[0m\] \[\e[1;34m\]>\[\e[0m\] '
 
 [ -r /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
 for f in "$HOME/.local/share/completions/"*.bash; do
@@ -19,18 +19,16 @@ unset f
 
 _dotfiles_install() {
   COMPREPLY=()
-  local flags script
-  case ${COMP_WORDS[0]##*/} in
-    install_dev|install_game) script=${COMP_WORDS[0]##*/} ;;
-    *) script=install ;;
-  esac
-  flags=$(sed -nE 's/^#   (--[a-z-]+) +.*/\1/p' "$HOME/dotfiles/$script")
+  local flags
+  flags=$(sed -nE 's/^#   (--[a-z-]+) +.*/\1/p' "$HOME/dotfiles/install")
   mapfile -t COMPREPLY < <(compgen -W "$flags" -- "${COMP_WORDS[COMP_CWORD]}")
 }
-complete -F _dotfiles_install ./install ./install_dev ./install_game dotfiles-update
+complete -F _dotfiles_install ./install dotfiles-update
 
-eval "$(dircolors -b | sed 's/;3\([12]\):/;9\1:/g')"
-alias ls='ls --color=auto'
+if command -v dircolors >/dev/null && command ls --color=auto -d . >/dev/null 2>&1; then
+  eval "$(dircolors -b | sed 's/;3\([12]\):/;9\1:/g')"
+  alias ls='ls --color=auto'
+fi
 alias ll='ls -lah'
 alias so='source ~/.bashrc'
 alias sp='source ~/.profile'
@@ -39,8 +37,7 @@ alias k=kubectl
 alias kaf='kubectl apply -f'
 alias kad='kubectl delete -f'
 
-# Codex caches RGB colors at startup. Use terminal palette slots so Foot can
-# change the colors while an interactive session is open.
+# Use ANSI palette slots in both virtual consoles and graphical terminals.
 codex() {
   if [[ -t 1 ]]; then
     FORCE_COLOR=1 command codex -c 'tui.theme="ansi"' "$@"

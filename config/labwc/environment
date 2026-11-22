@@ -9,4 +9,3 @@ XKB_DEFAULT_LAYOUT=us,ru
 XKB_DEFAULT_OPTIONS=grp:ctrl_space_toggle,grp_led:scroll
 XCURSOR_THEME=Adwaita
 XCURSOR_SIZE=24
-WLR_XWAYLAND=/usr/bin/false

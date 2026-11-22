@@ -1,7 +1,7 @@
 #!/bin/sh
 # ./debloat [-n]
 #   Strip a stock Ubuntu desktop down to what the Labwc session from `./install --desktop` runs on: every
-#   snap and snapd itself (blocked from coming back), GNOME, GDM, the Ubuntu desktop extras,
+#   snap and snapd itself unless Steam is installed as a snap, GNOME, GDM, the Ubuntu desktop extras,
 #   the former bspwm session, NetworkManager (iwd has Wi-Fi),
 #   the services nothing here uses and the configs the removed apps left in ~/.config.
 #   Run `./install --desktop` first, so greetd is there to log in with once GDM is gone.
@@ -40,15 +40,12 @@ REMOVE="
   gnome-shell gnome-shell-common gnome-session gnome-settings-daemon gnome-control-center
   nautilus ptyxis gnome-terminal yelp localsearch tinysparql evolution-data-server
   xdg-desktop-portal-gnome gnome-online-accounts gnome-software ubuntu-docs
-  snapd
   apport apport-core-dump-handler apport-symptoms python3-apport python3-problem-report
   cups cups-browsed cups-bsd cups-client cups-common cups-core-drivers cups-daemon
   cups-filters cups-filters-core-drivers cups-ipp-utils cups-ppdc cups-server-common
-  steam-installer steam-launcher steam-devices steam-libs steam-libs:i386 steam-libs-i386:i386
-  gamescope mangohud gamemode gamemode-daemon libgamemode0 libgamemodeauto0
   pavucontrol
   ubuntu-wallpapers ubuntu-wallpapers-resolute
-  helium-bin brave-browser brave-keyring claude-desktop lolka-x bat thunar thunar-data zathura zathura-pdf-poppler
+  helium-bin brave-browser brave-keyring claude-desktop bat thunar thunar-data zathura zathura-pdf-poppler
   switcheroo-control iio-sensor-proxy accountsservice
   networkd-dispatcher avahi-daemon avahi-utils libnss-mdns ipp-usb rsyslog fprintd libpam-fprintd playerctl
   kitty kitty-doc kitty-shell-integration kitty-terminfo fuzzel
@@ -68,7 +65,7 @@ REMOVE="
   libchewing3-data libopencc-data libpinyin-data
   network-manager network-manager-gnome network-manager-openvpn network-manager-pptp wpasupplicant
   ibus ibus-table-cangjie3 ibus-table-cangjie5 ibus-table-cangjie-big m17n-db
-  hunspell-en-au hunspell-en-ca hunspell-en-gb hunspell-en-za wbritish zenity
+  hunspell-en-au hunspell-en-ca hunspell-en-gb hunspell-en-za wbritish
   gvfs gvfs-common gvfs-daemons gvfs-libs gvfs-backends
   rhythmbox rhythmbox-data rhythmbox-plugins rhythmbox-plugin-alternative-toolbar
   exo-utils xfconf xscreensaver xscreensaver-data xscreensaver-gl"
@@ -84,20 +81,51 @@ STALE="org.gnome.Ptyxis nautilus evolution goa-1.0 gnome-initial-setup gnome-ini
   chromium microsoft-edge opera vivaldi
   discord i3 sway waybar geoclue-2.0 xterm"
 installed() { dpkg-query -W -f='${db:Status-Status}\n' "$1" 2>/dev/null | grep -qx installed; }
+
+STEAM_SNAP=0
+snap_list=
+if installed snapd; then
+  if ! snap_list=$(LC_ALL=C snap list 2>&1); then
+    case $snap_list in
+      'No snaps are installed yet'*) snap_list= ;;
+      *) log "Cannot list installed snaps. Cleanup stopped: $snap_list"; exit 1 ;;
+    esac
+  fi
+fi
+if printf '%s\n' "$snap_list" | awk '$1 == "steam" {found = 1} END {exit !found}'; then
+  STEAM_SNAP=1
+else
+  REMOVE="$REMOVE snapd"
+fi
+
 set --
 
 for p in $REMOVE; do installed "$p" && set -- "$@" "$p"; done
 
+# Steam packages can be marked automatic, including the 32-bit runtime.
+keep_pattern='^(steam|gamemode|lolka|xwayland)($|[-:])'
+[ "$STEAM_SNAP" = 0 ] || keep_pattern="$keep_pattern|^snapd($|:)"
+keep_option="APT::NeverAutoRemove::=$keep_pattern"
+simulation=
+if [ "$#" -gt 0 ]; then
+  simulation=$(LC_ALL=C apt-get -s -o "$keep_option" purge --autoremove "$@")
+  if printf '%s\n' "$simulation" | awk -v keep="$keep_pattern" '/^(Purg|Remv) / && $2 ~ keep {found = 1} END {exit !found}'; then
+    log 'APT would remove a gaming package or snapd needed by Steam. Cleanup stopped.'
+    exit 1
+  fi
+fi
+
 if [ "$DRY" = 1 ]; then
-  log "Snaps that would go:"
-  command -v snap > /dev/null && snap list 2>/dev/null | awk 'NR > 1 {print "  " $1}'
+  if [ "$STEAM_SNAP" = 1 ]; then
+    log 'Keeping snaps because Steam uses snapd.'
+  else
+    log "Snaps that would go:"
+    printf '%s\n' "$snap_list" | awk 'NR > 1 {print "  " $1}'
+  fi
   apt-mark showmanual | grep -qx iwd \
     || log "(install --desktop has not run yet: the list still has the desktop base it would keep)"
 
   log "apt would remove:"
-  simulation=
-
-  if [ "$#" -gt 0 ]; then simulation=$(LC_ALL=C apt-get -s purge --autoremove "$@"); fi
   printf '%s\n' "$simulation" | awk '/^Purg|^Remv/ {print "  " $2}'
 
   log "Services that would be disabled:"
@@ -113,13 +141,13 @@ fi
 # Snaps ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 # apps before the bases and snapd they run on; snapd's own purge then drops /snap and its state
 
-if command -v snap > /dev/null; then
+if [ "$STEAM_SNAP" = 0 ] && [ -n "$snap_list" ]; then
   log "Removing snaps"
   # `snap list` notes: base for the bases, snapd for snapd; content snaps (gnome-46-2404, mesa-2404) only
 
   # go once nothing uses them, hence the rounds
 
-  snaps() { snap list 2>/dev/null | awk -v base="$1" 'NR > 1 && $NF != "snapd" && ($NF = "base") = base {print $1}'; }
+  snaps() { snap list 2>/dev/null | awk -v base="$1" 'NR > 1 && $NF != "snapd" && ($NF == "base") == base {print $1}'; }
 
   for _ in 1 2 3; do
     for s in $(snaps 0); do sudo snap remove --purge "$s" || true; done
@@ -130,27 +158,27 @@ fi
 
 # Ubuntu's firefox and chromium debs are snap installers that pull snapd back in; pin it out
 
-log "Blocking snapd"
-sudo tee /etc/apt/preferences.d/no-snapd.pref > /dev/null <<'EOF'
+if [ "$STEAM_SNAP" = 0 ]; then
+  log "Blocking snapd"
+  sudo tee /etc/apt/preferences.d/no-snapd.pref > /dev/null <<'EOF'
 # debloat: no snapd, nor the transitional debs that install a snap
 
 Package: snapd
 Pin: release a=*
 Pin-Priority: -10
 EOF
+else
+  log 'Keeping snaps because Steam uses snapd.'
+fi
 
 # GNOME ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-log "Removing GNOME, GDM and snapd"
-[ "$#" -eq 0 ] || sudo apt purge -y --autoremove "$@"
+log "Removing unused packages"
+[ "$#" -eq 0 ] || sudo apt-get -o "$keep_option" purge -y --autoremove "$@"
 
 case $(cat /proc/sys/kernel/core_pattern) in
   '|/usr/share/apport/apport '*) sudo sysctl -w kernel.core_pattern=core ;;
 esac
-
-rm -rf "$HOME/snap"
-sudo rm -rf /snap /var/snap /var/lib/snapd /var/cache/snapd
-
 
 # Services and configs ──────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -161,10 +189,5 @@ for u in $DISABLE; do sudo systemctl disable --now "$u" 2>/dev/null || true; don
 log "Removing configs of the removed apps"
 
 for c in $STALE; do rm -rf "${HOME:?}/.config/$c"; done
-# the dpkg leftovers of what went (the "rc" packages: their configs)
-# Package names contain no whitespace or glob characters.
-# shellcheck disable=SC2046
-set -- $(dpkg -l | awk '/^rc/ {print $2}')
-[ "$#" -eq 0 ] || sudo apt purge -y "$@"
 
 log "Done. Reboot: greetd takes over the login."

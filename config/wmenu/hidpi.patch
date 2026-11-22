@@ -1,0 +1,78 @@
+--- a/pango.c
++++ b/pango.c
+@@ -26,9 +26,13 @@
+ 	return height;
+ }
+ 
+-PangoLayout *get_pango_layout(cairo_t *cairo, const char *font,
+-		const char *text, double scale) {
+-	PangoLayout *layout = pango_cairo_create_layout(cairo);
++static PangoLayout *get_pango_layout(const char *font, const char *text,
++		double scale) {
++	/* Keep the font match independent of Cairo's logical coordinates. */
++	PangoContext *context = pango_font_map_create_context(
++		pango_cairo_font_map_get_default());
++	PangoLayout *layout = pango_layout_new(context);
++	g_object_unref(context);
+ 	PangoAttrList *attrs = pango_attr_list_new();
+ 	pango_layout_set_text(layout, text, -1);
+ 	pango_attr_list_insert(attrs, pango_attr_scale_new(scale));
+@@ -41,13 +45,25 @@
+ 	return layout;
+ }
+ 
++static int get_device_scale(cairo_t *cairo) {
++	double x, y;
++	cairo_surface_get_device_scale(cairo_get_target(cairo), &x, &y);
++	return (int)x;
++}
++
+ void get_text_size(cairo_t *cairo, const char *font, int *width, int *height,
+ 		int *baseline, double scale, const char *text) {
+-	PangoLayout *layout = get_pango_layout(cairo, font, text, scale);
+-	pango_cairo_update_layout(cairo, layout);
++	int pixels = get_device_scale(cairo);
++	PangoLayout *layout = get_pango_layout(font, text, scale * pixels);
+ 	pango_layout_get_pixel_size(layout, width, height);
++	if (width) {
++		*width = (*width + pixels - 1) / pixels;
++	}
++	if (height) {
++		*height = (*height + pixels - 1) / pixels;
++	}
+ 	if (baseline) {
+-		*baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
++		*baseline = pango_layout_get_baseline(layout) / (PANGO_SCALE * pixels);
+ 	}
+ 	g_object_unref(layout);
+ }
+@@ -60,12 +76,16 @@
+ 
+ void pango_printf(cairo_t *cairo, const char *font, double scale,
+ 		const char *text) {
+-	PangoLayout *layout = get_pango_layout(cairo, font, text, scale);
++	int pixels = get_device_scale(cairo);
++	PangoLayout *layout = get_pango_layout(font, text, scale * pixels);
+ 	cairo_font_options_t *fo = cairo_font_options_create();
+ 	cairo_get_font_options(cairo, fo);
++	cairo_font_options_set_antialias(fo, CAIRO_ANTIALIAS_NONE);
+ 	pango_cairo_context_set_font_options(pango_layout_get_context(layout), fo);
+ 	cairo_font_options_destroy(fo);
+-	pango_cairo_update_layout(cairo, layout);
++	cairo_save(cairo);
++	cairo_scale(cairo, 1.0 / pixels, 1.0 / pixels);
+ 	pango_cairo_show_layout(cairo, layout);
+ 	g_object_unref(layout);
++	cairo_restore(cairo);
+ }
+--- a/pango.h
++++ b/pango.h
+@@ -5,8 +5,6 @@
+ #include <pango/pangocairo.h>
+ 
+ int get_font_height(const char *font);
+-PangoLayout *get_pango_layout(cairo_t *cairo, const char *font,
+-		const char *text, double scale);
+ void get_text_size(cairo_t *cairo, const char *font, int *width, int *height,
+ 		int *baseline, double scale, const char *text);
+ int text_width(cairo_t *cairo, const char *font, const char *text);

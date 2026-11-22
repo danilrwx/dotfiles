@@ -1,3 +1,9 @@
 #!/bin/sh
 pkill -x -u "$(id -u)" swayidle
-systemctl --user stop x-background.service xdg-desktop-portal-wlr.service dotfiles-polkit-agent.service
+pkill -x -u "$(id -u)" kanshi
+if command -v systemctl >/dev/null; then
+    systemctl --user stop x-background.service xdg-desktop-portal-wlr.service dotfiles-polkit-agent.service
+else
+    pkill -x -u "$(id -u)" dunst
+    pkill -x -u "$(id -u)" swaybg
+fi

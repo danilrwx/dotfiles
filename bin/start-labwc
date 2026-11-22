@@ -1,0 +1,12 @@
+#!/bin/sh
+# Start the shared session from a local console on systems with seatd.
+set -eu
+export PATH="$HOME/dotfiles/bin:$HOME/.local/bin:$PATH"
+if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
+    XDG_RUNTIME_DIR=$(mktemp -d "${TMPDIR:-/tmp}/labwc.XXXXXXXX")
+    export XDG_RUNTIME_DIR
+    trap 'rmdir "$XDG_RUNTIME_DIR" 2>/dev/null || :' EXIT
+    dbus-run-session -- labwc "$@"
+else
+    exec dbus-run-session -- labwc "$@"
+fi

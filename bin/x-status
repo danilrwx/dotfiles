@@ -1,8 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # x-status: an on-demand desktop status card (Super+i).
 # x-status battery: one battery-only check, invoked by the user timer once a minute.
 # Warning state lives in the runtime directory and resets while not discharging.
 export LC_NUMERIC=C   # wpctl prints 0.45; awk under ru_RU reads that as 0
+text_mode=0
+if [ "${1:-}" = --text ]; then
+  text_mode=1
+elif [ -z "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]; then
+  # A compositor started from a VT can pass TERM=linux to its shortcuts.
+  case ${XDG_SESSION_TYPE:-}:${TERM:-} in
+    tty:*|*:linux|*:vt220) text_mode=1 ;;
+  esac
+fi
 
 # "Volume: 0.45 [MUTED]" -> 45% or off
 level() { wpctl get-volume "$1" 2>/dev/null | awk '{print /MUTED/ ? "off" : int($2 * 100 + 0.5) "%"} END {if (!NR) print "unavailable"}'; }
@@ -11,7 +20,11 @@ battery() {
   for b in /sys/class/power_supply/BAT*; do [ -d "$b" ] && { echo "$(<"$b/capacity") $(<"$b/status")"; return; }; done
 }
 row() {
-  printf '<b>%s</b>\n%s\n' "$1" "$(printf '%s' "$2" | sed 's/\&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')"
+  if [ "$text_mode" = 1 ]; then
+    printf '%s: %s\n' "$1" "$2"
+  else
+    printf '<b>%s</b>\n%s\n' "$1" "$(printf '%s' "$2" | sed 's/\&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')"
+  fi
 }
 
 audio() {
@@ -76,7 +89,7 @@ for week in calendar.monthcalendar(year, month):
     lines.append(''.join(cell(str(d) if d else '', today=d == day, muted=i >= 5)
                          for i, d in enumerate(week)))
 print(f'<b>{calendar.month_name[month]} {year}</b>\n\n'
-      '<span font_family="Iosevka" line_height="1.35">' + '\n'.join(lines) + '</span>')
+      '<span line_height="1.35">' + '\n'.join(lines) + '</span>')
 PY
 }
 
@@ -96,20 +109,29 @@ status() {
   done
 
   printf '\n'
-  audio 'Audio' @DEFAULT_AUDIO_SINK@
-  audio 'Microphone' @DEFAULT_AUDIO_SOURCE@
-  headphones
+  if command -v wpctl >/dev/null; then
+    audio 'Audio' @DEFAULT_AUDIO_SINK@
+    audio 'Microphone' @DEFAULT_AUDIO_SOURCE@
+  fi
+  if command -v bluetoothctl >/dev/null; then headphones; fi
   if now=$(classical now 2>/dev/null) && [ -n "$now" ]; then
     row 'Now playing' "$now"
   fi
 
   printf '\n'
-  network
+  if command -v ip >/dev/null; then network; fi
 
   printf '\n'
-  row 'Memory' "$(free -m | awk '/^Mem:/ {printf "%.1f / %.1f GiB", $3/1024, $2/1024}')"
-  row 'Disk' "$(df -h --output=avail "$HOME" | awk 'NR==2 {print $1 " free"}')"
-  row 'Uptime' "$(LC_ALL=C uptime -p | sed -E 's/^up //; s/ days?/d/g; s/ hours?/h/g; s/ minutes?/m/g; s/,//g')"
+  if command -v free >/dev/null; then
+    row 'Memory' "$(free -m | awk '/^Mem:/ {printf "%.1f / %.1f GiB", $3/1024, $2/1024}')"
+  fi
+  if [ "$(uname -s)" = OpenBSD ]; then
+    row 'Disk' "$(df -h "$HOME" | awk 'NR==2 {print $4 " free"}')"
+    row 'Uptime' "$(uptime)"
+  else
+    row 'Disk' "$(df -h --output=avail "$HOME" | awk 'NR==2 {print $1 " free"}')"
+    row 'Uptime' "$(LC_ALL=C uptime -p | sed -E 's/^up //; s/ days?/d/g; s/ hours?/h/g; s/ minutes?/m/g; s/,//g')"
+  fi
 }
 # One warning at 10%, then one critical warning at 5%, per discharge.
 warn() {
@@ -134,9 +156,15 @@ warn() {
 
 case ${1:-} in
   battery) read -r c st <<< "$(battery)"; warn; exit $? ;;
-  '') ;;
-  *) echo 'usage: x-status [battery]' >&2; exit 2 ;;
+  ''|--text) ;;
+  *) echo 'usage: x-status [--text|battery]' >&2; exit 2 ;;
 esac
+
+if [ "$text_mode" = 1 ]; then
+  date '+%H:%M %A, %e %B %Y'
+  status
+  exit
+fi
 
 body=$(status)
 notify-send -a x-calendar -r 9916 -t 10000 'Calendar' "$(calendar)"

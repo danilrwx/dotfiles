@@ -1,14 +1,14 @@
 # Development profile
 
-Run `./install_dev` after `./install` on the development system. It installs
+On Ubuntu, `./install` installs
 compilers/build tools, language servers, Node/npm, Go, Go CLIs, kubectl/d8,
 Docker, RTK, OpenVPN, QEMU/libvirt and the private agent setup. It links the k9s
 configuration and OpenVPN helper, imports private VPN profiles with resolved DNS
 and polkit integration, and adds the user to libvirt/KVM groups.
 It does not install the desktop or gaming packages.
 
-- `./install_dev --android`: also install Android SDK, JDK and Studio.
-- `./install_dev --skip-go`: keep Go tool binaries, but still update Go itself.
+- `./install --android`: also install Android SDK, JDK and Studio.
+- `./install --skip-go`: keep Go tool binaries, but still update Go itself.
 
 Go/archive downloads retain their checksum checks and staged replacement.
 

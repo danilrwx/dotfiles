@@ -34,7 +34,7 @@ class InstallerTest(unittest.TestCase):
         self.stubs = self.root / "stubs"
         self.stubs.mkdir()
         self.calls = self.root / "forbidden-calls"
-        for name in ("sudo", "curl", "wget", "git", "go", "npm", "apt", "nvim", "gsettings", "labwc"):
+        for name in ("sudo", "curl", "wget", "git", "go", "npm", "apt", "vim", "gsettings", "labwc"):
             self.stub(name)
         systemctl = self.stubs / "systemctl"
         systemctl.write_text('#!/bin/sh\nprintf "%s\\n" "$0 $*" >> "$FORBIDDEN_CALLS"\nexit 97\n')
@@ -62,32 +62,36 @@ class InstallerTest(unittest.TestCase):
         return proc
 
     def test_apply_and_repeat_are_idempotent(self):
-        self.run_install("--configs", "--desktop")
+        self.run_install("--configs")
         before = snapshot(self.home)
         self.assertEqual(before, snapshot(self.home))
-        self.run_install("--configs", "--desktop")
+        self.run_install("--configs")
         self.assertEqual(before, snapshot(self.home))
         self.assertFalse((self.home / ".local/state/dotfiles/backups").exists())
 
     def test_conflicts_and_old_bak_are_preserved(self):
         (self.home / ".bashrc").write_text("old bash config\n")
         (self.home / ".bashrc.bak").write_text("older bash config\n")
-        old = self.home / ".config/nvim"
-        old.mkdir(parents=True)
-        (old / "init.lua").write_text("old neovim\n")
+        (self.home / ".vimrc").write_text("old Vim config\n")
+        retired = self.home / ".config/nvim"
+        retired.parent.mkdir()
+        retired.symlink_to(self.home / "dotfiles/config/nvim")
         (self.home / ".config/htop").symlink_to("missing-htop-config")
-        self.run_install("--configs", "--desktop")
+        self.run_install("--configs")
         runs = list((self.home / ".local/state/dotfiles/backups").iterdir())
         self.assertEqual(len(runs), 1)
         archive = runs[0] / str(self.home).lstrip("/")
         self.assertEqual((archive / ".bashrc").read_text(), "old bash config\n")
         self.assertEqual((archive / ".bashrc.bak").read_text(), "older bash config\n")
-        self.assertEqual((archive / ".config/nvim/init.lua").read_text(), "old neovim\n")
+        self.assertEqual((archive / ".vimrc").read_text(), "old Vim config\n")
+        self.assertTrue((self.home / ".vimrc").is_symlink())
+        self.assertFalse(retired.is_symlink())
+        self.assertEqual((archive / ".config/nvim").readlink(), self.home / "dotfiles/config/nvim")
         self.assertEqual(os.readlink(self.home / ".config/htop"), "missing-htop-config")
         first = snapshot(runs[0])
         (self.home / ".bashrc").unlink()
         (self.home / ".bashrc").write_text("second generation\n")
-        self.run_install("--configs", "--desktop")
+        self.run_install("--configs")
         self.assertEqual(len(list(runs[0].parent.iterdir())), 2)
         self.assertEqual(first, snapshot(runs[0]))
 

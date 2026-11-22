@@ -2,17 +2,22 @@
 <labwc_config>
   <core>
     <gap>0</gap>
+    <allowTearing>fullscreen</allowTearing>
   </core>
   <theme>
     <name>Dotfiles</name>
+    <font><name>Terminus</name><size>12</size></font>
     <cornerRadius>0</cornerRadius>
     <maximizedDecoration>none</maximizedDecoration>
     <dropShadows>no</dropShadows>
   </theme>
   <margin top="10" bottom="10" left="10" right="10" />
-  <desktops number="9" popupTime="0" />
+  <desktops number="5" popupTime="0" />
   <keyboard>
     <default />
+    <keybind key="W-S-F11">
+      <action name="ToggleTearing" />
+    </keybind>
     <keybind key="W-c">
       <action name="AutoPlace" policy="center" />
     </keybind>
@@ -159,30 +164,6 @@
     </keybind>
     <keybind key="W-S-5">
       <action name="SendToDesktop" to="5" follow="no" />
-    </keybind>
-    <keybind key="W-6">
-      <action name="GoToDesktop" to="6" />
-    </keybind>
-    <keybind key="W-S-6">
-      <action name="SendToDesktop" to="6" follow="no" />
-    </keybind>
-    <keybind key="W-7">
-      <action name="GoToDesktop" to="7" />
-    </keybind>
-    <keybind key="W-S-7">
-      <action name="SendToDesktop" to="7" follow="no" />
-    </keybind>
-    <keybind key="W-8">
-      <action name="GoToDesktop" to="8" />
-    </keybind>
-    <keybind key="W-S-8">
-      <action name="SendToDesktop" to="8" follow="no" />
-    </keybind>
-    <keybind key="W-9">
-      <action name="GoToDesktop" to="9" />
-    </keybind>
-    <keybind key="W-S-9">
-      <action name="SendToDesktop" to="9" follow="no" />
     </keybind>
     <keybind key="W-XF86AudioRaiseVolume">
       <action name="Execute" command="x-fnkeys mic-up" />

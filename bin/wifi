@@ -6,6 +6,9 @@
 # commands (tests).
 menu() { "${X_MENU:-$HOME/dotfiles/bin/x-menu}" "$@"; }
 iw() { "${IWCTL:-iwctl}" "$@"; }
+if [ -z "${X_MENU:-}" ] && { [ "${XDG_SESSION_TYPE:-}" = tty ] || [ -z "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; }; then
+	exec "${IWCTL:-iwctl}" "$@"
+fi
 note() { "${NOTIFY:-notify-send}" -a x-ctl -r 9912 -t "${1:-1500}" "Wi-Fi" "$2"; }
 strip() { sed 's/\x1b\[[0-9;]*m//g'; }
 

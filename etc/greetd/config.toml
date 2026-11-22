@@ -3,5 +3,5 @@
 vt = 7
 
 [default_session]
-command = "tuigreet --time --remember --asterisks --sessions /usr/share/wayland-sessions --cmd /usr/bin/labwc"
+command = "tuigreet --time --remember --asterisks --sessions /etc/greetd/sessions --xsessions /etc/greetd/xsessions --cmd /usr/bin/labwc"
 user = "_greetd"

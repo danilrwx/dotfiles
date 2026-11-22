@@ -1,6 +1,6 @@
 # sh login profile: shared by greetd and .bash_profile (terminals, tmux, SSH).
 # Non-login terminals inherit PATH and the rest from their graphical session.
-# install_dev --android: sdkmanager and avdmanager, adb and fastboot, the emulator. ~/Android/Sdk is where Studio
+# install --android: sdkmanager and avdmanager, adb and fastboot, the emulator. ~/Android/Sdk is where Studio
 # looks for an SDK, so a project needs no local.properties. Dead entries where the flag was never run, as
 # /usr/local/go/bin is without Go
 export ANDROID_HOME="$HOME/Android/Sdk"
@@ -9,19 +9,21 @@ PATH=$(printf '%s' "$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platfor
   awk -v RS=: 'length($0) && !seen[$0]++ {printf "%s%s", separator, $0; separator=":"}')
 export PATH
 
-# labwc exports DISPLAY even when its Xwayland executable is disabled.
-case ${XDG_CURRENT_DESKTOP:-} in
-  *labwc*) unset DISPLAY XAUTHORITY ;;
-esac
-
 export XDG_CONFIG_HOME="$HOME/.config"
-export EDITOR='nvim'
-export VISUAL='nvim'
+export EDITOR='vim'
+export VISUAL='vim'
 
-export FZF_DEFAULT_OPTS="--height 40% --input-border=sharp --list-border=sharp --preview-border=sharp --prompt='> ' --pointer='>' --marker='>' --gutter=' ' --info=inline-right --bind ctrl-f:page-down,ctrl-b:page-up --color=fg:-1,fg+:-1,bg:-1,bg+:236,hl:10,hl+:10,info:8,marker:13,prompt:-1,spinner:8,pointer:13,header:8,border:8,gutter:-1"
-# fzf follows the terminal's ANSI palette; previews use standard file tools.
-export FZF_CTRL_T_OPTS="--preview 'if [ -d {} ]; then ls -1 {}; else head -c 16384 {} | head -n 100; fi'"
-export FZF_ALT_C_OPTS="--preview 'ls -1 --color=always {}'"
+# Keep the current line readable with ANSI colors and a small console font repertoire.
+FZF_DEFAULT_OPTS="--height 40% --prompt='> ' --pointer='>' --marker='>' --gutter=' ' --info=inline-right --bind ctrl-f:page-down,ctrl-b:page-up --color=fg:-1,fg+:15,bg:-1,bg+:0,hl:10,hl+:15:underline,info:8,marker:13,prompt:-1,spinner:8,pointer:15,header:8,border:8,gutter:-1"
+if [ "${XDG_SESSION_TYPE:-}" != tty ] && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
+  FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --input-border=sharp --list-border=sharp --preview-border=sharp"
+else
+  FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --no-unicode --preview-border=none"
+fi
+export FZF_DEFAULT_OPTS
+# Previews use standard file tools.
+export FZF_CTRL_T_OPTS="--preview 'if [ -d {} ]; then ls -1 {}; else dd bs=16384 count=1 2>/dev/null < {} | head -n 100; fi'"
+export FZF_ALT_C_OPTS="--preview 'ls -1 {}'"
 
 export PI_OFFLINE=1
 
@@ -29,7 +31,9 @@ export PI_OFFLINE=1
 # ssh-agent.socket and the ~/.config/environment.d files install links from config/environment.d
 # (SSH_ASKPASS, NO_AT_BRIDGE), plain KEY=VALUE lines; only those, not what packages drop there for
 # systemd alone.
-export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/openssh_agent"
+if [ -z "${SSH_AUTH_SOCK:-}" ] && [ -S "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/openssh_agent" ]; then
+  export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/openssh_agent"
+fi
 for _dotfiles_env_file in "$HOME"/dotfiles/config/environment.d/*.conf; do
   [ -e "$HOME/.config/environment.d/${_dotfiles_env_file##*/}" ] || continue
   # shellcheck source=/dev/null

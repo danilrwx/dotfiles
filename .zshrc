@@ -2,7 +2,7 @@ export GPG_TTY=$(tty)
 
 autoload -Uz compinit && compinit -u
 
-# EDITOR=nvim contains "vi", which makes zsh pick vi keymap; force emacs (ctrl-f/ctrl-b).
+# EDITOR=vim contains "vi", which makes zsh pick vi keymap; force emacs (ctrl-f/ctrl-b).
 bindkey -e
 
 # ./install and dotfiles-update flags, parsed from the script's own usage comment

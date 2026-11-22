@@ -1,6 +1,6 @@
 # Vim without LSP
 
-An isolated experiment for recent Vim 9.1/9.2, focused on C and Zig, with occasional
+The dotfiles configuration for recent Vim 9.1/9.2, focused on C and Zig, with occasional
 Go reading. No ALE, plugin manager, external plugins or language servers.
 
 Run from a project directory:
@@ -9,7 +9,6 @@ Run from a project directory:
 vim -u ~/dotfiles/experiments/vim/vimrc
 ```
 
-This does not replace the Neovim configuration or change EDITOR.
 Open files after startup; options are applied to their native Vim filetypes.
 The standalone configuration uses fd for file search and ugrep for text search,
 with a grep fallback.
@@ -39,7 +38,7 @@ OpenBSD's base ctags is a different implementation; do not assume it accepts `-R
 
 ## Project navigation
 
-`install_dev` installs Universal Ctags; the base configuration links `config/ctags`
+`install` installs Universal Ctags; the base configuration links `config/ctags`
 to `~/.config/ctags`. The small Zig rules index ordinary `fn`, `const` and `var`
 declarations. They do not understand scopes, imports, quoted identifiers or comptime
 resolution; local declarations can also appear in results.
@@ -55,7 +54,7 @@ Ctrl-T returns through the native tag stack. Unsaved buffer contents are supplie
 to godef. Insert-mode tag completion and explicit tag searches still use `tags`.
 Without godef installed, Ctrl-] falls back to the tags file.
 
-`install_dev` builds godef using `dev/godef/go.mod`, which updates the analysis
+`install` builds godef using `dev/godef/go.mod`, which updates the analysis
 dependency for Go 1.27 without changing upstream source. To build it separately:
 
 ```sh
@@ -69,7 +68,7 @@ Dark is the default, using the terminal palette. `:ThemeLight` switches to an
 e-ink-style light theme: an off-white background, grayscale syntax and bold
 keywords. `:ThemeDark` restores the dark theme locally. Space u t toggles the
 whole desktop using x-theme. Open Vim sessions follow desktop theme changes within a second.
-The light theme uses true color, supported by foot and hst.
+The light theme uses true color in Foot.
 
 ## Keys and workflow
 

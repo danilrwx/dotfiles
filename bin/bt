@@ -5,6 +5,9 @@
 # terminal. X_MENU, BLUETOOTHCTL, X_TERM and NOTIFY override the commands (tests).
 menu() { "${X_MENU:-$HOME/dotfiles/bin/x-menu}" "$@"; }
 bt() { "${BLUETOOTHCTL:-bluetoothctl}" "$@"; }
+if [ -z "${X_MENU:-}" ] && { [ "${XDG_SESSION_TYPE:-}" = tty ] || [ -z "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; }; then
+	exec "${BLUETOOTHCTL:-bluetoothctl}" "$@"
+fi
 note() { "${NOTIFY:-notify-send}" -a x-ctl -r 9912 -t "${1:-1500}" "Bluetooth" "$2"; }
 
 powered() { bt show 2>/dev/null | sed -n 's/^[[:space:]]*Powered: *//p' | head -1; }

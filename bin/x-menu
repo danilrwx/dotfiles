@@ -1,16 +1,28 @@
 #!/bin/sh
-# x-menu PROMPT [LINES]: pick a line from stdin in wmenu using the theme's colors.
+# x-menu PROMPT [LINES]: pick a line from stdin using wmenu.
 # LINES makes it a vertical list of that many rows; the callers with a single prompt (bin/x-run, bin/x-ctl,
 # bin/x-drives) leave it out.
-bg=#000000
-fg=#ad9c84
-# shellcheck source=/dev/null
-[ ! -r "$HOME/.config/dotfiles/theme/menu.sh" ] || . "$HOME/.config/dotfiles/theme/menu.sh"
+palette="$HOME/dotfiles/config/foot/pastel.ini"
+section=colors
+if [ "$(cat "$HOME/.config/dotfiles/theme/name" 2>/dev/null)" = light ]; then
+    palette="$HOME/dotfiles/config/foot/foot.ini"
+    section=colors2
+fi
+colors=$(awk -F= -v section="$section" '
+    /^\[/ { active = ($0 == "[" section "]"); next }
+    active && $1 ~ /^(background|foreground|selection-background|selection-foreground)$/ { c[$1] = $2 }
+    END { print c["background"], c["foreground"], c["selection-background"], c["selection-foreground"] }
+' "$palette") || exit 1
+read -r bg fg selected_bg selected_fg <<EOF
+$colors
+EOF
 # A compositor's key binding can pass a tty as stdin. wmenu needs an input list or EOF.
 [ -t 0 ] && exec 0< /dev/null
 if [ -n "${2:-}" ]; then set -- "$1" -l "$2"; else set -- "$1"; fi
 prompt=$1
 shift
-exec wmenu -i -p "$prompt" "$@" -f 'Fixedsys Excelsior, IosevkaTerm Nerd Font Mono 17.5px' \
-	-N "${bg#\#}" -n "${fg#\#}" -S "${fg#\#}" -s "${bg#\#}" \
-	-M "${fg#\#}" -m "${bg#\#}"
+wmenu_bin="$HOME/.local/opt/wmenu/bin/wmenu"
+[ -x "$wmenu_bin" ] || wmenu_bin=wmenu
+exec "$wmenu_bin" -i -p "$prompt" "$@" -f 'Terminus 16px' \
+	-N "$bg" -n "$fg" -S "$selected_bg" -s "$selected_fg" \
+	-M "$selected_bg" -m "$selected_fg"

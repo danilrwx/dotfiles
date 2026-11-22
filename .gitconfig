@@ -1,5 +1,5 @@
 [core]
-  editor = nvim
+  editor = vim
   excludesfile = ~/.gitignore_global
 
 [user]
@@ -28,7 +28,7 @@
 	signOff = yes
 
 [diff]
-    tool = nvimdiff
+    tool = vimdiff
 [difftool]
     prompt = false
 
@@ -44,12 +44,12 @@
   current = brightgreen
 
 [merge]
-	tool = nvimdiff
+	tool = vimdiff
 	conflictStyle = zdiff3
 [mergetool]
     prompt = true
-[mergetool "nvimdiff"]
-    cmd = "nvim -d \"$LOCAL\" \"$REMOTE\" \"$MERGED\" -c 'wincmd w' -c 'wincmd J'"
+[mergetool "vimdiff"]
+    cmd = "vim -d \"$LOCAL\" \"$REMOTE\" \"$MERGED\" -c 'wincmd w' -c 'wincmd J'"
 
 [includeIf "gitdir:~/w/"]
     path = ~/dotfiles/private/work.gitconfig

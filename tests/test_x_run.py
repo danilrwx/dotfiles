@@ -20,6 +20,10 @@ class LauncherTest(unittest.TestCase):
             apps.mkdir(parents=True)
             (apps / "dotfiles-test-app.desktop").write_text(
                 "[Desktop Entry]\nType=Application\nName=Dotfiles launcher test app\nExec=true\n")
+            flatpak_apps = home / "data/flatpak/exports/share/applications"
+            flatpak_apps.mkdir(parents=True)
+            (flatpak_apps / "org.example.Test.desktop").write_text(
+                "[Desktop Entry]\nType=Application\nName=Dotfiles Flatpak test app\nExec=true\n")
             scripts = {
                 helpers / "x-menu": 'cat >/dev/null\nprintf "%s\\n" "$MENU_VALUE"',
                 helpers / "clip": 'echo clip >> "$FORBIDDEN"',
@@ -38,6 +42,7 @@ class LauncherTest(unittest.TestCase):
                        PATH=f"{stubs}:/usr/bin:/bin", RESULT=str(result), FORBIDDEN=str(forbidden))
             cases = {
                 "Dotfiles launcher test app": "dotfiles-test-app",
+                "Dotfiles Flatpak test app": "org.example.Test",
                 "launcher-test-command 'argument with spaces'": "argument with spaces",
                 "": None,
                 "2 + 2": None,

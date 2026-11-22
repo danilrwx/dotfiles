@@ -16,12 +16,10 @@ class ProfileTest(unittest.TestCase):
 
     def test_removed_check_option_fails_before_changes(self):
         before = fixture.snapshot(self.home)
-        for name in ("install", "install_dev", "install_game"):
-            with self.subTest(name=name):
-                result = subprocess.run([str(REPO / name), "--check"], env=self.env,
-                                        text=True, capture_output=True, timeout=10)
-                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-                self.assertIn("Unknown option", result.stderr)
+        result = subprocess.run([str(REPO / "install"), "--check"], env=self.env,
+                                text=True, capture_output=True, timeout=10)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("Unknown option", result.stderr)
         self.assertEqual(before, fixture.snapshot(self.home))
         self.assertFalse(self.calls.exists())
 
@@ -57,7 +55,29 @@ fetch https://example.org/asset "$TARGET" invalid && exit 3
         source = (REPO / "install").read_text()
         self.assertNotIn("lolka", source)
         self.assertNotIn("bluetui", source)
-        self.assertIn("lolka-x", (REPO / "install_game").read_text())
+        self.assertIn("lolka-x", (REPO / "lib/install-game.sh").read_text())
+
+    def test_old_lolka_does_not_skip_lolka_x_install(self):
+        source = (REPO / "lib/install-game.sh").read_text()
+        install_lolka = re.search(r"^lolka\(\) \{\n.*?^\}", source, re.MULTILINE | re.DOTALL)[0]
+        stubs = r'''
+installed() { [ "$1" = lolka ]; }
+log() { :; }
+curl() {
+  [ "$4" = https://updates.lolka.app/desktop/linux/latest ] || return 1
+  cat <<'JSON'
+{"files":[
+  {"name":"lolka-x.rpm"},
+  {"name":"lolka-x_2.0_amd64.deb","url":"https://cdn.lolka.app/lolka-x.deb","sha512":"expected-hash"}
+]}
+JSON
+}
+deb_from() { printf '%s\n' "$@"; }
+'''
+        result = subprocess.run(["sh", "-ec", stubs + install_lolka + "\nlolka"],
+                                capture_output=True, text=True, check=True, timeout=10)
+        self.assertEqual(result.stdout.splitlines(),
+                         ["https://cdn.lolka.app/lolka-x.deb", "expected-hash"])
 
     def test_debloat_preserves_base_packages(self):
         removed = set(re.search(r'^REMOVE="(.*?)"', (REPO / "debloat").read_text(),
@@ -69,12 +89,52 @@ fetch https://example.org/asset "$TARGET" invalid && exit 3
             self.assertFalse(packages & removed, packages & removed)
 
 class ShellTest(unittest.TestCase):
+    def test_debloat_preserves_steam(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, body in {
+                "dpkg-query": 'case "$3" in gdm3|snapd|steam*|zenity|gamemode|lolka-x) echo installed;; esac',
+                "snap": 'case "$TEST_STEAM_SNAP" in 1) echo "steam 1";; error) exit 1;; esac',
+                "apt-mark": "echo iwd",
+                "systemctl": "exit 1",
+                "apt-get": 'printf "%s\\n" "$@" > "$HOME/apt-args"; printf "%s\\n" "$PLAN"',
+            }.items():
+                path = root / name
+                path.write_text("#!/bin/sh\n" + body + "\n")
+                path.chmod(0o755)
+
+            for steam_snap, plan, expected in (
+                ("0", "Purg gdm3", 0),
+                ("1", "Purg gdm3", 0),
+                ("0", "Purg steam-libs-i386:i386", 1),
+                ("0", "Purg gamemode", 1),
+                ("1", "Purg snapd", 1),
+                ("error", "", 1),
+            ):
+                with self.subTest(steam_snap=steam_snap, plan=plan):
+                    env = dict(os.environ, HOME=directory, PATH=f"{root}:/usr/bin:/bin",
+                               TEST_STEAM_SNAP=steam_snap, PLAN=plan)
+                    result = subprocess.run([str(REPO / "debloat"), "-n"], env=env,
+                                            capture_output=True, text=True, timeout=15)
+                    self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+                    if steam_snap == "error":
+                        self.assertIn("Cannot list installed snaps", result.stdout)
+                        continue
+                    args = (root / "apt-args").read_text().splitlines()
+                    self.assertIn("gdm3", args)
+                    self.assertTrue(any(arg.startswith("APT::NeverAutoRemove::=") and "steam" in arg for arg in args))
+                    self.assertFalse(any(arg.startswith("steam") for arg in args))
+                    self.assertNotIn("zenity", args)
+                    self.assertFalse({"gamemode", "lolka-x"} & set(args))
+                    self.assertEqual("snapd" in args, steam_snap == "0")
+
     def test_posix_syntax(self):
-        for name in ("install", "install_dev", "install_game", "debloat", "lib/install.sh"):
+        for name in ("install", "debloat", "lib/install.sh", "lib/install-dev.sh",
+                     "lib/install-game.sh", "lib/install-session.sh", "bin/start-labwc"):
             with self.subTest(name=name):
                 result = subprocess.run(["sh", "-n", str(REPO / name)], capture_output=True, text=True)
                 self.assertEqual(result.returncode, 0, result.stderr)
-        for name in ("install", "install_dev", "install_game", "debloat"):
+        for name in ("install", "debloat", "bin/start-labwc"):
             self.assertEqual((REPO / name).read_text().splitlines()[0], "#!/bin/sh")
 
     def test_debloat_empty_list_does_not_autoremove(self):

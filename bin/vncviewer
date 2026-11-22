@@ -1,0 +1,51 @@
+#!/bin/sh
+# gvncviewer takes a display number, while VNC URLs and d8 use TCP ports.
+case ${1-} in
+  ''|-*) exec gvncviewer "$@" ;;
+esac
+
+address=$1
+shift
+port_address=no
+case $address in
+  vnc://*)
+    address=${address#vnc://}
+    address=${address%/}
+    port_address=yes
+    ;;
+  *::*)
+    port_address=yes
+    address="${address%%::*}:${address##*::}"
+    ;;
+esac
+
+# Accept the TigerVNC tuning arguments d8 adds to its local proxy address.
+for option do
+  case $option in
+    -AutoSelect=0|-PreferredEncoding=Tight|-QualityLevel=*|-CompressLevel=*|-FullColor|Log=*:stderr:100)
+      port_address=yes ;;
+    *) printf 'vncviewer: unsupported argument %s\n' "$option" >&2; exit 2 ;;
+  esac
+done
+
+case $address in
+  *:*:*)
+    printf 'vncviewer: address must use a hostname or IPv4\n' >&2
+    exit 2 ;;
+  *:*)
+    host=${address%:*}
+    number=${address##*:}
+    case $number in
+      ''|*[!0-9]*|??????*) printf 'vncviewer: invalid display or port\n' >&2; exit 2 ;;
+    esac
+    if [ "$port_address" = yes ] || [ "$number" -ge 100 ]; then
+      if [ "$number" -lt 1 ] || [ "$number" -gt 65535 ]; then
+        printf 'vncviewer: TCP port out of range\n' >&2
+        exit 2
+      fi
+      display=$(expr "$number" - 5900)
+      address="$host:$display"
+    fi ;;
+esac
+
+exec gvncviewer -- "$address"

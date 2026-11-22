@@ -1,32 +1,31 @@
 # Gaming profile
 
-On the gaming Ubuntu amd64 system, run these in order:
+On Ubuntu amd64, `./install` installs Steam from Flathub, GameMode,
+Xwayland and Lolka X (`lolka-x`). Steam gets its 32-bit graphics libraries
+from the Flatpak runtime and runs in the regular Labwc session.
+
+On kernels with sched_ext support, the installer also installs scx_lavd
+v1.1.4 and enables its performance-mode service.
+
+The laptop panel defaults to 3120×2080 at 120 Hz and output scale 2.
+Xwayland applications see a 1560×1040 desktop. Launch Steam from the
+application menu for the desktop client.
+
+On this HONOR, Labwc uses a software cursor. On this Intel Xe laptop,
+`WLR_DRM_NO_ATOMIC=1` in the HONOR Labwc environment enables
+asynchronous page flips through legacy DRM. It takes effect at login.
+In fullscreen CS2, Super+Shift+F11 switches between synchronized and
+asynchronous flips.
+
+Use these CS2 launch options to select the session’s SDL backend:
 
 ```sh
-./install --desktop
-./debloat
-./install_game
+SDL_VIDEO_DRIVER="$XDG_SESSION_TYPE" %command%
 ```
-
-The last installer adds Steam, Gamescope, MangoHud, GameMode, Xwayland,
-32-bit Mesa/OpenGL/Vulkan libraries, and scx_lavd pinned to v1.1.4. It enables
-the scx_lavd autopilot system service. Native Lolka is installed by this gaming
-installer only; the main desktop installer does not install it.
-
-Select **Labwc (gaming)** at login. That session shares the regular Labwc
-configuration and enables Xwayland for Steam and other X11 games.
 
 Optional CPU idle control uses `systemctl start cpu-idle.service` and
 `systemctl stop cpu-idle.service`. Start it before gaming and stop it afterward
 to restore idle states. Disabling idle states increases power use and heat.
 
-Steam launch options, using the gaming screen's actual width and height:
-
-```text
-gamemoderun gamescope -W WIDTH -H HEIGHT -w WIDTH -h HEIGHT -f --immediate-flips -- mangohud %command%
-```
-
-Proton is managed by Steam. Proprietary NVIDIA drivers and their matching
-32-bit libraries must be installed for that machine separately; this profile
-installs Mesa drivers. The kernel must support sched_ext.
+Proton is managed by Steam. The installer includes Mesa drivers.
 

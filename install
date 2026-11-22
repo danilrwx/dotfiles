@@ -1,18 +1,21 @@
 #!/bin/sh
-# ./install [--desktop] [--configs] [--ru-mirror]
-#   --desktop    install the Labwc desktop and Firefox
-#   --configs    apply user configs only; add --desktop for desktop configs
+# ./install [--configs] [--android] [--skip-go] [--ru-mirror]
+#   --configs    apply user configuration without installing packages
+#   --android    also install Android SDK and Studio on Ubuntu
+#   --skip-go    keep existing Go tools while updating Go on Ubuntu
 #   --ru-mirror  use the Yandex Ubuntu mirror
-# Development and gaming are separate: ./install_dev and ./install_game.
 
-DESKTOP=0
 CONFIGS=0
 RU_MIRROR=0
+ANDROID=0
+SKIP_GO=0
 
 for arg do
   case $arg in
-    --desktop) DESKTOP=1 ;;
+    --desktop) ;; # Compatibility with the former desktop entry point.
     --configs) CONFIGS=1 ;;
+    --android) ANDROID=1 ;;
+    --skip-go) SKIP_GO=1 ;;
     --ru-mirror) RU_MIRROR=1 ;;
     -h|--help) sed -n '2,6s/^# //p' "$0"; exit 0 ;;
     *) printf 'Unknown option: %s\n' "$arg" >&2; exit 1 ;;
@@ -22,29 +25,43 @@ done
 cd "$HOME/dotfiles" || exit 1
 
 . ./lib/install.sh
-# shellcheck source=/dev/null
-. /etc/os-release
-[ "$ID" = ubuntu ] || { log 'Ubuntu only'; exit 1; }
+. ./lib/install-session.sh
+case $(uname -s) in
+  OpenBSD)
+    platform=openbsd
+    LINK_FLAGS=-sh
+    ;;
+  Linux)
+    # shellcheck source=/dev/null
+    . /etc/os-release
+    case $ID in
+      ubuntu|alpine) platform=$ID ;;
+      *) log 'Supported Linux distributions: Ubuntu and Alpine'; exit 1 ;;
+    esac
+    ;;
+  *) log 'Ubuntu and OpenBSD only'; exit 1 ;;
+esac
 MIHOMO_VERSION=v1.19.32
 
-if [ "$CONFIGS" = 1 ] && [ "$RU_MIRROR" = 1 ]; then
-  log '--configs cannot change apt mirrors'; exit 1
+if { [ "$CONFIGS" = 1 ] || [ "$platform" != ubuntu ]; } &&
+    [ "$ANDROID:$SKIP_GO:$RU_MIRROR" != 0:0:0 ]; then
+  log '--android, --skip-go and --ru-mirror require a full Ubuntu installation'; exit 1
 fi
 
-BASE_PKGS="git libcap2-bin openssl wget zip unzip curl file procps bash bash-completion tmux gnupg2 desktop-file-utils
-  ugrep fzf jq neovim fd-find
-  openssh-server pass vim-gtk3 age python3"
+BASE_PKGS="git libcap2-bin openssl wget zip unzip curl file procps bash bash-completion tmux gnupg2
+  ugrep fzf jq fd-find
+  openssh-server pass vim age python3 console-setup"
 
-DESKTOP_PKGS="iwd bluez rfkill
+DESKTOP_PKGS="iwd bluez rfkill desktop-file-utils
   pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
   power-profiles-daemon thermald bolt upower
   udisks2 fwupd systemd-oomd polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
   intel-media-va-driver-non-free
-  gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-terminus-otb fonts-noto-color-emoji fonts-noto-cjk
+  gnome-keyring libpam-gnome-keyring fonts-terminus-otb fonts-noto-color-emoji fonts-noto-cjk
   gstreamer1.0-libav gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
   greetd tuigreet ssh-askpass-gnome"
 
-WAYLAND_PKGS="foot labwc swaybg wlr-randr swayidle swaylock wlopm wmenu wl-clipboard grim slurp xdg-desktop-portal-wlr
+WAYLAND_PKGS="foot labwc xwayland swaybg wlr-randr kanshi swayidle swaylock wlopm wmenu wl-clipboard grim slurp xdg-desktop-portal-wlr
   dunst libnotify-bin policykit-1-gnome brightnessctl libgtk-3-bin mpv"
 
 base_configs() {
@@ -55,11 +72,11 @@ base_configs() {
   done
   retire_link .zprofile .zprofile || return
   retire_link .zshrc .zshrc || return
-  retire_link .config/MangoHud config/MangoHud || return
   retire_link .config/maki config/maki || return
 
   retire_link .config/htop config/htop || return
-  link config/nvim "$HOME/.config/nvim" || return
+  retire_link .config/nvim config/nvim || return
+  link experiments/vim/vimrc "$HOME/.vimrc" || return
   link config/ctags "$HOME/.config/ctags" || return
 
   if [ -x /usr/bin/fdfind ]; then link /usr/bin/fdfind "$HOME/.local/bin/fd" || return; fi
@@ -70,9 +87,8 @@ desktop_configs() {
     link config/themes/dark "$HOME/.config/dotfiles/theme" || return
   fi
 
-  link config/labwc "$HOME/.config/labwc" || return
+  labwc_configs || return
   link config/foot "$HOME/.config/foot" || return
-  link config/xdg-desktop-portal/labwc-portals.conf "$HOME/.config/xdg-desktop-portal/labwc-portals.conf" || return
 
   for profile in "$HOME"/.config/mozilla/firefox/* "$HOME"/.mozilla/firefox/*; do
     [ -f "$profile/prefs.js" ] || continue
@@ -86,15 +102,17 @@ desktop_configs() {
   link "$HOME/.config/dotfiles/theme/dunst.conf" "$HOME/.config/dunst/dunstrc.d/theme.conf" || return
   link "$HOME/.config/dotfiles/theme/labwc-themerc" "$HOME/.local/share/themes/Dotfiles/openbox-3/themerc" || return
 
-  for e in config/environment.d/*.conf; do
-    link "$e" "$HOME/.config/environment.d/${e##*/}" || return
-  done
-
   for g in gtk-3.0 gtk-4.0; do
     link "$HOME/.config/dotfiles/theme/gtk.css" "$HOME/.config/$g/gtk.css" || return
   done
   link "$HOME/.config/dotfiles/theme/settings.ini" "$HOME/.config/gtk-3.0/settings.ini" || return
   link config/fontconfig/fonts.conf "$HOME/.config/fontconfig/fonts.conf" || return
+
+  [ "$platform" = ubuntu ] || return 0
+  link config/xdg-desktop-portal/labwc-portals.conf "$HOME/.config/xdg-desktop-portal/labwc-portals.conf" || return
+  for e in config/environment.d/*.conf; do
+    link "$e" "$HOME/.config/environment.d/${e##*/}" || return
+  done
   link config/systemd/ssh-agent-askpass.conf "$HOME/.config/systemd/user/ssh-agent.service.d/askpass.conf" || return
   link config/systemd/mihomo.service "$HOME/.config/systemd/user/mihomo.service" || return
 
@@ -132,16 +150,22 @@ base() {
       /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null
   fi
 
-  sudo apt update -y
-  sudo apt install -y $BASE_PKGS
+  sudo apt-get update || return
+  sudo apt-get install -y $BASE_PKGS || return
+  sudo sed -i -e 's|^CODESET=.*|CODESET="Uni2"|' \
+    -e 's|^FONTFACE=.*|FONTFACE="Terminus"|' \
+    -e 's|^FONTSIZE=.*|FONTSIZE="16x32"|' /etc/default/console-setup
+  if [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -S "$XDG_RUNTIME_DIR/bus" ]; then
+    user_systemctl enable --now ssh-agent.socket || log 'Could not start the user SSH agent socket'
+  fi
   # Ubuntu calls fd fdfind.
   link /usr/bin/fdfind "$HOME/.local/bin/fd"
 }
 
 desktop_system() {
   log "Installing the desktop base"
-  sudo apt install -y $DESKTOP_PKGS
-  sudo apt install -y --no-install-recommends $WAYLAND_PKGS
+  sudo apt-get install -y $DESKTOP_PKGS || return
+  sudo apt-get install -y --no-install-recommends $WAYLAND_PKGS || return
 
   # iwd handles Wi-Fi and DHCP; networkd handles Ethernet; resolved handles DNS.
   put /etc/iwd/main.conf
@@ -180,7 +204,7 @@ desktop_system() {
   sudo sed -i -e 's/^XKBLAYOUT=.*/XKBLAYOUT="us,ru"/' -e 's/^XKBVARIANT=.*/XKBVARIANT=","/' \
     -e 's/^XKBOPTIONS=.*/XKBOPTIONS="grp:ctrl_space_toggle,grp_led:scroll"/' /etc/default/keyboard
 
-  put /etc/greetd/config.toml
+  ubuntu_login || return
   # Replace GDM's display-manager alias without restarting the current session.
   if [ "$(readlink -f /etc/systemd/system/display-manager.service)" != /usr/lib/systemd/system/greetd.service ]; then
     sudo systemctl enable --force greetd
@@ -188,9 +212,8 @@ desktop_system() {
     echo /usr/sbin/greetd | sudo tee /etc/X11/default-display-manager > /dev/null
   fi
 
-  # Use a readable console font on the HiDPI panel, including greetd on tty7.
-  sudo sed -i -e 's|^ACTIVE_CONSOLES=.*|ACTIVE_CONSOLES="/dev/tty[1-7]"|' -e 's|^FONTFACE=.*|FONTFACE="Terminus"|' \
-    -e 's|^FONTSIZE=.*|FONTSIZE="16x32"|' /etc/default/console-setup
+  # Apply console setup to greetd on tty7 too.
+  sudo sed -i 's|^ACTIVE_CONSOLES=.*|ACTIVE_CONSOLES="/dev/tty[1-7]"|' /etc/default/console-setup
 }
 
 desktop_session() {
@@ -206,31 +229,6 @@ desktop_session() {
   fi
   gsettings set org.gnome.desktop.interface cursor-theme Adwaita
   gsettings set org.gnome.desktop.interface cursor-size 24
-
-  # Use the Mono Nerd Font build so tmux icons occupy one cell.
-  font_version=v3.5.1
-  font_sha=054a4a369cdcc5d57e9bc91ea56dfefd66c71c253dcb0c0d7b72c0810373da26
-  font_dir=$HOME/.local/share/fonts/IosevkaTermNerdFontMono
-
-  if [ ! -f "$font_dir/IosevkaTermNerdFontMono-Regular.ttf" ]; then
-    log "Installing the Iosevka Term Nerd Font $font_version"
-    font_archive=$(mktemp)
-
-    if fetch "https://github.com/ryanoasis/nerd-fonts/releases/download/$font_version/IosevkaTerm.tar.xz" "$font_archive" "$font_sha"; then
-      mkdir -p "$font_dir"
-
-      if tar -xJf "$font_archive" -C "$font_dir" IosevkaTermNerdFontMono-Regular.ttf IosevkaTermNerdFontMono-Bold.ttf IosevkaTermNerdFontMono-Italic.ttf IosevkaTermNerdFontMono-BoldItalic.ttf; then
-        fc-cache -f "$HOME/.local/share/fonts" > /dev/null \
-          || log "fc-cache failed; the font is installed but the cache is stale"
-      else
-        log "Failed to install the Iosevka Term Nerd Font. Continue installation."
-      fi
-    else
-      log "Failed to install the Iosevka Term Nerd Font. Continue installation."
-    fi
-
-    rm -f "$font_archive"
-  fi
 
   # Use OpenSSH instead of GCR so AddKeysToAgent confirm prompts for each key.
   log "Setting up ssh-agent with ssh-askpass-gnome"
@@ -309,7 +307,7 @@ firefox() {
       -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0 || return
   fi
 
-  sudo apt install -y --no-install-recommends firefox
+  sudo apt-get install -y --no-install-recommends firefox || return
   jq -e . etc/firefox/policies/policies.json >/dev/null || return
   put /etc/firefox/policies/policies.json || true
 
@@ -346,15 +344,16 @@ system() {
 }
 
 reload_configs() {
-  if [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -S "${XDG_RUNTIME_DIR}/bus" ]; then
+  if [ "$platform" = ubuntu ] && [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -S "${XDG_RUNTIME_DIR}/bus" ]; then
     systemctl --user daemon-reload || return
   fi
 
-  if [ -n "${TMUX:-}${WAYLAND_DISPLAY:-}" ] && command -v tmux >/dev/null && tmux has-session 2>/dev/null; then
+  if { [ -n "${TMUX:-}${WAYLAND_DISPLAY:-}${DISPLAY:-}" ] || [ -t 0 ]; } &&
+    command -v tmux >/dev/null && tmux has-session 2>/dev/null; then
     tmux source-file "$HOME/.tmux.conf" || return
   fi
 
-  if [ "$DESKTOP" = 1 ] && [ -n "${LABWC_PID:-}" ]; then
+  if [ -n "${LABWC_PID:-}" ]; then
     labwc --reconfigure || return
   fi
 }
@@ -363,21 +362,23 @@ migrate_backups || exit 1
 
 if [ "$CONFIGS" = 1 ]; then
   base_configs || exit 1
-  [ "$DESKTOP" != 1 ] || desktop_configs || exit 1
+  desktop_configs || exit 1
   reload_configs || exit 1
+elif [ "$platform" = ubuntu ]; then
+  . ./lib/install-dev.sh
+  . ./lib/install-game.sh
+  base || exit 1
+  desktop_system || exit 1
+  desktop_session || exit 1
+  vless_client || exit 1
+  firefox || exit 1
+  system || exit 1
+  install_development || exit 1
+  install_gaming || exit 1
 else
-  base
-
-  if [ "$DESKTOP" = 1 ]; then
-    desktop_system
-    desktop_session
-    vless_client
-    firefox
-  fi
-
-  mkdir -p "$HOME/.local/share/completions"
-  fzf --bash > "$HOME/.local/share/completions/fzf.bash" 2>/dev/null || true
-  system
+  portable_packages || exit 1
+  base_configs || exit 1
+  desktop_configs || exit 1
 fi
 
 [ -z "$BACKUP_DIR" ] || log "Backups: $BACKUP_DIR"

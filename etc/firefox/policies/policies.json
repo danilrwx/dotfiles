@@ -131,12 +131,16 @@
         "Value": false,
         "Status": "locked"
       },
-      "browser.sessionstore.interval": {
-        "Value": 60000,
+      "browser.sessionstore.cleanup.forget_closed_after": {
+        "Value": 900000,
+        "Status": "default"
+      },
+      "browser.sessionstore.max_tabs_undo": {
+        "Value": 5,
         "Status": "default"
       },
       "browser.sessionstore.privacy_level": {
-        "Value": 2,
+        "Value": 0,
         "Status": "default"
       },
       "browser.sessionstore.resume_from_crash": {

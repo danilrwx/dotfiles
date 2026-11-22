@@ -1,12 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # the launcher (Super+D in Labwc), in bin/x-menu: the apps by their names (the
 # .desktop entries, not PATH's binaries; those hidden by NoDisplay, config/applications's among them, left out).
 # Typed commands run through the shell; other input is ignored.
 
 # the entries by id, the user's over the system's
 declare -A app seen
-for d in "${XDG_DATA_HOME:-$HOME/.local/share}/applications" /usr/local/share/applications /usr/share/applications; do
-  for f in "$d"/*.desktop; do
+data_home=${XDG_DATA_HOME:-$HOME/.local/share}
+export XDG_DATA_DIRS="$data_home/flatpak/exports/share:/var/lib/flatpak/exports/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+IFS=: read -r -a data_dirs <<< "$XDG_DATA_DIRS"
+for d in "$data_home" "${data_dirs[@]}"; do
+  [ -n "$d" ] || continue
+  for f in "$d"/applications/*.desktop; do
     [ -f "$f" ] || continue
     id=${f##*/}
     [ -n "${seen[$id]}" ] && continue

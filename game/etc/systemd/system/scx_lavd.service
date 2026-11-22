@@ -1,14 +1,10 @@
-# scx_lavd, the sched_ext scheduler (install_game builds it from the pinned tag into /usr/local/bin): autopilot picks
-# performance against powersave by the load, and packs the work onto fewer of the Core Ultra's cores when the
-# machine is idle. Root's unit: sched_ext is the kernel's BPF scheduling class, and `systemctl stop scx_lavd`
-# hands the CPUs back to EEVDF. ConditionPathIsDirectory: a kernel built without sched_ext skips it, not fails.
 [Unit]
-Description=scx_lavd, the sched_ext scheduler (autopilot)
+Description=scx_lavd, the sched_ext scheduler (performance)
 Documentation=https://github.com/sched-ext/scx
 ConditionPathIsDirectory=/sys/kernel/sched_ext
 
 [Service]
-ExecStart=/usr/local/bin/scx_lavd --autopilot
+ExecStart=/usr/local/bin/scx_lavd --performance
 Restart=on-failure
 RestartSec=5
 

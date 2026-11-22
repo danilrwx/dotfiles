@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=GTK VNC Viewer
+Exec=vncviewer %u
+MimeType=x-scheme-handler/vnc;
+NoDisplay=true

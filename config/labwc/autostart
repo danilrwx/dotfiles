@@ -1,12 +1,26 @@
 #!/bin/sh
-# Set the laptop's logical scale before starting applications.
-wlr-randr --output eDP-1 --mode 3120x2080@120Hz --scale 2
+# Apply the machine's monitor settings before starting applications.
+outputs="$HOME/.config/dotfiles/outputs.sh"
+if [ -r "$outputs" ]; then
+    sh "$outputs"
+elif [ "$(cat /sys/class/dmi/id/product_name 2>/dev/null)" = ZQC-P ]; then
+    wlr-randr --output eDP-1 --mode 3120x2080@120Hz --scale 2
+    if kanshi_bin=$(command -v kanshi); then
+        "$kanshi_bin" -c "$HOME/.config/labwc/kanshi.conf" &
+    fi
+fi
 
-dbus-update-activation-environment --systemd "DISPLAY=${DISPLAY:-}" "XAUTHORITY=${XAUTHORITY:-}" WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE GDK_BACKEND QT_QPA_PLATFORM MOZ_ENABLE_WAYLAND ELECTRON_OZONE_PLATFORM_HINT XCURSOR_THEME XCURSOR_SIZE
-systemctl --user restart dunst.service xdg-desktop-portal.service
-systemctl --user start x-battery.timer x-battery.service
-systemd-run --user --quiet --collect --unit=dotfiles-polkit-agent \
-  /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1
+if command -v systemd-run >/dev/null && systemctl --user show-environment >/dev/null 2>&1; then
+    systemctl --user unset-environment WAYLAND_SOCKET
+    dbus-update-activation-environment --systemd "DISPLAY=${DISPLAY:-}" "XAUTHORITY=${XAUTHORITY:-}" WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE GDK_BACKEND QT_QPA_PLATFORM MOZ_ENABLE_WAYLAND ELECTRON_OZONE_PLATFORM_HINT XCURSOR_THEME XCURSOR_SIZE
+    systemctl --user restart dunst.service
+    systemctl --user --no-block restart xdg-desktop-portal.service
+    systemctl --user start x-battery.timer x-battery.service
+    systemd-run --user --quiet --collect --unit=dotfiles-polkit-agent \
+        /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1
+else
+    dunst &
+fi
 
 x-theme "$(cat "$HOME/.config/dotfiles/theme/name")"
 

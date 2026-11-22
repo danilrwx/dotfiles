@@ -9,7 +9,10 @@ case $mode in
   *) echo 'Usage: x-theme [dark|light|toggle]' >&2; exit 1 ;;
 esac
 mkdir -p "${current%/*}"
-ln -sfnT "$HOME/dotfiles/config/themes/$mode" "$current"
+case $(uname -s) in
+  OpenBSD) ln -shf "$HOME/dotfiles/config/themes/$mode" "$current" ;;
+  *) ln -sfnT "$HOME/dotfiles/config/themes/$mode" "$current" ;;
+esac
 
 if [ "$mode" = light ]; then
   signal=USR2
@@ -21,9 +24,10 @@ else
   scheme=prefer-dark
 fi
 pkill -"$signal" -x -u "$(id -u)" foot || true
-pkill -USR1 -x -u "$(id -u)" nvim || true
-gsettings set org.gnome.desktop.interface gtk-theme "$gtk"
-gsettings set org.gnome.desktop.interface color-scheme "$scheme"
+if command -v gsettings >/dev/null; then
+  gsettings set org.gnome.desktop.interface gtk-theme "$gtk" || true
+  gsettings set org.gnome.desktop.interface color-scheme "$scheme" || true
+fi
 dunstctl reload || true
 case ${XDG_CURRENT_DESKTOP:-} in
   *labwc*)
@@ -34,16 +38,21 @@ case ${XDG_CURRENT_DESKTOP:-} in
     state=${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/wallpaper-$mode
     previous=$(cat "$state" 2>/dev/null || true)
     image=$(find "$gallery" -maxdepth 1 -type f -name '*.jpg' 2>/dev/null |
-      grep -Fxv -- "$previous" | shuf -n 1)
+      grep -Fxv -- "$previous" | awk 'BEGIN { srand() } rand() * NR < 1 { pick = $0 } END { if (NR) print pick }')
     if [ -z "$image" ] && [ -f "$previous" ]; then image=$previous; fi
     if [ ! -f "$image" ]; then image=$current/wallpaper.jpg; fi
     mkdir -p "${state%/*}"
     printf '%s\n' "$image" > "$state"
 
-    systemctl --user stop x-background.service 2>/dev/null || true
-    systemd-run --user --quiet --collect --unit=x-background \
-      --setenv="WAYLAND_DISPLAY=$WAYLAND_DISPLAY" \
-    swaybg --color "$desktop" --image "$image" --mode fill
+    if command -v systemd-run >/dev/null; then
+      systemctl --user stop x-background.service 2>/dev/null || true
+      systemd-run --user --quiet --collect --unit=x-background \
+        --setenv="WAYLAND_DISPLAY=$WAYLAND_DISPLAY" \
+        swaybg --color "$desktop" --image "$image" --mode fill
+    else
+      pkill -x -u "$(id -u)" swaybg || true
+      swaybg --color "$desktop" --image "$image" --mode fill >/dev/null 2>&1 &
+    fi
     labwc --reconfigure ;;
 esac
 printf '%s\n' "$mode"
