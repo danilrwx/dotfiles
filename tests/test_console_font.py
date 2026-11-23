@@ -28,6 +28,12 @@ class ConsoleFontTest(unittest.TestCase):
                 edge = [row[-1] for row in rows(left)]
                 self.assertTrue(any(edge))
                 self.assertEqual(edge, [row[0] for row in rows(right)])
+        horizontal = [row[0] for row in rows("═")]
+        vertical = rows("║")[0]
+        self.assertEqual([i for i, lit in enumerate(horizontal) if lit], [height // 2 - 2, height // 2 + 1])
+        self.assertEqual([i for i, lit in enumerate(vertical) if lit], [width // 2 - 2, width // 2 + 1])
+        self.assertEqual([row[-1] for row in rows("╠")], horizontal)
+        self.assertEqual(rows("╬")[0], vertical)
         self.assertEqual([sum(row) for row in rows("▀")], [width] * (height // 2) + [0] * (height // 2))
         self.assertEqual([sum(row) for row in rows("▄")], [0] * (height // 2) + [width] * (height // 2))
         for char, fraction in zip("░▒▓", (1, 2, 3)):

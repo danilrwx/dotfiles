@@ -14,8 +14,36 @@ WSFONT_LIMIT = 512 * 1024
 ASCII = "".join(map(chr, range(0x20, 0x7F)))
 CYRILLIC = "Ё" + "".join(map(chr, range(0x410, 0x450))) + "ё"
 BOXES = "─│┌┐└┘├┤┬┴┼━┃┏┓┗┛┣┫┳┻╋═║╔╗╚╝╠╣╦╩╬╭╮╯╰╱╲╳"
+DOUBLE_BOXES = dict(zip("═║╔╗╚╝╠╣╦╩╬", ("EW", "NS", "ES", "SW", "NE", "NW",
+                                           "NES", "NSW", "ESW", "NEW", "NESW")))
 BLOCKS = "▀▄█▌▐░▒▓"
 SYMBOLS = " ©«»°±·×÷–—‘’“”•…←↑→↓↔✓✗"
+
+
+def double_box(draw, width, height, arms):
+    # Draw on exact pixels so the two strokes stay distinct after rasterizing.
+    left, right = width // 2 - 2, width // 2 + 1
+    top, bottom = height // 2 - 2, height // 2 + 1
+    for horizontal, edge_x, near_x, far_x in (("W", 0, left, right),
+                                             ("E", width - 1, right, left)):
+        for vertical, edge_y, near_y, far_y in (("N", 0, top, bottom),
+                                               ("S", height - 1, bottom, top)):
+            if horizontal in arms and vertical in arms:
+                draw.line((edge_x, near_y, near_x, near_y, near_x, edge_y), fill=1)
+                if len(arms) == 2:
+                    draw.line((edge_x, far_y, far_x, far_y, far_x, edge_y), fill=1)
+    if arms == "EW":
+        for y in (top, bottom):
+            draw.line((0, y, width - 1, y), fill=1)
+    elif "E" in arms and "W" in arms and len(arms) == 3:
+        y = bottom if "N" in arms else top
+        draw.line((0, y, width - 1, y), fill=1)
+    if arms == "NS":
+        for x in (left, right):
+            draw.line((x, 0, x, height - 1), fill=1)
+    elif "N" in arms and "S" in arms and len(arms) == 3:
+        x = left if "E" in arms else right
+        draw.line((x, 0, x, height - 1), fill=1)
 
 
 def glyphs(source, width, height, characters):
@@ -35,6 +63,9 @@ def glyphs(source, width, height, characters):
             level = "░▒▓".index(char) + 1
             pattern = ((0, 2), (3, 1))
             image.putdata([pattern[y % 2][x % 2] < level for y in range(height) for x in range(width)])
+        elif char in DOUBLE_BOXES:
+            image = Image.new("1", (width, height))
+            double_box(ImageDraw.Draw(image), width, height, DOUBLE_BOXES[char])
         elif char in BOXES + BLOCKS:
             image = Image.new("1", graphics_cell)
             draw = ImageDraw.Draw(image)
