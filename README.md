@@ -16,7 +16,7 @@ cd ~/dotfiles && ./install --desktop
   use the terminal's ANSI slots. Vim uses the terminal palette in the dark theme. GTK, dunst, wmenu and other apps keep colours in their own configs.
 - **A small desktop.** Labwc from Ubuntu's archive, Foot, wmenu and no permanent bar.
   **Super+i** shows a status card; **Super+x** opens quick settings.
-- **HiDPI.** Native 2× scaling, JetBrains Mono at 32 pixels in Foot, and 10-logical-pixel outer gaps
+- **HiDPI.** Native 2× scaling, Iosevka at 32 pixels in Foot, and 10-logical-pixel outer gaps
   to keep maximized windows clear of the laptop panel's rounded corners.
 - **Vim, plugin-free.** Fuzzy `:find`, quickfix search, tag navigation and netrw.
   See [the Vim configuration](experiments/vim/README.md).
@@ -163,7 +163,7 @@ open their native CLI when iwd and BlueZ are installed.
   global, profiles from `private`). OpenVPN profiles and their systemd/polkit setup belong to `install`.
 - **ssh** through the plain `ssh-agent` with a GTK askpass and a confirm per use, not gcr's agent
 - **apps**: Firefox from Mozilla's signed APT repository. On Ubuntu the installer also adds Lolka X.
-- **Fonts.** JetBrains Mono in Foot, menus, window decorations, notifications, GTK and
+- **Fonts.** Iosevka in Foot, menus, window decorations, notifications, GTK and
   the Firefox interface. Noto Color Emoji provides emoji where installed.
 
 Firefox's settings are in `etc/firefox/policies/policies.json` (DRM playback is enabled): vertical tabs, compact UI,
@@ -217,9 +217,7 @@ user and reboot. Greetd starts the ReGreet graphical login on `ttyC4`
 console, where `~/dotfiles/bin/start-labwc` is available for manual startup.
 
 On Chimera Linux, install the desktop packages for your session and
-`fonts-nerd-jetbrains-mono` from the `user` repository, then run `./install --desktop --configs`.
-Fontconfig maps requests for JetBrains Mono to the packaged JetBrains Mono NL Nerd Font Mono
-when the regular JetBrains Mono is unavailable.
+`fonts-iosevka-ttf` from the `user` repository, then run `./install --desktop --configs`.
 
 Ubuntu installs Steam from Flathub into the same Labwc desktop. See
 [`game/README.md`](game/README.md) for the gaming tools.

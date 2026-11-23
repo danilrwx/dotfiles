@@ -5,7 +5,7 @@ with F3 in Ubuntu's tuigreet.
 
 - Laptop: eDP-1, 3120x2080 at 120 Hz, scale 2; outer margin 10 logical pixels.
   Kanshi reapplies scale 2 when the built-in panel reconnects by itself.
-- Terminal: Foot, JetBrains Mono at 16 pixels on 1× displays and 32 pixels on 2× displays, shared ANSI colors.
+- Terminal: Foot, Iosevka at 16 pixels on 1× displays and 32 pixels on 2× displays, shared ANSI colors.
 - Touchpad: natural scrolling, no tap, clickfinger, speed -0.25, scroll factor 0.3.
 - Super+Return: terminal; Super+D: applications; Super+B: bookmarks.
 - Super+X: quick settings; Super+Shift+X: lock; Super+Right: next track.

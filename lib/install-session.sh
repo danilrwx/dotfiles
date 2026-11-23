@@ -92,7 +92,7 @@ portable_desktop_packages() {
   case $platform in
     alpine)
       admin setup-wayland-base labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
-        grim slurp wlr-randr kanshi wlopm seatd xwayland font-jetbrains-mono mpv \
+        grim slurp wlr-randr kanshi wlopm seatd xwayland font-iosevka-base mpv \
         greetd-agreety greetd-openrc || return
       id -Gn "$portable_user" | grep -qw seat || admin addgroup "$portable_user" seat || return
       admin rc-update add seatd default || return
@@ -101,7 +101,7 @@ portable_desktop_packages() {
     openbsd)
       admin pkg_add dbus greetd cage regreet python%3 \
         labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
-        grim slurp wlr-randr kanshi wlopm seatd xwayland jetbrains-mono mpv || return
+        grim slurp wlr-randr kanshi wlopm seatd xwayland iosevka mpv || return
       id -Gn "$portable_user" | grep -qw _seatd || admin user mod -G _seatd "$portable_user" || return
       admin rcctl enable seatd || return
       admin rcctl check seatd || admin rcctl start seatd

@@ -1,6 +1,6 @@
 # wmenu on HiDPI
 
-`x-menu` uses the packaged wmenu with JetBrains Mono. The optional patch below is
+`x-menu` uses the packaged wmenu with Iosevka. The optional patch below is
 for bitmap fonts. It renders text at the buffer's physical scale, so at 2×
 Terminus 16 px uses the 32-pixel strike.
 
