@@ -78,7 +78,7 @@ portable_base_packages() {
       admin apk add bash git tmux vim curl jq fzf fd ugrep python3 kbd
       ;;
     openbsd)
-      set -- bash git vim-- curl jq fzf ugrep python%3
+      set -- bash git vim-- curl jq fzf ugrep
       case $(arch -s) in
         amd64|aarch64|riscv64) set -- "$@" fd ;;
       esac
@@ -99,7 +99,7 @@ portable_desktop_packages() {
       admin rc-service seatd start
       ;;
     openbsd)
-      admin pkg_add dbus greetd cage regreet \
+      admin pkg_add dbus greetd cage regreet python%3 \
         labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
         grim slurp wlr-randr kanshi wlopm seatd xwayland iosevka mpv || return
       id -Gn "$portable_user" | grep -qw _seatd || admin user mod -G _seatd "$portable_user" || return

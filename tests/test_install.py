@@ -120,7 +120,7 @@ esac
         base, console_font = calls.read_text().splitlines()
         self.assertTrue(base.startswith("pkg_add "))
         self.assertIn("vim--", base.split())
-        self.assertIn("python%3", base.split())
+        self.assertNotIn("python%3", base.split())
         self.assertNotIn("fd", base.split())
         self.assertTrue(set(base.split()).isdisjoint({"cage", "firefox", "foot", "greetd", "labwc", "seatd"}))
         self.assertTrue(console_font.endswith("/lib/install-console-font.sh"))
@@ -130,7 +130,7 @@ esac
         calls.unlink()
         self.run_install("--desktop", expected=1)
         desktop = calls.read_text().splitlines()[-1].split()
-        self.assertTrue({"cage", "firefox", "foot", "greetd", "labwc", "seatd"}.issubset(desktop))
+        self.assertTrue({"cage", "firefox", "foot", "greetd", "labwc", "python%3", "seatd"}.issubset(desktop))
 
     def test_conflicts_and_old_bak_are_preserved(self):
         (self.home / ".bashrc").write_text("old bash config\n")
