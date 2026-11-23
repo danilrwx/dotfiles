@@ -10,6 +10,8 @@ trap 'rm -rf "$font_tmp"' 0
 # The raster console accepts only its current cell dimensions.
 for size in 8x16 12x24 16x32 32x64; do
   name=Iosevka-${size}
+  # wscons keeps the earlier bitmap under Iosevka-12x24 until reboot.
+  if [ "$size" = 12x24 ]; then name=Iosevka-12x24-Large; fi
   if ! printf '%s\n' "$loaded_fonts" | awk -v name="$name" '$2 == name { found = 1 } END { exit !found }'; then
     gzip -dc "/usr/local/share/dotfiles/console/iosevka-$size.wsfont.gz" > "$font_tmp/font"
     wsfontload -e iso -w "${size%x*}" -h "${size#*x}" -N "$name" "$font_tmp/font" 2>/dev/null || continue

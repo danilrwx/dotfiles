@@ -19,9 +19,11 @@ SYMBOLS = " ©«»°±·×÷–—‘’“”•…←↑→↓↔✓✗"
 
 
 def glyphs(source, width, height, characters):
-    text = ImageFont.truetype(source, round(height * 0.8))
+    large_text = (width, height) == (12, 24)
+    text_size = 21 if large_text else round(height * 0.8)
+    text = ImageFont.truetype(source, text_size)
     graphics = ImageFont.truetype(source, width * 2)
-    baseline = height - round(height * 0.22)
+    baseline = 20 if large_text else height - round(height * 0.22)
     _, top, _, bottom = graphics.getbbox("─", anchor="ls")
     graphics_baseline = (height - top - bottom) // 2
     missing = bytes(text.getmask("\U0010ffff", mode="1"))
@@ -35,7 +37,10 @@ def glyphs(source, width, height, characters):
             if bytes(text.getmask(char, mode="1")) == missing:
                 continue
             x = round((width - text.getlength(char)) / 2)
-            draw.text((x, baseline), char, font=text, anchor="ls", fill=1)
+            y = baseline
+            if large_text:
+                y = max(y, -text.getbbox(char, anchor="ls")[1])
+            draw.text((x, y), char, font=text, anchor="ls", fill=1)
         yield char, image.tobytes()
 
 
