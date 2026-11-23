@@ -13,6 +13,19 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export EDITOR='vim'
 export VISUAL='vim'
 
+# Select the bitmap on Linux virtual console logins.
+if [ "${TERM:-}" = linux ] && [ -t 1 ] && linux_tty=$(tty); then
+  case ${linux_tty#/dev/tty} in
+    ''|*[!0-9]*) ;;
+    *)
+      if [ -r "$HOME/dotfiles/config/console/jetbrains-mono-16x32.psfu.gz" ] && command -v setfont >/dev/null; then
+        setfont -C "$linux_tty" "$HOME/dotfiles/config/console/jetbrains-mono-16x32.psfu.gz" 2>/dev/null || true
+      fi
+      ;;
+  esac
+  unset linux_tty
+fi
+
 # OpenBSD wscons starts in VT220 mode. Enable UTF-8 on local display consoles.
 if [ -t 0 ] && [ -t 1 ] && [ "${TERM:-}" = vt220 ]; then
   case $(tty) in

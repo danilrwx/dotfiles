@@ -1,4 +1,4 @@
-# Iosevka on the system console
+# JetBrains Mono on the system console
 
 The full installer configures the console font on Ubuntu, Alpine and
 OpenBSD. For a standalone install on OpenBSD, run
@@ -19,9 +19,9 @@ and run `sh lib/install-console-font.sh` as root to configure the font for the
 next boot. Run this from a Linux virtual console to try the bitmap.
 
 ```sh
-setfont ~/dotfiles/config/console/iosevka-16x32.psfu.gz
+setfont ~/dotfiles/config/console/jetbrains-mono-16x32.psfu.gz
 ```
 
-The bitmaps are derived from Iosevka 34.2.1 under the [SIL Open Font License](OFL.txt).
-To regenerate them, run `python3 config/console/build-fonts.py /path/to/Iosevka-Regular.ttf`
+The bitmaps are derived from JetBrains Mono 2.304 under the [SIL Open Font License](OFL.txt).
+To regenerate them, run `python3 config/console/build-fonts.py /path/to/JetBrainsMono-Regular.ttf`
 with Pillow installed.

@@ -65,7 +65,7 @@ DESKTOP_PKGS="iwd bluez rfkill desktop-file-utils
   power-profiles-daemon thermald bolt upower
   udisks2 fwupd systemd-oomd polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
   intel-media-va-driver-non-free
-  gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk
+  gnome-keyring libpam-gnome-keyring fonts-jetbrains-mono fonts-noto-color-emoji fonts-noto-cjk
   gstreamer1.0-libav gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
   greetd tuigreet ssh-askpass-gnome"
 
@@ -236,7 +236,7 @@ desktop_session() {
   fi
   gsettings set org.gnome.desktop.interface cursor-theme Adwaita
   gsettings set org.gnome.desktop.interface cursor-size 24
-  gsettings set org.gnome.desktop.interface font-name 'Iosevka 11'
+  gsettings set org.gnome.desktop.interface font-name 'JetBrains Mono 11'
 
   # Use OpenSSH instead of GCR so AddKeysToAgent confirm prompts for each key.
   log "Setting up ssh-agent with ssh-askpass-gnome"

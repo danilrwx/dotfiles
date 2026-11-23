@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Build the checked-in console fonts from Iosevka-Regular.ttf using Pillow."""
+"""Build the checked-in console fonts from JetBrainsMono-Regular.ttf using Pillow."""
 
 import argparse
 import gzip
+import math
 import struct
 from pathlib import Path
 
@@ -19,11 +20,11 @@ SYMBOLS = " ©«»°±·×÷–—‘’“”•…←↑→↓↔✓✗"
 
 
 def glyphs(source, width, height, characters):
-    large_text = (width, height) == (12, 24)
-    text_size = 21 if large_text else round(height * 0.8)
+    text_size = 20 if (width, height) == (12, 24) else round(height * 0.8)
     text = ImageFont.truetype(source, text_size)
-    graphics = ImageFont.truetype(source, width * 2)
-    baseline = 20 if large_text else height - round(height * 0.22)
+    graphics_size = math.ceil(width * text_size / text.getlength("─"))
+    graphics = ImageFont.truetype(source, graphics_size)
+    baseline = height - round(height * 0.22)
     _, top, _, bottom = graphics.getbbox("─", anchor="ls")
     graphics_baseline = (height - top - bottom) // 2
     missing = bytes(text.getmask("\U0010ffff", mode="1"))
@@ -34,12 +35,18 @@ def glyphs(source, width, height, characters):
         if char in BOXES + BLOCKS:
             draw.text((0, graphics_baseline), char, font=graphics, anchor="ls", fill=1)
         else:
-            if bytes(text.getmask(char, mode="1")) == missing:
+            mask, (left, top) = text.getmask2(char, mode="1", anchor="ls")
+            if bytes(mask) == missing:
                 continue
             x = round((width - text.getlength(char)) / 2)
             y = baseline
-            if large_text:
-                y = max(y, -text.getbbox(char, anchor="ls")[1])
+            bounds = mask.getbbox()
+            if bounds:
+                x0, y0, x1, y1 = bounds
+                if x1 - x0 <= width:
+                    x = max(-left - x0, min(x, width - left - x1))
+                if y1 - y0 <= height:
+                    y = max(-top - y0, min(y, height - top - y1))
             draw.text((x, y), char, font=text, anchor="ls", fill=1)
         yield char, image.tobytes()
 
@@ -63,7 +70,7 @@ def build_psf(source):
     blank = bytes(bytes_per_glyph)
     data = b"".join(bitmaps.get(char, blank) for char in slots)
     table = b"".join((char + ("�" if char == "?" else "")).encode("utf-8") + b"\xff" for char in slots)
-    write_font("iosevka-16x32.psfu.gz", header + data + table)
+    write_font("jetbrains-mono-16x32.psfu.gz", header + data + table)
 
 
 def build_wsfont(source, width, height):
@@ -76,12 +83,12 @@ def build_wsfont(source, width, height):
     assert set(ASCII + CYRILLIC) <= bitmaps.keys()
     # wscons uses the Unicode code point directly as the glyph index.
     data = b"".join(bitmaps.get(chr(code), bitmaps["?"]) for code in range(ord(max(bitmaps)) + 1))
-    write_font(f"iosevka-{width}x{height}.wsfont.gz", data)
+    write_font(f"jetbrains-mono-{width}x{height}.wsfont.gz", data)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("ttf", help="path to Iosevka-Regular.ttf")
+    parser.add_argument("ttf", help="path to JetBrainsMono-Regular.ttf")
     args = parser.parse_args()
     build_psf(args.ttf)
     for width, height in [(8, 16), (12, 24), (16, 32), (32, 64)]:
