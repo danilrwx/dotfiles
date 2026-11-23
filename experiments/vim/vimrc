@@ -70,9 +70,14 @@ function! NativeFind(text, completing) abort
   if !a:completing && filereadable(a:text)
     return [a:text]
   endif
-  let files = systemlist('fd --type f --color never')
+  if executable('fd')
+    let command = 'fd --type f --color never'
+  else
+    let command = "find . ! -name . -name '.*' -prune -o -type f -print"
+  endif
+  let files = systemlist(command)
   if v:shell_error
-    echoerr 'fd failed'
+    echoerr 'File search failed: ' .. command
     return []
   endif
   call map(files, {_, path -> substitute(path, '^\./', '', '')})

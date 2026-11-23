@@ -1,14 +1,13 @@
 # Development profile
 
-On Ubuntu, `./install` installs
+On Ubuntu, `./install --desktop` installs
 compilers/build tools, language servers, Node/npm, Go, Go CLIs, kubectl/d8,
 Docker, RTK, OpenVPN, QEMU/libvirt and the private agent setup. It links the k9s
 configuration and OpenVPN helper, imports private VPN profiles with resolved DNS
 and polkit integration, and adds the user to libvirt/KVM groups.
-It does not install the desktop or gaming packages.
 
 - `./install --android`: also install Android SDK, JDK and Studio.
-- `./install --skip-go`: keep Go tool binaries, but still update Go itself.
+- `./install --desktop --skip-go`: keep Go tool binaries while updating Go itself.
 
 Go/archive downloads retain their checksum checks and staged replacement.
 

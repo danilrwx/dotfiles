@@ -72,20 +72,34 @@ admin() {
   fi
 }
 
-portable_packages() {
+portable_base_packages() {
+  case $platform in
+    alpine)
+      admin apk add bash git tmux vim curl jq fzf fd ugrep python3 kbd
+      ;;
+    openbsd)
+      set -- bash git vim-- curl jq fzf ugrep python%3
+      case $(arch -s) in
+        amd64|aarch64|riscv64) set -- "$@" fd ;;
+      esac
+      admin pkg_add "$@"
+      ;;
+  esac
+}
+
+portable_desktop_packages() {
   portable_user=$(id -un)
   case $platform in
     alpine)
-      admin setup-wayland-base bash git tmux vim curl jq fzf fd ugrep python3 \
-        labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
-        grim slurp wlr-randr kanshi wlopm seatd xwayland font-iosevka-base kbd mpv \
+      admin setup-wayland-base labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
+        grim slurp wlr-randr kanshi wlopm seatd xwayland font-iosevka-base mpv \
         greetd-agreety greetd-openrc || return
       id -Gn "$portable_user" | grep -qw seat || admin addgroup "$portable_user" seat || return
       admin rc-update add seatd default || return
       admin rc-service seatd start
       ;;
     openbsd)
-      admin pkg_add bash git vim-- curl jq fzf fd ugrep python%3.14 dbus greetd cage regreet \
+      admin pkg_add dbus greetd cage regreet \
         labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
         grim slurp wlr-randr kanshi wlopm seatd xwayland iosevka mpv || return
       id -Gn "$portable_user" | grep -qw _seatd || admin user mod -G _seatd "$portable_user" || return

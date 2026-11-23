@@ -6,7 +6,7 @@ Pro 14 2026 at 3120×2080, with 2× scaling.
 
 ```sh
 git clone https://github.com/danilrwx/dotfiles ~/dotfiles
-cd ~/dotfiles && ./install
+cd ~/dotfiles && ./install --desktop
 ```
 
 ## Why it is nice to live in
@@ -24,35 +24,37 @@ cd ~/dotfiles && ./install
   profile, VLESS, OpenVPN, the power profile.
 - **Every root password prompt says what it is for.** `sudo -A` shows the command it will run, and whether
   Claude Code is the one asking.
-- **Safe to rerun.** `./install` checks before it changes anything; `dotfiles-update` is the same script
+- **Safe to rerun.** Rerun the same installer flags to update your setup. `dotfiles-update` is the same script
   on your PATH.
 
 ## Requirements
 
 - Ubuntu for the full laptop setup, or Alpine and OpenBSD for the shared Labwc desktop
-- Chimera Linux supports `./install --configs` for an existing Labwc desktop
-- `git`, `curl` and `sudo`
+- Chimera Linux supports config-only installation, including an existing Labwc desktop
+- `git` and either `sudo` or `doas` for system installation
 - Optional: an SSH key in `~/.ssh`. With one, `install` switches the repo to SSH and pulls the private
   submodule; without one both are skipped.
 
 ## Install
 
 ```sh
-cd ~/dotfiles && ./install             # Labwc, native Firefox, and on Ubuntu development tools and Steam
-./install --configs                    # apply user configs and reload Labwc when available
+cd ~/dotfiles && ./install             # CLI tools and system console on Ubuntu, Alpine and OpenBSD
+./install --desktop                    # add Labwc, Firefox and graphical login
+./install --configs                    # apply CLI user configs only
+./install --desktop --configs          # also apply desktop user configs and reload Labwc when available
 ./install --android                    # on Ubuntu, add the Android SDK and Studio
 ./debloat -n                           # inspect optional Ubuntu system cleanup
 ```
 
-Use `--configs` to apply CLI and Labwc configuration without installing packages.
-This mode updates user links, then reloads tmux, Labwc
-and the user service definitions when a session is available. It needs an initial full installation:
-it does not run sudo, install packages, download fonts, build tools, change system files,
-run `private/install`, enable services or update the private submodule. Existing windows stay open;
-new terminal windows pick up font changes. Shell changes take effect in a new shell.
+The default setup is suitable for console systems such as Pomera and headless VMs.
+On Ubuntu, `--desktop` also enables the development and gaming setup.
+`--configs` applies user links without installing packages or changing system settings.
+It reloads tmux when a session is available. With `--desktop`, it also reloads Labwc
+and the user service definitions. New terminal windows pick up font changes.
+Shell changes take effect in a new shell.
 
-The full installer remains the way to install or update tools and system configuration.
-`./install --skip-go` skips Go tool updates; it still allows downloads and system changes.
+Use `./install --desktop --skip-go` on Ubuntu to keep existing Go tool binaries
+while updating Go itself.
 
 ### Backups and restore
 
@@ -126,19 +128,16 @@ named colours and `settings.ini` in [`config/gtk`](config/gtk), the borders in `
 wmenu's (`bin/x-menu`), k9s's `skins/theme.yaml`, and Claude Code's,
 in `private` beside its own config as `themes/dotfiles.json`.
 
-Edit `config/foot/pastel.ini` to change the palette. Run `./install --configs`
+Edit `config/foot/pastel.ini` to change the palette. Run `./install --desktop --configs`
 and open a new Foot window to load the updated colours. A fresh Linux virtual
 console login also loads the updated palette.
 
 ## Text console
 
-The full installer sets up the Iosevka bitmap for the system console on
-Ubuntu, Alpine and OpenBSD. Bash applies Pastel at login on Linux.
-On a console-only OpenBSD install, install Bash, Vim, fzf and ugrep from
-packages, run `./install --configs` as your user, and run
-`doas sh lib/install-console-font.sh` for the console font. OpenBSD includes
-tmux. If your login shell is ksh, start Bash with `bash -l` to load the Bash
-config. See [console font installation and supported glyphs](config/console/README.md).
+Run `./install` for CLI tools and the Iosevka bitmap on Ubuntu, Alpine and
+OpenBSD. The login profile applies Pastel on Linux virtual consoles. OpenBSD
+includes tmux. If your login shell is ksh, start Bash with `bash -l` to load
+the Bash config. See [console font installation and supported glyphs](config/console/README.md).
 
 Start `tmux new-session -A -s main` in either console. New panels use
 `tmux-256color`. The outer terminals keep their own capabilities. In tmux,
@@ -152,8 +151,8 @@ open their native CLI when iwd and BlueZ are installed.
 
 - **Base CLI tools** from apt: Bash, Git, tmux, GnuPG, fzf, jq, ugrep, fd,
   Vim, OpenSSH, pass and age, plus standard file/network utilities.
-  The base sets Bash as the login shell and Caps Lock as Ctrl.
-- **Development**: [`install`](install) on Ubuntu installs compilers, language servers, Universal Ctags,
+  On Ubuntu the base sets Bash as the login shell. The desktop setup also makes Caps Lock act as Ctrl.
+- **Development**: `./install --desktop` on Ubuntu installs compilers, language servers, Universal Ctags,
   Node/npm, Go and Go tools, kubectl/d8, Docker, RTK, OpenVPN, QEMU/libvirt and the private agent setup.
   Its k9s config lives in [`dev/config/k9s`](dev/config/k9s).
   Android SDK and Studio are optional: `./install --android`.
@@ -211,14 +210,14 @@ the installed snaps. `-n` previews the cleanup. Applying it requires greetd to b
 ## Running Labwc
 
 Ubuntu uses the package's Labwc session in greetd. On Alpine 3.24,
-`./install` enables greetd for the next boot. Log in on the VM or machine
-console to start Labwc. On OpenBSD 8.0, run `./install` as your desktop
+`./install --desktop` enables greetd for the next boot. Log in on the VM or machine
+console to start Labwc. On OpenBSD 8.0, run `./install --desktop` as your desktop
 user and reboot. Greetd starts the ReGreet graphical login on `ttyC4`
 (Ctrl+Alt+F5). Select Labwc at the login screen. Ctrl+Alt+F1 opens a text
 console, where `~/dotfiles/bin/start-labwc` is available for manual startup.
 
 On Chimera Linux, install the desktop packages for your session and
-`fonts-iosevka-ttf` from the `user` repository, then run `./install --configs`.
+`fonts-iosevka-ttf` from the `user` repository, then run `./install --desktop --configs`.
 
 Ubuntu installs Steam from Flathub into the same Labwc desktop. See
 [`game/README.md`](game/README.md) for the gaming tools.

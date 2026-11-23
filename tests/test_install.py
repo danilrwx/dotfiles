@@ -63,6 +63,10 @@ class InstallerTest(unittest.TestCase):
 
     def test_apply_and_repeat_are_idempotent(self):
         self.run_install("--configs")
+        self.assertTrue((self.home / ".vimrc").is_symlink())
+        self.assertFalse((self.home / ".config/labwc").exists())
+        self.assertFalse((self.home / ".config/foot").exists())
+        self.assertFalse((self.home / ".config/dunst").exists())
         before = snapshot(self.home)
         self.assertEqual(before, snapshot(self.home))
         self.run_install("--configs")
@@ -73,12 +77,13 @@ class InstallerTest(unittest.TestCase):
         foot = self.stubs / "foot"
         foot.write_text("#!/bin/sh\nexit 1\n")
         foot.chmod(0o755)
-        self.run_install("--configs")
+        self.run_install("--desktop", "--configs")
         config_dir = self.home / ".config/foot"
         self.assertTrue(config_dir.is_symlink())
+        self.assertTrue((self.home / ".config/labwc/rc.xml").is_symlink())
 
         foot.write_text('#!/bin/sh\n[ "$*" = "--check-config --config /dev/null --override=initial-color-theme=dark" ]\n')
-        self.run_install("--configs")
+        self.run_install("--desktop", "--configs")
         self.assertFalse(config_dir.is_symlink())
         rendered = (config_dir / "foot.ini").read_text()
         self.assertIn("[colors-dark]\n", rendered)
@@ -87,8 +92,45 @@ class InstallerTest(unittest.TestCase):
         self.assertNotIn("[colors2]", rendered)
         self.assertNotIn("[colors]", rendered)
         before = snapshot(self.home)
-        self.run_install("--configs")
+        self.run_install("--desktop", "--configs")
         self.assertEqual(before, snapshot(self.home))
+
+    def test_openbsd_console_install_skips_graphical_packages_and_services(self):
+        scripts = {
+            "uname": "echo OpenBSD",
+            "arch": "echo arm",
+            "id": "echo 1000",
+            "ln": '[ "$1" != "-sh" ] || { shift; set -- -s "$@"; }; exec /bin/ln "$@"',
+            "doas": r'''
+printf '%s\n' "$*" >> "$INSTALL_CALLS"
+case "$1" in
+    pkg_add) [ "$2" != dbus ] || exit 42 ;;
+    sh) [ "$2" = "$HOME/dotfiles/lib/install-console-font.sh" ] ;;
+    *) exit 97 ;;
+esac
+''',
+        }
+        for name, script in scripts.items():
+            path = self.stubs / name
+            path.write_text("#!/bin/sh\n" + script + "\n")
+            path.chmod(0o755)
+        calls = self.root / "install-calls"
+        self.env["INSTALL_CALLS"] = str(calls)
+        self.run_install()
+        base, console_font = calls.read_text().splitlines()
+        self.assertTrue(base.startswith("pkg_add "))
+        self.assertIn("vim--", base.split())
+        self.assertIn("python%3", base.split())
+        self.assertNotIn("fd", base.split())
+        self.assertTrue(set(base.split()).isdisjoint({"cage", "firefox", "foot", "greetd", "labwc", "seatd"}))
+        self.assertTrue(console_font.endswith("/lib/install-console-font.sh"))
+        self.assertTrue((self.home / ".vimrc").is_symlink())
+        self.assertFalse((self.home / ".config/labwc").exists())
+
+        calls.unlink()
+        self.run_install("--desktop", expected=1)
+        desktop = calls.read_text().splitlines()[-1].split()
+        self.assertTrue({"cage", "firefox", "foot", "greetd", "labwc", "seatd"}.issubset(desktop))
 
     def test_conflicts_and_old_bak_are_preserved(self):
         (self.home / ".bashrc").write_text("old bash config\n")
