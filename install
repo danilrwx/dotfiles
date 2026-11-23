@@ -36,10 +36,13 @@ case $(uname -s) in
     . /etc/os-release
     case $ID in
       ubuntu|alpine) platform=$ID ;;
-      *) log 'Supported Linux distributions: Ubuntu and Alpine'; exit 1 ;;
+      chimera)
+        [ "$CONFIGS" = 1 ] || { log 'Chimera Linux supports ./install --configs'; exit 1; }
+        platform=$ID ;;
+      *) log 'Supported Linux distributions: Ubuntu, Alpine and Chimera Linux (--configs)'; exit 1 ;;
     esac
     ;;
-  *) log 'Ubuntu and OpenBSD only'; exit 1 ;;
+  *) log 'Supported kernels: Linux and OpenBSD'; exit 1 ;;
 esac
 MIHOMO_VERSION=v1.19.32
 
@@ -57,7 +60,7 @@ DESKTOP_PKGS="iwd bluez rfkill desktop-file-utils
   power-profiles-daemon thermald bolt upower
   udisks2 fwupd systemd-oomd polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
   intel-media-va-driver-non-free
-  gnome-keyring libpam-gnome-keyring fonts-terminus-otb fonts-noto-color-emoji fonts-noto-cjk
+  gnome-keyring libpam-gnome-keyring fonts-iosevka fonts-noto-color-emoji fonts-noto-cjk
   gstreamer1.0-libav gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
   greetd tuigreet ssh-askpass-gnome"
 
@@ -104,8 +107,8 @@ desktop_configs() {
 
   for g in gtk-3.0 gtk-4.0; do
     link "$HOME/.config/dotfiles/theme/gtk.css" "$HOME/.config/$g/gtk.css" || return
+    link "$HOME/.config/dotfiles/theme/settings.ini" "$HOME/.config/$g/settings.ini" || return
   done
-  link "$HOME/.config/dotfiles/theme/settings.ini" "$HOME/.config/gtk-3.0/settings.ini" || return
   link config/fontconfig/fonts.conf "$HOME/.config/fontconfig/fonts.conf" || return
 
   [ "$platform" = ubuntu ] || return 0
@@ -152,9 +155,7 @@ base() {
 
   sudo apt-get update || return
   sudo apt-get install -y $BASE_PKGS || return
-  sudo sed -i -e 's|^CODESET=.*|CODESET="Uni2"|' \
-    -e 's|^FONTFACE=.*|FONTFACE="Terminus"|' \
-    -e 's|^FONTSIZE=.*|FONTSIZE="16x32"|' /etc/default/console-setup
+  admin "$PWD/bin/x-install-console-font" || return
   if [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -S "$XDG_RUNTIME_DIR/bus" ]; then
     user_systemctl enable --now ssh-agent.socket || log 'Could not start the user SSH agent socket'
   fi
@@ -229,6 +230,7 @@ desktop_session() {
   fi
   gsettings set org.gnome.desktop.interface cursor-theme Adwaita
   gsettings set org.gnome.desktop.interface cursor-size 24
+  gsettings set org.gnome.desktop.interface font-name 'Iosevka 11'
 
   # Use OpenSSH instead of GCR so AddKeysToAgent confirm prompts for each key.
   log "Setting up ssh-agent with ssh-askpass-gnome"
@@ -379,6 +381,7 @@ else
   portable_packages || exit 1
   base_configs || exit 1
   desktop_configs || exit 1
+  admin "$PWD/bin/x-install-console-font" || exit 1
   if [ "$platform" = alpine ]; then alpine_login || exit 1; fi
 fi
 

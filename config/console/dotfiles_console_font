@@ -1,0 +1,7 @@
+#!/bin/ksh
+
+daemon="/usr/local/share/dotfiles/console/load-wsfont"
+
+. /etc/rc.d/rc.subr
+
+rc_cmd "$1"

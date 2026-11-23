@@ -1,6 +1,6 @@
 # Notification frame matches the 4px window borders in both themes.
 [global]
-    font = Terminus 12
+    font = Iosevka 12
     format = "<b>%s</b>\n%b"
     width = (300, 420)
     height = (0, 650)

@@ -13,6 +13,16 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export EDITOR='vim'
 export VISUAL='vim'
 
+# OpenBSD wscons starts in VT220 mode. Enable UTF-8 on local display consoles.
+if [ -t 0 ] && [ -t 1 ] && [ "${TERM:-}" = vt220 ]; then
+  case $(tty) in
+    /dev/ttyC[0-9ab])
+      export LC_CTYPE="${LC_CTYPE:-C.UTF-8}"
+      printf '\033%%G'
+      ;;
+  esac
+fi
+
 # Keep the current line readable with ANSI colors and a small console font repertoire.
 FZF_DEFAULT_OPTS="--height 40% --prompt='> ' --pointer='>' --marker='>' --gutter=' ' --info=inline-right --bind ctrl-f:page-down,ctrl-b:page-up --color=fg:-1,fg+:15,bg:-1,bg+:0,hl:10,hl+:15:underline,info:8,marker:13,prompt:-1,spinner:8,pointer:15,header:8,border:8,gutter:-1"
 if [ "${XDG_SESSION_TYPE:-}" != tty ] && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then

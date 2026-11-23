@@ -21,8 +21,6 @@ EOF
 if [ -n "${2:-}" ]; then set -- "$1" -l "$2"; else set -- "$1"; fi
 prompt=$1
 shift
-wmenu_bin="$HOME/.local/opt/wmenu/bin/wmenu"
-[ -x "$wmenu_bin" ] || wmenu_bin=wmenu
-exec "$wmenu_bin" -i -p "$prompt" "$@" -f 'Terminus 16px' \
+exec wmenu -i -p "$prompt" "$@" -f 'Iosevka 16px' \
 	-N "$bg" -n "$fg" -S "$selected_bg" -s "$selected_fg" \
 	-M "$selected_bg" -m "$selected_fg"

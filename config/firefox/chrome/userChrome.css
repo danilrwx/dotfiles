@@ -2,6 +2,7 @@
 :root[windowtype="navigator:browser"] {
   appearance: none !important;
   box-shadow: none !important;
+  font-family: Iosevka, monospace !important;
 }
 :root[windowtype="navigator:browser"] > body {
   border-radius: 0 !important;

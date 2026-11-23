@@ -78,7 +78,7 @@ portable_packages() {
     alpine)
       admin setup-wayland-base bash git tmux vim curl jq fzf fd ugrep python3 \
         labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
-        grim slurp wlr-randr kanshi wlopm seatd xwayland font-terminus mpv \
+        grim slurp wlr-randr kanshi wlopm seatd xwayland font-iosevka-base kbd mpv \
         greetd-agreety greetd-openrc || return
       id -Gn "$portable_user" | grep -qw seat || admin addgroup "$portable_user" seat || return
       admin rc-update add seatd default || return
@@ -87,7 +87,7 @@ portable_packages() {
     openbsd)
       admin pkg_add bash git vim-- curl jq fzf fd ugrep python%3.14 dbus \
         labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
-        grim slurp wlr-randr kanshi wlopm seatd xwayland terminus-font mpv || return
+        grim slurp wlr-randr kanshi wlopm seatd xwayland iosevka mpv || return
       id -Gn "$portable_user" | grep -qw _seatd || admin user mod -G _seatd "$portable_user" || return
       admin rcctl enable seatd || return
       admin rcctl check seatd || admin rcctl start seatd

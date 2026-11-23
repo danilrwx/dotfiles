@@ -16,7 +16,7 @@ cd ~/dotfiles && ./install
   use the terminal's ANSI slots. Vim uses the terminal palette in the dark theme. GTK, dunst, wmenu and other apps keep colours in their own configs.
 - **A small desktop.** Labwc from Ubuntu's archive, Foot, wmenu and no permanent bar.
   **Super+i** shows a status card; **Super+x** opens quick settings.
-- **HiDPI.** Native 2× scaling, Terminus at 32 pixels in Foot, and 10-logical-pixel outer gaps
+- **HiDPI.** Native 2× scaling, Iosevka at 32 pixels in Foot, and 10-logical-pixel outer gaps
   to keep maximized windows clear of the laptop panel's rounded corners.
 - **Vim, plugin-free.** Fuzzy `:find`, quickfix search, tag navigation and netrw.
   See [the Vim configuration](experiments/vim/README.md).
@@ -30,6 +30,7 @@ cd ~/dotfiles && ./install
 ## Requirements
 
 - Ubuntu for the full laptop setup, or Alpine and OpenBSD for the shared Labwc desktop
+- Chimera Linux supports `./install --configs` for an existing Labwc desktop
 - `git`, `curl` and `sudo`
 - Optional: an SSH key in `~/.ssh`. With one, `install` switches the repo to SSH and pulls the private
   submodule; without one both are skipped.
@@ -131,13 +132,13 @@ console login also loads the updated palette.
 
 ## Text console
 
-On Ubuntu, run `./install` for Bash, tmux and Vim on a text-only system.
-The installer configures Terminus 16×32 for Linux virtual consoles. Bash
-applies Pastel at login. On OpenBSD, install Bash, Vim, fzf and ugrep from
-packages and run `./install --configs` as your user. OpenBSD supplies tmux in
-the base system. This command installs the user configs and leaves system
-login settings and packages under the OpenBSD administrator's control. If your
-OpenBSD login shell is ksh, start Bash with `bash -l` to load the Bash config.
+The full installer sets up the Iosevka bitmap for the system console on
+Ubuntu, Alpine and OpenBSD. Bash applies Pastel at login on Linux.
+On a console-only OpenBSD install, install Bash, Vim, fzf and ugrep from
+packages, run `./install --configs` as your user, and run
+`doas ./bin/x-install-console-font` for the console font. OpenBSD includes
+tmux. If your login shell is ksh, start Bash with `bash -l` to load the Bash
+config. See [console font installation and supported glyphs](config/console/README.md).
 
 Start `tmux new-session -A -s main` in either console. New panels use
 `tmux-256color`. The outer terminals keep their own capabilities. In tmux,
@@ -163,8 +164,8 @@ open their native CLI when iwd and BlueZ are installed.
   global, profiles from `private`). OpenVPN profiles and their systemd/polkit setup belong to `install`.
 - **ssh** through the plain `ssh-agent` with a GTK askpass and a confirm per use, not gcr's agent
 - **apps**: Firefox from Mozilla's signed APT repository. On Ubuntu the installer also adds Lolka X.
-- **Fonts.** Terminus in terminals, menus, window decorations and notifications.
-  GTK uses its default fonts. Noto Color Emoji provides emoji.
+- **Fonts.** Iosevka in Foot, menus, window decorations, notifications, GTK and
+  the Firefox interface. Noto Color Emoji provides emoji where installed.
 
 Firefox's settings are in `etc/firefox/policies/policies.json` (DRM playback is enabled): vertical tabs, compact UI,
 Google search, Patchtree/uBlock Origin/SponsorBlock, privacy settings and disabled AI features.
@@ -214,6 +215,9 @@ Ubuntu uses the package's Labwc session in greetd. On Alpine 3.24,
 console to start Labwc. On OpenBSD 8.0, run `./install` as your desktop
 user, log in again for seatd, then run `~/dotfiles/bin/start-labwc` from a
 local console. The same command also works from a text console on Alpine.
+
+On Chimera Linux, install the desktop packages for your session and
+`fonts-iosevka-ttf` from the `user` repository, then run `./install --configs`.
 
 Ubuntu installs Steam from Flathub into the same Labwc desktop. See
 [`game/README.md`](game/README.md) for the gaming tools.

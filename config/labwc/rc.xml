@@ -6,7 +6,7 @@
   </core>
   <theme>
     <name>Dotfiles</name>
-    <font><name>Terminus</name><size>12</size></font>
+    <font><name>Iosevka</name><size>12</size></font>
     <cornerRadius>0</cornerRadius>
     <maximizedDecoration>none</maximizedDecoration>
     <dropShadows>no</dropShadows>
