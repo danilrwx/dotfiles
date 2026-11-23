@@ -37,7 +37,7 @@ case $(uname -s) in
   OpenBSD)
     font_dir=/usr/local/share/dotfiles/console
     install -d "$font_dir"
-    install -m 644 ./jetbrains-mono-*.wsfont.gz OFL.txt "$font_dir/"
+    install -m 644 ./iosevka-*.wsfont.gz OFL.txt "$font_dir/"
     install -m 755 load-wsfont "$font_dir/"
     install -m 755 dotfiles_console_font /etc/rc.d/
     rcctl enable dotfiles_console_font
@@ -48,16 +48,16 @@ case $(uname -s) in
     case $ID in
       ubuntu|chimera)
         install -d /etc/console-setup
-        install -m 644 jetbrains-mono-16x32.psfu.gz /etc/console-setup/
-        install -m 644 OFL.txt /etc/console-setup/jetbrains-mono-OFL.txt
-        set_font_setting /etc/default/console-setup 'FONT="/etc/console-setup/jetbrains-mono-16x32.psfu.gz"'
+        install -m 644 iosevka-16x32.psfu.gz /etc/console-setup/
+        install -m 644 OFL.txt /etc/console-setup/iosevka-OFL.txt
+        set_font_setting /etc/default/console-setup 'FONT="/etc/console-setup/iosevka-16x32.psfu.gz"'
         setupcon --save-only --font-only
         ;;
       alpine)
         install -d /usr/share/consolefonts
-        install -m 644 jetbrains-mono-16x32.psfu.gz /usr/share/consolefonts/
-        install -m 644 OFL.txt /usr/share/consolefonts/jetbrains-mono-OFL.txt
-        set_font_setting /etc/conf.d/consolefont 'consolefont="/usr/share/consolefonts/jetbrains-mono-16x32.psfu.gz"'
+        install -m 644 iosevka-16x32.psfu.gz /usr/share/consolefonts/
+        install -m 644 OFL.txt /usr/share/consolefonts/iosevka-OFL.txt
+        set_font_setting /etc/conf.d/consolefont 'consolefont="/usr/share/consolefonts/iosevka-16x32.psfu.gz"'
         rc-update add consolefont boot
         ;;
       *)

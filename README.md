@@ -134,7 +134,7 @@ console login also loads the updated palette.
 
 ## Text console
 
-Run `./install` for CLI tools and the JetBrains Mono bitmap on Ubuntu, Alpine and
+Run `./install` for CLI tools and the Iosevka bitmap on Ubuntu, Alpine and
 OpenBSD. The login profile applies Pastel on Linux virtual consoles. OpenBSD
 includes tmux. If your login shell is ksh, start Bash with `bash -l` to load
 the Bash config. See [console font installation and supported glyphs](config/console/README.md).

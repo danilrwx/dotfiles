@@ -18,8 +18,8 @@ if [ "${TERM:-}" = linux ] && [ -t 1 ] && linux_tty=$(tty); then
   case ${linux_tty#/dev/tty} in
     ''|*[!0-9]*) ;;
     *)
-      if [ -r "$HOME/dotfiles/config/console/jetbrains-mono-16x32.psfu.gz" ] && command -v setfont >/dev/null; then
-        setfont -C "$linux_tty" "$HOME/dotfiles/config/console/jetbrains-mono-16x32.psfu.gz" 2>/dev/null || true
+      if [ -r "$HOME/dotfiles/config/console/iosevka-16x32.psfu.gz" ] && command -v setfont >/dev/null; then
+        setfont -C "$linux_tty" "$HOME/dotfiles/config/console/iosevka-16x32.psfu.gz" 2>/dev/null || true
       fi
       ;;
   esac
