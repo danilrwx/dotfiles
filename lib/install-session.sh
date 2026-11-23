@@ -85,7 +85,7 @@ portable_packages() {
       admin rc-service seatd start
       ;;
     openbsd)
-      admin pkg_add bash git vim-- curl jq fzf fd ugrep python%3.14 dbus \
+      admin pkg_add bash git vim-- curl jq fzf fd ugrep python%3.14 dbus greetd cage regreet \
         labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
         grim slurp wlr-randr kanshi wlopm seatd xwayland iosevka mpv || return
       id -Gn "$portable_user" | grep -qw _seatd || admin user mod -G _seatd "$portable_user" || return
@@ -93,6 +93,24 @@ portable_packages() {
       admin rcctl check seatd || admin rcctl start seatd
       ;;
   esac
+}
+
+openbsd_login() {
+  greetd_config=/etc/greetd/config.toml
+  admin install -d -m 755 /etc/greetd/wayland-sessions /usr/local/libexec || return
+  admin install -m 755 bin/start-labwc /usr/local/libexec/dotfiles-labwc-session || return
+  admin install -m 644 etc/greetd/labwc.desktop /etc/greetd/wayland-sessions/labwc.desktop || return
+  admin install -m 644 etc/greetd/regreet.toml /etc/greetd/dotfiles-regreet.toml || return
+  if ! admin cmp -s etc/greetd/openbsd.toml "$greetd_config"; then
+    if admin test -f "$greetd_config" && ! admin test -e "$greetd_config.before-dotfiles"; then
+      admin cp -p "$greetd_config" "$greetd_config.before-dotfiles" || return
+    fi
+    admin install -m 644 etc/greetd/openbsd.toml "$greetd_config" || return
+  fi
+  id -Gn _greetd | grep -qw _seatd || admin user mod -G _seatd _greetd || return
+  if admin rcctl ls on | grep -qx xenodm; then admin rcctl disable xenodm || return; fi
+  admin rcctl enable greetd || return
+  admin rcctl order seatd greetd
 }
 
 alpine_login() {

@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=labwc
+Exec=/usr/local/libexec/dotfiles-labwc-session
+Type=Application

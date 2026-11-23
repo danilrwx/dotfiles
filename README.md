@@ -213,9 +213,9 @@ the installed snaps. `-n` previews the cleanup. Applying it requires greetd to b
 Ubuntu uses the package's Labwc session in greetd. On Alpine 3.24,
 `./install` enables greetd for the next boot. Log in on the VM or machine
 console to start Labwc. On OpenBSD 8.0, run `./install` as your desktop
-user, then log in again on the first local console (`ttyC0`, Ctrl+Alt+F1)
-to start Labwc with your new seatd group membership. Use Ctrl+Alt+F2 for a
-shell or run `~/dotfiles/bin/start-labwc` manually from a local console.
+user and reboot. Greetd starts the ReGreet graphical login on `ttyC4`
+(Ctrl+Alt+F5). Select Labwc at the login screen. Ctrl+Alt+F1 opens a text
+console, where `~/dotfiles/bin/start-labwc` is available for manual startup.
 
 On Chimera Linux, install the desktop packages for your session and
 `fonts-iosevka-ttf` from the `user` repository, then run `./install --configs`.

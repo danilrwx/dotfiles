@@ -382,7 +382,10 @@ else
   base_configs || exit 1
   desktop_configs || exit 1
   admin sh "$PWD/lib/install-console-font.sh" || exit 1
-  if [ "$platform" = alpine ]; then alpine_login || exit 1; fi
+  case $platform in
+    alpine) alpine_login || exit 1 ;;
+    openbsd) openbsd_login || exit 1 ;;
+  esac
 fi
 
 [ -z "$BACKUP_DIR" ] || log "Backups: $BACKUP_DIR"

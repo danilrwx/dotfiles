@@ -13,6 +13,16 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export EDITOR='vim'
 export VISUAL='vim'
 
+# OpenBSD wscons starts in VT220 mode. Enable UTF-8 on local display consoles.
+if [ -t 0 ] && [ -t 1 ] && [ "${TERM:-}" = vt220 ]; then
+  case $(tty) in
+    /dev/ttyC[0-9ab])
+      export LC_CTYPE="${LC_CTYPE:-C.UTF-8}"
+      printf '\033%%G'
+      ;;
+  esac
+fi
+
 # Keep the current line readable with ANSI colors and a small console font repertoire.
 FZF_DEFAULT_OPTS="--height 40% --prompt='> ' --pointer='>' --marker='>' --gutter=' ' --info=inline-right --bind ctrl-f:page-down,ctrl-b:page-up --color=fg:-1,fg+:15,bg:-1,bg+:0,hl:10,hl+:15:underline,info:8,marker:13,prompt:-1,spinner:8,pointer:15,header:8,border:8,gutter:-1"
 if [ "${XDG_SESSION_TYPE:-}" != tty ] && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
@@ -49,20 +59,3 @@ unset _dotfiles_env_file _dotfiles_env_key _dotfiles_env_value
 # so greetd's /bin/sh gets them too and the whole session inherits them.
 [ -f "$HOME/dotfiles/private/.profile" ] && . "$HOME/dotfiles/private/.profile"
 if [ -f "$HOME/.cargo/env" ]; then . "$HOME/.cargo/env"; fi
-
-# OpenBSD starts local wscons sessions in VT220 mode.
-if [ -t 0 ] && [ -t 1 ] && [ -z "${DISPLAY:-}${WAYLAND_DISPLAY:-}${SSH_CONNECTION:-}" ]; then
-  wscons_tty=$(tty)
-  case $wscons_tty in
-    /dev/ttyC[0-9ab])
-      export LC_CTYPE="${LC_CTYPE:-C.UTF-8}"
-      printf '\033%%G'
-      ;;
-  esac
-  # Keep the other consoles available for shell access.
-  if [ "$wscons_tty" = /dev/ttyC0 ] && [ "$(id -u)" -ne 0 ] &&
-    [ -f "$XDG_CONFIG_HOME/labwc/rc.xml" ] && command -v labwc >/dev/null 2>&1; then
-    "$HOME/dotfiles/bin/start-labwc"
-  fi
-  unset wscons_tty
-fi

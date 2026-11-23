@@ -1,0 +1,10 @@
+[terminal]
+# The stock OpenBSD configuration leaves ttyC4 free. greetd calls it VT 5.
+vt = 5
+
+[general]
+service = "system"
+
+[default_session]
+command = "env XDG_DATA_DIRS=/etc/greetd:/usr/local/share:/usr/share /usr/local/bin/dbus-run-session -- /usr/local/bin/cage -d -s -- /usr/local/bin/regreet --config /etc/greetd/dotfiles-regreet.toml"
+user = "_greetd"
