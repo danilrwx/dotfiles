@@ -2,7 +2,7 @@
 
 The full installer configures the console font on Ubuntu, Alpine and
 OpenBSD. For a standalone install on OpenBSD, run
-`doas ./bin/x-install-console-font` from the repository. The installer activates
+`doas sh lib/install-console-font.sh` from the repository. The installer activates
 the font immediately and registers it with `rcctl` for future boots.
 
 OpenBSD framebuffer consoles can only load fonts with the active cell size.
@@ -15,7 +15,7 @@ Unicode slots at 16×32 and 32×64. The login profile enables UTF-8 on local
 On Ubuntu, Alpine and Chimera Linux the Linux console uses the same 16×32
 PSF2 bitmap with 256 slots and a Unicode table for ASCII, Russian Cyrillic
 and common box-drawing glyphs. On Chimera, install the `console-setup` package
-and run `./bin/x-install-console-font` as root to configure the font for the
+and run `sh lib/install-console-font.sh` as root to configure the font for the
 next boot. Run this from a Linux virtual console to try the bitmap.
 
 ```sh

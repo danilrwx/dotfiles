@@ -155,7 +155,7 @@ base() {
 
   sudo apt-get update || return
   sudo apt-get install -y $BASE_PKGS || return
-  admin "$PWD/bin/x-install-console-font" || return
+  admin sh "$PWD/lib/install-console-font.sh" || return
   if [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -S "$XDG_RUNTIME_DIR/bus" ]; then
     user_systemctl enable --now ssh-agent.socket || log 'Could not start the user SSH agent socket'
   fi
@@ -381,7 +381,7 @@ else
   portable_packages || exit 1
   base_configs || exit 1
   desktop_configs || exit 1
-  admin "$PWD/bin/x-install-console-font" || exit 1
+  admin sh "$PWD/lib/install-console-font.sh" || exit 1
   if [ "$platform" = alpine ]; then alpine_login || exit 1; fi
 fi
 

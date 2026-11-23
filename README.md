@@ -136,7 +136,7 @@ The full installer sets up the Iosevka bitmap for the system console on
 Ubuntu, Alpine and OpenBSD. Bash applies Pastel at login on Linux.
 On a console-only OpenBSD install, install Bash, Vim, fzf and ugrep from
 packages, run `./install --configs` as your user, and run
-`doas ./bin/x-install-console-font` for the console font. OpenBSD includes
+`doas sh lib/install-console-font.sh` for the console font. OpenBSD includes
 tmux. If your login shell is ksh, start Bash with `bash -l` to load the Bash
 config. See [console font installation and supported glyphs](config/console/README.md).
 

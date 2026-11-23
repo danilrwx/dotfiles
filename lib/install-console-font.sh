@@ -2,7 +2,7 @@
 set -eu
 
 if [ "$(id -u)" != 0 ]; then
-  printf '%s\n' 'Run x-install-console-font as root.' >&2
+  printf '%s\n' 'Run lib/install-console-font.sh as root.' >&2
   exit 1
 fi
 
