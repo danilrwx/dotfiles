@@ -28,6 +28,7 @@ cd "$HOME/dotfiles" || exit 1
 
 . ./lib/install.sh
 . ./lib/install-session.sh
+. ./lib/install-microphone.sh
 case $(uname -s) in
   OpenBSD)
     platform=openbsd
@@ -61,7 +62,7 @@ BASE_PKGS="git libcap2-bin openssl wget zip unzip curl file procps bash bash-com
   openssh-server pass vim age python3 console-setup"
 
 DESKTOP_PKGS="iwd bluez rfkill desktop-file-utils
-  pipewire-audio pipewire-alsa pipewire-pulse wireplumber alsa-utils alsa-ucm-conf firmware-sof-signed
+  pipewire-audio pipewire-alsa pipewire-pulse wireplumber lsp-plugins-ladspa alsa-utils alsa-ucm-conf firmware-sof-signed
   power-profiles-daemon thermald bolt upower
   udisks2 fwupd systemd-oomd polkitd xdg-desktop-portal-gtk xdg-utils xdg-user-dirs
   intel-media-va-driver-non-free
@@ -97,6 +98,7 @@ desktop_configs() {
 
   labwc_configs || return
   foot_configs || return
+  microphone_configs || log "Could not install the microphone filters. Continue installation."
 
   for profile in "$HOME"/.config/mozilla/firefox/* "$HOME"/.mozilla/firefox/*; do
     [ -f "$profile/prefs.js" ] || continue

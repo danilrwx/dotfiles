@@ -94,6 +94,8 @@ portable_desktop_packages() {
       admin setup-wayland-base labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
         grim slurp wlr-randr kanshi wlopm seatd xwayland font-iosevka-base mpv \
         greetd-agreety greetd-openrc || return
+      admin apk add pipewire pipewire-alsa pipewire-pulse pipewire-tools wireplumber \
+        noise-suppression-for-voice lsp-plugins-ladspa || return
       id -Gn "$portable_user" | grep -qw seat || admin addgroup "$portable_user" seat || return
       admin rc-update add seatd default || return
       admin rc-service seatd start

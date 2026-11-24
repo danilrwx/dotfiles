@@ -53,6 +53,16 @@ It reloads tmux when a session is available. With `--desktop`, it also reloads L
 and the user service definitions. New terminal windows pick up font changes.
 Shell changes take effect in a new shell.
 
+On the HONOR ZQC-P, `./install --desktop` on Ubuntu (amd64) installs **Built-in Microphone (RNNoise)**:
+75 Hz low cut, RNNoise and an LSP stereo compressor (2:1, −18 dB threshold).
+Ubuntu verifies a pinned RNNoise release. Alpine uses its native package and installs the filter
+only if the HONOR mic array configuration is already present.
+The filter uses only the built-in `honor-dmic` source. It never falls back to a headset.
+PipeWire loads the filter from `~/.config/pipewire/pipewire.conf.d/60-dotfiles-microphone.conf`
+when it starts. Select it in `Super+X → input`. The installer does not restart audio or change the
+selected input. `./install --desktop --configs` writes the filter configuration only when both
+plugins are already installed.
+
 Use `./install --desktop --skip-go` on Ubuntu to keep existing Go tool binaries
 while updating Go itself.
 
