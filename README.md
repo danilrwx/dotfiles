@@ -219,12 +219,27 @@ the installed snaps. `-n` previews the cleanup. Applying it requires greetd to b
 
 ## Running Labwc
 
-Ubuntu uses the package's Labwc session in greetd. On Alpine 3.24,
-`./install --desktop` enables greetd for the next boot. Log in on the VM or machine
-console to start Labwc. On OpenBSD 8.0, run `./install --desktop` as your desktop
-user and reboot. Greetd starts the ReGreet graphical login on `ttyC4`
-(Ctrl+Alt+F5). Select Labwc at the login screen. Ctrl+Alt+F1 opens a text
-console, where `~/dotfiles/bin/start-labwc` is available for manual startup.
+Ubuntu uses the package's Labwc session in greetd. On Alpine 3.24, enable the
+matching `community` repository before running `./install`, including for the
+CLI-only setup (`setup-apkrepos -o` as root). `./install --desktop` enables greetd
+for the next boot and leaves your existing device manager unchanged.
+
+If an older installer switched Alpine from `mdev` to `udev`, restore `mdev`
+from a local text console as root, not over SSH:
+
+```sh
+(apk info -e busybox-mdev-openrc || apk add busybox-mdev-openrc) && setup-devd -C mdev
+```
+
+Reboot after a successful switch. If interface names changed, check
+`/etc/network/interfaces` and `/etc/conf.d/wpa_supplicant` against `ip link`.
+If you need to switch back, run `setup-devd udev` as root and reboot. There is
+no need to uninstall `eudev` packages to switch device managers.
+
+On OpenBSD 8.0, run `./install --desktop` as your desktop user and reboot.
+Greetd starts the ReGreet graphical login on `ttyC4` (Ctrl+Alt+F5). Select Labwc
+at the login screen. Ctrl+Alt+F1 opens a text console, where
+`~/dotfiles/bin/start-labwc` is available for manual startup.
 
 On Chimera Linux, install the desktop packages for your session and
 `fonts-iosevka-ttf` from the `user` repository, then run `./install --desktop --configs`.

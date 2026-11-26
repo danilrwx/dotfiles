@@ -128,6 +128,40 @@ class ShellTest(unittest.TestCase):
                     self.assertFalse({"gamemode", "lolka-x"} & set(args))
                     self.assertEqual("snapd" in args, steam_snap == "0")
 
+    def test_alpine_desktop_keeps_device_manager(self):
+        script = r'''
+. "$1"
+platform=alpine
+id() {
+  case "$1" in
+    -un) echo desktop-user ;;
+    -Gn) echo users ;;
+    *) return 97 ;;
+  esac
+}
+admin() {
+  case "$1" in
+    apk|addgroup|rc-update|rc-service) printf '%s\n' "$*" ;;
+    *) printf 'Unexpected admin command: %s\n' "$*" >&2; return 97 ;;
+  esac
+}
+portable_desktop_packages
+'''
+        result = subprocess.run(["sh", "-ec", script, "sh", str(REPO / "lib/install-session.sh")],
+                                capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        packages, audio, *services = result.stdout.splitlines()
+        self.assertTrue(packages.startswith("apk add "))
+        self.assertTrue({"labwc", "dbus", "dbus-openrc", "seatd", "greetd-openrc"}
+                        .issubset(packages.split()[2:]))
+        self.assertTrue(audio.startswith("apk add pipewire "))
+        self.assertEqual(services, [
+            "addgroup desktop-user seat",
+            "rc-update add cgroups default", "rc-service cgroups start",
+            "rc-update add dbus default", "rc-service dbus start",
+            "rc-update add seatd default", "rc-service seatd start",
+        ])
+
     def test_posix_syntax(self):
         for name in ("install", "debloat", "lib/install.sh", "lib/install-dev.sh",
                      "lib/install-game.sh", "lib/install-session.sh", "bin/start-labwc"):

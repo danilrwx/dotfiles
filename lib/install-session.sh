@@ -91,14 +91,18 @@ portable_desktop_packages() {
   portable_user=$(id -un)
   case $platform in
     alpine)
-      admin setup-wayland-base labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
+      # setup-wayland-base would replace the system's device manager with udev.
+      admin apk add elogind polkit-elogind dbus dbus-openrc \
+        labwc foot firefox wmenu dunst libnotify swaybg swayidle swaylock wl-clipboard \
         grim slurp wlr-randr kanshi wlopm seatd xwayland font-iosevka-base mpv \
         greetd-agreety greetd-openrc || return
       admin apk add pipewire pipewire-alsa pipewire-pulse pipewire-tools wireplumber \
         noise-suppression-for-voice lsp-plugins-ladspa || return
       id -Gn "$portable_user" | grep -qw seat || admin addgroup "$portable_user" seat || return
-      admin rc-update add seatd default || return
-      admin rc-service seatd start
+      for alpine_service in cgroups dbus seatd; do
+        admin rc-update add "$alpine_service" default || return
+        admin rc-service "$alpine_service" start || return
+      done
       ;;
     openbsd)
       admin pkg_add dbus greetd cage regreet python%3 \
